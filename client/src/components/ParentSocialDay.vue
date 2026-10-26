@@ -69,7 +69,7 @@ const empty = computed(() => {
     <!-- what the child did -->
     <div v-if="activityList.length > 0">
       <span class="small-label">What {{ childName }} did</span>
-      <span v-for="activity in activityList" :key="activity" class="day-chip">{{ activity }}</span>
+      <span v-for="activity in activityList" :key="activity" class="chip">{{ activity }}</span>
     </div>
 
     <!-- the short lines -->

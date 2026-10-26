@@ -5,7 +5,6 @@ import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
-import HandoverCard from '@/components/HandoverCard.vue' // the AI summary
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
 import '@/assets/parentpage.css' // the styles of this page
@@ -136,6 +135,19 @@ function activitiesOf(session) {
   }
   return []
 }
+
+// the lines of the AI summary, each with its label (a line is left out when it is empty)
+const summaryLines = computed(() => {
+  if (!handover.value) return []
+  const lines = [
+    { label: 'Working on', text: handover.value.continueTopic },
+    { label: 'Latest score', text: handover.value.lastResult },
+    { label: 'What helped', text: handover.value.whatWorked },
+    { label: 'Finding tricky', text: handover.value.struggle },
+    { label: 'Coming up next', text: handover.value.nextStep },
+  ]
+  return lines.filter((line) => line.text && line.text !== '-')
+})
 
 // the days shown on the social tab: the newest three, or all of them
 const socialDays = computed(() => (showAllDays.value ? sessions.value : sessions.value.slice(0, 3)))
@@ -284,8 +296,18 @@ onMounted(async () => {
       </div>
 
       <!-- today at a glance: the AI summary -->
-      <div class="glance">
-        <HandoverCard v-if="handover || handoverLoading" :handover="handover" :loading="handoverLoading" audience="parent" title="Today at a glance" />
+      <div class="glance" data-test="handover-card">
+        <span class="small-label">Today at a glance</span>
+        <p v-if="handoverLoading" class="muted">Getting the update...</p>
+        <template v-else-if="summaryLines.length > 0">
+          <p v-for="line in summaryLines" :key="line.label" class="glance-line">
+            <strong>{{ line.label }}:</strong> {{ line.text }}
+          </p>
+          <p v-if="handover.recurring && handover.recurring.length > 0" class="glance-line">
+            <strong>Keep practising:</strong>
+            <span v-for="topic in handover.recurring" :key="topic" class="chip" data-test="recurring-badge">{{ topic }}</span>
+          </p>
+        </template>
         <p v-else class="muted">No summary yet.</p>
       </div>
 
