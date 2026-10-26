@@ -6,6 +6,7 @@
      #DDF0EF pale aqua  tiles, tags and small areas
      #EAF6F5 lightest   note boxes
      #CDE8D2 green      done
+     #B7D8D7 teal       being checked
      #F6D1AA peach      late
      #F9F1E6 cream      the board
      #5E6C80 grey       small text
@@ -26,6 +27,12 @@
   font-family: inherit;
   color: #414F67;
   text-shadow: none;
+}
+
+/* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
+.parentpage .lapis-page-header .page-title {
+  font-family: inherit;
+  color: #414F67;
 }
 
 .parentpage .muted {
@@ -112,6 +119,10 @@
 
 .parentpage .tile-late {
   background: #F6D1AA;
+}
+
+.parentpage .tile-next {
+  background: #FFFFFF;
 }
 
 /* ---------- today at a glance (the AI summary) ---------- */
@@ -270,6 +281,10 @@
 
 .parentpage .row-late .row-tag {
   background: #F6D1AA;
+}
+
+.parentpage .row-waiting .row-tag {
+  background: #B7D8D7;
 }
 
 .parentpage .row-done .row-tag,
@@ -448,10 +463,15 @@
   }
 }
 
-/* ---------- the top bar ---------- */
+/* ---------- the top bar and the background ---------- */
 
 /* the bar itself is NavBar.vue, shared by every page. A parent sees it in aqua, like the rest of this page. */
 .role-parent .lapis-nav.sticky-top {
   background-color: #AED9D8;
   border-bottom-color: #414F67;
+}
+
+/* the dots behind the pages come from main.css. A parent sees a plain background instead. */
+body:has(.role-parent)::after {
+  display: none;
 }

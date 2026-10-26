@@ -182,7 +182,6 @@ const nextSession = computed(() => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return {
-    isToday: soonest.daysAway === 0,
     date: `${date.getFullYear()}-${month}-${day}`,
     volunteer: volunteerName(soonest.volunteerId),
   }
@@ -192,12 +191,11 @@ const nextSession = computed(() => {
 const summaryTiles = computed(() => {
   const late = todoHomework.value.filter(isLate).length
   const next = nextSession.value
-  let nextValue = 'Not set yet'
-  if (next) nextValue = next.isToday ? 'Today' : formatDate(next.date)
+  const nextValue = next ? formatDate(next.date) : 'Not set yet' // always a date, like Mon, 26 Oct
   return [
     { value: late > 0 ? late + ' late' : 'On time', label: late > 0 ? 'Past its date' : 'No late homework', late: late > 0 },
     { value: todoHomework.value.length - late + ' to do', label: 'Remind at home' },
-    { value: nextValue, label: next && next.volunteer ? 'Next session · ' + firstName(next.volunteer) : 'Next session' },
+    { value: nextValue, label: next && next.volunteer ? 'Next session · ' + firstName(next.volunteer) : 'Next session', next: true },
   ]
 })
 
@@ -289,7 +287,7 @@ onMounted(async () => {
 
       <!-- three small tiles: what needs attention -->
       <div class="summary-tiles" data-test="status-strip">
-        <div v-for="tile in summaryTiles" :key="tile.label" class="tile" :class="{ 'tile-late': tile.late }">
+        <div v-for="tile in summaryTiles" :key="tile.label" class="tile" :class="{ 'tile-late': tile.late, 'tile-next': tile.next }">
           <strong>{{ tile.value }}</strong>
           <span>{{ tile.label }}</span>
         </div>
