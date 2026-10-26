@@ -16,13 +16,24 @@ const props = defineProps({
 
 // the non-academic things the child did (chess with friends, soccer ...), as a list
 const activityList = computed(() => {
-  if (props.session.activities && props.session.activities.length > 0) {
-    return props.session.activities
+  const activity = props.session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
+  if (Array.isArray(activity)) {
+    return activity
   }
-  if (props.session.activity) {
-    return [props.session.activity]
+  if (activity) {
+    return [activity]
   }
   return []
+})
+
+// the short lines, each with an icon (a line is left out when the volunteer did not fill it in)
+const lines = computed(() => {
+  const all = [
+    { icon: '🍱', label: 'Meal', text: props.session.meal },
+    { icon: '🤝', label: 'Getting along with others', text: props.session.interaction },
+    { icon: '⭐', label: 'Something positive', text: props.session.behaviour },
+  ]
+  return all.filter((line) => line.text)
 })
 
 // the photos: the first one is big, the next two are small, the rest are counted
@@ -37,8 +48,7 @@ const noteLabel = computed(() => {
 
 // true when the volunteer wrote nothing about the social side
 const empty = computed(() => {
-  const s = props.session
-  return photos.value.length === 0 && activityList.value.length === 0 && !s.meal && !s.interaction && !s.behaviour && !s.socialNotes
+  return photos.value.length === 0 && activityList.value.length === 0 && lines.value.length === 0 && !props.session.socialNotes
 })
 </script>
 
@@ -58,30 +68,22 @@ const empty = computed(() => {
 
     <!-- what the child did -->
     <div v-if="activityList.length > 0">
-      <span class="day-label">What {{ childName }} did</span>
+      <span class="small-label">What {{ childName }} did</span>
       <span v-for="activity in activityList" :key="activity" class="day-chip">{{ activity }}</span>
     </div>
 
     <!-- the short lines -->
-    <div v-if="session.meal" class="day-line">
-      <span class="day-icon">🍱</span>
-      <div><span class="day-label">Meal</span>{{ session.meal }}</div>
-    </div>
-    <div v-if="session.interaction" class="day-line">
-      <span class="day-icon">🤝</span>
-      <div><span class="day-label">Getting along with others</span>{{ session.interaction }}</div>
-    </div>
-    <div v-if="session.behaviour" class="day-line">
-      <span class="day-icon">⭐</span>
-      <div><span class="day-label">Something positive</span>{{ session.behaviour }}</div>
+    <div v-for="line in lines" :key="line.label" class="day-line">
+      <span class="day-icon">{{ line.icon }}</span>
+      <div><span class="small-label">{{ line.label }}</span>{{ line.text }}</div>
     </div>
 
     <!-- the note -->
-    <div v-if="session.socialNotes" class="day-note">
-      <span class="day-label">{{ noteLabel }}</span>
+    <div v-if="session.socialNotes" class="note-box">
+      <span class="small-label">{{ noteLabel }}</span>
       "{{ session.socialNotes }}"
     </div>
 
-    <div v-if="empty" class="small text-muted-cb">Nothing extra was noted for this day.</div>
+    <p v-if="empty" class="muted">Nothing extra was noted for this day.</p>
   </div>
 </template>
