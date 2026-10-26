@@ -120,6 +120,12 @@ const routes = [
     component: () => import('@/views/coordinator/MatchmakingView.vue'), // Yu Xuan
     meta: { roles: ['teacher'] },
   },
+  {
+    path: '/coordinator/schedule',
+    name: 'schedule',
+    component: () => import('@/views/coordinator/ScheduleView.vue'), // Yu Xuan
+    meta: { roles: ['teacher'] },
+  },
 
   // ---------- 404 ----------
   {
@@ -127,6 +133,7 @@ const routes = [
     name: 'not-found',
     component: () => import('@/views/NotFoundView.vue'),
   },
+
 ]
 
 // create router

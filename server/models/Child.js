@@ -19,7 +19,7 @@ const childSchema = new mongoose.Schema(
     points: { type: Number, default: 0 }, // gamification (Jachin)
     avatar: { type: String, default: '🙂' },
     followUp: { type: Boolean, default: false }, // flagged by coordinator (Yu Xuan)
-    schedule: { type: [slotSchema], default: [] }, // which day each volunteer sees this child (Yu Xuan)
+    schedule: [{ _id: false, volunteerId: String, day: String, time: String }], // which day each volunteer sees this child (Yu Xuan)
   },
   { toJSON: jsonOptions },
 )

@@ -19,6 +19,7 @@ const LINKS = {
     { to: '/coordinator/children',    label: 'Children',    icon: 'bi-person-badge' },
     { to: '/coordinator/volunteers',  label: 'Volunteers',  icon: 'bi-person-heart' },
     { to: '/coordinator/matchmaking', label: 'Matchmaking', icon: 'bi-shuffle' },
+    { to: '/coordinator/schedule',    label: 'Schedule',    icon: 'bi-calendar-week' },
     { to: '/messages',                label: 'Messages',    icon: 'bi-chat-dots' },
     { to: '/profile',                 label: 'Profile',     icon: 'bi-person-gear' },
   ],
