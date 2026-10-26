@@ -141,7 +141,7 @@ body::after {
 
 /* ── Role accent colours ────────────────────────────────────── */
 .role-child     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
-.role-parent    { --role-accent: var(--lapis-orange); --role-accent-soft: #FBF0E4; --role-accent-dark: var(--lapis-orange-dark); }
+.role-parent    { --role-accent: #AED9D8;             --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
 .role-volunteer { --role-accent: var(--lapis-lime);   --role-accent-soft: #EAF5E0; --role-accent-dark: var(--lapis-lime-dark); }
 .role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
 .role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }

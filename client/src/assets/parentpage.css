@@ -463,13 +463,7 @@
   }
 }
 
-/* ---------- the top bar and the background ---------- */
-
-/* the bar itself is NavBar.vue, shared by every page. A parent sees it in aqua, like the rest of this page. */
-.role-parent .lapis-nav.sticky-top {
-  background-color: #AED9D8;
-  border-bottom-color: #414F67;
-}
+/* ---------- the background ---------- */
 
 /* the dots behind the pages come from main.css. A parent sees a plain background instead. */
 body:has(.role-parent)::after {
