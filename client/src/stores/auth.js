@@ -6,8 +6,8 @@
 //   const auth = useAuthStore()
 //   auth.user.name, auth.role, auth.isLoggedIn, auth.logout()
 //
-// The token + user are saved in localStorage (Week 6) so a page
-// refresh does not log you out.
+// The token + user are saved in sessionStorage (Week 6) so a page
+// refresh does not log you out. Closing the tab does log you out.
 // =============================================================
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
@@ -16,14 +16,14 @@ import api from '@/services/api'
 // Where each role lands after logging in
 export const ROLE_HOME = {
   volunteer: '/volunteer',
-  teacher: '/coordinator',
+  teacher: '/teacher',
   parent: '/parent',
   child: '/child',
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('cb_token'))
-  const user = ref(JSON.parse(localStorage.getItem('cb_user') || 'null'))
+  const token = ref(sessionStorage.getItem('cb_token'))
+  const user = ref(JSON.parse(sessionStorage.getItem('cb_user') || 'null'))
 
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const role = computed(() => user.value?.role || null)
@@ -32,15 +32,15 @@ export const useAuthStore = defineStore('auth', () => {
   function saveSession(data) {
     token.value = data.token
     user.value = data.user
-    localStorage.setItem('cb_token', data.token)
-    localStorage.setItem('cb_user', JSON.stringify(data.user))
+    sessionStorage.setItem('cb_token', data.token)
+    sessionStorage.setItem('cb_user', JSON.stringify(data.user))
   }
 
   function clearSession() {
     token.value = null
     user.value = null
-    localStorage.removeItem('cb_token')
-    localStorage.removeItem('cb_user')
+    sessionStorage.removeItem('cb_token')
+    sessionStorage.removeItem('cb_user')
   }
 
   async function login(email, password) {
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function patchUser(updated) {
     user.value = { ...user.value, ...updated }
-    localStorage.setItem('cb_user', JSON.stringify(user.value))
+    sessionStorage.setItem('cb_user', JSON.stringify(user.value))
   }
 
   return { token, user, isLoggedIn, role, homePath, login, signup, logout, clearSession, patchUser }

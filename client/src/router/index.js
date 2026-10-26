@@ -95,27 +95,27 @@ const routes = [
     meta: { roles: ['child'] },
   },
 
-  // ---------- Coordinator (Yu Xuan + Kai Sen) ----------
+  // ---------- Teacher (Yu Xuan + Kai Sen) ----------
   {
-    path: '/coordinator',
+    path: '/teacher',
     name: 'coordinator-home',
     component: () => import('@/views/coordinator/CoordinatorDashboardView.vue'), // Yu Xuan
     meta: { roles: ['teacher'] },
   },
   {
-    path: '/coordinator/children',
+    path: '/teacher/children',
     name: 'manage-children',
     component: () => import('@/views/coordinator/ManageChildrenView.vue'), // Kai Sen
     meta: { roles: ['teacher'] },
   },
   {
-    path: '/coordinator/volunteers',
+    path: '/teacher/volunteers',
     name: 'manage-volunteers',
     component: () => import('@/views/coordinator/ManageVolunteersView.vue'), // Yu Xuan
     meta: { roles: ['teacher'] },
   },
   {
-    path: '/coordinator/matchmaking/:childId?',
+    path: '/teacher/matchmaking/:childId?',
     name: 'matchmaking',
     component: () => import('@/views/coordinator/MatchmakingView.vue'), // Yu Xuan
     meta: { roles: ['teacher'] },

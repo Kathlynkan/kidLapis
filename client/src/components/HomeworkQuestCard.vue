@@ -8,7 +8,7 @@ const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
 })
-const emit = defineEmits(['submit', 'verify'])
+const emit = defineEmits(['submit', 'verify', 'delete'])
 
 const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
@@ -18,10 +18,9 @@ const isOverdue = computed(
 
 <template>
   <div
-    class="cb-card topic-homework p-3 h-100 d-flex flex-column"
+    class="cb-card cb-card-yellow cb-card-top p-3 h-100 d-flex flex-column"
     data-test="homework-card"
     :style="isOverdue ? 'border-color:var(--topic-alert)' : ''"
-    style="padding-top: 1.25rem !important;"
   >
     <div class="d-flex justify-content-between align-items-start gap-2">
       <h3 class="h6 mb-1" style="text-shadow:none;color:var(--lapis-plum)">{{ homework.title }}</h3>
@@ -72,6 +71,14 @@ const isOverdue = computed(
         @click="emit('verify', homework.id)"
       >
         ✅ Verify &amp; give points
+      </button>
+      <button
+        v-if="mode === 'volunteer' && homework.status !== 'verified'"
+        class="btn btn-outline-secondary btn-sm mt-1"
+        data-test="delete-homework-btn"
+        @click="emit('delete', homework.id)"
+      >
+        Remove
       </button>
     </div>
   </div>

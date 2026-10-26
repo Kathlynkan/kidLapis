@@ -2,13 +2,6 @@
 // /sessions  - session records (the core of the app)   Owner: Ning Xuan
 // -------------------------------------------------------------
 // Fields: see models/Session.jsn
-// GET is DONE so that Yuqi / Kat / Jachin / Yu Xuan can build on it.
-//
-// TODO (Ning Xuan):
-//   [done] POST   /sessions        volunteer records a session
-//   [done] PUT    /sessions/:id    edit (only the volunteer who wrote it, or a coordinator)
-//   [done] DELETE /sessions/:id    delete (same rule)
-//   [done] Validate: correct <= attempted, date not in the future, topic required
 // =============================================================
 import { Router } from 'express'
 import { Child, Session, User, Handover } from '../models/index.js' // import mongoDB collections
@@ -191,10 +184,13 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
       mood: req.body.mood,
       notes: req.body.notes,
       volunteerId: req.user.id,
+      meal: req.body.meal,
+      portion: req.body.portion,
       activity: req.body.activity,
       interaction: req.body.interaction,
       behaviour: req.body.behaviour,
       socialNotes: req.body.socialNotes,
+      photos: req.body.photos || []
     })
 
     // return new session
@@ -270,10 +266,13 @@ router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
     session.nextStep = req.body.nextStep
     session.mood = req.body.mood
     session.notes = req.body.notes
+    session.meal = req.body.meal
+    session.portion = req.body.portion
     session.activity = req.body.activity
     session.interaction = req.body.interaction
     session.behaviour = req.body.behaviour
     session.socialNotes = req.body.socialNotes
+    session.photos = req.body.photos || []
 
     await session.save()
     // when session was edited -> saved AI summary is outdated -> delete 

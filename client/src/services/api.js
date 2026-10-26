@@ -26,7 +26,7 @@ const api = axios.create({
 // true: automatically sends token with every request, so backend can validate token
 api.interceptors.request.use((config) => {
   // get token from browser storage
-  const token = localStorage.getItem('cb_token') // localStorage is browser storage
+  const token = sessionStorage.getItem('cb_token')
   // if token exists, add Authorization header to every reqeust
   // headers are extra information attached to the request
   // 'Bearer' is standard format used for lgoin tokens

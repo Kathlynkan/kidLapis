@@ -6,6 +6,7 @@
 ============================================================= -->
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
@@ -13,6 +14,7 @@ import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const AVATARS = [
   '🙂', '😊', '😄', '😎', '🤩', '🥳', '😸',
@@ -40,6 +42,10 @@ onMounted(async () => {
     } catch { /* silent */ }
   }
 })
+
+function cancel() {
+  router.back() // return user to wherever they came from
+}
 
 async function save() {
   success.value = ''
@@ -216,15 +222,13 @@ async function save() {
             </fieldset>
           </PeelCard>
 
-          <button
-            type="submit"
-            class="btn btn-primary w-100"
-            :disabled="loading"
-            data-test="profile-save"
-          >
-            <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-            Save changes
-          </button>
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <!-- right-aligned buttons with gap in between and top margin -->
+            <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" :disabled="loading" data-test="profile-save">
+              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span> Save changes
+            </button>
+          </div>
 
         </form>
       </div>

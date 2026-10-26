@@ -14,6 +14,9 @@ const childSchema = new mongoose.Schema(
     level: { type: String, required: true }, // P1 - P6
     school: String,
     parentId: String, // -> User (role parent)
+    // Child code a parent types in at sign up to link to this child (Kai Sen).
+    // select: false = never sent to the browser unless a route asks for it (only teachers see it).
+    linkCode: { type: String, unique: true, sparse: true, select: false },
     volunteerIds: [String], // -> Users (role volunteer) assigned to this child
     needs: [String], // skills the child needs help with (matchmaking)
     points: { type: Number, default: 0 }, // gamification (Jachin)

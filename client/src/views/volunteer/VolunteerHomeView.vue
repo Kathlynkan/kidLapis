@@ -99,8 +99,11 @@ const selectedDayChildren = computed(() => childrenOnDay(selectedDay.value))
 const needsAttentionByChild = computed(() => {
   const result = {}
   for (const child of children.value) {
-    // get latest 5 sessions of today's child
-    const childSessions = sessions.value.filter((s) => s.childId === child.id).slice(0, 5)
+    // get latest 5 sessions of this child, sorted newest-first so we don't flag resolved struggles
+    const childSessions = sessions.value
+      .filter((s) => s.childId === child.id)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 5)
 
     const counts = {}
     let repeated = false
@@ -286,7 +289,7 @@ onMounted(loadData)
 
         <template v-else>
           <!-- search + filter -->
-          <div class="cb-card p-3 mb-3">
+          <div class="cb-card cb-card-lime p-3 mb-3">
             <div class="row g-2 align-items-end">
               <div class="col-12 col-md-7">
                 <label for="search" class="form-label small mb-1">Search</label>

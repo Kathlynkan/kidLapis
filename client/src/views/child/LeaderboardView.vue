@@ -54,7 +54,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4">
-    <PageHeader title="🏆 Leaderboard" subtitle="See how everyone is doing!" />
+    <PageHeader title="🏆 Leaderboard" subtitle="Complete quests to earn stars and climb the ranks!" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -79,7 +79,7 @@ onMounted(async () => {
             data-test="tab-improved"
             @click="switchTab('week')"
           >
-            🔥 Stars earned this week
+            🔥 This week
           </button>
         </li>
       </ul>
@@ -153,7 +153,7 @@ onMounted(async () => {
   min-width: 88px;
 }
 .podium-bar {
-  background: var(--cb-primary-soft);
+  background: var(--role-accent-soft, var(--lapis-cream));
   border-radius: var(--cb-radius) var(--cb-radius) 0 0;
   font-size: 1.6rem;
   width: 100%;

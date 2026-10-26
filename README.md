@@ -86,7 +86,7 @@ Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
 | Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe |
 | Volunteer | `volunteer2@kidslapis.sg` | Daniel — Ethan, Meera, Ryan |
 | Volunteer | `volunteer3@kidslapis.sg` | Priya — Arjun |
-| Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
+| Teacher | `teacher@kidslapis.sg` | Sees the whole centre |
 | Parent | `parent@kidslapis.sg` | Ms Grace — parent of Ethan **and** Mia |
 | Parent | `parent2@kidslapis.sg` | Ravi — parent of Meera **and** Arjun |
 | Child | `child@kidslapis.sg` | Ethan |
@@ -116,10 +116,12 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 
 | Spec | Covers | Owner |
 |---|---|---|
-| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards | Kai Sen |
-| `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open session form | Yuqi / Ning Xuan |
-| `e2e/child.spec.js` | Child quests (submit, waiting message, badge shelf), leaderboard (loads, tab switch) | Jachin |
+| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email) | Kai Sen |
+| `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
+| `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
 | `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, recurring badge, session timeline with mood labels, SkillProgressChart, child switcher, switching children | Jachin |
+| `e2e/teacher.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
+| `e2e/messages.spec.js` | Parent child list, chat thread visible, switch child, send message + real-time delivery, teacher sees same thread | Kat |
 
 ---
 
@@ -145,7 +147,7 @@ kids-lapis/
         ├── main.js        <- Bootstrap, Pinia, Router
         ├── App.vue        <- NavBar + <RouterView />
         ├── router/        <- all routes + role guard
-        ├── stores/auth.js <- logged-in user (Pinia + localStorage)
+        ├── stores/auth.js <- logged-in user (Pinia + sessionStorage)
         ├── services/api.js<- shared axios instance (adds the token)
         ├── utils/         <- format, constants, gamification (+ unit tests)
         ├── components/    <- reusable pieces (cards, charts, chat...)
@@ -162,13 +164,13 @@ All routes except `/auth/signup` and `/auth/login` need `Authorization: Bearer <
 |---|---|---|---|
 | `POST /auth/signup`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | Accounts | ✅ done | Kai Sen |
 | `GET /children`, `GET /children/:id` | Children visible to me | ✅ done | Kai Sen |
-| `POST / PUT / DELETE /children` | Manage children | ⏳ TODO | Kai Sen |
+| `POST / PUT / DELETE /children` | Manage children | ✅ done | Kai Sen |
 | `GET /users?role=volunteer`, `GET /users/:id`, `PUT /users/:id` | Volunteers & profiles | ✅ done | Yu Xuan |
 | `GET /sessions?childId=`, `GET /sessions/:id` | Session history | ✅ done | Ning Xuan |
 | `POST / PUT / DELETE /sessions` | Record / edit / delete | ✅ done | Ning Xuan |
 | `GET /homework?childId=` | Homework list | ✅ done | Ning Xuan |
 | `POST /homework` | Assign homework (with optional question deck) | ✅ done | Ning Xuan / Jachin |
-| `PUT /homework/:id/submit`, `PUT /homework/:id/verify` | Child submits; volunteer verifies and awards berries | ✅ done | Jachin |
+| `PUT /homework/:id/submit`, `PUT /homework/:id/verify` | Child submits; volunteer verifies and awards stars | ✅ done | Jachin |
 | `GET /homework/leaderboard` | Berry leaderboard (all-time + weekly) | ✅ done | Jachin |
 | `GET /decks` | Question bank decks for homework | ✅ done | Jachin |
 | `POST /handover/:childId` | AI summary (Gemini + fallback), audience: volunteer or parent | ✅ done | Yuqi |
@@ -184,4 +186,4 @@ All routes except `/auth/signup` and `/auth/login` need `Authorization: Bearer <
 
 ## Third-party code & credits
 
-Bootstrap, Bootstrap Icons, Vue, Vue Router, Pinia, Axios, Chart.js, vue-chartjs, Express, Mongoose, Playwright, Vitest (all free/open-source). Fonts: Nunito (Google Fonts); the child pages use Arial and Georgia. The child pages ("Road to Becoming King of the Pirates", berries, Bounty Board) are a fan-inspired nod to the One Piece series and use only emoji and our own CSS, no original artwork. The project skeleton was generated with AI assistance as boilerplate starter code, which the module allows. Each feature is implemented by its owner as listed in WORKLOAD.md.
+Bootstrap, Bootstrap Icons, Vue, Vue Router, Pinia, Axios, Chart.js, vue-chartjs, Express, Mongoose, Playwright, Vitest (all free/open-source). Fonts: Nunito (Google Fonts); the child pages use Arial and Georgia. The child pages (stars, Bounty Board leaderboard) are a fan-inspired nod to the One Piece series and use only emoji and our own CSS, no original artwork. The project skeleton was generated with AI assistance as boilerplate starter code, which the module allows. Each feature is implemented by its owner as listed in WORKLOAD.md.

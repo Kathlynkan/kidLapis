@@ -1,24 +1,34 @@
 // =============================================================
 // /children  - child profiles             Owner: Kai Sen
 // -------------------------------------------------------------
-// GET routes are DONE (everyone's pages depend on them).
-//
-// TODO (Kai Sen):
-//   [x] POST   /children        create a child (coordinator only)
-//   [x] PUT    /children/:id    edit a child   (coordinator only)
-//   [x] DELETE /children/:id    remove a child (coordinator only)
 // =============================================================
 import { Router } from 'express'
+import bcrypt from 'bcryptjs'
 import { Child, User, Session, Homework, Message, Handover } from '../models/index.js'
+import { newLinkCode } from '../models/helpers.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild, childFilterFor } from '../utils/access.js'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const router = Router()
 router.use(requireAuth)
 
 // GET /children  -> only the children this user is allowed to see
+// Teachers also get each child's linkCode (the code parents use at sign up).
 router.get('/', async (req, res) => {
-  const children = await Child.find(childFilterFor(req.user)).sort({ name: 1 })
+  const isTeacher = req.user.role === 'teacher'
+  let query = Child.find(childFilterFor(req.user)).sort({ name: 1 })
+  if (isTeacher) query = query.select('+linkCode')
+  const children = await query
+
+  // Children added before child codes existed don't have one yet: give them one now
+  if (isTeacher) {
+    for (const child of children.filter((c) => !c.linkCode)) {
+      child.linkCode = newLinkCode()
+      await child.save()
+    }
+  }
   res.json(children)
 })
 
@@ -57,19 +67,36 @@ async function checkChildForm({ name, level, needs, parentId }) {
   return ''
 }
 
-// POST /children   body: { name, level, school, parentId, needs, avatar }
-// Only coordinators get past requireRole('teacher'); everyone else gets 403.
+// POST /children   body: { name, level, school, parentId, needs, avatar, childEmail?, childPassword? }
+// Only teachers get past requireRole('teacher'); everyone else gets 403.
+// childEmail + childPassword are optional: if both are supplied, a child User login is also created.
 router.post('/', requireRole('teacher'), async (req, res) => {
-  const { name, level, school, parentId, needs, avatar } = req.body
+  const { name, level, school, parentId, needs, avatar, childEmail, childPassword } = req.body
 
-  // 1. Validate
+  // 1. Validate profile fields
   const problem = await checkChildForm(req.body)
   if (problem) {
     return res.status(400).json({ message: problem })
   }
 
-  // 2. Save to MongoDB. Mongoose fills in _id ("c_xxxx"), points: 0, followUp: false
-  //    and the default avatar from models/Child.js.
+  // 2. Validate login fields if provided (either both or neither)
+  const wantsLogin = childEmail || childPassword
+  if (wantsLogin) {
+    const email = String(childEmail || '').trim().toLowerCase()
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ message: 'Child login email is not valid.' })
+    }
+    // Same minimum as every other account (MIN_PASSWORD_LENGTH in routes/auth.js)
+    if (typeof childPassword !== 'string' || childPassword.length < 8) {
+      return res.status(400).json({ message: 'Child login password must be at least 8 characters.' })
+    }
+    const exists = await User.exists({ email })
+    if (exists) {
+      return res.status(409).json({ message: 'That email is already used by another account.' })
+    }
+  }
+
+  // 3. Save the child profile
   try {
     const child = await Child.create({
       name: String(name).trim(),
@@ -77,16 +104,29 @@ router.post('/', requireRole('teacher'), async (req, res) => {
       school: school ? String(school).trim() : undefined,
       parentId: parentId || undefined,
       needs: needs || [],
-      volunteerIds: [], // a new child starts unassigned; Yu Xuan's matchmaking assigns volunteers
+      volunteerIds: [],
       avatar: avatar || undefined,
+      linkCode: newLinkCode(), // the teacher gives this to the parent for sign up
     })
-    // 3. 201 Created + the new child, so the page can add it to the table straight away
+
+    // 4. Optionally create the child User account
+    if (wantsLogin) {
+      const email = String(childEmail).trim().toLowerCase()
+      await User.create({
+        name: String(name).trim(),
+        email,
+        password: await bcrypt.hash(childPassword, 10),
+        role: 'child',
+        childId: child._id,
+      })
+    }
+
     res.status(201).json(child)
   } catch (error) {
     if (error.name === 'ValidationError') {
       return res.status(400).json({ message: error.message })
     }
-    throw error // anything else goes to the 500 handler in server.js
+    throw error
   }
 })
 
@@ -94,8 +134,8 @@ router.post('/', requireRole('teacher'), async (req, res) => {
 // Edits the child's profile only. Volunteers (Yu Xuan), points (Jachin) and
 // follow-up flags are changed by their own features, so they are not touched here.
 router.put('/:id', requireRole('teacher'), async (req, res) => {
-  // 1. Does this child exist?
-  const child = await Child.findById(req.params.id)
+  // 1. Does this child exist? (+linkCode so the reply still has the child code for the table)
+  const child = await Child.findById(req.params.id).select('+linkCode')
   if (!child) {
     return res.status(404).json({ message: 'Child not found' })
   }

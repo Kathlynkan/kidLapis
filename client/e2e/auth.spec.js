@@ -16,7 +16,7 @@ test.describe('Authentication', () => {
 
   test('coordinator lands on the dashboard', async ({ page }) => {
     await loginAs(page, 'coordinator')
-    await expect(page).toHaveURL(/\/coordinator$/)
+    await expect(page).toHaveURL(/\/teacher$/)
     await expect(page.getByText('Sessions this week')).toBeVisible()
   })
 
@@ -41,13 +41,13 @@ test.describe('Authentication', () => {
   })
 
   test('protected pages redirect to login', async ({ page }) => {
-    await page.goto('/coordinator')
+    await page.goto('/teacher')
     await expect(page).toHaveURL(/\/login\?redirect=/)
   })
 
-  test('a parent cannot open the coordinator dashboard', async ({ page }) => {
+  test('a parent cannot open the teacher dashboard', async ({ page }) => {
     await loginAs(page, 'parent')
-    await page.goto('/coordinator')
+    await page.goto('/teacher')
     await expect(page).toHaveURL(/\/parent$/)
   })
 })
@@ -77,9 +77,11 @@ test.describe('Sign up', () => {
     await page.locator('[data-test="signup-email"]').fill(email)
     await page.locator('[data-test="signup-password"]').fill('secret123')
     await page.locator('[data-test="signup-confirm"]').fill('secret123')
-    // Volunteers pick at least one skill and one day (click the button-style labels)
-    await page.locator('[data-test="signup-skills"]').getByText('Fractions').click()
-    await page.locator('[data-test="signup-days"]').getByText('Mon').click()
+    // The skill/day checkboxes are visually hidden (Bootstrap btn-check class).
+    // Click the visible label elements — the browser forwards the click to the
+    // hidden input, toggling it and firing a change event that Vue's v-model picks up.
+    await page.locator('[data-test="signup-skills"] label', { hasText: 'Math' }).click()
+    await page.locator('[data-test="signup-days"] label', { hasText: 'Mon' }).click()
     await page.locator('[data-test="signup-submit"]').click()
 
     await expect(page).toHaveURL(/\/volunteer$/)
@@ -95,5 +97,52 @@ test.describe('Sign up', () => {
     await page.locator('[data-test="signup-submit"]').click()
 
     await expect(page.locator('[data-test="signup-error"]')).toContainText('already exists')
+  })
+
+  test('a parent signs up with the child code from the teacher and sees their child', async ({
+    page,
+  }) => {
+    // 1. Teacher adds a new child (a different name every run: each test runs on desktop + iPhone 6)
+    const childName = `Code Kid ${Date.now()}`
+    await loginAs(page, 'coordinator')
+    await page.goto('/teacher/children')
+    await page.locator('[data-test="add-child"]').click()
+    await page.locator('[data-test="child-name"]').fill(childName)
+    await page.locator('[data-test="child-level"]').selectOption('P2')
+    await page.locator('[data-test="save-child"]').click()
+
+    // 2. Read the child code shown for the new child (table on desktop, card on phones)
+    await page.locator('[data-test="child-search"]').fill(childName)
+    const code = (await page.locator('[data-test="child-code"]:visible').textContent()).trim()
+    expect(code).toMatch(/^[A-Z0-9]{6}$/)
+
+    // 3. Log out (clear the saved session) and sign up as that child's parent with the code
+    await page.evaluate(() => sessionStorage.clear())
+    await page.goto('/signup')
+    await page.getByText('Parent', { exact: true }).click()
+    await page.locator('[data-test="signup-name"]').fill('Code Parent')
+    await page.locator('[data-test="signup-email"]').fill(`code.parent.${Date.now()}@example.com`)
+    await page.locator('[data-test="signup-password"]').fill('secret123')
+    await page.locator('[data-test="signup-confirm"]').fill('secret123')
+    await page.locator('[data-test="signup-child-code"]').fill(code.toLowerCase()) // case doesn't matter
+    await page.locator('[data-test="signup-submit"]').click()
+
+    // 4. The new parent lands on their page and sees the child straight away
+    await expect(page).toHaveURL(/\/parent$/)
+    await expect(page.getByText(childName).first()).toBeVisible()
+  })
+
+  test('a wrong child code shows an error', async ({ page }) => {
+    await page.goto('/signup')
+    await page.getByText('Parent', { exact: true }).click()
+    await page.locator('[data-test="signup-name"]').fill('Someone')
+    await page.locator('[data-test="signup-email"]').fill(`wrong.code.${Date.now()}@example.com`)
+    await page.locator('[data-test="signup-password"]').fill('secret123')
+    await page.locator('[data-test="signup-confirm"]').fill('secret123')
+    await page.locator('[data-test="signup-child-code"]').fill('ZZZZZZ')
+    await page.locator('[data-test="signup-submit"]').click()
+
+    await expect(page.locator('[data-test="signup-error"]')).toContainText('does not match')
+    await expect(page).toHaveURL(/\/signup$/)
   })
 })

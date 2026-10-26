@@ -248,4 +248,24 @@ router.put('/:id/verify', requireRole('volunteer', 'teacher'), async (req, res) 
   res.json({ homework: hw, points: child.points })
 })
 
+// DELETE /homework/:id  — volunteer or teacher; not allowed once verified (stars already awarded)
+router.delete('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
+  const hw = await Homework.findById(req.params.id)
+  if (!hw) return res.status(404).json({ message: 'Homework not found.' })
+
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(hw.childId)) {
+    return res.status(403).json({ message: 'You do not have access to this homework.' })
+  }
+
+  if (hw.status === 'verified') {
+    return res.status(400).json({
+      message: 'Verified homework cannot be deleted — the child already earned their stars.',
+    })
+  }
+
+  await Homework.deleteOne({ _id: hw._id })
+  res.json({ deleted: hw._id })
+})
+
 export default router

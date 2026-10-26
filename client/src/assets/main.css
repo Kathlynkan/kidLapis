@@ -1,46 +1,67 @@
 /* =============================================================
    Kids Lapis — Kueh Lapis design system.
-   The background IS the theme: horizontal colour bands,
-   edge-to-edge, top-to-bottom — like a steamed kueh lapis.
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Fredoka:wght@600;700&display=swap');
 
 /* ── Palette tokens ─────────────────────────────────────────── */
 :root {
   --band: 16px;
 
-  --lapis-pink:   #C9577F; /* pink */
+  --lapis-pink:   #E8A0B8; /* rose pink — children */
   --lapis-cream:  #FBF8F3; /* coconut white */
-  --lapis-lime:   #86B67A; /* pandan green */
-  --lapis-yellow: #F4DEE5; /* butter yellow */
-  --lapis-orange: #5EA9C6; /* peach */
-  --lapis-purple: #8C6DB3; /* lavender */
+  --lapis-lime:   #A8CC90; /* pandan green — sessions / activities */
+  --lapis-yellow: #F5DF98; /* golden yellow — homework / tasks */
+  --lapis-blue:   #88C0D8; /* sky blue — messages / communication */
+  --lapis-orange: #F5B880; /* warm peach — accent / alerts */
+  --lapis-purple: #C0A8D8; /* soft lavender */
   --lapis-plum:   #4A3F3A; /* warm brown ink, for text */
-  --lapis-shadow: #B9A99B; /* soft taupe, for borders and shadows */
+  --lapis-shadow: #B9A99B; /* soft taupe, for drop shadows only — not borders */
+
+  /* Darker border tones — each is the fill colour deepened ~40% */
+  --lapis-cream-dark:  #C8B8A8;
+  --lapis-pink-dark:   #C07090;
+  --lapis-lime-dark:   #68A048;
+  --lapis-yellow-dark: #C8A028;
+  --lapis-blue-dark:   #4890B8;
+  --lapis-orange-dark: #C07838;
+  --lapis-purple-dark: #8068A8;
+
   --lapis-apricot: #EBCDB2;
   --lapis-mint:    #C5DDB9;
-  --lapis-sky:     #B9D9E6; /* sky blue */
+  --lapis-sky:     #B9D9E6;
 
-  /* ── One colour per topic, used everywhere in the app ──
-     academic = pink, social = blue, homework = lavender,
-     schedule = lime, messages = peach, highlights = blush */
-  --topic-academic:       #E9B9CB;
-  --topic-academic-soft:  #F8EBF0;
-  --topic-social:         #B9D9E6;
-  --topic-social-soft:    #EDF5F9;
-  --topic-homework:       #CDBFE0;
-  --topic-homework-soft:  #F3EFF8;
-  --topic-schedule:       #C5DDB9;
-  --topic-schedule-soft:  #F1F6EC;
-  --topic-messages:       #EBCDB2;
-  --topic-messages-soft:  #F8F0E8;
-  --topic-highlight:      #F4DEE5;
-  --topic-highlight-soft: #FAF1F4;
-  --topic-alert:          #E58E86;
-  --topic-alert-soft:     #FBE9E7;
+  /* ── Semantic topic colours ──
+     children/people = pink, sessions/learning = lime,
+     homework/tasks = yellow, messages/communication = blue */
+  --topic-academic:       #A8CC90;
+  --topic-academic-soft:  #E8F5DC;
+  --topic-social:         #88C0D8;
+  --topic-social-soft:    #DFF0F8;
+  --topic-homework:       #F5DF98;
+  --topic-homework-soft:  #FBF5DC;
+  --topic-schedule:       #A8CC90;
+  --topic-schedule-soft:  #E8F5DC;
+  --topic-messages:       #88C0D8;
+  --topic-messages-soft:  #DFF0F8;
+  --topic-highlight:      #F5DF98;
+  --topic-highlight-soft: #FBF5DC;
+  --topic-alert:          #E8A0B8;
+  --topic-alert-soft:     #FAE8F2;
 
-  /* Legacy cb tokens — remapped so existing templates keep working */
+  /* ── PSLE subject colours ──
+     English = sky blue, Math = amber, Science = yellow, Mother Tongue = coral */
+  --subject-english:            #88C0D8;
+  --subject-english-soft:       #DFF0F8;
+  --subject-math:               #D4B840;
+  --subject-math-soft:          #FBF0C8;
+  --subject-science:            #F5DF98;
+  --subject-science-soft:       #FBF5DC;
+  --subject-mother-tongue:      #E8906C;
+  --subject-mother-tongue-soft: #FBE4D8;
+
+  /* Legacy cb tokens */
   --cb-primary:      var(--lapis-lime);
   --cb-primary-dark: #6E9A63;
   --cb-primary-soft: #E8F0E3;
@@ -53,16 +74,16 @@
   --cb-surface:      var(--lapis-cream);
   --cb-text:         var(--lapis-plum);
   --cb-muted:        #8D7F77;
-  --cb-border:       var(--lapis-shadow);
+  --cb-border:       var(--lapis-cream-dark);
   --cb-radius:       0px;
 
   /* Bootstrap colour overrides */
   --bs-primary:           var(--lapis-pink);
-  --bs-primary-rgb:       201, 87, 127;
+  --bs-primary-rgb:       232, 160, 184;
   --bs-success:           var(--lapis-lime);
-  --bs-success-rgb:       134, 182, 122;
+  --bs-success-rgb:       168, 204, 144;
   --bs-warning:           var(--lapis-yellow);
-  --bs-warning-rgb:       244, 222, 229;
+  --bs-warning-rgb:       245, 223, 152;
   --bs-danger:            var(--topic-alert);
   --bs-danger-rgb:        255, 138, 128;
   --bs-link-color:        #7A4FB8;
@@ -70,14 +91,12 @@
   --bs-body-font-family:  'Inter', system-ui, 'Segoe UI', sans-serif;
   --bs-body-color:        var(--lapis-plum);
   --bs-body-bg:           var(--lapis-cream);
-  --bs-border-color:      var(--lapis-shadow);
+  --bs-border-color:      var(--lapis-cream-dark);
   --bs-border-radius:     0px;
   --bs-border-width: 1px;
 }
 
-/* 16px bands look great on all screen sizes — no override needed */
-
-/* ── Plain cream background — theme lives in the cards and nav ── */
+/* ── Base ───────────────────────────────────────────────────── */
 html, body {
   min-height: 100%;
   background-color: var(--lapis-cream);
@@ -87,8 +106,18 @@ html, body {
   color: var(--lapis-plum);
 }
 
+/* Speckle: reads as steamed cake texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(58, 10, 42, 0.06) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
 
-/* ── App shell — no backgrounds: body stripes must show through ─ */
+/* ── App shell ──────────────────────────────────────────────── */
 #app {
   min-height: 100vh;
   display: flex;
@@ -98,10 +127,24 @@ html, body {
   background: transparent !important;
 }
 
+.lapis-app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
+}
+
 .app-main {
   flex: 1;
   background: transparent !important;
 }
+
+/* ── Role accent colours ────────────────────────────────────── */
+.role-child     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
+.role-parent    { --role-accent: var(--lapis-orange); --role-accent-soft: #FBF0E4; --role-accent-dark: var(--lapis-orange-dark); }
+.role-volunteer { --role-accent: var(--lapis-lime);   --role-accent-soft: #EAF5E0; --role-accent-dark: var(--lapis-lime-dark); }
+.role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
+.role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
 
 /* ── Typography ─────────────────────────────────────────────── */
 h1, h2, h3, .fw-heavy {
@@ -120,45 +163,22 @@ h4, h5, h6 {
 .text-muted-cb { color: var(--cb-muted); }
 
 /* ── Cards ──────────────────────────────────────────────────── */
-/*
- * Card = a slice of kueh lapis.
- *   Left edge  → the cut cross-section: same repeating bands as the page background
- *                reveals what the "inside" of the cake looks like.
- *   Card body  → slightly translucent cream so the page bands bleed through
- *                subtly — the card feels part of the cake, not a slab on top.
- *   Border     → 3px plum  |  shadow → 6×6 hard (no blur)
- */
 .cb-card {
   position: relative;
   background: var(--lapis-cream);
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-cream-dark);
   border-radius: var(--cb-radius);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-/* Left edge: the kueh cross-section — thin vertical strip of stacked colour bands */
-.cb-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 10px;
-  border-radius: calc(var(--cb-radius) - 3px) 0 0 calc(var(--cb-radius) - 3px);
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--lapis-pink)   0                     calc(var(--band) * 1),
-    var(--lapis-cream)  calc(var(--band) * 1)  calc(var(--band) * 2),
-    var(--lapis-lime)   calc(var(--band) * 2)  calc(var(--band) * 3),
-    var(--lapis-cream)  calc(var(--band) * 3)  calc(var(--band) * 4),
-    var(--lapis-yellow) calc(var(--band) * 4)  calc(var(--band) * 5),
-    var(--lapis-cream)  calc(var(--band) * 5)  calc(var(--band) * 6),
-    var(--lapis-orange) calc(var(--band) * 6)  calc(var(--band) * 7),
-    var(--lapis-cream)  calc(var(--band) * 7)  calc(var(--band) * 8)
-  );
-  box-shadow: inset -1px 0 0 rgba(255, 248, 240, 0.4);
-}
+/* Semantic card colour variants — pastel fill + matching darker border */
+.cb-card-pink   { background: #FAE8F2; border-color: #C07090; }
+.cb-card-lime   { background: #E8F5DC; border-color: #68A048; }
+.cb-card-yellow { background: #FBF5DC; border-color: #C8A028; }
+.cb-card-blue   { background: #DFF0F8; border-color: #4890B8; }
+.cb-card-orange { background: #FBF0E4; border-color: #C87830; }
+.cb-card-purple { background: #F0EAF8; border-color: #7850B8; }
 
 .cb-card-hover { cursor: pointer; }
 
@@ -166,17 +186,15 @@ h4, h5, h6 {
   box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
 }
 
-/* Section dividers: 4-colour strip (replaces 1px grey hairlines) */
+/* Extra top padding utility — used on cards whose header sits flush at the top */
+.cb-card-top { padding-top: 1.25rem !important; }
+
+/* Section dividers */
 .lapis-stripe,
 .lapis-divider {
-  height: 8px;
+  height: 4px;
   flex-shrink: 0;
-  background: linear-gradient(to right,
-    var(--lapis-pink)   0 25%,
-    var(--lapis-lime)   25% 50%,
-    var(--lapis-yellow) 50% 75%,
-    var(--lapis-orange) 75% 100%
-  );
+  background: var(--role-accent, var(--lapis-pink));
   border: none;
   border-radius: 0;
 }
@@ -193,117 +211,88 @@ h4, h5, h6 {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-/* Primary — pink with purple hard shadow */
 .btn-primary {
   --bs-btn-bg:                  var(--lapis-pink);
-  --bs-btn-border-color:        var(--lapis-shadow);
+  --bs-btn-border-color:        var(--lapis-pink-dark);
   --bs-btn-color:               var(--lapis-cream);
   --bs-btn-hover-bg:            #B0446A;
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-pink-dark);
   --bs-btn-hover-color:         var(--lapis-cream);
   --bs-btn-active-bg:           #B0446A;
-  --bs-btn-active-border-color: var(--lapis-shadow);
+  --bs-btn-active-border-color: var(--lapis-pink-dark);
   --bs-btn-disabled-bg:         var(--lapis-pink);
-  --bs-btn-disabled-border-color: var(--lapis-shadow);
+  --bs-btn-disabled-border-color: var(--lapis-pink-dark);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-primary:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
+.btn-primary:active                { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
 
-.btn-primary:active {
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
-}
-
-/* Outline primary — cream bg, pink on hover */
 .btn-outline-primary {
   --bs-btn-color:               var(--lapis-plum);
-  --bs-btn-border-color:        var(--lapis-shadow);
+  --bs-btn-border-color:        var(--lapis-cream-dark);
   --bs-btn-bg:                  var(--lapis-cream);
   --bs-btn-hover-bg:            var(--lapis-pink);
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-pink-dark);
   --bs-btn-hover-color:         var(--lapis-cream);
   --bs-btn-active-bg:           var(--lapis-pink);
-  --bs-btn-active-border-color: var(--lapis-shadow);
+  --bs-btn-active-border-color: var(--lapis-pink-dark);
   background: var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-outline-primary:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.btn-outline-primary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
+.btn-outline-primary:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
 
-.btn-outline-primary:active {
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
-}
-
-/* Secondary — orange, shadow in plum */
 .btn-secondary {
   --bs-btn-bg:                  var(--lapis-orange);
-  --bs-btn-border-color:        var(--lapis-shadow);
+  --bs-btn-border-color:        var(--lapis-orange-dark);
   --bs-btn-color:               var(--lapis-plum);
   --bs-btn-hover-bg:            #488CA8;
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-orange-dark);
   --bs-btn-hover-color:         var(--lapis-plum);
   --bs-btn-active-bg:           #488CA8;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-secondary:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.btn-secondary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
+.btn-secondary:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
 
-.btn-secondary:active {
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
-}
-
-/* Outline secondary */
 .btn-outline-secondary {
   --bs-btn-color:               var(--lapis-plum);
-  --bs-btn-border-color:        var(--lapis-shadow);
+  --bs-btn-border-color:        var(--lapis-cream-dark);
   --bs-btn-hover-bg:            var(--lapis-orange);
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-orange-dark);
   --bs-btn-hover-color:         var(--lapis-plum);
   background: var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-outline-secondary:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.btn-outline-secondary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
 
-/* Danger — pink */
 .btn-danger {
   --bs-btn-bg:                  var(--lapis-pink);
-  --bs-btn-border-color:        var(--lapis-shadow);
+  --bs-btn-border-color:        var(--lapis-pink-dark);
   --bs-btn-color:               var(--lapis-cream);
   --bs-btn-hover-bg:            #B0446A;
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-pink-dark);
   --bs-btn-hover-color:         var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-danger:hover:not(:disabled) {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.btn-danger:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
+.btn-danger:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
 
-.btn-danger:active {
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
-}
-
-/* Outline danger */
 .btn-outline-danger {
-  --bs-btn-color:               var(--lapis-pink);
-  --bs-btn-border-color:        var(--lapis-pink);
+  --bs-btn-color:               var(--lapis-pink-dark);
+  --bs-btn-border-color:        var(--lapis-pink-dark);
   --bs-btn-hover-bg:            var(--lapis-pink);
-  --bs-btn-hover-border-color:  var(--lapis-shadow);
+  --bs-btn-hover-border-color:  var(--lapis-pink-dark);
   --bs-btn-hover-color:         var(--lapis-cream);
   background: var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-/* Link buttons */
 .btn-link {
   color: var(--lapis-purple);
   font-weight: 700;
@@ -346,7 +335,7 @@ h4, h5, h6 {
 
 .form-check-input:checked {
   background-color: var(--lapis-lime);
-  border-color: var(--lapis-shadow);
+  border-color: var(--lapis-lime-dark);
 }
 
 .form-check-input:focus {
@@ -356,7 +345,7 @@ h4, h5, h6 {
 
 .input-group-text {
   background: var(--lapis-yellow);
-  border: 1px solid var(--lapis-plum);
+  border: 1px solid var(--lapis-yellow-dark);
   color: var(--lapis-plum);
   font-weight: 700;
 }
@@ -366,79 +355,37 @@ h4, h5, h6 {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 2px solid var(--lapis-shadow);
+  border: none;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   border-radius: 4px;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
-.badge-soft {
-  background: var(--lapis-lime);
-  color: var(--lapis-plum);
-}
-
-.badge-accent {
-  background: var(--lapis-yellow);
-  color: var(--lapis-plum);
-}
-
-.badge-ruby {
-  background: var(--lapis-pink);
-  color: var(--lapis-cream);
-}
-
-.badge-danger-soft {
-  background: var(--lapis-orange);
-  color: var(--lapis-plum);
-}
+.badge-soft        { background: var(--lapis-lime);   color: var(--lapis-plum); border: 1px solid var(--lapis-lime-dark); }
+.badge-accent      { background: var(--lapis-yellow); color: var(--lapis-plum); border: 1px solid var(--lapis-yellow-dark); }
+.badge-ruby        { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
+.badge-danger-soft { background: var(--lapis-orange); color: var(--lapis-plum); border: 1px solid var(--lapis-orange-dark); }
 
 /* Bootstrap semantic badge overrides */
-.text-bg-primary {
-  background-color: var(--lapis-pink) !important;
-  color: var(--lapis-cream) !important;
-}
-
-.text-bg-success {
-  background-color: var(--lapis-lime) !important;
-  color: var(--lapis-plum) !important;
-}
-
-.text-bg-warning {
-  background-color: var(--lapis-yellow) !important;
-  color: var(--lapis-plum) !important;
-}
-
-.text-bg-danger {
-  background-color: var(--lapis-pink) !important;
-  color: var(--lapis-cream) !important;
-}
-
-.text-bg-secondary {
-  background-color: var(--lapis-orange) !important;
-  color: var(--lapis-plum) !important;
-}
+.text-bg-primary   { background-color: var(--lapis-pink)   !important; color: var(--lapis-cream) !important; }
+.text-bg-success   { background-color: var(--lapis-lime)   !important; color: var(--lapis-plum)  !important; }
+.text-bg-warning   { background-color: var(--lapis-yellow) !important; color: var(--lapis-plum)  !important; }
+.text-bg-danger    { background-color: var(--lapis-pink)   !important; color: var(--lapis-cream) !important; }
+.text-bg-secondary { background-color: var(--lapis-orange) !important; color: var(--lapis-plum)  !important; }
+.text-bg-light     { background-color: var(--lapis-cream)  !important; color: var(--lapis-plum)  !important; border: 2px solid var(--lapis-cream-dark); }
 
 /* ── Alerts ─────────────────────────────────────────────────── */
 .alert {
-  border: 1px solid var(--lapis-shadow);
   border-radius: 6px;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.alert-success {
-  background: var(--lapis-lime);
-  color: var(--lapis-plum);
-}
-
-.alert-danger {
-  background: var(--lapis-pink);
-  color: var(--lapis-cream);
-}
-
-.alert-warning {
-  background: var(--lapis-yellow);
-  color: var(--lapis-plum);
-}
+.alert-success { background: var(--lapis-lime);   color: var(--lapis-plum);  border: 1px solid var(--lapis-lime-dark); }
+.alert-danger  { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
+.alert-warning { background: var(--lapis-yellow); color: var(--lapis-plum);  border: 1px solid var(--lapis-yellow-dark); }
 
 /* ── Avatar circle ──────────────────────────────────────────── */
 .avatar {
@@ -450,7 +397,7 @@ h4, h5, h6 {
   justify-content: center;
   font-size: 1.6rem;
   background: var(--lapis-yellow);
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-yellow-dark);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   flex-shrink: 0;
 }
@@ -458,31 +405,23 @@ h4, h5, h6 {
 /* ── Progress bars ──────────────────────────────────────────── */
 .progress {
   background: var(--lapis-cream);
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-cream-dark);
   border-radius: 999px;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   overflow: hidden;
 }
 
 .progress-bar {
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--lapis-pink)   0      20%,
-    var(--lapis-lime)   20%    40%,
-    var(--lapis-yellow) 40%    60%,
-    var(--lapis-orange) 60%    80%,
-    var(--lapis-purple) 80%   100%
-  );
-  background-size: 200px 100%;
-  color: var(--lapis-cream);
+  background-color: var(--role-accent, var(--lapis-pink));
+  color: var(--lapis-plum);
 }
 
 /* ── List groups ────────────────────────────────────────────── */
 .list-group {
   --bs-list-group-active-bg:            var(--lapis-pink);
-  --bs-list-group-active-border-color:  var(--lapis-shadow);
+  --bs-list-group-active-border-color:  var(--lapis-pink-dark);
   --bs-list-group-active-color:         var(--lapis-cream);
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-cream-dark);
   border-radius: var(--cb-radius);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   overflow: hidden;
@@ -491,7 +430,7 @@ h4, h5, h6 {
 .list-group-item {
   background: var(--lapis-cream);
   border: 0;
-  border-bottom: 1px solid var(--lapis-shadow);
+  border-bottom: 1px solid var(--lapis-cream-dark);
   color: var(--lapis-plum);
   font-weight: 500;
 }
@@ -515,11 +454,11 @@ h4, h5, h6 {
 .nav-pills .nav-link:hover {
   background: var(--lapis-yellow);
   color: var(--lapis-plum);
-  border-color: var(--lapis-shadow);
+  border-color: var(--lapis-yellow-dark);
 }
 
 .nav-pills .nav-link.active {
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-pink-dark);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   color: var(--lapis-cream);
 }
@@ -527,43 +466,14 @@ h4, h5, h6 {
 /* ── Modals ─────────────────────────────────────────────────── */
 .modal-content {
   background: var(--lapis-cream);
-  border: 1px solid var(--lapis-shadow);
+  border: 2px solid var(--role-accent, var(--lapis-pink));
   border-radius: var(--cb-radius);
   box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
   overflow: hidden;
 }
 
-/* Kueh left-edge cross-section on modals */
-.modal-content::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 10px;
-  border-radius: calc(var(--cb-radius) - 3px) 0 0 calc(var(--cb-radius) - 3px);
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--lapis-pink)   0                     calc(var(--band) * 1),
-    var(--lapis-cream)  calc(var(--band) * 1)  calc(var(--band) * 2),
-    var(--lapis-lime)   calc(var(--band) * 2)  calc(var(--band) * 3),
-    var(--lapis-cream)  calc(var(--band) * 3)  calc(var(--band) * 4),
-    var(--lapis-yellow) calc(var(--band) * 4)  calc(var(--band) * 5),
-    var(--lapis-cream)  calc(var(--band) * 5)  calc(var(--band) * 6),
-    var(--lapis-orange) calc(var(--band) * 6)  calc(var(--band) * 7),
-    var(--lapis-cream)  calc(var(--band) * 7)  calc(var(--band) * 8)
-  );
-}
-
-.modal-header {
-  border-bottom: 1px solid var(--lapis-shadow);
-  background: var(--lapis-cream);
-}
-
-.modal-footer {
-  border-top: 1px solid var(--lapis-shadow);
-  background: var(--lapis-cream);
-}
+.modal-header { border-bottom: 1px solid var(--lapis-cream-dark); background: var(--lapis-cream); }
+.modal-footer { border-top:    1px solid var(--lapis-cream-dark); background: var(--lapis-cream); }
 
 .modal-title {
   font-family: 'Fraunces', Georgia, serif;
@@ -571,7 +481,6 @@ h4, h5, h6 {
   color: var(--lapis-plum);
 }
 
-/* Purple overlay (not black) */
 .modal-backdrop {
   background-color: var(--lapis-purple) !important;
   opacity: 0.55 !important;
@@ -582,7 +491,7 @@ h4, h5, h6 {
   color: var(--lapis-plum);
   --bs-table-bg: var(--lapis-cream);
   --bs-table-striped-bg: var(--lapis-cream);
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid var(--lapis-cream-dark);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -593,30 +502,18 @@ h4, h5, h6 {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--lapis-shadow) !important;
-  border-color: var(--lapis-shadow) !important;
+  border-bottom: 1px solid rgba(251, 248, 243, 0.2) !important;
+  border-color: rgba(251, 248, 243, 0.2) !important;
 }
 
-.table td {
-  border-color: rgba(42, 6, 24, 0.2);
-  font-weight: 500;
-}
+.table td { border-color: rgba(42, 6, 24, 0.2); font-weight: 500; }
 
-/* Alternating left-stripe rows — kueh layers, not grey zebra */
-.table tbody tr:nth-child(4n+1) td:first-child { border-left: 6px solid var(--lapis-pink); }
-.table tbody tr:nth-child(4n+2) td:first-child { border-left: 6px solid var(--lapis-lime); }
-.table tbody tr:nth-child(4n+3) td:first-child { border-left: 6px solid var(--lapis-yellow); }
-.table tbody tr:nth-child(4n+0) td:first-child { border-left: 6px solid var(--lapis-orange); }
+.table tbody tr:nth-child(even) { background: rgba(74, 63, 58, 0.03); }
 
 /* ── Footer ─────────────────────────────────────────────────── */
 .app-footer {
-  background: linear-gradient(to right,
-    var(--lapis-pink)   0 25%,
-    var(--lapis-lime)   25% 50%,
-    var(--lapis-yellow) 50% 75%,
-    var(--lapis-orange) 75% 100%
-  );
-  border-top: 1px solid var(--lapis-shadow);
+  background: var(--role-accent-soft, var(--lapis-cream));
+  border-top: 3px solid var(--role-accent-dark, var(--lapis-cream-dark));
   color: var(--lapis-plum);
   font-weight: 600;
   text-transform: uppercase;
@@ -635,12 +532,7 @@ h4, h5, h6 {
 ::-webkit-scrollbar              { width: 10px; }
 ::-webkit-scrollbar-track        { background: var(--lapis-cream); }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom,
-    var(--lapis-pink),
-    var(--lapis-lime),
-    var(--lapis-yellow),
-    var(--lapis-orange)
-  );
+  background: var(--lapis-shadow);
   border-radius: 999px;
   border: 2px solid var(--lapis-cream);
 }
@@ -648,7 +540,7 @@ h4, h5, h6 {
 
 /* ── Nav tabs ───────────────────────────────────────────────── */
 .nav-tabs {
-  border-bottom: 1px solid var(--lapis-shadow);
+  border-bottom: 1px solid var(--lapis-cream-dark);
   gap: 4px;
 }
 
@@ -665,51 +557,32 @@ h4, h5, h6 {
 
 .nav-tabs .nav-link:hover {
   background: var(--lapis-yellow);
-  border-color: var(--lapis-shadow) var(--lapis-shadow) transparent;
+  border-color: var(--lapis-yellow-dark) var(--lapis-yellow-dark) transparent;
   color: var(--lapis-plum);
 }
 
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-link.active.bg-primary {
   background: var(--lapis-pink) !important;
-  border-color: var(--lapis-shadow) var(--lapis-shadow) var(--lapis-pink);
+  border-color: var(--lapis-pink-dark) var(--lapis-pink-dark) var(--lapis-pink);
   color: var(--lapis-cream) !important;
   box-shadow: none;
 }
 
-/* text-bg-light → cream pill (used in badge variants) */
-.text-bg-light {
-  background-color: var(--lapis-cream) !important;
-  color: var(--lapis-plum) !important;
-  border: 2px solid var(--lapis-shadow);
-}
+/* ── Page transition ────────────────────────────────────────── */
+.page-peel-enter-from  { opacity: 0; transform: translateY(14px) scale(0.99); }
+.page-peel-enter-active { transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.page-peel-leave-to    { opacity: 0; transform: translateY(-8px); }
+.page-peel-leave-active { transition: all 0.18s ease-in; }
 
-/* ── Page peel transition ────────────────────────────────────── */
-.page-peel-enter-from {
-  opacity: 0;
-  transform: translateY(14px) scale(0.99);
-}
-.page-peel-enter-active {
-  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.page-peel-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-.page-peel-leave-active {
-  transition: all 0.18s ease-in;
-}
+/* ── Topic colours ──────────────────────────────────────────── */
+.topic-academic { background: var(--topic-academic-soft); border-color: var(--topic-academic); }
+.topic-social   { background: var(--topic-social-soft);   border-color: var(--topic-social); }
+.topic-homework { background: var(--topic-homework-soft); border-color: var(--topic-homework); }
+.topic-schedule { background: var(--topic-schedule-soft); border-color: var(--topic-schedule); }
+.topic-messages { background: var(--topic-messages-soft); border-color: var(--topic-messages); }
 
-/* ---------- topic colours: the same colour for the same kind of information, everywhere ---------- */
-
-/* soft tinted block with a strong left edge */
-.topic-academic { background: var(--topic-academic-soft); border-left: 8px solid var(--topic-academic); }
-.topic-social   { background: var(--topic-social-soft);   border-left: 8px solid var(--topic-social); }
-.topic-homework { background: var(--topic-homework-soft); border-left: 8px solid var(--topic-homework); }
-.topic-schedule { background: var(--topic-schedule-soft); border-left: 8px solid var(--topic-schedule); }
-.topic-messages { background: var(--topic-messages-soft); border-left: 8px solid var(--topic-messages); }
-
-/* small coloured tags: <span class="chip chip-social">Happy</span> */
+/* ── Chips ──────────────────────────────────────────────────── */
 .chip { display: inline-block; padding: 2px 10px; font-size: 0.8rem; font-weight: 700; color: var(--lapis-plum); }
 .chip-academic { background: var(--topic-academic); }
 .chip-social   { background: var(--topic-social); }
@@ -717,10 +590,3 @@ h4, h5, h6 {
 .chip-schedule { background: var(--topic-schedule); }
 .chip-messages { background: var(--topic-messages); }
 .chip-alert    { background: var(--topic-alert); }
-
-/* ---------- narrow screens: tags wrap inside their box ---------- */
-.badge {
-  white-space: normal;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}

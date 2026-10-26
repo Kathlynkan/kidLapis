@@ -16,16 +16,16 @@ test.describe('Parent portal', () => {
   })
 
   test('lands on parent home and shows greeting', async ({ page }) => {
-    // PageHeader uses firstName(auth.user.name), Ms Grace's first name resolves to "Ms Grace"
+    // PageHeader uses firstName(auth.user.name)
     await expect(page.getByText(/Hello/)).toBeVisible()
-    await expect(page.getByText("Here's what's been happening at student care.")).toBeVisible()
+    await expect(page.getByText(/Stay up to date/)).toBeVisible()
   })
 
-  test('shows the selected child name and berries', async ({ page }) => {
+  test('shows the selected child name and star count', async ({ page }) => {
     // Ethan is the first child for parent@kidslapis.sg
     await expect(page.getByText('Ethan Wong')).toBeVisible()
-    // The child card shows level and berry count
-    await expect(page.getByText(/berries earned/)).toBeVisible()
+    // The child card shows level and star count (e.g. "130 stars")
+    await expect(page.getByText(/\d+ stars/)).toBeVisible()
   })
 
   test('shows the handover card', async ({ page }) => {
@@ -41,6 +41,8 @@ test.describe('Parent portal', () => {
   })
 
   test('shows session timeline with mood labels', async ({ page }) => {
+    // The session timeline is in the Social tab — switch to it first
+    await page.getByRole('button', { name: 'Social' }).click()
     const timeline = page.locator('[data-test="session-timeline"]')
     await expect(timeline).toBeVisible()
     // Ethan has sessions with mood: frustrated -> "😕 Found it hard",

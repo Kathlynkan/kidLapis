@@ -22,7 +22,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
-  <div class="cb-card p-3" data-test="session-card" style="padding-top: 1.25rem !important;">
+  <div class="cb-card cb-card-lime cb-card-top p-3" data-test="session-card">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
       <div>
         <strong style="color:var(--lapis-plum)">{{ session.subject }} - {{ session.topic }}</strong>

@@ -1,23 +1,21 @@
 /* Styles for the parent home page (ParentHomeView.vue).
    Every rule starts with .parentpage so it only affects that page.
-   All colours use lapis design tokens from main.css. */
+   The colours are written as hex codes. */
 
 /* ---------- top summary sentence ---------- */
 
 .parentpage .top-summary {
   margin-bottom: 24px;
   padding: 20px 24px;
-  border: 1px solid var(--lapis-shadow);
-  border-left: 8px solid var(--lapis-apricot);
-  border-radius: 16px;
-  background: var(--lapis-orange);
+  border: 1px solid #C07838;
+  border-radius: 0;
+  background: #FBF8F3;
   position: relative;
   overflow: hidden;
-  padding-bottom: 32px;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font-size: 20px;
   font-weight: 700;
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
 .parentpage .top-extra {
@@ -33,7 +31,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   opacity: 0.7;
 }
 
@@ -42,40 +40,25 @@
 .parentpage .notice-board {
   padding: 20px;
   padding-top: 28px;
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 16px;
-  background: var(--lapis-apricot);
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
+  border: 1px solid #C8B8A8;
+  border-radius: 0;
+  background: #FBF8F3;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   position: relative;
   overflow: hidden;
-}
-
-.parentpage .notice-board::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background: linear-gradient(to right,
-    var(--lapis-pink)   0 25%,
-    var(--lapis-lime)   25% 50%,
-    var(--lapis-yellow) 50% 75%,
-    var(--lapis-orange) 75% 100%
-  );
 }
 
 .parentpage .board-title {
   display: inline-block;
   margin: 0 0 16px;
   padding: 6px 16px;
-  background: var(--lapis-cream);
-  color: var(--lapis-plum);
+  background: #FBF8F3;
+  color: #4A3F3A;
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 700;
   font-size: 18px;
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 999px;
+  border: 1px solid #C8B8A8;
+  border-radius: 0;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
@@ -88,15 +71,15 @@
 
 .parentpage .notice-tab {
   padding: 6px 16px;
-  border: 1px solid var(--lapis-shadow);
-  background: var(--lapis-cream);
-  color: var(--lapis-plum);
+  border: 1px solid #C8B8A8;
+  background: #FBF8F3;
+  color: #4A3F3A;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.78rem;
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: 0;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
@@ -106,9 +89,9 @@
 }
 
 .parentpage .notice-tab.active {
-  background: var(--lapis-yellow);
-  border-color: var(--lapis-shadow);
-  color: var(--lapis-plum);
+  background: #F5DF98;
+  border-color: #C8A028;
+  color: #4A3F3A;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
@@ -117,11 +100,11 @@
   position: relative;
   margin-bottom: 12px;
   padding: 18px 12px 12px;
-  background: var(--lapis-yellow);
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 8px;
+  background: #F5DF98;
+  border: 1px solid #C8A028;
+  border-radius: 0;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .parentpage .note::before {
@@ -132,14 +115,14 @@
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  background: var(--lapis-pink);
-  border: 2px solid var(--lapis-shadow);
+  background: #E8A0B8;
+  border: 2px solid #C07090;
 }
 
 .parentpage .note summary {
   cursor: pointer;
   font-weight: 700;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .parentpage .note-label {
@@ -149,7 +132,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   opacity: 0.65;
 }
 
@@ -160,7 +143,7 @@
   flex-wrap: wrap;
   gap: 16px;
   padding: 24px 16px 16px;
-  background: var(--lapis-cream);
+  background: #FBF8F3;
 }
 
 .parentpage .session-pic {
@@ -176,7 +159,7 @@
   width: 120px;
   height: 160px;
   object-fit: cover;
-  border: 1px solid var(--lapis-shadow);
+  border: 1px solid #C8B8A8;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
@@ -188,17 +171,17 @@
   justify-content: center;
   width: 120px;
   height: 160px;
-  border: 1px dashed var(--lapis-purple);
+  border: 1px dashed #C0A8D8;
   border-radius: 8px;
-  background: var(--lapis-cream);
-  color: var(--cb-muted);
+  background: #FBF8F3;
+  color: #8D7F77;
 }
 
 .parentpage .pic-arrow {
   border: 0;
   background: transparent;
   font-size: 24px;
-  color: var(--lapis-pink);
+  color: #E8A0B8;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.1s ease;
@@ -209,32 +192,13 @@
 .parentpage .session-info {
   flex: 1;
   min-width: 200px;
-  color: var(--lapis-plum);
-}
-
-.parentpage .session-kind {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-weight: 700;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .parentpage .session-details {
   margin-bottom: 12px;
   font-weight: 500;
-  color: var(--lapis-plum);
-}
-
-.parentpage .session-homework {
-  padding: 8px 12px;
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 8px;
-  background: var(--lapis-lime);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  color: var(--lapis-plum);
-  font-weight: 600;
+  color: #4A3F3A;
 }
 
 /* ---------- homework status boxes ---------- */
@@ -252,185 +216,504 @@
   align-items: center;
   min-width: 96px;
   padding: 8px 12px;
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 10px;
-  background: var(--lapis-cream);
+  border: 1px solid #C8B8A8;
+  border-radius: 0;
+  background: #FBF8F3;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font-weight: 700;
 }
 
 .parentpage .status-box.late {
-  background: var(--lapis-pink);
-  color: var(--lapis-plum);
-}
-
-/* ---------- session timeline ---------- */
-
-.parentpage .timeline {
-  border-left: 4px solid var(--lapis-yellow);
-  margin-left: 6px;
-}
-
-.parentpage .timeline-item {
-  position: relative;
-  padding: 0 0 16px 20px;
-}
-
-.parentpage .timeline-item::before {
-  content: '';
-  position: absolute;
-  left: -9px;
-  top: 4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 7px;
-  background: var(--lapis-pink);
-  border: 1px solid var(--lapis-shadow);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+  background: #E8A0B8;
+  color: #4A3F3A;
 }
 
 /* ---------- kueh lapis pastel tiles ---------- */
 
-/* the layered edge along the bottom of the big tiles: pink, cream, apricot, cream, pandan */
-.parentpage .top-summary::after,
-.parentpage .notice-board::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 12px;
-  background: linear-gradient(
-    to bottom,
-    var(--lapis-pink) 0 20%,
-    var(--lapis-cream) 20% 40%,
-    var(--lapis-apricot) 40% 60%,
-    var(--lapis-cream) 60% 80%,
-    var(--lapis-lime) 80% 100%
-  );
-}
-.parentpage .notice-board {
-  padding-bottom: 32px;
-}
-
 /* the child card is sky blue, the timeline card is lavender */
 .parentpage .tile-sky {
-  background: var(--lapis-sky);
+  background: #B9D9E6;
 }
 .parentpage .tile-lav {
-  background: var(--lapis-purple);
+  background: #C0A8D8;
 }
-
-/* ---------- the kueh lapis cake (homework tab) ---------- */
-
-.parentpage .cake-box {
-  margin-bottom: 16px;
-  padding: 10px 14px 12px;
-  border: 1px solid var(--lapis-shadow);
-  border-radius: 12px;
-  background: var(--lapis-cream);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-}
-
-.parentpage .cake {
-  display: flex;
-  gap: 3px;
-  margin: 6px 0;
-}
-
-/* one layer: empty (dashed) until it is baked */
-.parentpage .cake i {
-  flex: 1;
-  height: 18px;
-  border-radius: 5px;
-  border: 2px dashed var(--lapis-shadow);
-  background: var(--lapis-cream);
-}
-.parentpage .cake i.baked {
-  border-style: solid;
-}
-.parentpage .cake i:nth-child(1).baked { background: var(--lapis-pink); }
-.parentpage .cake i:nth-child(2).baked { background: var(--lapis-yellow); }
-.parentpage .cake i:nth-child(3).baked { background: var(--lapis-lime); }
-.parentpage .cake i:nth-child(4).baked { background: var(--lapis-orange); }
-.parentpage .cake i:nth-child(5).baked { background: var(--lapis-purple); }
-.parentpage .cake i:nth-child(6).baked { background: var(--lapis-pink); }
-.parentpage .cake i:nth-child(7).baked { background: var(--lapis-yellow); }
-.parentpage .cake i:nth-child(8).baked { background: var(--lapis-lime); }
-.parentpage .cake i:nth-child(9).baked { background: var(--lapis-orange); }
 
 /* ---------- topic colours on the parent page ---------- */
 /* academic = pink, social = blue, homework = lavender, schedule = apricot, highlights = yellow */
 
-/* today at a glance: the yellow highlight; the next session line is the schedule colour */
+/* today at a glance: soft orange panel; the next session line is the schedule colour */
 .parentpage .top-summary {
-  background: var(--topic-highlight);
+  background: #FBF0E4;
 }
 .parentpage .top-next {
   display: inline-block;
   padding: 2px 12px;
-  background: var(--topic-schedule);
+  background: #A8CC90;
 }
 
 /* the notice board takes the colour of the open tab */
-.parentpage .notice-board.board-social { background: var(--topic-social); }
-.parentpage .notice-board.board-latest { background: var(--topic-academic); }
-.parentpage .notice-board.board-homework { background: var(--topic-homework); }
+.parentpage .notice-board.board-social { background: #88C0D8; }
+.parentpage .notice-board.board-latest { background: #A8CC90; }
+.parentpage .notice-board.board-homework { background: #F5DF98; }
 
 /* the tabs: each one has its topic colour underneath, and is filled when open */
-.parentpage .notice-tab.tab-social { border-bottom: 8px solid var(--topic-social); }
-.parentpage .notice-tab.tab-latest { border-bottom: 8px solid var(--topic-academic); }
-.parentpage .notice-tab.tab-homework { border-bottom: 8px solid var(--topic-homework); }
-.parentpage .notice-tab.tab-social.active { background: var(--topic-social); }
-.parentpage .notice-tab.tab-latest.active { background: var(--topic-academic); }
-.parentpage .notice-tab.tab-homework.active { background: var(--topic-homework); }
+.parentpage .notice-tab.tab-social { border-bottom: 8px solid #88C0D8; }
+.parentpage .notice-tab.tab-latest { border-bottom: 8px solid #A8CC90; }
+.parentpage .notice-tab.tab-homework { border-bottom: 8px solid #F5DF98; }
+.parentpage .notice-tab.tab-social.active { background: #88C0D8; }
+.parentpage .notice-tab.tab-latest.active { background: #A8CC90; }
+.parentpage .notice-tab.tab-homework.active { background: #F5DF98; }
 
 /* the notes on the board are the soft version of the board colour */
-.parentpage .board-social .note { background: var(--topic-social-soft); }
-.parentpage .board-latest .note { background: var(--topic-academic-soft); }
-.parentpage .board-homework .note { background: var(--topic-homework-soft); }
+.parentpage .board-social .note { background: #DFF0F8; }
+.parentpage .board-latest .note { background: #E8F5DC; }
+.parentpage .board-homework .note { background: #FBF5DC; }
 
 /* the session card: academic = pink, social = blue */
 .parentpage .parent-session-card.kind-academic {
-  background: var(--topic-academic-soft);
-  border-top: 8px solid var(--topic-academic);
+  background: #E8F5DC;
+  border-top: 8px solid #A8CC90;
 }
-.parentpage .parent-session-card.kind-social {
-  background: var(--topic-social-soft);
-  border-top: 8px solid var(--topic-social);
-}
-.parentpage .kind-social .note { background: var(--lapis-cream); }
 
-/* homework is lavender everywhere: the box in the card, the status boxes and the cake */
-.parentpage .session-homework { background: var(--topic-homework); }
-.parentpage .status-box { background: var(--topic-homework-soft); }
-.parentpage .status-box.late { background: var(--topic-alert); color: var(--lapis-plum); }
-.parentpage .cake-box { background: var(--topic-homework-soft); }
-
-/* the timeline is about sessions, so it is pink */
-.parentpage .timeline { border-left-color: var(--topic-academic); }
-.parentpage .timeline-item::before { background: var(--topic-academic); }
+/* homework is lavender: the status boxes */
+.parentpage .status-box { background: #FBF5DC; border-color: #C8A028; }
+.parentpage .status-box.late { background: #E8A0B8; color: #4A3F3A; border-color: #C07090; }
 
 /* ---------- a calmer look for the parent page ---------- */
 
-/* the banner is a light blush panel with a rose edge, not a block of colour */
+/* the banner is a soft role-accent panel with a rose edge */
 .parentpage .top-summary {
-  background: var(--topic-highlight-soft);
-  border-left: 4px solid var(--lapis-pink);
+  background: #FBF0E4;
+  border-left: 4px solid #E8A0B8;
 }
 
 /* the notice board is a cream panel; its topic colour is a bar on top and the open tab */
-.parentpage .notice-board.board-social { background: var(--lapis-cream); border-top: 6px solid var(--topic-social); }
-.parentpage .notice-board.board-latest { background: var(--lapis-cream); border-top: 6px solid var(--topic-academic); }
-.parentpage .notice-board.board-homework { background: var(--lapis-cream); border-top: 6px solid var(--topic-homework); }
+.parentpage .notice-board.board-social { background: #FBF8F3; border-top: 6px solid #88C0D8; }
+.parentpage .notice-board.board-latest { background: #FBF8F3; border-top: 6px solid #A8CC90; }
+.parentpage .notice-board.board-homework { background: #FBF8F3; border-top: 6px solid #F5DF98; }
 
 /* tabs: a thin coloured line underneath instead of a thick block */
-.parentpage .notice-tab.tab-social { border-bottom: 3px solid var(--topic-social); }
-.parentpage .notice-tab.tab-latest { border-bottom: 3px solid var(--topic-academic); }
-.parentpage .notice-tab.tab-homework { border-bottom: 3px solid var(--topic-homework); }
+.parentpage .notice-tab.tab-social { border-bottom: 3px solid #88C0D8; }
+.parentpage .notice-tab.tab-latest { border-bottom: 3px solid #A8CC90; }
+.parentpage .notice-tab.tab-homework { border-bottom: 3px solid #F5DF98; }
 
 /* the tinted notes read as a quiet card with a coloured edge */
-.parentpage .board-social .note { background: var(--topic-social-soft); }
-.parentpage .board-latest .note { background: var(--topic-academic-soft); }
-.parentpage .board-homework .note { background: var(--topic-homework-soft); }
+.parentpage .board-social .note   { background: #DFF0F8;   border-color: #4890B8; }
+.parentpage .board-latest .note   { background: #E8F5DC; border-color: #68A048; }
+.parentpage .board-homework .note { background: #FBF5DC; border-color: #C8A028; }
+
+/* ---------- the layout for parents: the most important things first ---------- */
+
+/* the child's name and the child buttons share one row */
+.parentpage .child-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+/* three small tiles: late homework, homework to do, next session */
+.parentpage .status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.parentpage .strip-tile {
+  flex: 1;
+  min-width: 96px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 1px solid #C8B8A8;
+  color: #4A3F3A;
+}
+.parentpage .strip-tile strong {
+  font-size: 20px;
+  line-height: 1.2;
+}
+.parentpage .tile-late { background: #FAE8F2; border-color: #E8A0B8; }
+.parentpage .tile-ok { background: #E8F5DC; border-color: #A8CC90; }
+.parentpage .tile-todo { background: #FBF5DC; border-color: #F5DF98; }
+.parentpage .tile-next { background: #E8F5DC; border-color: #A8CC90; }
+
+/* the sentence banner is smaller now, the tiles above it carry the numbers */
+.parentpage .top-summary {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 500;
+}
+.parentpage .top-extra {
+  font-size: 14px;
+}
+
+/* the notice board has no title now, so it needs less space on top */
+.parentpage .notice-board {
+  padding-top: 12px;
+}
+.parentpage .notice-tabs {
+  flex-wrap: nowrap;
+  gap: 0;
+  border-bottom: 1px solid #C8B8A8;
+}
+.parentpage .notice-tab {
+  flex: 1;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+}
+.parentpage .notice-tab.tab-social { border-bottom-color: #88C0D8; }
+.parentpage .notice-tab.tab-latest { border-bottom-color: #A8CC90; }
+.parentpage .notice-tab.tab-homework { border-bottom-color: #F5DF98; }
+.parentpage .notice-tab:hover { box-shadow: none; }
+.parentpage .notice-tab.active { background: transparent; }
+.parentpage .notice-tab.tab-social.active { background: #DFF0F8; }
+.parentpage .notice-tab.tab-latest.active { background: #E8F5DC; }
+.parentpage .notice-tab.tab-homework.active { background: #FBF5DC; }
+
+/* the number of homework to do, on the Homework tab */
+.parentpage .tab-count {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  background: #4A3F3A;
+  color: #FBF8F3;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+/* homework status boxes: two by two on a small screen */
+@media (max-width: 480px) {
+  .parentpage .status-box {
+    flex: 1 1 40%;
+  }
+}
+
+/* ---------- the homework tab: three groups, what to do first ---------- */
+
+.parentpage .hw-heading {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.parentpage .hw-heading span {
+  font-weight: 400;
+}
+.parentpage .hw-heading-todo { color: #8A3B34; }
+.parentpage .hw-heading-waiting { color: #7A5A1E; }
+.parentpage .hw-heading-done { color: #55704B; }
+
+.parentpage .hw-item {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid #C8B8A8;
+  border-left-width: 5px;
+  background: #FBF8F3;
+  color: #4A3F3A;
+}
+.parentpage .hw-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.parentpage .hw-title {
+  font-weight: 700;
+}
+.parentpage .hw-tag {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.parentpage .hw-details {
+  margin-top: 4px;
+}
+
+.parentpage .hw-late { background: #FAE8F2; border-color: #E8A0B8; }
+.parentpage .hw-late .hw-tag { background: #E8A0B8; }
+.parentpage .hw-todo { border-color: #F5DF98; }
+.parentpage .hw-todo .hw-tag { background: #FBF5DC; }
+.parentpage .hw-waiting { border-color: #F0D49A; }
+.parentpage .hw-waiting .hw-tag { background: #FFF3DC; }
+.parentpage .hw-done { background: #E8F5DC; border-color: #A8CC90; }
+.parentpage .hw-done .hw-tag { background: #A8CC90; }
+
+.parentpage .hw-toggle {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid #A8CC90;
+  background: #E8F5DC;
+  color: #4A3F3A;
+  font-weight: 600;
+}
+
+/* a finished homework opens when tapped */
+.parentpage details.hw-item > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: 24px;
+}
+.parentpage details.hw-item > summary::-webkit-details-marker {
+  display: none;
+}
+.parentpage details.hw-item > summary::after {
+  content: 'Tap to open';
+  display: block;
+  font-size: 12px;
+  color: #8D7F77;
+}
+.parentpage details.hw-item[open] > summary::after {
+  content: 'Tap to close';
+}
+
+/* the result of a finished homework */
+.parentpage .hw-box {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid #C8B8A8;
+}
+.parentpage .hw-box-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.parentpage .hw-box { background: #FFF3DC; }
+.parentpage .hw-box-tricky { border-left-color: #BA7517; }
+.parentpage .hw-box-helped { border-left-color: #55704B; }
+.parentpage .hw-box-next { border-left-color: #8C6DB3; }
+.parentpage .hw-box-note { border-left-color: #E8A0B8; }
+
+.parentpage .hw-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.parentpage .hw-photos img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid #C8B8A8;
+}
+
+/* the score of a finished homework: a green pill under the title */
+.parentpage .hw-title {
+  display: block;
+}
+.parentpage .hw-score {
+  display: inline-block;
+  margin: 4px 0;
+  padding: 1px 10px;
+  background: #A8CC90;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------- the social tab: a diary ---------- */
+
+/* the week: one face for each of the last five sessions */
+.parentpage .week-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.parentpage .week-faces {
+  display: flex;
+  gap: 6px;
+}
+.parentpage .week-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #FFF3DC;
+}
+.parentpage .week-face-now {
+  outline: 2px solid #88C0D8;
+}
+
+/* the moods share the same colours everywhere */
+.parentpage .mood-happy { background: #EAF3DE; color: #27500A; }
+.parentpage .mood-okay { background: #FFF3DC; color: #633806; }
+.parentpage .mood-tired { background: #F3EFF8; color: #4D4060; }
+.parentpage .mood-frustrated { background: #FBE9E7; color: #8A3B34; }
+.parentpage .mood-chip {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* a day */
+.parentpage .day-card {
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #C8B8A8;
+  border-top: 4px solid #88C0D8;
+  background: #fff;
+  color: #4A3F3A;
+}
+.parentpage .day-card-small {
+  padding: 9px 12px;
+}
+.parentpage .day-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.parentpage .day-earlier {
+  margin: 12px 0 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8D7F77;
+}
+.parentpage .day-card-small > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.parentpage .day-card-small > summary::-webkit-details-marker {
+  display: none;
+}
+.parentpage .day-card-small > summary::after {
+  content: 'See the full day';
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #4F7A8E;
+}
+.parentpage .day-card-small[open] > summary::after {
+  content: 'Close';
+}
+.parentpage .day-card-small[open] > .day {
+  margin-top: 8px;
+}
+
+/* the inside of a day */
+.parentpage .day {
+  margin-top: 8px;
+}
+.parentpage .day-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4F7A8E;
+}
+.parentpage .day-chip {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  padding: 2px 10px;
+  border: 1px solid #88C0D8;
+  border-radius: 12px;
+  background: #DFF0F8;
+  font-size: 13px;
+}
+.parentpage .day-line {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #C8B8A8;
+}
+.parentpage .day-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #DFF0F8;
+}
+.parentpage .day-note {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid #E8A0B8;
+  background: #FBF5DC;
+}
+
+/* photos: one big, two small */
+.parentpage .day-photos {
+  display: flex;
+  gap: 6px;
+  height: 120px;
+  margin-bottom: 10px;
+}
+.parentpage .day-photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid #C8B8A8;
+}
+.parentpage .day-photo-big {
+  flex: 2;
+  min-width: 0;
+}
+.parentpage .day-photo-small {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.parentpage .day-photo-small > img,
+.parentpage .day-photo-last {
+  flex: 1;
+  min-height: 0;
+}
+.parentpage .day-photo-last {
+  position: relative;
+}
+.parentpage .day-photo-more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 63, 58, 0.55);
+  color: #fff;
+  font-weight: 700;
+}
+
+.parentpage .day-more {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #88C0D8;
+  background: #DFF0F8;
+  color: #4A3F3A;
+  font-weight: 600;
+}

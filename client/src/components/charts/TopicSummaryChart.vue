@@ -1,5 +1,5 @@
-<!-- TopicSummaryChart - average accuracy per topic (bar chart)  Owner: Jachin
-     Used on: Child profile (Yuqi), Coordinator dashboard (Yu Xuan)
+<!-- TopicSummaryChart - average accuracy per subject (bar chart)  Owner: Jachin
+     Used on: Child profile (Yuqi), Teacher dashboard (Yu Xuan)
      Props: sessions (Array), title (String) -->
 <script setup>
 import { computed } from 'vue'
@@ -16,36 +16,44 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip)
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
-  title: { type: String, default: 'Accuracy by topic' },
+  title: { type: String, default: 'Accuracy by subject' },
 })
 
-function barColor(acc) {
-  if (acc < 50) return '#FF6F61'   // Lapis Pink — needs help
-  if (acc < 75) return '#4FC3E6'   // Lapis Orange — steady
-  return '#7ED36B'                  // Lapis Lime — strong
+// Fixed order matches PSLE subjects
+const SUBJECT_ORDER = ['English', 'Math', 'Science', 'Mother Tongue']
+const SUBJECT_COLOR = {
+  'English':      '#88C0D8', // --subject-english  (sky blue)
+  'Math':         '#D4B840', // --subject-math      (amber — not lime, avoids volunteer-role clash)
+  'Science':      '#F5DF98', // --subject-science   (yellow)
+  'Mother Tongue':'#E8906C', // --subject-mother-tongue (coral — not pink, avoids child-role clash)
 }
 
-const byTopic = computed(() => {
+const bySubject = computed(() => {
   const groups = {}
   for (const s of props.sessions) {
-    groups[s.topic] ??= { topic: s.topic, attempted: 0, correct: 0 }
-    groups[s.topic].attempted += s.attempted
-    groups[s.topic].correct += s.correct
+    const key = s.subject || 'Other'
+    groups[key] ??= { subject: key, attempted: 0, correct: 0 }
+    groups[key].attempted += s.attempted
+    groups[key].correct += s.correct
   }
-  return Object.values(groups).map((g) => ({
-    ...g,
-    accuracy: g.attempted ? Math.round((g.correct / g.attempted) * 100) : 0,
-  }))
+  return SUBJECT_ORDER
+    .filter((k) => groups[k])
+    .map((k) => ({
+      ...groups[k],
+      accuracy: groups[k].attempted ? Math.round((groups[k].correct / groups[k].attempted) * 100) : 0,
+    }))
 })
 
 const chartData = computed(() => ({
-  labels: byTopic.value.map((t) => t.topic),
+  labels: bySubject.value.map((t) => t.subject),
   datasets: [
     {
       label: 'Accuracy %',
-      data: byTopic.value.map((t) => t.accuracy),
-      backgroundColor: byTopic.value.map((t) => barColor(t.accuracy)),
-      borderRadius: 6,
+      data: bySubject.value.map((t) => t.accuracy),
+      backgroundColor: bySubject.value.map((t) => SUBJECT_COLOR[t.subject] ?? '#C8B8A8'),
+      borderColor: bySubject.value.map((t) => SUBJECT_COLOR[t.subject] ?? '#C8B8A8'),
+      borderWidth: 1,
+      borderRadius: 0,
     },
   ],
 }))
@@ -68,18 +76,12 @@ const chartOptions = {
   <div class="cb-card p-3" data-test="topic-summary-chart">
     <h2 class="h6 mb-3"><i class="bi bi-bar-chart me-2"></i>{{ title }}</h2>
     <p v-if="sessions.length === 0" class="small text-muted-cb mb-0">No data yet.</p>
-    <template v-else>
-      <div
-        style="position: relative"
-        :style="{ height: Math.max(120, byTopic.length * 44) + 'px' }"
-      >
-        <Bar :data="chartData" :options="chartOptions" />
-      </div>
-      <div class="d-flex flex-wrap gap-3 mt-2 small text-muted-cb">
-        <span><span style="color:#7ED36B;font-size:1.1em">●</span> Strong (≥75%)</span>
-        <span><span style="color:#4FC3E6;font-size:1.1em">●</span> Steady (50–74%)</span>
-        <span><span style="color:#FF6F61;font-size:1.1em">●</span> Needs help (&lt;50%)</span>
-      </div>
-    </template>
+    <div
+      v-else
+      style="position: relative"
+      :style="{ height: Math.max(120, bySubject.length * 52) + 'px' }"
+    >
+      <Bar :data="chartData" :options="chartOptions" />
+    </div>
   </div>
 </template>

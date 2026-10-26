@@ -2,8 +2,7 @@
   Login page - WORKING, use it as the reference for forms.   Owner: Kai Sen
   Pattern: v-model inputs -> async submit -> loading + error states -> router.push
   TODO (Kai Sen):
-    [ ] show/hide password toggle
-    [ ] remove the "demo accounts" box before final submission (keep them in README)
+    [x] show/hide password toggle
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
@@ -19,18 +18,7 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-
-const demoAccounts = [
-  { role: 'Volunteer', email: 'volunteer@kidslapis.sg' },
-  { role: 'Teacher', email: 'teacher@kidslapis.sg' },
-  { role: 'Parent', email: 'parent@kidslapis.sg' },
-  { role: 'Child', email: 'child@kidslapis.sg' },
-]
-
-function fillDemo(account) {
-  email.value = account.email
-  password.value = 'password123'
-}
+const showPassword = ref(false) // true = show the password as plain text
 
 async function handleLogin() {
   error.value = ''
@@ -58,7 +46,9 @@ async function handleLogin() {
           <div v-if="route.query.expired" class="alert alert-warning small">
             Your session expired. Please log in again.
           </div>
-          <div v-if="error" class="alert alert-danger small" data-test="login-error">{{ error }}</div>
+          <div v-if="error" class="alert alert-danger small" data-test="login-error">
+            {{ error }}
+          </div>
 
           <form @submit.prevent="handleLogin">
             <div class="mb-3">
@@ -74,14 +64,28 @@ async function handleLogin() {
             </div>
             <div class="mb-4">
               <label for="password" class="form-label">Password</label>
-              <input
-                id="password"
-                v-model="password"
-                type="password"
-                class="form-control"
-                required
-                autocomplete="current-password"
-              />
+              <div class="input-group">
+                <input
+                  id="password"
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  class="form-control"
+                  required
+                  autocomplete="current-password"
+                />
+                <!-- No "password" in this button's name: the E2E tests find the box with
+                     getByLabel('Password'), which would also match a "Show password" button -->
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  :aria-pressed="showPassword"
+                  data-test="toggle-password"
+                  @click="showPassword = !showPassword"
+                >
+                  <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" class="me-1"></i>
+                  {{ showPassword ? 'Hide' : 'Show' }}
+                </button>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary w-100" :disabled="loading">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
@@ -92,21 +96,6 @@ async function handleLogin() {
           <p class="small text-center mt-3 mb-0">
             New volunteer or parent? <RouterLink to="/signup">Create an account</RouterLink>
           </p>
-        </div>
-
-        <div class="cb-card p-3 mt-3 small">
-          <strong>Demo accounts</strong> (password: <code>password123</code>)
-          <div class="d-flex flex-wrap gap-2 mt-2">
-            <button
-              v-for="a in demoAccounts"
-              :key="a.email"
-              type="button"
-              class="btn btn-sm btn-outline-secondary"
-              @click="fillDemo(a)"
-            >
-              {{ a.role }}
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -34,7 +34,147 @@ Owning the whole slice end to end means:
 
 ---
 
-## 2. Detailed scope per member
+## 2. File ownership (every file in the repo)
+
+Each person must be able to open their files and explain every line in the Q&A.
+The homework route is split — see the callout at the bottom of this section.
+
+### Kai Sen — Auth, Children, Platform infrastructure
+
+| File | What it does |
+|---|---|
+| `client/src/views/HomeView.vue` | Landing page — how-it-works cards, role cards |
+| `client/src/views/auth/LoginView.vue` | Login form, error handling, redirect by role |
+| `client/src/views/auth/SignupView.vue` | Sign-up form — skills/days for volunteers, child code for parents |
+| `client/src/views/coordinator/ManageChildrenView.vue` | Add/edit/delete child modal, child list |
+| `client/src/views/NotFoundView.vue` | 404 page |
+| `client/src/views/shared/ProfileView.vue` | Edit your own name/email/password/skills/avatar |
+| `client/src/router/index.js` | All routes, `meta.roles`, `meta.guestOnly`, `beforeEach` guard |
+| `client/src/stores/auth.js` | Pinia store — token + user in sessionStorage, login/logout/patchUser |
+| `client/src/services/api.js` | Axios instance — base URL, auth header, 401 handler |
+| `client/src/utils/validation.js` | `isValidEmail`, `isStrongPassword` — same rules as server |
+| `client/src/utils/__tests__/validation.spec.js` | Unit tests for validation rules |
+| `client/src/main.js` | App bootstrap — Vue, Pinia, Router, 401 handler wired up |
+| `client/src/App.vue` | Root shell — NavBar, `<RouterView>`, page-peel transition |
+| `client/src/components/NavBar.vue` | Top nav bar — role-aware links, unread message badge |
+| `client/src/components/PageHeader.vue` | Shared page title + subtitle + action-buttons slot |
+| `client/src/components/StateMessage.vue` | Shared loading / error / empty state message |
+| `server/routes/auth.js` | POST /auth/signup, POST /auth/login, POST /auth/logout — bcryptjs, token auth |
+| `server/routes/children.js` | GET, POST, PUT, DELETE /children — coordinators manage child profiles |
+| `server/middleware/auth.js` | `requireAuth` (verifies token), `requireRole` (checks user role) |
+| `server/models/User.js` | Mongoose schema — email, password (hashed), role, skills, availability |
+| `server/models/Child.js` | Mongoose schema — name, level, school, needs, volunteerIds, schedule, followUp |
+| `server/models/index.js` | Re-exports all models from one import |
+| `server/models/helpers.js` | Shared Mongoose utilities |
+| `server/utils/access.js` | `canAccessChild`, `childFilterFor`, `visibleChildIds` — who can see which child |
+| `server/utils/db.js` | MongoDB Atlas connection (loads `config.env`) |
+| `server/utils/seed.js` | `pnpm seed` — wipes DB and loads `server/data/seed.json` |
+| `server/server.js` | Express + socket.io app — CORS, JSON, socket rooms per childId, mounts all routes |
+| `server/config.env` | DB connection string + Gemini API key (not in git) |
+| `server/data/seed.json` | Demo data — children, parents, volunteers, sessions, homework, messages |
+| `client/e2e/auth.spec.js` | E2E — login per role, wrong-role redirect, sign-up flow |
+| `README.md`, `CONTRIBUTING.md`, `WORKLOAD.md` | Project docs, setup instructions, team split |
+| `pnpm-workspace.yaml`, `client/vite.config.js`, `client/vitest.config.js`, `client/playwright.config.js` | Build, test, workspace config |
+
+### Yuqi — Pre-session briefing & AI handover
+
+| File | What it does |
+|---|---|
+| `client/src/views/volunteer/VolunteerHomeView.vue` | "My Children" home — week calendar strip, search/filter, needs-attention logic |
+| `client/src/views/volunteer/ChildProfileView.vue` | Pre-session briefing — handover card, session history, charts, homework |
+| `client/src/components/ChildCard.vue` | Child summary card — last session, needs-attention badge |
+| `client/src/components/HandoverCard.vue` | AI summary card — collapsible peel, AI/fallback badge |
+| `client/src/components/PeelCard.vue` | Reusable collapsible accordion (grid-template-rows animation) |
+| `server/routes/handover.js` | POST /handover/:childId — calls Gemini, parses JSON, caches result, fallback |
+| `server/models/Handover.js` | Mongoose schema — cached AI summary per child, `audience` field |
+| `server/routes/__tests__/handover.test.js` | Unit/integration tests for handover route |
+| `client/e2e/volunteer.spec.js` | E2E — handover shows, session history, recurring badge (Yuqi); session recording (Ning Xuan); homework assignment (Jachin) |
+
+### Ning Xuan — Session logging & homework assignment
+
+| File | What it does |
+|---|---|
+| `client/src/views/volunteer/SessionFormView.vue` | Record + edit session — subject, topic, mood, struggles, scores, notes |
+| `client/src/views/volunteer/HomeworkAssignView.vue` | Assign homework — title, subject, due date, points, deck picker |
+| `client/src/components/SessionCard.vue` | One past session — expandable notes, edit/delete buttons, confirm modal |
+| `server/routes/sessions.js` | Full CRUD for sessions — POST, GET, PUT, DELETE with role guards and validation |
+| `server/routes/homework.js` *(shared — POST /homework + DELETE only)* | POST /homework (assign) + DELETE /homework/:id — Ning Xuan owns these endpoints |
+| `server/models/Session.js` | Mongoose schema — childId, volunteerId, date, subject, topic, scores, struggles, mood |
+| `server/models/Homework.js` | Mongoose schema — childId, title, status, points, dueDate, deckId, questions |
+
+### Kat — Parent portal & messaging
+
+| File | What it does |
+|---|---|
+| `client/src/views/parent/ParentHomeView.vue` | Parent home — child switcher, AI handover (parent-friendly), session timeline, homework status |
+| `client/src/views/shared/MessagesView.vue` | Chat page — child sidebar, message thread, real-time via socket.io (marks read on open) |
+| `client/src/components/ChatThread.vue` | Message list + send bar — emits `send`, auto-scrolls |
+| `client/src/components/ParentSessionCard.vue` | Simplified session card for parent view (no jargon) |
+| `client/src/components/ParentSocialDay.vue` | One day entry in the parent's social/mood timeline |
+| `server/routes/messages.js` | GET (with sender names), POST (emits socket event), PUT /read, GET /unread |
+| `server/models/Message.js` | Mongoose schema — childId, fromId, text, sentAt, readBy array |
+| `client/e2e/messages.spec.js` | E2E — child list, thread visible, switch child, send message, teacher sees thread |
+
+### Yu Xuan — Coordinator dashboard & matchmaking
+
+| File | What it does |
+|---|---|
+| `client/src/views/coordinator/CoordinatorDashboardView.vue` | KPI cards, alerts table, follow-up toggle, recent activity feed |
+| `client/src/views/coordinator/ManageVolunteersView.vue` | Volunteer list — skills, availability, workload, edit |
+| `client/src/views/coordinator/MatchmakingView.vue` | Pick a child → ranked volunteer suggestions → assign with day picker |
+| `client/src/components/StatCard.vue` | KPI number card — icon, value, label, colour variant |
+| `server/routes/dashboard.js` | GET /dashboard/summary (KPIs), GET /dashboard/alerts, PUT /dashboard/follow-up/:childId |
+| `server/routes/matchmaking.js` | GET /matchmaking/:childId (scored suggestions), PUT /matchmaking/:childId/assign |
+| `server/routes/users.js` | GET /users (volunteer list), PUT /users/:id (edit skills/days) |
+| `server/utils/alerts.js` | Pure alert rules — no-session-7d, recurring struggle, overdue homework, unassigned |
+| `server/utils/matchmaking.js` | `scoreVolunteer`, `rankVolunteers` — pure scoring functions |
+| `server/tests/alerts.test.js` | Unit tests for each alert rule |
+| `server/tests/matchmaking.test.js` | Unit tests for the scoring function |
+
+### Jachin — Data visualisation & child gamification
+
+| File | What it does |
+|---|---|
+| `client/src/views/child/ChildHomeView.vue` | "My Quests" — level bar, badge shelf, quest cards, celebration animation |
+| `client/src/views/child/LeaderboardView.vue` | All-time + weekly leaderboard — podium top 3, highlights "me" |
+| `client/src/components/charts/SkillProgressChart.vue` | Chart.js line chart — topic accuracy over sessions (used on 3 pages) |
+| `client/src/components/charts/TopicSummaryChart.vue` | Chart.js horizontal bar — topics coloured needs-help/steady/strong |
+| `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), "Verify & give points" (volunteer) |
+| `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework, sessions)` — 6 badge conditions |
+| `client/src/utils/__tests__/gamification.spec.js` | Unit tests for all gamification rules and edge cases |
+| `server/routes/progress.js` | GET /progress/:childId (per-topic accuracy + trend), GET /progress/overview |
+| `server/routes/decks.js` | GET /decks — question banks for the homework deck picker |
+| `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards berries), GET /homework/leaderboard |
+| `server/models/Deck.js` | Mongoose schema — question bank (title, subject, questions with answers) |
+| `client/e2e/child.spec.js` | E2E — child marks quest done, verify flow (DB write), API failure state, badge shelf, leaderboard |
+| `client/e2e/parent.spec.js` | E2E — parent greeting, child info, handover, recurring badge, mood timeline, SkillProgressChart, child switcher |
+| `client/e2e/teacher.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
+
+### Shared files — everyone can explain how it applies to their slice
+
+| File | What it does |
+|---|---|
+| `client/src/utils/constants.js` | SUBJECTS, SKILL_OPTIONS, LEVELS, DAYS, MOODS, HOMEWORK_STATUS |
+| `client/src/utils/format.js` | `formatDate`, `accuracy`, `relativeDay`, `firstName`, `daysSince` |
+| `client/src/utils/__tests__/format.spec.js` | Unit tests for format helpers |
+
+### The `homework.js` route split
+
+Because this one file is shared, be precise about which endpoints you wrote:
+
+```
+server/routes/homework.js
+├── POST   /homework              → Ning Xuan  (volunteer assigns)
+├── GET    /homework              → shared     (filter by childId)
+├── DELETE /homework/:id          → Ning Xuan
+├── PUT    /homework/:id/submit   → Jachin     (child completes)
+├── PUT    /homework/:id/verify   → Jachin     (volunteer verifies, awards berries)
+└── GET    /homework/leaderboard  → Jachin
+```
+
+---
+
+## 3. Detailed scope per member
 
 Each section uses three priority levels:
 
@@ -102,7 +242,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 |---|---|
 | ✅ Must | `POST /children` + "Add child" Bootstrap modal on Manage Children. |
 | Should | `PUT` / `DELETE /children/:id` (decide what happens to that child's sessions). |
-| ⏳ Should | Hash passwords with `bcryptjs`. Better validation on sign up (email format, password ≥ 8, confirm password). |
+| ✅ Should | Hash passwords with `bcryptjs`. Better validation on sign up (email format, password ≥ 8, confirm password, skills/days for volunteers). |
 | Should | Sign up extras: volunteers pick skills + days, parents enter a **child code** from the centre to link their child. |
 | Should | Navbar unread-message badge (using Kat's endpoint). Landing page polish. Remove the demo-account box before submission (keep the accounts in the README). |
 | ✅ Must | **MongoDB Atlas setup** for the team: one free cluster, one database user, Network Access `0.0.0.0/0`. Share the connection string privately. Everyone uses their own database name for development (see README, Step 0). |
@@ -163,7 +303,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 ---
 
-## 3. Shared rules (everyone)
+## 4. Shared rules (everyone)
 
 1. **Your own tests.** At least 2 Playwright E2E tests for your journey + 1 Vitest unit test. Use `data-test="..."` selectors, which the rubric calls "stable selectors". Testing is 10% of the grade.
 2. **Your own responsive styling.** Check your pages at iPhone 6 (375 px) and Bootstrap XL in Chrome DevTools. Graders test exactly this range. Use the shared classes and colours in `assets/main.css` (`cb-card`, `badge-soft`, `--cb-primary`) so the app looks like one product.
@@ -180,7 +320,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 ---
 
-## 4. Timeline
+## 5. Timeline
 
 | When | Milestone |
 |---|---|
@@ -193,7 +333,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 ---
 
-## 5. How the pieces depend on each other
+## 6. How the pieces depend on each other
 
 ```
 Kai Sen (login, roles, children) ─┬─► everyone (you need to log in to see anything)

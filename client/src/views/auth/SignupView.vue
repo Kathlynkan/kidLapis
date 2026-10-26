@@ -3,6 +3,7 @@
   Done: checks on the page (name, email format, password >= 8, passwords match)
         with Bootstrap .is-invalid / .invalid-feedback. The server checks again.
         Volunteers pick their skills + available days (used by matchmaking).
+        Parents can enter the child code from the centre to link to their child.
 ============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
@@ -23,6 +24,7 @@ const form = ref({
   role: 'volunteer',
   skills: [], // volunteers only - ticked skill buttons go in here
   availability: [], // volunteers only - ticked days go in here
+  childCode: '', // parents only - the code the centre gave them (optional)
 })
 const submitted = ref(false) // only show red errors after the first "Sign up" click
 const loading = ref(false)
@@ -53,6 +55,10 @@ async function handleSignup() {
       details.skills = form.value.skills
       details.availability = form.value.availability
     }
+    // Only parents send a child code, and only if they typed one
+    if (form.value.role === 'parent' && form.value.childCode.trim()) {
+      details.childCode = form.value.childCode.trim().toUpperCase()
+    }
     await auth.signup(details)
     loading.value = false // success
     router.push(auth.homePath)
@@ -69,7 +75,7 @@ async function handleSignup() {
       <div class="col-sm-10 col-md-7 col-lg-5">
         <div class="cb-card p-4 p-md-5">
           <h1 class="h3 mb-1">Create an account</h1>
-          <p class="text-muted-cb mb-4">Coordinators create child accounts for the centre.</p>
+          <p class="text-muted-cb mb-4">Teachers create child accounts for the centre.</p>
 
           <div v-if="error" class="alert alert-danger small" data-test="signup-error">
             {{ error }}
@@ -203,6 +209,29 @@ async function handleSignup() {
                 </div>
               </fieldset>
             </template>
+
+            <!-- Parents only: links the new account to their child -->
+            <div v-if="form.role === 'parent'" class="mb-4">
+              <label for="child-code" class="form-label"
+                >Child code <span class="text-muted-cb">(optional)</span></label
+              >
+              <input
+                id="child-code"
+                v-model="form.childCode"
+                class="form-control text-uppercase"
+                :class="{ 'is-invalid': shown.childCode }"
+                maxlength="6"
+                autocomplete="off"
+                placeholder="e.g. K7P3QX"
+                aria-describedby="child-code-help"
+                data-test="signup-child-code"
+              />
+              <div v-if="!shown.childCode" id="child-code-help" class="form-text">
+                The 6-character code from your child's centre. No code yet? Leave it blank and the
+                centre can link your child later.
+              </div>
+              <div class="invalid-feedback">{{ shown.childCode }}</div>
+            </div>
 
             <button
               type="submit"

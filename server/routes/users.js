@@ -2,7 +2,7 @@
 // /users  - volunteer list & profiles     Owners: Yu Xuan (volunteers), Kai Sen
 // =============================================================
 import { Router } from 'express'
-import { User } from '../models/index.js'
+import { User, Child } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 
 const router = Router()
@@ -37,6 +37,23 @@ router.put('/:id', async (req, res) => {
   if (availability) user.availability = availability
   await user.save()
   res.json(user)
+})
+
+// DELETE /users/:id   (teacher only)
+// Removes a volunteer account. Sessions, homework, and messages they created are preserved
+// as historical records. The volunteer is also removed from any children's volunteerIds list.
+router.delete('/:id', requireRole('teacher'), async (req, res) => {
+  const user = await User.findById(req.params.id)
+  if (!user) return res.status(404).json({ message: 'User not found.' })
+  if (user.role !== 'volunteer') {
+    return res.status(400).json({ message: 'Only volunteer accounts can be deleted this way.' })
+  }
+
+  // Detach from every child they were assigned to
+  await Child.updateMany({ volunteerIds: user.id }, { $pull: { volunteerIds: user.id } })
+
+  await User.deleteOne({ _id: user.id })
+  res.json({ message: `${user.name} has been removed.` })
 })
 
 export default router

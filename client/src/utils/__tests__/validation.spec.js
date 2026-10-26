@@ -1,7 +1,7 @@
 // Unit tests for the sign-up checks.   Owner: Kai Sen
 // Run:  pnpm test:unit
 import { describe, it, expect } from 'vitest'
-import { isValidEmail, validateSignup } from '../validation'
+import { isValidEmail, isValidChildCode, validateSignup } from '../validation'
 
 // A form that passes every check; each test changes one thing
 const goodForm = () => ({
@@ -64,5 +64,40 @@ describe('validateSignup', () => {
   it('does not ask parents for skills or days', () => {
     const form = { ...goodForm(), role: 'parent', skills: [], availability: [] }
     expect(validateSignup(form)).toEqual({})
+  })
+
+  it('lets parents leave the child code blank', () => {
+    const form = { ...goodForm(), role: 'parent', childCode: '  ' }
+    expect(validateSignup(form)).toEqual({})
+  })
+
+  it('accepts a correct child code, in any case', () => {
+    expect(validateSignup({ ...goodForm(), role: 'parent', childCode: 'K7P3QX' })).toEqual({})
+    expect(validateSignup({ ...goodForm(), role: 'parent', childCode: 'k7p3qx' })).toEqual({})
+  })
+
+  it('rejects a child code that is the wrong length or has symbols', () => {
+    expect(
+      validateSignup({ ...goodForm(), role: 'parent', childCode: 'K7P3' }).childCode,
+    ).toContain('6 letters')
+    expect(
+      validateSignup({ ...goodForm(), role: 'parent', childCode: 'K7P-3Q' }).childCode,
+    ).toBeTruthy()
+  })
+
+  it('ignores the child code for volunteers', () => {
+    expect(validateSignup({ ...goodForm(), childCode: 'nope' })).toEqual({})
+  })
+})
+
+describe('isValidChildCode', () => {
+  it('accepts 6 letters and numbers', () => {
+    expect(isValidChildCode('K7P3QX')).toBe(true)
+  })
+
+  it('rejects anything else', () => {
+    expect(isValidChildCode('')).toBe(false)
+    expect(isValidChildCode('K7P3QXZ')).toBe(false)
+    expect(isValidChildCode('K7 P3Q')).toBe(false)
   })
 })

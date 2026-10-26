@@ -17,14 +17,15 @@ const sessionSchema = new mongoose.Schema(
     nextStep: String,
     mood: { type: String, enum: ['happy', 'okay', 'tired', 'frustrated'], default: 'okay' },
     notes: String,
-    activity: String,
+    meal: String,
+    portion: String,
+    activity: [String],
     interaction: String,
     behaviour: String,
-    socialNotes: String
+    socialNotes: String,
+    photos: [{type: String}]
   },
   { toJSON: jsonOptions },
 )
-
-// TODO (Ning Xuan): also check correct <= attempted (custom validator or in the route)
 
 export default mongoose.model('Session', sessionSchema)

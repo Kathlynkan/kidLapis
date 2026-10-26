@@ -62,7 +62,7 @@ const open = ref(props.initialOpen)
 }
 
 .peel-card--open .peel-header {
-  border-bottom-color: var(--lapis-shadow);
+  border-bottom-color: var(--lapis-cream-dark);
   border-bottom-width: 3px;
   border-bottom-style: solid;
 }

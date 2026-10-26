@@ -5,10 +5,10 @@
 export const BADGES = [
   { id: 'first-quest', icon: '🌱', name: 'First Quest', rule: 'Complete your first homework' },
   { id: 'streak-3', icon: '🔥', name: 'On Fire', rule: 'Complete 3 homework in a row on time' },
-  { id: 'fraction-hero', icon: '🍕', name: 'Fraction Hero', rule: 'Score 4/5 or more on Fractions' },
+  { id: 'fraction-hero', icon: '🍕', name: 'Fraction Hero', rule: 'Score 4/5 or more on Fractions in 2 sessions' },
   { id: 'bookworm', icon: '📚', name: 'Bookworm', rule: 'Complete 2 English homework' },
   { id: 'century', icon: '💯', name: 'Century', rule: 'Earn 100 points' },
-  { id: 'rising-star', icon: '📈', name: 'Rising Star', rule: 'Improve by 15% on any topic (3+ sessions)' },
+  { id: 'rising-star', icon: '📈', name: 'Rising Star', rule: 'Improve by 15% in any subject (3+ sessions)' },
 ]
 
 export function earnedBadges(child, homework, sessions) {
@@ -35,13 +35,15 @@ export function earnedBadges(child, homework, sessions) {
         return false
       }
 
-      case 'fraction-hero':
-        return sessions.some(
+      case 'fraction-hero': {
+        const fractionSessions = sessions.filter(
           (s) =>
             s.topic.toLowerCase().includes('fraction') &&
             s.attempted > 0 &&
             s.correct / s.attempted >= 0.8,
         )
+        return fractionSessions.length >= 2
+      }
 
       case 'bookworm':
         return verified.filter((h) => h.subject === 'English').length >= 2
@@ -50,13 +52,14 @@ export function earnedBadges(child, homework, sessions) {
         return (child.points || 0) >= 100
 
       case 'rising-star': {
-        const byTopic = {}
+        // Group by subject (not topic) so free-text volunteer notes don't fragment progress
+        const bySubject = {}
         for (const s of sessions) {
           if (!s.attempted) continue
-          byTopic[s.topic] = byTopic[s.topic] || []
-          byTopic[s.topic].push(s)
+          bySubject[s.subject] = bySubject[s.subject] || []
+          bySubject[s.subject].push(s)
         }
-        return Object.values(byTopic).some((list) => {
+        return Object.values(bySubject).some((list) => {
           if (list.length < 3) return false
           const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date))
           const first = sorted[0].correct / sorted[0].attempted

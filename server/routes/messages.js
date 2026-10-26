@@ -56,7 +56,11 @@ router.post('/', async (req, res) => {
     return res.status(403).json({ message: 'You do not have access to this conversation.' })
   }
   const message = await Message.create({ childId, fromId: req.user.id, text, readBy: [req.user.id] })
-  res.status(201).json({ ...message.toJSON(), fromName: req.user.name, fromRole: req.user.role })
+  const payload = { ...message.toJSON(), fromName: req.user.name, fromRole: req.user.role }
+  // Push to every browser currently viewing this child's thread (real-time)
+  const io = req.app.get('io')
+  if (io) io.to(`child:${childId}`).emit('new-message', payload)
+  res.status(201).json(payload)
 })
 
 // PUT /messages/read   body: { childId }  -> mark all as read by me

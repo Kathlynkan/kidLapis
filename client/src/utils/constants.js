@@ -1,19 +1,10 @@
 // Shared option lists so every form uses the same values.
 // Add to these lists instead of hard-coding options in your own page.
 
-export const SUBJECTS = ['Math', 'English', 'Science', 'Chinese', 'Malay', 'Tamil']
+export const SUBJECTS = ['English', 'Math', 'Science', 'Mother Tongue']
 
 // Used for volunteer skills AND child needs -> powers skills-based matchmaking
-export const SKILL_OPTIONS = [
-  'Primary Math',
-  'Fractions',
-  'Problem Sums',
-  'English Comprehension',
-  'Composition',
-  'Spelling',
-  'Science',
-  'Mother Tongue',
-]
+export const SKILL_OPTIONS = ['English', 'Math', 'Science', 'Mother Tongue']
 
 export const LEVELS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 

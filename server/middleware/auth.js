@@ -3,9 +3,9 @@
 // -------------------------------------------------------------
 // Demo version: tokens are random strings kept in memory.
 // Restarting the server logs everyone out (the client handles 401).
+// Passwords are hashed with bcryptjs in routes/auth.js.
 //
 // TODO (Kai Sen):
-//   [ ] Hash passwords with bcryptjs instead of storing plain text
 //   [ ] (Optional) Replace in-memory tokens with JWT (jsonwebtoken),
 //       which also survives server restarts on Render
 // =============================================================
@@ -24,15 +24,22 @@ export function revokeToken(token) {
   tokens.delete(token)
 }
 
+// The logged-in user for a token, or null if the token is unknown (or the user was deleted).
+// Used by requireAuth below and by the live chat connection in server.js.
+export async function userForToken(token) {
+  const userId = tokens.get(String(token ?? ''))
+  if (!userId) return null
+  return User.findById(userId)
+}
+
 // Attach req.user (a Mongoose User document) if "Authorization: Bearer <token>" is valid
 export async function requireAuth(req, res, next) {
   const header = req.header('Authorization') || ''
   const token = header.replace('Bearer ', '')
-  const userId = tokens.get(token)
-  if (!userId) {
+  if (!tokens.has(token)) {
     return res.status(401).json({ message: 'Please log in again.' })
   }
-  const user = await User.findById(userId)
+  const user = await userForToken(token)
   if (!user) {
     return res.status(401).json({ message: 'User no longer exists.' })
   }

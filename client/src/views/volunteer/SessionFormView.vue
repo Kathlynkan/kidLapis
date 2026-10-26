@@ -3,13 +3,6 @@
   Routes:  /children/:id/sessions/new     (create)
            /sessions/:sessionId/edit      (edit - same form)
   -------------------------------------------------------------
-  The form fields are already bound with v-model. TODO (Ning Xuan):
-    [done] submit: POST /sessions (create) or PUT /sessions/:id (edit)
-        then router.push to the child profile
-    [done] edit mode: load the session with GET /sessions/:sessionId and fill the form
-    [done] validation: topic required, correct <= attempted (computed + .is-invalid)
-    [done] "struggles" as tags: type + Enter to add, x to remove (Week 5 list exercise)
-    [ ] quick-pick chips from the child's previous struggles
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -38,7 +31,7 @@ const date = dateString.slice(0, 10) // format to yyyy-mm-dd
 const form = ref({
   // academic
   date: date,
-  subject: 'Math',
+  subject: 'English',
   topic: '',
   attempted: 0,
   correct: 0,
@@ -49,13 +42,16 @@ const form = ref({
   notes: '',
 
   // social
-  activity: '',
+  meal: '',
+  portion: '',
+  activity: [],
   interaction: '',
   behaviour: '',
   socialNotes: '',
   photos: []
 })
 const newStruggle = ref('')
+const newActivity = ref('')
 const saving = ref(false) // track whether the form is currently saving
 const error = ref('')
 
@@ -74,10 +70,13 @@ async function loadSession() {
     form.value.nextStep = session.nextStep
     form.value.mood = session.mood
     form.value.notes = session.notes
+    form.value.meal = session.meal
+    form.value.portion = session.portion
     form.value.activity = session.activity
     form.value.interaction = session.interaction
     form.value.behaviour = session.behaviour
     form.value.socialNotes = session.socialNotes
+    form.value.photos = session.photos || []
 
     childId.value = session.childId // retrieve childId
   } catch (err) {
@@ -118,11 +117,18 @@ async function handleSubmit() {
         nextStep: form.value.nextStep,
         mood: form.value.mood,
         notes: form.value.notes,
+        meal: form.value.meal,
+        portion: form.value.portion,
         activity: form.value.activity,
         interaction: form.value.interaction,
         behaviour: form.value.behaviour,
         socialNotes: form.value.socialNotes,
+        photos: form.value.photos
       })
+
+      // Refresh the handover immediately so the next volunteer doesn't see a stale summary.
+      // Fire-and-forget: we navigate away regardless of whether the AI call succeeds.
+      api.post(`/handover/${childId.value}`, { audience: 'volunteer' }).catch(() => {})
 
       router.push({
         name: 'child-profile',
@@ -147,6 +153,22 @@ function uploadPhotos(event) {
   form.value.photos = Array.from(event.target.files)
 }
 
+function getPhotoURL(photo) {
+  // if photo is a string (already a URL from database)
+  if (typeof photo === 'string') {
+    return photo
+  }
+
+  // else photo is newly uplaoded 
+  return URL.createObjectURL(photo)
+  // createObjectURL: convert file from computer 
+  // into temporary preview link for <img :src="...">
+}
+
+function removePhoto(index) {
+  form.value.photos.splice(index,1)
+}
+
 function addStruggle() {
   if (!newStruggle.value) {
     return
@@ -156,7 +178,7 @@ function addStruggle() {
   }
 
   // add new struggle
-  form.value.struggles.push(newStruggle.value)
+  form.value.struggles.push(newStruggle.value.trim())
 
   newStruggle.value = ''
 }
@@ -171,6 +193,32 @@ function removeStruggle(struggle) {
   }
 
   form.value.struggles = updatedStruggles
+}
+
+function addActivity() {
+  if (!newActivity.value) {
+    return
+  } else if (form.value.activity.includes(newActivity.value)) {
+    // avoid duplicates
+    return
+  }
+
+  // add new struggle
+  form.value.activity.push(newActivity.value.trim())
+
+  newActivity.value = ''
+}
+
+function removeActivity(activity) {
+  const updatedActivity = []
+
+  for (const a of form.value.activity) {
+    if (a !== activity) {
+      updatedActivity.push(a)
+    }
+  }
+
+  form.value.activity = updatedActivity
 }
 
 function cancel() {
@@ -194,7 +242,7 @@ onMounted(() => { // autofill form if edit form
 
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <form class="cb-card p-4" data-test="session-form" @submit.prevent="handleSubmit">
+        <form class="cb-card p-4 px-5" data-test="session-form" @submit.prevent="handleSubmit">
           <!-- 
           cb-card: custom class
           @submit: when form is submitted, call handleSubmit()
@@ -207,34 +255,17 @@ onMounted(() => { // autofill form if edit form
 
           <h2 class="h5 mb-3">Academic</h2>
 
-          <div class="row g-3">
-            <div class="col-sm-4">
+          <div class="row g-4">
+            <div class="col-sm-3">
               <label class="form-label" for="date">Date</label>
               <!-- form-label: bootstrap form label styling-->
               <input id="date" v-model="form.date" type="date" class="form-control"/>
               <!-- form-control: bootstrap-styled input -->
             </div>
-            <div class="col-sm-4">
-              <label class="form-label" for="subject">Subject</label>
-              <select id="subject" v-model="form.subject" class="form-select">
-                <!-- form-select: bootstrap-styled dropdown -->
-                <option v-for="s in SUBJECTS" :key="s">{{ s }}</option>
-              </select>
-            </div>
-            <div class="col-sm-4">
-              <label class="form-label" for="topic">Topic covered</label>
-              <input id="topic" v-model.trim="form.topic" class="form-control" placeholder="e.g. Fractions"/>
-            </div>
 
-            <div class="col-6 col-sm-3">
-              <label class="form-label" for="attempted">Attempted</label>
-              <input id="attempted" v-model.number="form.attempted" type="number" min="0" class="form-control" />
-            </div>
-            <div class="col-6 col-sm-3">
-              <label class="form-label" for="correct">Correct</label>
-              <input id="correct" v-model.number="form.correct" type="number" min="0" class="form-control" />
-            </div>
-            <div class="col-sm-6">
+            <div class="col-sm-1"></div>
+
+            <div class="col-sm-8">
               <span class="form-label d-block">How was the child feeling?</span>
               <!-- d-block: display label on its own line, label takes up entire row -->
               <div class="btn-group flex-wrap" role="group">
@@ -256,6 +287,41 @@ onMounted(() => { // autofill form if edit form
               </div>
             </div>
 
+            <div class="col-sm-3">
+              <label class="form-label" for="subject">Subject</label>
+              <select id="subject" v-model="form.subject" class="form-select">
+                <!-- form-select: bootstrap-styled dropdown -->
+                <option v-for="s in SUBJECTS" :key="s">{{ s }}</option>
+              </select>
+            </div>
+
+            <div class="col-sm-1"></div>
+
+            <div class="col-sm-7">
+              <label class="form-label" for="topic">Topic covered</label>
+              <input id="topic" v-model.trim="form.topic" class="form-control" placeholder="e.g. Fractions"/>
+            </div>
+
+            <div class="col-6 col-sm-3">
+              <label class="form-label" for="attempted">Attempted</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary" @click="form.attempted = Math.max(0,(form.attempted || 0)-1)">-</button>
+                <input id="attempted" v-model.number="form.attempted" type="number" min="0" class="form-control" />
+                <button type="button" class="btn btn-outline-secondary" @click="form.attempted = (form.attempted || 0)+1">+</button>
+              </div>
+            </div>
+
+            <div class="col-sm-1"></div>
+
+            <div class="col-6 col-sm-3">
+              <label class="form-label" for="correct">Correct</label>
+              <div class="input-group">
+                <button type="button" class="btn btn-outline-secondary" @click="form.correct = Math.max(0,(form.correct || 0)-1)">-</button>
+                <input id="correct" v-model.number="form.correct" type="number" min="0" class="form-control" />
+                <button type="button" class="btn btn-outline-secondary" @click="form.correct = (form.correct || 0)+1">+</button>
+              </div>
+            </div>
+
             <div class="col-12">
               <label class="form-label" for="struggle">Skills the child struggled with</label>
               <input
@@ -273,7 +339,7 @@ onMounted(() => { // autofill form if edit form
                   me-1: (margin-end) small right margin between badges
                   -->
                   {{ s }}
-                  <button type="button" class="border-0 bg-transparent ms-1" @click="removeStruggle(s)">x</button>
+                  <button type="button" class="border-0 bg-transparent ms-1" @click="removeStruggle(s)">X</button>
                   <!--
                   border-0: remove button border
                   ms-1: (margin-start) small spacing before remove button
@@ -286,6 +352,7 @@ onMounted(() => { // autofill form if edit form
               <label class="form-label" for="worked">Teaching method that worked</label>
               <input id="worked" v-model.trim="form.whatWorked" class="form-control" placeholder="e.g. Visual diagrams" />
             </div>
+
             <div class="col-md-6">
               <label class="form-label" for="next">Suggested next step</label>
               <input id="next" v-model.trim="form.nextStep" class="form-control" placeholder="e.g. Practise fraction addition" />
@@ -300,10 +367,48 @@ onMounted(() => { // autofill form if edit form
 
           <h2 class="h5 mb-3">Social</h2>
 
-          <div class="row g-3">
+          <div class="row g-4">
             <div class="col-md-6">
-              <label class="form-label" for="activity">Activity</label>
-              <input id="activity" v-model.trim="form.activity" class="form-control" placeholder="e.g. Board games">
+              <label class="form-label" for="meal">Today's Meal</label>
+              <input id="meal" v-model.trim="form.meal" class="form-control" placeholder="e.g. Chicken rice and apples">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="portion">Portion Eaten</label>
+              <select id="portion" v-model="form.portion" class="form-select">
+                <option value="">Select</option>
+                <option>All</option>
+                <option>Most</option>
+                <option>Half</option>
+                <option>Little</option>
+                <option>None</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="activity">Activities</label>
+              <input
+                id="activity"
+                v-model.trim="newActivity"
+                class="form-control"
+                placeholder="Type a skill and press Enter"
+                @keydown.enter.prevent="addActivity"
+              />
+              <div class="mt-2">
+                <span v-for="a in form.activity" :key="a" class="badge badge-danger-soft me-1">
+                  <!--
+                  badge: bootstrap badge/tag styling
+                  badge-danger-soft: custom soft-red badge colour
+                  me-1: (margin-end) small right margin between badges
+                  -->
+                  {{ a }}
+                  <button type="button" class="border-0 bg-transparent ms-1" @click="removeActivity(a)">X</button>
+                  <!--
+                  border-0: remove button border
+                  ms-1: (margin-start) small spacing before remove button
+                  -->
+                </span>
+              </div>
             </div>
 
             <div class="col-md-6">
@@ -318,33 +423,41 @@ onMounted(() => { // autofill form if edit form
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="behaviour">Positive behaviour observed</label>
+              <label class="form-label" for="behaviour">Positive Behaviour Observed</label>
               <input id="behaviour" v-model.trim="form.behaviour" class="form-control" placeholder="e.g. Helped another child">
             </div>
 
             <div class="col-12">
-              <label class="form-label" for="socialNotes">Notes</label>
-              <textarea id="socialNotes" v-model.trim="form.socialNotes" rows="3" class="form-control"></textarea>
+              <label class="form-label" for="photos">Photos</label>
+              <input id="photos" type="file" multiple accept="image/*" class="form-control" @change="uploadPhotos">
+
+              <!-- photo preview directly below uplaod input -->
+              <div v-if="form.photos.length > 0" class="d-flex flex-wrap gap-2 mt-2">
+                <div v-for="(photo, index) in form.photos" :key="index" class="position-relative">
+                  <img :src="getPhotoURL(photo)"
+                  class="rounded"
+                  style="width: 100px; height: 100px; object-fit: cover;">
+
+                  <button type="button" 
+                    class="btn-close bg-danger position-absolute rounded-circle top-0 end-0 p-1"
+                    style="width: 12px; height: 12px; font-size: 10px; opacity: 1;" 
+                    @click="removePhoto(index)"></button>
+                </div>
+
+              </div>
             </div>
 
             <div class="col-12">
-              <label class="form-label" for="photos">Photos</label>
-              <input id="photos" type="file" placeholder="Upload photos here"
-              multiple accept="image/*" class="form-control" @change="uploadPhotos">
+              <label class="form-label" for="socialNotes">Other Notes (Optional)</label>
+              <textarea id="socialNotes" v-model.trim="form.socialNotes" rows="3" class="form-control"></textarea>
             </div>
 
-            <div v-if="form.photos.length > 0" class="mt-2">
-              <img v-for="photo in form.photos" :key="photo.name"
-                :src="URL.createObjectURL(photo)"
-                class="img-thumbnail me-2 mb-2"
-                style="width: 120px">
-            </div>
           </div>
 
           <div class="d-flex justify-content-end gap-2 mt-4">
             <!-- right-aligned buttons with gap in between and top margin -->
             <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary" :disabled="saving">
+            <button type="submit" class="btn btn-primary" :disabled="saving" data-test="session-submit">
               {{ isEdit ? 'Save changes' : 'Save session' }}
             </button>
           </div>
@@ -353,3 +466,21 @@ onMounted(() => { // autofill form if edit form
     </div>
   </div>
 </template>
+
+<style scoped>
+  /* Center text and force alignment over Bootstrap defaults */
+  /* override framework styles, browser ignores those standard rules and applies that style 
+  regardless of where it appears or how specific other selectors are */
+  input[type="number"] {
+    text-align: center !important;
+    -moz-appearance: textfield !important; /* Firefox */
+    appearance: textfield !important;
+  }
+
+  /* Hide webkit arrows in Chrome, Safari, Edge, Opera */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+  }
+</style>

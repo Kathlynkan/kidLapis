@@ -19,9 +19,8 @@
       "password": "password123",
       "role": "volunteer",
       "skills": [
-        "Primary Math",
-        "Fractions",
-        "English Comprehension"
+        "Math",
+        "English"
       ],
       "availability": [
         "Mon",
@@ -36,8 +35,7 @@
       "password": "password123",
       "role": "volunteer",
       "skills": [
-        "Primary Math",
-        "Problem Sums",
+        "Math",
         "Science"
       ],
       "availability": [
@@ -53,9 +51,8 @@
       "password": "password123",
       "role": "volunteer",
       "skills": [
-        "English Comprehension",
-        "Composition",
-        "Spelling"
+        "English",
+        "Mother Tongue"
       ],
       "availability": [
         "Wed",
@@ -136,8 +133,7 @@
         }
       ],
       "needs": [
-        "Primary Math",
-        "Fractions"
+        "Math"
       ],
       "points": 120,
       "avatar": "🦊",
@@ -159,7 +155,7 @@
         }
       ],
       "needs": [
-        "Problem Sums",
+        "Math",
         "Science"
       ],
       "points": 210,
@@ -187,8 +183,7 @@
         }
       ],
       "needs": [
-        "English Comprehension",
-        "Spelling"
+        "English"
       ],
       "points": 60,
       "avatar": "🐯",
@@ -210,8 +205,8 @@
         }
       ],
       "needs": [
-        "Primary Math",
-        "Composition"
+        "Math",
+        "English"
       ],
       "points": 90,
       "avatar": "🐰",
@@ -233,7 +228,7 @@
         }
       ],
       "needs": [
-        "Problem Sums"
+        "Math"
       ],
       "points": 150,
       "avatar": "🦁",
@@ -248,8 +243,8 @@
       "volunteerIds": [],
       "schedule": [],
       "needs": [
-        "Spelling",
-        "Primary Math"
+        "English",
+        "Math"
       ],
       "points": 0,
       "avatar": "🐨",
@@ -271,8 +266,8 @@
         }
       ],
       "needs": [
-        "Spelling",
-        "Primary Math"
+        "English",
+        "Math"
       ],
       "points": 30,
       "avatar": "🐰",
@@ -601,7 +596,7 @@
         "Finding common denominators"
       ],
       "whatWorked": "Fraction strips",
-      "nextStep": "Practise equivalent fractions with strips",
+      "nextStep": "Practice equivalent fractions with strips",
       "mood": "okay",
       "notes": ""
     },
@@ -618,7 +613,7 @@
         "Finding common denominators"
       ],
       "whatWorked": "Visual diagrams",
-      "nextStep": "Practise basic fraction addition",
+      "nextStep": "Practice basic fraction addition",
       "mood": "happy",
       "notes": "",
       "activity": "Drawing",
@@ -678,7 +673,7 @@
         "Mixed numbers"
       ],
       "whatWorked": "Visual diagrams",
-      "nextStep": "Practise basic fraction addition",
+      "nextStep": "Practice basic fraction addition",
       "mood": "happy",
       "notes": "Much more confident today!",
       "activity": "Outdoor play",
@@ -921,7 +916,7 @@
         "Mixing up b and d"
       ],
       "whatWorked": "Saying each word out loud",
-      "nextStep": "Practise school words",
+      "nextStep": "Practice school words",
       "mood": "okay",
       "notes": ""
     },
@@ -998,7 +993,7 @@
       "id": "h_2",
       "childId": "c_1",
       "volunteerId": "u_vol2",
-      "title": "7 times table x3",
+      "title": "7 times table",
       "subject": "Math",
       "details": "Say the 7 times table out loud three times.",
       "dueDate": "2026-10-02",
@@ -1075,7 +1070,7 @@
       "volunteerId": "u_vol3",
       "title": "Spelling list 6",
       "subject": "English",
-      "details": "Practise list 6 with look-cover-write-check.",
+      "details": "Practice list 6 with look-cover-write-check.",
       "dueDate": "2026-10-07",
       "points": 15,
       "status": "assigned",
@@ -1288,11 +1283,11 @@
     {
       "id": "m_1",
       "childId": "c_1",
-      "fromId": "u_vol1",
+      "fromId": "u_coord",
       "text": "Hi Mrs Wong! Ethan did really well with fractions today - 4/5 correct.",
       "sentAt": "2026-10-04T09:40:00.000Z",
       "readBy": [
-        "u_vol1",
+        "u_coord",
         "u_par1"
       ]
     },
@@ -1300,41 +1295,41 @@
       "id": "m_2",
       "childId": "c_1",
       "fromId": "u_par1",
-      "text": "Thank you Aisha! He told me about the pizza drawings haha",
+      "text": "Thank you Ms Tan! He told me about the pizza drawings haha",
       "sentAt": "2026-10-04T12:15:00.000Z",
       "readBy": [
         "u_par1",
-        "u_vol1"
+        "u_coord"
       ]
     },
     {
       "id": "m_3",
       "childId": "c_1",
-      "fromId": "u_vol1",
+      "fromId": "u_coord",
       "text": "I gave him a short fraction worksheet - could you remind him to try it this weekend?",
       "sentAt": "2026-10-05T09:35:00.000Z",
       "readBy": [
-        "u_vol1"
+        "u_coord"
       ]
     },
     {
       "id": "m_4",
       "childId": "c_3",
-      "fromId": "u_vol3",
+      "fromId": "u_coord",
       "text": "Arjun's spelling is improving! Silent letters are still tricky.",
       "sentAt": "2026-10-05T10:00:00.000Z",
       "readBy": [
-        "u_vol3"
+        "u_coord"
       ]
     },
     {
       "id": "m_5",
       "childId": "c_7",
-      "fromId": "u_vol1",
+      "fromId": "u_coord",
       "text": "Hi Mrs Wong! Mia is getting better at her spelling - 6 out of 8 today.",
       "sentAt": "2026-10-08T09:30:00.000Z",
       "readBy": [
-        "u_vol1"
+        "u_coord"
       ]
     }
   ]

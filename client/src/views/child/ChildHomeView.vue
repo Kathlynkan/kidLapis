@@ -126,7 +126,7 @@ onMounted(async () => {
 
 <style scoped>
 .hero-card {
-  background: linear-gradient(135deg, var(--cb-accent-soft), var(--cb-primary-soft));
+  background: var(--role-accent-soft, var(--lapis-cream));
   border-radius: var(--cb-radius);
 }
 

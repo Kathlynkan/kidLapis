@@ -1,12 +1,4 @@
-<!-- =============================================================
-  Manage volunteers                                   Owner: Yu Xuan
-  -------------------------------------------------------------
-  Already: list of volunteers with skills + availability.
-  TODO (Yu Xuan):
-    [ ] edit a volunteer's skills / available days (checkboxes, Week 5) -> PUT /users/:id
-    [ ] show how many children each volunteer has (workload)
-    [ ] filter by skill
-============================================================= -->
+<!-- Manage volunteers                                   Owner: Yu Xuan -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
@@ -25,6 +17,10 @@ const editing_ID = ref(null)
 const draft = ref({ skills: [], availability: [] })
 const saving = ref(false)
 const save_error = ref('')
+
+const confirmDeleteId = ref(null) // volunteer id awaiting delete confirmation
+const deleting = ref(false)
+const delete_error = ref('')
 
 const filtered_Volunteers = computed(() => {
   if (!skill_Filter.value) return volunteers.value
@@ -63,6 +59,29 @@ function startEdit(v) {
 function cancelEdit() {
   editing_ID.value = null
   save_error.value = ''
+}
+
+function startDelete(v) {
+  confirmDeleteId.value = v.id
+  delete_error.value = ''
+}
+
+function cancelDelete() {
+  if (!deleting.value) confirmDeleteId.value = null
+}
+
+async function confirmDelete(v) {
+  deleting.value = true
+  delete_error.value = ''
+  try {
+    await api.delete(`/users/${v.id}`)
+    volunteers.value = volunteers.value.filter((x) => x.id !== v.id)
+    confirmDeleteId.value = null
+  } catch (err) {
+    delete_error.value = errorMessage(err)
+  } finally {
+    deleting.value = false
+  }
 }
 
 async function save(v) {
@@ -127,10 +146,48 @@ onMounted(async () => {
         <div class="cb-card p-3 h-100" data-test="volunteer-card">
           <h2 class="h6 mb-1"><i class="bi bi-person-circle me-1"></i>{{ v.name }}</h2>
           <div class="small text-muted-cb mb-2">{{ v.email }}</div>
-          <button v-if="editing_ID !== v.id" class="btn btn-sm btn-outline-secondary" :disabled="editing_ID !== null"
-          data-test="edit-volunteer" @click="startEdit(v)">
-          <i class="bi bi-pencil me-1"></i>Edit
-        </button>
+          <div class="d-flex gap-2 mb-2">
+            <button
+              v-if="editing_ID !== v.id && confirmDeleteId !== v.id"
+              class="btn btn-sm btn-outline-secondary"
+              :disabled="editing_ID !== null || confirmDeleteId !== null"
+              data-test="edit-volunteer"
+              @click="startEdit(v)"
+            >
+              <i class="bi bi-pencil me-1"></i>Edit
+            </button>
+            <button
+              v-if="editing_ID !== v.id && confirmDeleteId !== v.id"
+              class="btn btn-sm btn-outline-danger"
+              :disabled="editing_ID !== null || confirmDeleteId !== null"
+              data-test="delete-volunteer"
+              @click="startDelete(v)"
+            >
+              <i class="bi bi-trash me-1"></i>Remove
+            </button>
+          </div>
+
+          <div v-if="confirmDeleteId === v.id" class="border rounded p-2 mb-2 small">
+            <p class="mb-2">Remove <strong>{{ v.name }}</strong>? Their sessions and records stay — only the login is deleted.</p>
+            <div v-if="delete_error" class="text-danger mb-2">{{ delete_error }}</div>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-sm btn-danger"
+                :disabled="deleting"
+                data-test="confirm-delete-volunteer"
+                @click="confirmDelete(v)"
+              >
+                {{ deleting ? 'Removing...' : 'Yes, remove' }}
+              </button>
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                :disabled="deleting"
+                @click="cancelDelete"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         <div class="small mb-2" data-test="workload">
           <i class="bi bi-people me-1"></i>
           <template v-if="workloadOf(v).length">

@@ -1,24 +1,15 @@
-<!-- =============================================================
-  Parent home: "What did my child do today?"          Owner: Kat
-  -------------------------------------------------------------
-  Already loads the parent's children + each child's sessions & homework.
-  TODO (Kat):
-    [x] child switcher when a parent has 2+ children (Ravi Kumar has 2 in the demo data)
-    [x] "Today at student care" card in parent-friendly words
-        (reuse <HandoverCard> with POST /handover/:id { audience: 'parent' })
-    [x] timeline of recent sessions (simpler than the volunteer view - no jargon)
-    [x] homework status so parents can remind their child at home
-============================================================= -->
+<!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
 import { ref, computed, onMounted } from 'vue' 
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc 
-import SkillProgressChart from '@/components/charts/SkillProgressChart.vue'
-import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
-import HandoverCard from '@/components/HandoverCard.vue' 
+import HandoverCard from '@/components/HandoverCard.vue'
 import ParentSessionCard from '@/components/ParentSessionCard.vue' // the session card from the whiteboard design
+import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
+import SkillProgressChart from '@/components/charts/SkillProgressChart.vue'
+import PeelCard from '@/components/PeelCard.vue'
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
 import '@/assets/parentpage.css' // the styles of this page (the timeline)
 
@@ -82,6 +73,15 @@ const MOOD_WORDS = {
   frustrated: '😕 Found it hard',
 }
 
+// a face for each mood, used in the week strip
+const MOOD_FACES = { happy: '😊', okay: '🙂', tired: '😴', frustrated: '😕' }
+
+// the moods of the last five sessions, the oldest first (the newest is on the right)
+const weekMoods = computed(() => sessions.value.slice(0, 5).reverse())
+
+// the days shown on the social tab: the newest three, or all of them
+const socialDays = computed(() => (showAllDays.value ? sessions.value : sessions.value.slice(0, 3)))
+
 // the child's first name, used in the sentences
 const childName = computed(() => (selectedChild.value ? firstName(selectedChild.value.name) : ''))
 
@@ -116,12 +116,16 @@ const nextSession = computed(() => {
   const today = new Date()
   let soonest = null
   for (const slot of schedule) {
-    let daysAway = DAY_NUMBERS[slot.day] - today.getDay()
+    const dayNum = DAY_NUMBERS[slot.day]
+    if (dayNum === undefined) continue // skip any slot with an unrecognised day name
+    let daysAway = dayNum - today.getDay()
     if (daysAway < 0) daysAway = daysAway + 7 // that day already passed this week, so it is next week
     if (soonest === null || daysAway < soonest.daysAway) {
       soonest = { daysAway: daysAway, volunteerId: slot.volunteerId }
     }
   }
+
+  if (!soonest) return null // all slots had unrecognised days
 
   // the date of that day, written like 2026-10-12 so formatDate can show it
   const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + soonest.daysAway)
@@ -134,12 +138,50 @@ const nextSession = computed(() => {
   }
 })
 
-// how many of the 9 cake layers are baked: one for every checked homework (a full cake is 9, then a new one starts)
-const layersBaked = computed(() => {
-  const checked = homeworkCounts.value.checked
-  if (checked > 0 && checked % 9 === 0) return 9
-  return checked % 9
+// the next session as a short label for the small tile, like "Thu 24" ("Today" when it is today)
+const nextShort = computed(() => {
+  if (!nextSession.value) return 'Not set yet'
+  if (nextSession.value.isToday) return 'Today'
+  return new Date(nextSession.value.date + 'T00:00:00').toLocaleDateString('en-SG', { weekday: 'short', day: 'numeric' })
 })
+
+// the homework that was handed in and waits for the volunteer to check
+const waitingHomework = computed(() => homework.value.filter((item) => item.status === 'submitted'))
+
+// the homework that is checked and finished
+const checkedHomework = computed(() => homework.value.filter((item) => item.status === 'verified'))
+const showChecked = ref(false) // true when the finished homework list is opened
+const showAllDays = ref(false) // true when the social tab shows every day, not only the newest three
+
+// the session that shows how a finished homework went: the first session of the same subject
+// on or after the day the child handed it in (or the due date). Empty when there is none yet.
+function sessionFor(item) {
+  const from = item.completedAt || item.dueDate
+  let found = null
+  for (const session of sessions.value) {
+    if (!session.subject || !item.subject) continue
+    if (session.subject.toLowerCase() !== item.subject.toLowerCase()) continue
+    if (session.date < from) continue
+    if (found === null || session.date < found.date) found = session
+  }
+  return found
+}
+
+// the score of a session in words, like "4 / 5 right" (empty when nothing was attempted)
+function scoreOf(session) {
+  if (!session || !session.attempted) return ''
+  return session.correct + ' / ' + session.attempted + ' right'
+}
+
+// the due date in plain words: "2 days late", "Due today", "Due tomorrow", "Due in 5 days"
+function dueLabel(item) {
+  const days = daysSince(item.dueDate)
+  if (days > 1) return days + ' days late'
+  if (days === 1) return '1 day late'
+  if (days === 0) return 'Due today'
+  if (days === -1) return 'Due tomorrow'
+  return 'Due in ' + -days + ' days'
+}
 
 // ONE friendly sentence about the latest session, shown at the very top
 const topSentence = computed(() => {
@@ -220,26 +262,42 @@ onMounted(async () => {
     <StateMessage v-else-if="!selectedChild" message="No child is linked to your account yet." />
 
     <template v-else>
-      <!-- child buttons: only shown when the parent has 2 or more children -->
-      <div v-if="children.length > 1" class="d-flex flex-wrap gap-2 mb-3" data-test="child-switcher">
-        <button
-          v-for="child in children"
-          :key="child.id"
-          type="button"
-          class="btn"
-          :class="child.id === selectedId ? 'btn-primary' : 'btn-outline-primary'"
-          @click="switchChild(child.id)"
-        >
-          {{ child.avatar }} {{ firstName(child.name) }}
-        </button>
+      <!-- the child's name and level, and the child buttons (only when the parent has 2 or more children) -->
+      <div class="child-row" data-test="child-switcher">
+        <div class="d-flex align-items-center gap-2">
+          <span class="avatar">{{ selectedChild.avatar }}</span>
+          <div>
+            <h2 class="h6 mb-0">{{ selectedChild.name }}</h2>
+            <div class="small text-muted-cb">{{ selectedChild.level }} &middot; ⭐ {{ selectedChild.points }} stars</div>
+          </div>
+        </div>
+        <div v-if="children.length > 1" class="d-flex flex-wrap gap-2">
+          <button
+            v-for="child in children"
+            :key="child.id"
+            type="button"
+            class="btn btn-sm"
+            :class="child.id === selectedId ? 'btn-primary' : 'btn-outline-primary'"
+            @click="switchChild(child.id)"
+          >
+            {{ firstName(child.name) }}
+          </button>
+        </div>
       </div>
 
-      <!-- the child's name, level and stars -->
-      <div class="cb-card p-3 p-md-4 mb-4 d-flex align-items-center gap-3">
-        <span class="avatar">{{ selectedChild.avatar }}</span>
-        <div>
-          <h2 class="h5 mb-0">{{ selectedChild.name }}</h2>
-          <div class="small text-muted-cb">{{ selectedChild.level }} &middot; ⭐ {{ selectedChild.points }} stars earned</div>
+      <!-- three small tiles: what needs attention -->
+      <div class="status-strip" data-test="status-strip">
+        <div class="strip-tile" :class="homeworkCounts.late > 0 ? 'tile-late' : 'tile-ok'">
+          <strong>{{ homeworkCounts.late > 0 ? homeworkCounts.late + ' late' : 'On time' }}</strong>
+          <span class="small">{{ homeworkCounts.late > 0 ? 'Homework past its date' : 'No late homework' }}</span>
+        </div>
+        <div class="strip-tile tile-todo">
+          <strong>{{ homeworkCounts.todo }} to do</strong>
+          <span class="small">Remind at home</span>
+        </div>
+        <div class="strip-tile tile-next">
+          <strong>{{ nextShort }}</strong>
+          <span class="small">Next session<template v-if="nextSession && nextSession.volunteer"> · {{ firstName(nextSession.volunteer) }}</template></span>
         </div>
       </div>
 
@@ -247,47 +305,68 @@ onMounted(async () => {
       <div v-if="topSentence" class="top-summary" data-test="top-summary">
         <span class="top-label">Today at a glance</span>
         {{ topSentence }}
-        <!-- who ran the last session, and when the next one is -->
-        <div v-if="latest && latest.volunteerName" class="top-extra">{{ latest.volunteerName }} ran {{ latestWeekday }}'s session.</div>
-        <div v-if="nextSession" class="top-extra top-next">
-          Next session: {{ nextSession.isToday ? 'today, ' : '' }}{{ formatDate(nextSession.date) }}
-          <span v-if="nextSession.volunteer">with {{ nextSession.volunteer }}</span>
-        </div>
+        <div v-if="latest && latest.volunteerName" class="top-extra">Ran by {{ latest.volunteerName }}</div>
       </div>
 
       <!-- the notice board (the AI summary is inside it, under the academic details) -->
       <div class="row g-4 mb-4">
         <div class="col-12">
           <div class="notice-board" :class="'board-' + noticeTab" data-test="notice-board">
-            <h2 class="board-title">Notice board</h2>
-
             <!-- the three tabs -->
             <div class="notice-tabs">
+              <button type="button" class="notice-tab tab-latest" :class="{ active: noticeTab === 'latest' }" @click="noticeTab = 'latest'">Academic</button>
+              <button type="button" class="notice-tab tab-homework" :class="{ active: noticeTab === 'homework' }" @click="noticeTab = 'homework'">
+                Homework<span v-if="homeworkCounts.todo > 0" class="tab-count">{{ homeworkCounts.todo }}</span>
+              </button>
               <button type="button" class="notice-tab tab-social" :class="{ active: noticeTab === 'social' }" @click="noticeTab = 'social'">Social</button>
-              <button type="button" class="notice-tab tab-latest" :class="{ active: noticeTab === 'latest' }" @click="noticeTab = 'latest'">Latest session</button>
-              <button type="button" class="notice-tab tab-homework" :class="{ active: noticeTab === 'homework' }" @click="noticeTab = 'homework'">Homework</button>
             </div>
 
-            <!-- tab: social = one post-it per session. Click it to open the social card of that session. -->
-            <div v-if="noticeTab === 'social'">
-              <p v-if="recentSessions.length === 0" class="note mb-0">Nothing posted yet.</p>
-              <details v-for="session in recentSessions" :key="session.id" class="note">
-                <!-- the part you always see: the date, the mood and the activities -->
-                <summary>
-                  {{ formatDate(session.date) }} &middot; {{ MOOD_WORDS[session.mood] || 'Mood not noted' }}
-                  <span v-if="activitiesOf(session).length > 0" class="text-muted-cb">&middot; {{ activitiesOf(session).join(', ') }}</span>
-                </summary>
-                <!-- the part that opens: the social card -->
-                <div class="mt-2">
-                  <ParentSessionCard :session="session" :child="selectedChild" :social-only="true" />
+            <!-- tab: social = a diary: the newest day is open, the earlier days are short cards -->
+            <div v-if="noticeTab === 'social'" data-test="session-timeline">
+              <p v-if="sessions.length === 0" class="note mb-0">Nothing posted yet.</p>
+              <template v-else>
+                <!-- the mood of the last five sessions -->
+                <div class="week-strip">
+                  <strong>{{ childName }}'s week</strong>
+                  <span class="week-faces">
+                    <span v-for="(session, number) in weekMoods" :key="session.id" class="week-face" :class="['mood-' + session.mood, { 'week-face-now': number === weekMoods.length - 1 }]" :title="formatDate(session.date)">{{ MOOD_FACES[session.mood] || '🙂' }}</span>
+                  </span>
                 </div>
-              </details>
+
+                <!-- the newest day, always open -->
+                <div class="day-card">
+                  <div class="day-head">
+                    <div>
+                      <h3 class="h6 mb-0">{{ daysSince(sessions[0].date) === 0 ? 'Today at student care' : 'Latest day at student care' }}</h3>
+                      <div class="small text-muted-cb">{{ formatDate(sessions[0].date) }}<template v-if="sessions[0].volunteerName"> &middot; with {{ sessions[0].volunteerName }}</template></div>
+                    </div>
+                    <span class="mood-chip" :class="'mood-' + sessions[0].mood">{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
+                  </div>
+                  <ParentSocialDay :session="sessions[0]" :child-name="childName" />
+                </div>
+
+                <!-- the earlier days: a short card, tap to see the full day -->
+                <h3 v-if="sessions.length > 1" class="day-earlier">Earlier days</h3>
+                <details v-for="session in socialDays.slice(1)" :key="session.id" class="day-card day-card-small">
+                  <summary>
+                    <span class="day-head">
+                      <strong>{{ formatDate(session.date) }}</strong>
+                      <span class="mood-chip" :class="'mood-' + session.mood">{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
+                    </span>
+                    <span v-if="activitiesOf(session).length > 0" class="small text-muted-cb d-block">{{ activitiesOf(session).join(', ') }}</span>
+                  </summary>
+                  <ParentSocialDay :session="session" :child-name="childName" />
+                </details>
+                <button v-if="sessions.length > 3" type="button" class="day-more" @click="showAllDays = !showAllDays">
+                  {{ showAllDays ? 'Show fewer days' : 'Show more days' }}
+                </button>
+              </template>
             </div>
 
-            <!-- tab: latest session = the session card -->
+            <!-- tab: academic = the session card -->
             <div v-else-if="noticeTab === 'latest'">
               <p v-if="!latest" class="note mb-0">No sessions yet.</p>
-              <ParentSessionCard v-else :session="latest" :child="selectedChild" :homework="homework">
+              <ParentSessionCard v-else :session="latest" :child="selectedChild">
                 <!-- the AI summary, under the academic details -->
                 <template #academic-extra>
                   <HandoverCard
@@ -306,36 +385,82 @@ onMounted(async () => {
             <div v-else>
               <p v-if="homework.length === 0" class="note mb-0">No homework right now.</p>
 
-              <!-- homework status: four small boxes with numbers -->
+              <!-- four small numbers -->
               <div v-else class="homework-status" data-test="homework-status">
-                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.todo }}</strong><span class="small text-muted-cb">To do</span></div>
-                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.waiting }}</strong><span class="small text-muted-cb">Waiting for check</span></div>
-                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.checked }}</strong><span class="small text-muted-cb">Checked</span></div>
                 <div class="status-box" :class="{ late: homeworkCounts.late > 0 }"><strong class="fs-4">{{ homeworkCounts.late }}</strong><span class="small text-muted-cb">Late</span></div>
+                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.todo - homeworkCounts.late }}</strong><span class="small text-muted-cb">To do</span></div>
+                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.waiting }}</strong><span class="small text-muted-cb">Being checked</span></div>
+                <div class="status-box"><strong class="fs-4">{{ homeworkCounts.checked }}</strong><span class="small text-muted-cb">Done</span></div>
               </div>
 
-              <!-- the kueh lapis cake: nine layers, one more for every checked homework -->
-              <div v-if="homework.length > 0" class="cake-box" data-test="cake">
-                <span class="note-label">{{ firstName(selectedChild.name) }}'s kueh lapis</span>
-                <div class="cake">
-                  <i v-for="layer in 9" :key="layer" :class="{ baked: layer <= layersBaked }"></i>
+              <!-- group 1: what the child still has to do (the earliest date first) -->
+              <div v-if="todoHomework.length > 0" data-test="homework-reminders">
+                <h3 class="hw-heading hw-heading-todo">Needs doing at home <span>{{ todoHomework.length }}</span></h3>
+                <div v-for="item in todoHomework" :key="item.id" class="hw-item" :class="daysSince(item.dueDate) > 0 ? 'hw-late' : 'hw-todo'" data-test="homework-card">
+                  <div class="hw-top">
+                    <span class="hw-title">{{ item.title }}</span>
+                    <span class="hw-tag">{{ dueLabel(item) }}</span>
+                  </div>
+                  <div class="small text-muted-cb">{{ item.subject }} &middot; due {{ formatDate(item.dueDate) }}</div>
+                  <div v-if="item.details" class="hw-details">{{ item.details }}</div>
                 </div>
-                <div class="small">{{ layersBaked }} of 9 layers baked. Each checked homework adds one.</div>
               </div>
 
-              <!-- reminders: what to ask the child about at home -->
-              <div v-if="todoHomework.length > 0" class="note" data-test="homework-reminders">
-                <strong>Remind {{ firstName(selectedChild.name) }} at home:</strong>
-                <ul class="mb-0 ps-4">
-                  <li v-for="item in todoHomework" :key="item.id">
-                    {{ item.title }} - due {{ formatDate(item.dueDate) }}
-                    <span v-if="daysSince(item.dueDate) > 0" class="text-danger fw-semibold">(late)</span>
-                  </li>
-                </ul>
+              <!-- group 2: handed in, nothing for the parent to do -->
+              <div v-if="waitingHomework.length > 0">
+                <h3 class="hw-heading hw-heading-waiting">Handed in, waiting for the volunteer to check <span>{{ waitingHomework.length }}</span></h3>
+                <div v-for="item in waitingHomework" :key="item.id" class="hw-item hw-waiting" data-test="homework-card">
+                  <div class="hw-top">
+                    <span class="hw-title">{{ item.title }}</span>
+                    <span class="hw-tag">Being checked</span>
+                  </div>
+                  <div class="small text-muted-cb">{{ item.subject }}<template v-if="item.completedAt"> &middot; handed in {{ formatDate(item.completedAt) }}</template></div>
+                </div>
               </div>
-              <div class="d-flex flex-column gap-2">
-                <div v-for="item in homework" :key="item.id" class="note">
-                  <HomeworkQuestCard :homework="item" mode="parent" />
+
+              <!-- group 3: finished, folded away until opened -->
+              <div v-if="checkedHomework.length > 0">
+                <h3 class="hw-heading hw-heading-done">Checked and finished <span>{{ checkedHomework.length }}</span></h3>
+                <button type="button" class="hw-toggle" :aria-expanded="showChecked" @click="showChecked = !showChecked">
+                  <span>{{ showChecked ? 'Hide' : 'Show' }} finished homework</span>
+                </button>
+                <div v-if="showChecked">
+                  <!-- tap a finished homework to open it: the result the volunteer wrote in the session form -->
+                  <details v-for="item in checkedHomework" :key="item.id" class="hw-item hw-done" data-test="homework-card">
+                    <summary>
+                      <span class="hw-title">{{ item.title }}</span>
+                      <span class="hw-score">{{ scoreOf(sessionFor(item)) || 'Done' }}</span>
+                    </summary>
+                    <div class="small text-muted-cb">
+                      {{ item.subject }}
+                      <template v-if="item.completedAt"> &middot; handed in {{ formatDate(item.completedAt) }}</template>
+                      &middot; +{{ item.points }} ⭐
+                    </div>
+
+                    <template v-if="sessionFor(item)">
+                      <div v-if="MOOD_WORDS[sessionFor(item).mood]" class="small mt-2">How {{ childName }} felt: {{ MOOD_WORDS[sessionFor(item).mood] }}</div>
+                      <div v-if="sessionFor(item).struggles && sessionFor(item).struggles.length" class="hw-box hw-box-tricky">
+                        <span class="hw-box-label">A bit tricky</span>
+                        {{ sessionFor(item).struggles.join('; ') }}
+                      </div>
+                      <div v-if="sessionFor(item).whatWorked" class="hw-box hw-box-helped">
+                        <span class="hw-box-label">What helped</span>
+                        {{ sessionFor(item).whatWorked }}
+                      </div>
+                      <div v-if="sessionFor(item).nextStep" class="hw-box hw-box-next">
+                        <span class="hw-box-label">Coming up next</span>
+                        {{ sessionFor(item).nextStep }}
+                      </div>
+                      <div v-if="sessionFor(item).notes" class="hw-box hw-box-note">
+                        <span class="hw-box-label">Note from the volunteer</span>
+                        "{{ sessionFor(item).notes }}"
+                      </div>
+                      <div v-if="sessionFor(item).photos && sessionFor(item).photos.length" class="hw-photos">
+                        <img v-for="(photo, number) in sessionFor(item).photos" :key="number" :src="photo" alt="Photo from the session" />
+                      </div>
+                    </template>
+                    <div v-else class="small text-muted-cb mt-2" data-test="no-result">No result recorded yet.</div>
+                  </details>
                 </div>
               </div>
             </div>
@@ -344,27 +469,10 @@ onMounted(async () => {
 
       </div>
 
-      <!-- below: the progress chart and the recent sessions -->
-      <div class="row g-4">
-        <div class="col-lg-7">
-          <SkillProgressChart :sessions="sessions" />
-        </div>
-        <div class="col-lg-5">
-          <div v-if="recentSessions.length > 0" class="cb-card topic-academic p-3 p-md-4" data-test="session-timeline">
-            <h2 class="h5 mb-3">Recent sessions</h2>
-            <ul class="timeline list-unstyled mb-0">
-              <li v-for="session in recentSessions" :key="session.id" class="timeline-item">
-                <div class="small text-muted-cb">{{ formatDate(session.date) }}</div>
-                <div class="fw-semibold">{{ session.subject }}: {{ session.topic }}</div>
-                <div>
-                  Got {{ session.correct }} out of {{ session.attempted }} right
-                  <span v-if="MOOD_WORDS[session.mood]" class="text-muted-cb">&middot; {{ MOOD_WORDS[session.mood] }}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <PeelCard title="Progress over time" icon="bi-graph-up-arrow" :initial-open="true">
+        <SkillProgressChart :sessions="sessions" />
+      </PeelCard>
+
     </template>
   </div>
 </template>

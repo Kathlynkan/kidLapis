@@ -43,6 +43,60 @@ test.describe('Child quests', () => {
   })
 })
 
+// ── Test Case 1: Quest verification ──────────────────────────────────────────
+// Feature: volunteer verifies a submitted quest (PUT /homework/:id/verify).
+// DB involvement: writes homework.status → 'verified' and awards berry points to the child.
+// Depends on the 'clicking I\'m done!' test above having run first on chromium,
+// which moves h_1 from 'assigned' → 'submitted'.
+test.describe('Quest verification (volunteer)', () => {
+  test('verifying a submitted quest removes the verify button', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'state-mutating — runs on chromium only')
+
+    await loginAs(page, 'volunteer')
+    await page.goto('/children/c_1')
+    await expect(page).toHaveURL(/\/children\/c_1/)
+
+    // The submitted quest (h_1) shows a "Verify & give points" button to volunteers.
+    // This button only appears when homework.status === 'submitted' in the DB.
+    const verifyBtn = page.locator('[data-test="verify-quest-btn"]').first()
+    await expect(verifyBtn).toBeVisible()
+    const countBefore = await page.locator('[data-test="verify-quest-btn"]').count()
+
+    await verifyBtn.click()
+
+    // PUT /homework/:id/verify writes to MongoDB: sets status → 'verified', adds points.
+    // The view reloads homework from the DB; one fewer verify button should appear.
+    await expect(page.locator('[data-test="verify-quest-btn"]')).toHaveCount(countBefore - 1)
+  })
+})
+
+// ── Test Case 2: API failure on ChildHomeView ─────────────────────────────────
+// Feature: the child's "My Quests" page handles a server error gracefully.
+// DB involvement: the page normally reads from MongoDB via GET /homework and
+//   GET /children/:id. Here we simulate the server being down (500) to verify
+//   the error state renders instead of a blank/crashed page.
+test.describe('ChildHomeView API failure', () => {
+  test('shows error state when the homework API returns 500', async ({ page }) => {
+    // Set up the intercept BEFORE navigation so it is in place when onMounted fires.
+    await page.route('**/homework*', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Database error' }),
+      }),
+    )
+
+    await loginAs(page, 'child')
+
+    // ChildHomeView catches the Promise.all rejection and sets error.value,
+    // which renders <StateMessage type="error"> → <div role="alert"> in the DOM.
+    await expect(page.locator('[role="alert"]')).toBeVisible()
+
+    // The quest cards must NOT appear — the page should not partially render.
+    await expect(page.locator('[data-test="homework-card"]')).toHaveCount(0)
+  })
+})
+
 test.describe('Leaderboard', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'child')

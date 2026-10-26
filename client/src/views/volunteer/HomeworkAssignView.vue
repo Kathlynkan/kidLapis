@@ -1,15 +1,5 @@
-<!-- =============================================================
-  Give homework to a child                            Owner: Ning Xuan
-  Route: /children/:id/homework/new
-  The homework then appears on the child's quest page (Jachin)
-  and on the parent page (Kat).
-  TODO (Ning Xuan):
-    [done] POST /homework with { childId, title, subject, details, dueDate, points }
-    [done] validation: title required, due date not in the past
-    [done] "suggest from next step": pre-fill title from the latest session's nextStep
-  Jachin: the volunteer can also pick a DECK of questions. The deck fills in the title, subject and instructions,
-  and the child answers the questions of the deck as a quiz on the quest page.
-============================================================= -->
+<!-- Give homework to a child                            Owner: Ning Xuan
+  Route: /children/:id/homework/new -->
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -27,7 +17,7 @@ const form = ref({
   childId: route.params.id,
   deckId: '', // the id of the picked deck (empty = no deck)
   title: '',
-  subject: 'Math',
+  subject: 'English',
   details: '',
   dueDate: '',
   points: 10,
@@ -120,7 +110,7 @@ async function handleSubmit() {
 
     <div class="row justify-content-center">
       <div class="col-lg-7">
-        <form class="cb-card p-4" @submit.prevent="handleSubmit">
+        <form class="cb-card p-4 px-5" @submit.prevent="handleSubmit">
           <div v-if="error" class="alert alert-warning small">{{ error }}</div>
 
           <!-- optional: a deck of questions. The child answers its questions as a quiz. -->
@@ -143,7 +133,7 @@ async function handleSubmit() {
 
           <div class="mb-3">
             <label class="form-label" for="title">Title</label>
-            <input id="title" v-model.trim="form.title" class="form-control" placeholder="e.g. Fraction addition worksheet" />
+            <input id="title" v-model.trim="form.title" class="form-control" placeholder="e.g. Fraction addition worksheet" data-test="hw-title" />
           </div>
           <div class="row g-3 mb-3">
             <div class="col-sm-4">
@@ -154,7 +144,7 @@ async function handleSubmit() {
             </div>
             <div class="col-sm-4">
               <label class="form-label" for="due">Due date</label>
-              <input id="due" v-model="form.dueDate" type="date" class="form-control" />
+              <input id="due" v-model="form.dueDate" type="date" class="form-control" data-test="hw-due" />
             </div>
             <div class="col-sm-4">
               <label class="form-label" for="points">Reward points</label>
@@ -171,7 +161,7 @@ async function handleSubmit() {
           </div>
           <div class="d-flex justify-content-end gap-2">
             <button type="button" class="btn btn-outline-secondary" @click="router.back()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Assign homework</button>
+            <button type="submit" class="btn btn-primary" data-test="hw-submit">Assign homework</button>
           </div>
         </form>
       </div>

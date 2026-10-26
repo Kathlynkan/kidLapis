@@ -7,6 +7,7 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.js',
   timeout: 30 * 1000,
   expect: { timeout: 5000 },
   fullyParallel: false, // tests share one JSON database, so run them one by one
