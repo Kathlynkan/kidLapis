@@ -65,7 +65,7 @@ async function logout() {
   <nav class="lapis-nav sticky-top">
     <div class="container lapis-nav-inner">
       <RouterLink class="lapis-brand" :to="auth.homePath">
-        <img src="/favicon.svg" alt="" width="26" height="26" />
+        <img src="/logo.webp" alt="" width="34" height="34" />
         Kids Lapis
       </RouterLink>
 
