@@ -242,9 +242,9 @@ onMounted(() => { // autofill form if edit form
 
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <form class="cb-card p-4 px-5" data-test="session-form" @submit.prevent="handleSubmit">
+        <form class="lapis-card p-4 px-5" data-test="session-form" @submit.prevent="handleSubmit">
           <!-- 
-          cb-card: custom class
+          lapis-card: custom class
           @submit: when form is submitted, call handleSubmit()
           .prevent: stop browser's default form behavior, else will interfere with Vue app 
           without .prevent: click submit > browser submit form > page reloads

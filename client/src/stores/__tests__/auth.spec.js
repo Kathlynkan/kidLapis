@@ -39,8 +39,8 @@ describe('auth store', () => {
     expect(auth.isLoggedIn).toBe(true)
     expect(auth.role).toBe('parent')
     expect(auth.homePath).toBe('/parent')
-    expect(sessionStorage.getItem('cb_token')).toBe('abc123')
-    expect(JSON.parse(sessionStorage.getItem('cb_user'))).toEqual(parent)
+    expect(sessionStorage.getItem('lapis_token')).toBe('abc123')
+    expect(JSON.parse(sessionStorage.getItem('lapis_user'))).toEqual(parent)
   })
 
   it('a failed login leaves you logged out', async () => {
@@ -49,7 +49,7 @@ describe('auth store', () => {
 
     await expect(auth.login('parent@kidslapis.sg', 'wrong')).rejects.toThrow('Incorrect')
     expect(auth.isLoggedIn).toBe(false)
-    expect(sessionStorage.getItem('cb_token')).toBe(null)
+    expect(sessionStorage.getItem('lapis_token')).toBe(null)
   })
 
   it('signup logs you straight in', async () => {
@@ -67,8 +67,8 @@ describe('auth store', () => {
   })
 
   it('remembers you after a page refresh (the saved session is read back)', () => {
-    sessionStorage.setItem('cb_token', 'saved-token')
-    sessionStorage.setItem('cb_user', JSON.stringify(parent))
+    sessionStorage.setItem('lapis_token', 'saved-token')
+    sessionStorage.setItem('lapis_user', JSON.stringify(parent))
 
     const auth = useAuthStore() // a new store = what happens on a page refresh
     expect(auth.isLoggedIn).toBe(true)
@@ -84,8 +84,8 @@ describe('auth store', () => {
     await auth.logout()
 
     expect(auth.isLoggedIn).toBe(false)
-    expect(sessionStorage.getItem('cb_token')).toBe(null)
-    expect(sessionStorage.getItem('cb_user')).toBe(null)
+    expect(sessionStorage.getItem('lapis_token')).toBe(null)
+    expect(sessionStorage.getItem('lapis_user')).toBe(null)
   })
 
   it('patchUser updates the saved user (e.g. after editing your profile)', async () => {
@@ -97,6 +97,6 @@ describe('auth store', () => {
 
     expect(auth.user.name).toBe('Mrs Wong Mei')
     expect(auth.user.role).toBe('parent') // the other fields stay
-    expect(JSON.parse(sessionStorage.getItem('cb_user')).name).toBe('Mrs Wong Mei')
+    expect(JSON.parse(sessionStorage.getItem('lapis_user')).name).toBe('Mrs Wong Mei')
   })
 })

@@ -1,6 +1,6 @@
 <!-- =============================================================
   Landing page (public).                              Owner: Kai Sen
-  Done: hero with an example parent update (built from cb-cards, so it
+  Done: hero with an example parent update (built from lapis-cards, so it
         matches the app and needs no image files)
         "How it works" follows the core flow: record -> summarise -> share -> continue
         layout checked from iPhone 6 (375px) to Bootstrap XL: cards stack on phones
@@ -76,7 +76,7 @@ const roles = [
           <h1 class="display-5 fw-heavy mb-3">
             When the volunteer changes, the child's progress shouldn't reset.
           </h1>
-          <p class="lead text-muted-cb mb-4">
+          <p class="lead lapis-muted mb-4">
             Kids Lapis turns volunteer session notes into a clear, regularly updated picture for
             parents: learning progress, mood, recurring struggles and what is helping.
           </p>
@@ -98,12 +98,12 @@ const roles = [
           <figure class="hero-preview mb-0" data-test="hero-preview">
             <figcaption class="visually-hidden">Example of a parent's daily update</figcaption>
 
-            <div class="cb-card cb-card-blue p-3 p-sm-4 handover-demo">
+            <div class="lapis-card lapis-card-blue p-3 p-sm-4 handover-demo">
               <div class="d-flex align-items-center gap-2 mb-3">
                 <span class="preview-avatar" aria-hidden="true">🦊</span>
                 <div>
                   <div class="fw-heavy">Ethan · P4</div>
-                  <div class="small text-muted-cb">Today at student care</div>
+                  <div class="small lapis-muted">Today at student care</div>
                 </div>
                 <span class="badge badge-accent ms-auto">AI summary</span>
               </div>
@@ -132,7 +132,7 @@ const roles = [
               </div>
             </div>
 
-            <div class="cb-card p-2 px-3 mt-2 ms-4 ms-sm-5 small preview-message">
+            <div class="lapis-card p-2 px-3 mt-2 ms-4 ms-sm-5 small preview-message">
               <i class="bi bi-chat-dots me-1"></i>
               <strong>Ms Grace:</strong> Ethan explained it to a friend today!
             </div>
@@ -146,12 +146,12 @@ const roles = [
     <h2 class="h3 text-center mb-4">How it works</h2>
     <div class="row g-3">
       <div v-for="(step, i) in steps" :key="step.title" class="col-sm-6 col-lg-3">
-        <div class="cb-card p-3 h-100" :class="`cb-card-${step.color}`" data-test="how-step">
+        <div class="lapis-card p-3 h-100" :class="`lapis-card-${step.color}`" data-test="how-step">
           <div class="d-flex align-items-center gap-2 mb-2">
             <div class="step-num">{{ i + 1 }}</div>
             <h3 class="h6 mb-0"><i class="bi me-1" :class="step.icon"></i>{{ step.title }}</h3>
           </div>
-          <p class="small text-muted-cb mb-0">{{ step.text }}</p>
+          <p class="small lapis-muted mb-0">{{ step.text }}</p>
         </div>
       </div>
     </div>
@@ -161,10 +161,10 @@ const roles = [
     <h2 class="h3 text-center mb-4">One app, four views</h2>
     <div class="row g-3">
       <div v-for="r in roles" :key="r.name" class="col-sm-6 col-lg-3">
-        <div class="cb-card p-3 h-100 text-center" :class="`cb-card-${r.color}`">
+        <div class="lapis-card p-3 h-100 text-center" :class="`lapis-card-${r.color}`">
           <i class="bi fs-2 text-primary" :class="r.icon"></i>
           <h3 class="h6 mt-2">{{ r.name }}</h3>
-          <p class="small text-muted-cb mb-0">{{ r.text }}</p>
+          <p class="small lapis-muted mb-0">{{ r.text }}</p>
         </div>
       </div>
     </div>

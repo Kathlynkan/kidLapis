@@ -1,25 +1,21 @@
 /* Styles for the parent home page (ParentHomeView.vue and ParentSocialDay.vue).
    Every rule starts with .parentpage so it only affects that page.
    Colours:
-     #414F67 navy       text and strong borders
-     #AED9D8 aqua       the main colour (top lines, tabs, selected button)
+     #414F67 navy       text
+     #AED9D8 aqua       the main colour (selected tab and button)
      #DDF0EF pale aqua  tiles, tags and small areas
      #EAF6F5 lightest   note boxes
      #CDE8D2 green      done
      #B7D8D7 teal       being checked
-     #F6D1AA peach      late
+     #F5B8B0 soft red   late
+     #FBE7A1 soft yellow still to do (due)
+     #F6D1AA peach      the star icon
      #F9F1E6 cream      the board
      #5E6C80 grey       small text
-     #CFE0DE            thin borders */
+     #CFE0DE            thin borders
+   Look: no dark outlines, soft corners (16px boxes, round pills) and a very light shadow. */
 
 /* ---------- the whole page ---------- */
-
-.parentpage {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #414F67;
-}
 
 .parentpage h1,
 .parentpage h2,
@@ -29,9 +25,8 @@
   text-shadow: none;
 }
 
-/* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
-.parentpage .lapis-page-header .page-title {
-  font-family: inherit;
+/* the sentence under the title is navy too */
+.parentpage .lapis-page-header .page-subtitle {
   color: #414F67;
 }
 
@@ -40,14 +35,42 @@
   font-size: 13px;
 }
 
-/* the small capital labels (above a note, above a line of a day) */
+/* the small labels (above a note, above a line of a day) */
 .parentpage .small-label {
   display: block;
   margin-bottom: 2px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+}
+
+/* the very light shadow under the boxes */
+.parentpage .tile-next,
+.parentpage .homework-row,
+.parentpage .day-card,
+.parentpage .board {
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
+}
+
+/* ---------- the drawn icons (LineIcon.vue) ---------- */
+
+.parentpage .line-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.parentpage .line-icon.small {
+  width: 14px;
+  height: 14px;
+}
+
+/* an icon in front of a few words */
+.parentpage .with-icon,
+.parentpage .mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* ---------- the child and the child buttons ---------- */
@@ -67,28 +90,23 @@
   gap: 10px;
 }
 
-.parentpage .child-name {
-  margin: 0;
-  font-size: 18px;
-}
-
-.parentpage .child-buttons {
+/* the round picture of the child: the first letter of the name */
+.parentpage .child-initial {
   display: flex;
-  gap: 6px;
-}
-
-.parentpage .child-button {
-  padding: 4px 12px;
-  border: 1px solid #414F67;
-  background: transparent;
-  color: #414F67;
-  font: inherit;
-  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #AED9D8;
+  font-size: 16px;
   font-weight: 700;
 }
 
-.parentpage .child-button.selected {
-  background: #AED9D8;
+.parentpage .child-name {
+  margin: 0;
+  font-size: 18px;
 }
 
 /* ---------- the three tiles ---------- */
@@ -102,8 +120,8 @@
 .parentpage .tile {
   flex: 1;
   min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid #414F67;
+  padding: 10px 12px;
+  border-radius: 16px;
   background: #DDF0EF;
 }
 
@@ -117,28 +135,57 @@
   font-size: 12px;
 }
 
+/* late is a soft red, still to do is a soft yellow */
 .parentpage .tile-late {
-  background: #F6D1AA;
+  background: #F5B8B0;
+}
+
+.parentpage .tile-todo {
+  background: #FBE7A1;
 }
 
 .parentpage .tile-next {
   background: #FFFFFF;
 }
 
+/* the tiles you can press (they take you to the homework) */
+.parentpage .tile-link {
+  border: 0;
+  color: #414F67;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* a little darker when the mouse is over it */
+.parentpage .tile-link:hover {
+  background: #C9E4E2;
+}
+
+.parentpage .tile-todo.tile-link:hover {
+  background: #F5DA84;
+}
+
+.parentpage .tile-late.tile-link:hover {
+  background: #EDA39A;
+}
+
 /* ---------- today at a glance (the AI summary) ---------- */
 
 .parentpage .glance {
   margin-bottom: 16px;
-  padding: 10px 12px;
-  border: 1px solid #AED9D8;
-  border-left: 4px solid #AED9D8;
+  padding: 14px 16px;
+  border-radius: 18px;
   background: #DDF0EF;
   font-size: 14px;
 }
 
 .parentpage .glance .small-label {
   color: #5E6C80;
-  letter-spacing: 0.06em;
+}
+
+.parentpage .glance .chip {
+  background: #FFFFFF;
 }
 
 .parentpage .glance-line {
@@ -148,21 +195,26 @@
 /* ---------- the board and its tabs ---------- */
 
 .parentpage .board {
-  border: 1px solid #CFE0DE;
-  border-top: 6px solid #AED9D8;
+  padding: 14px;
+  border-radius: 22px;
   background: #F9F1E6;
+  scroll-margin-top: 12px; /* when we scroll to the board it stops a little below the top of the screen */
 }
 
+/* the tabs: two pills in a pale track */
 .parentpage .tabs {
   display: flex;
-  border-bottom: 1px solid #CFE0DE;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #DDF0EF;
 }
 
 .parentpage .tab {
   flex: 1;
-  min-height: 44px;
+  min-height: 40px;
   border: 0;
-  border-bottom: 3px solid #AED9D8;
+  border-radius: 999px;
   background: transparent;
   color: #414F67;
   font: inherit;
@@ -171,13 +223,15 @@
 }
 
 .parentpage .tab.active {
-  background: #DDF0EF;
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(65, 79, 103, 0.15);
 }
 
 .parentpage .tab-count {
   display: inline-block;
   margin-left: 6px;
-  padding: 0 6px;
+  padding: 0 7px;
+  border-radius: 999px;
   background: #414F67;
   color: #F9F1E6;
   font-size: 12px;
@@ -185,24 +239,22 @@
 }
 
 .parentpage .board-panel {
-  padding: 12px;
+  padding: 4px 0 0;
 }
 
 .parentpage .group-heading {
   display: flex;
   justify-content: space-between;
   margin: 14px 0 6px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 /* the white rows: a homework, or a day of the social tab */
 .parentpage .homework-row,
 .parentpage .day-card {
-  margin-bottom: 8px;
-  border: 1px solid #CFE0DE;
+  margin-bottom: 10px;
+  border-radius: 18px;
   background: #FFFFFF;
 }
 
@@ -212,7 +264,8 @@
   min-height: 44px;
   margin-bottom: 8px;
   padding: 10px;
-  border: 1px solid #AED9D8;
+  border: 0;
+  border-radius: 999px;
   background: #DDF0EF;
   color: #414F67;
   font: inherit;
@@ -234,20 +287,23 @@
   display: block;
 }
 
+/* a line with an icon in front of it stays in one row */
+.parentpage summary .muted.with-icon {
+  display: flex;
+}
+
 /* the box with a label and a note (what helped, a note from the volunteer ...) */
 .parentpage .note-box {
   margin-top: 8px;
-  padding: 8px 10px;
-  border-left: 4px solid #AED9D8;
+  padding: 10px 14px;
+  border-radius: 14px;
   background: #EAF6F5;
 }
 
 /* ---------- the homework rows ---------- */
 
 .parentpage .homework-row {
-  padding: 9px 11px;
-  border-color: #AED9D8;
-  border-left-width: 5px;
+  padding: 12px 16px;
 }
 
 .parentpage .row-top {
@@ -262,7 +318,8 @@
 
 .parentpage .row-tag,
 .parentpage .row-score {
-  padding: 1px 8px;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #DDF0EF;
   font-size: 12px;
   font-weight: 700;
@@ -279,8 +336,12 @@
   font-size: 13px;
 }
 
+.parentpage .row-todo .row-tag {
+  background: #FBE7A1;
+}
+
 .parentpage .row-late .row-tag {
-  background: #F6D1AA;
+  background: #F5B8B0;
 }
 
 .parentpage .row-waiting .row-tag {
@@ -319,18 +380,17 @@
   width: 96px;
   height: 72px;
   object-fit: cover;
-  border: 1px solid #CFE0DE;
+  border-radius: 12px;
 }
 
 /* ---------- the social tab ---------- */
 
 .parentpage .day-card {
-  padding: 12px;
-  border-top: 4px solid #AED9D8;
+  padding: 14px 16px;
 }
 
 .parentpage .day-card-small {
-  padding: 9px 12px;
+  padding: 11px 16px;
 }
 
 .parentpage .day-head {
@@ -347,8 +407,8 @@
 
 .parentpage .mood-chip {
   flex-shrink: 0;
-  padding: 2px 10px;
-  border: 1px solid #AED9D8;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #DDF0EF;
   font-size: 12px;
   font-weight: 700;
@@ -375,9 +435,8 @@
 .parentpage .chip {
   display: inline-block;
   margin: 0 4px 4px 4px;
-  padding: 2px 10px;
-  border: 1px solid #AED9D8;
-  border-radius: 12px;
+  padding: 2px 12px;
+  border-radius: 999px;
   background: #DDF0EF;
   font-size: 13px;
 }
@@ -397,9 +456,6 @@
   width: 26px;
   height: 26px;
   flex-shrink: 0;
-  border-radius: 50%;
-  background: #DDF0EF;
-  font-size: 13px;
 }
 
 /* photos: one big, two small */
@@ -414,7 +470,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border: 1px solid #CFE0DE;
+  border-radius: 12px;
 }
 
 .parentpage .day-photo-big {
@@ -438,6 +494,8 @@
 
 .parentpage .day-photo-last {
   position: relative;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .parentpage .day-photo-more {
@@ -461,11 +519,4 @@
   .parentpage .tile {
     flex-basis: 40%;
   }
-}
-
-/* ---------- the background ---------- */
-
-/* the dots behind the pages come from main.css. A parent sees a plain background instead. */
-body:has(.role-parent)::after {
-  display: none;
 }

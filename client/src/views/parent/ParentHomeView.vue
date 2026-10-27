@@ -1,13 +1,15 @@
 <!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
+import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
-import '@/assets/parentpage.css' // the styles of this page
+import '@/css/parentshared.css' // what the parent pages have in common
+import '@/css/parentpage.css' // the styles of this page
 
 const auth = useAuthStore()
 
@@ -32,10 +34,18 @@ const TABS = [
 
 // how the child felt, in simple words for a parent
 const MOOD_WORDS = {
-  happy: '😊 Happy',
-  okay: '🙂 Doing okay',
-  tired: '😴 A bit tired',
-  frustrated: '😕 Found it hard',
+  happy: 'Happy',
+  okay: 'Doing okay',
+  tired: 'A bit tired',
+  frustrated: 'Found it hard',
+}
+
+// the face icon that goes with each mood
+const MOOD_FACES = {
+  happy: 'face-happy',
+  okay: 'face-okay',
+  tired: 'face-tired',
+  frustrated: 'face-hard',
 }
 
 // the number of each weekday, the way JavaScript counts them (Sunday is 0)
@@ -44,6 +54,9 @@ const DAY_NUMBERS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 // ---------- values worked out from the things above ----------
 // the child we are showing now (found in the list by its id)
 const selectedChild = computed(() => children.value.find((child) => child.id === selectedId.value))
+
+// the first letter of the child's name, shown in the round picture
+const childInitial = computed(() => (selectedChild.value ? selectedChild.value.name.charAt(0).toUpperCase() : ''))
 
 // the child's first name, used in the sentences
 const childName = computed(() => (selectedChild.value ? firstName(selectedChild.value.name) : ''))
@@ -91,7 +104,7 @@ function rowMeta(item, groupKey) {
   if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
   const handedIn = item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : ''
   if (groupKey === 'waiting') return item.subject + handedIn
-  return item.subject + handedIn + ' · +' + item.points + ' ⭐'
+  return item.subject + handedIn
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -193,11 +206,18 @@ const summaryTiles = computed(() => {
   const next = nextSession.value
   const nextValue = next ? formatDate(next.date) : 'Not set yet' // always a date, like Mon, 26 Oct
   return [
-    { value: late > 0 ? late + ' late' : 'On time', label: late > 0 ? 'Past its date' : 'No late homework', late: late > 0 },
-    { value: todoHomework.value.length - late + ' to do', label: 'Remind at home' },
-    { value: nextValue, label: next && next.volunteer ? 'Next session · ' + firstName(next.volunteer) : 'Next session', next: true },
+    { value: late > 0 ? late + ' late' : 'On time', label: late > 0 ? 'Needs a catch-up' : 'No late homework', late: late > 0, goToHomework: true },
+    { value: todoHomework.value.length - late + ' to do', label: 'To do at home', todo: todoHomework.value.length - late > 0, goToHomework: true },
+    { value: nextValue, label: next && next.volunteer ? 'Next session with ' + firstName(next.volunteer) : 'Next session', next: true },
   ]
 })
+
+// pressing the "late" or "to do" tile: open the homework tab and scroll down to it
+async function showHomework() {
+  openTab.value = 'homework'
+  await nextTick() // wait until the tab is on the screen
+  document.getElementById('homework-board').scrollIntoView({ behavior: 'instant', block: 'start' })
+}
 
 // ---------- ask the server for the AI summary ----------
 async function loadHandover(childId) {
@@ -254,7 +274,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 parentpage">
-    <PageHeader :title="`Hello ${firstName(auth.user.name)}`" subtitle="Stay up to date with your child's learning and social life at student care." />
+    <PageHeader :title="`Hello, ${firstName(auth.user.name)}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
 
     <!-- one of these three messages shows while loading, on an error, or when there is no child -->
     <StateMessage v-if="loading" type="loading" />
@@ -265,10 +285,10 @@ onMounted(async () => {
       <!-- the child's name and level, and the child buttons (only when the parent has 2 or more children) -->
       <div class="child-row" data-test="child-switcher">
         <div class="child-info">
-          <span class="avatar">{{ selectedChild.avatar }}</span>
+          <span class="child-initial">{{ childInitial }}</span>
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; ⭐ {{ selectedChild.points }} stars earned</div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><LineIcon name="star" small />{{ selectedChild.points }} stars earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">
@@ -287,15 +307,24 @@ onMounted(async () => {
 
       <!-- three small tiles: what needs attention -->
       <div class="summary-tiles" data-test="status-strip">
-        <div v-for="tile in summaryTiles" :key="tile.label" class="tile" :class="{ 'tile-late': tile.late, 'tile-next': tile.next }">
+        <!-- the late and the to do tiles are buttons: they take the parent to the homework -->
+        <component
+          :is="tile.goToHomework ? 'button' : 'div'"
+          v-for="tile in summaryTiles"
+          :key="tile.label"
+          class="tile"
+          :class="{ 'tile-late': tile.late, 'tile-todo': tile.todo, 'tile-next': tile.next, 'tile-link': tile.goToHomework }"
+          :type="tile.goToHomework ? 'button' : null"
+          @click="tile.goToHomework && showHomework()"
+        >
           <strong>{{ tile.value }}</strong>
           <span>{{ tile.label }}</span>
-        </div>
+        </component>
       </div>
 
       <!-- today at a glance: the AI summary -->
       <div class="glance" data-test="handover-card">
-        <span class="small-label">Today at a glance</span>
+        <span class="small-label">How things are going</span>
         <p v-if="handoverLoading" class="muted">Getting the update...</p>
         <template v-else-if="summaryLines.length > 0">
           <p v-for="line in summaryLines" :key="line.label" class="glance-line">
@@ -310,7 +339,7 @@ onMounted(async () => {
       </div>
 
       <!-- the board with two tabs -->
-      <div class="board" data-test="notice-board">
+      <div id="homework-board" class="board" data-test="notice-board">
         <div class="tabs">
           <button v-for="tab in TABS" :key="tab.id" type="button" class="tab" :class="{ active: openTab === tab.id }" @click="openTab = tab.id">
             {{ tab.label }}
@@ -343,13 +372,14 @@ onMounted(async () => {
                   </span>
                   <span v-if="group.key === 'done' && scoreOf(sessionFor(item))" class="row-score">{{ scoreOf(sessionFor(item)) }}</span>
                   <span class="muted">{{ rowMeta(item, group.key) }}</span>
+                  <span v-if="group.key === 'done'" class="muted with-icon"><LineIcon name="star" small />{{ item.points }} stars</span>
                 </summary>
 
                 <!-- what the volunteer wrote down for it -->
                 <p v-if="group.key === 'todo' && item.details" class="row-details">{{ item.details }}</p>
                 <template v-if="group.key === 'done'">
                   <template v-if="sessionFor(item)">
-                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details">How {{ childName }} felt: {{ MOOD_WORDS[sessionFor(item).mood] }}</p>
+                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <LineIcon :name="MOOD_FACES[sessionFor(item).mood]" small />{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
                     <div v-for="note in resultNotes(sessionFor(item))" :key="note.label" class="note-box">
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
@@ -376,7 +406,7 @@ onMounted(async () => {
                   <h3 class="day-title">{{ daysSince(sessions[0].date) === 0 ? 'Today at student care' : 'Latest day at student care' }}</h3>
                   <div class="muted">{{ formatDate(sessions[0].date) }}<template v-if="sessions[0].volunteerName"> &middot; with {{ sessions[0].volunteerName }}</template></div>
                 </div>
-                <span class="mood-chip">{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
+                <span class="mood-chip"><LineIcon v-if="MOOD_FACES[sessions[0].mood]" :name="MOOD_FACES[sessions[0].mood]" small />{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
               </div>
               <ParentSocialDay :session="sessions[0]" :child-name="childName" />
             </div>
@@ -387,7 +417,7 @@ onMounted(async () => {
               <summary>
                 <span class="day-head">
                   <strong>{{ formatDate(session.date) }}</strong>
-                  <span class="mood-chip">{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
+                  <span class="mood-chip"><LineIcon v-if="MOOD_FACES[session.mood]" :name="MOOD_FACES[session.mood]" small />{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
                 </span>
                 <span v-if="activitiesOf(session).length > 0" class="muted">{{ activitiesOf(session).join(', ') }}</span>
               </summary>

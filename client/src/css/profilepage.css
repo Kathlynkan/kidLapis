@@ -1,0 +1,151 @@
+/* Styles for the profile page (ProfileView.vue), in the same colours as the parent page.
+   The profile page is shared by every role, so every rule starts with .role-parent .profilepage and only a parent sees these colours.
+   The one exception is the round letter picture (.profile-initial): it is for every role, in the colour of that role.
+   Colours:
+     #414F67 navy       text
+     #AED9D8 aqua       the main colour (buttons, the box you type in when it is active)
+     #DDF0EF pale aqua  small areas
+     #CDE8D2 green      saved
+     #F6D1AA peach      an error
+     #F9F1E6 cream      the cards
+     #5E6C80 grey       small text
+     #CFE0DE            thin borders
+   Look: no dark outlines, soft corners and round pills, like the parent page. */
+
+/* the round picture with the first letter of the name. This one is for every role, in the colour of that role. */
+.profilepage .profile-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--role-accent, #AED9D8);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ---------- the whole page ---------- */
+
+.role-parent .profilepage .lapis-muted {
+  color: #5E6C80;
+}
+
+/* ---------- the cards (PeelCard.vue) ---------- */
+
+.role-parent .profilepage .peel-card {
+  border: 0;
+  border-radius: 22px;
+  background: #F9F1E6;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
+  overflow: hidden;
+}
+
+/* the little stripe on the edge of a shared card is not used here */
+.role-parent .profilepage .peel-card::before {
+  display: none;
+}
+
+.role-parent .profilepage .peel-header,
+.role-parent .profilepage .peel-header:hover {
+  background: transparent;
+}
+
+.role-parent .profilepage .peel-card--open .peel-header {
+  border-bottom: 1px solid #CFE0DE;
+}
+
+.role-parent .profilepage .peel-title {
+  color: #414F67;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.role-parent .profilepage .peel-arrow {
+  color: #414F67;
+}
+
+/* ---------- the boxes you type in ---------- */
+
+.role-parent .profilepage .form-label {
+  color: #414F67;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.role-parent .profilepage .form-control {
+  border: 1px solid #CFE0DE;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: #414F67;
+  box-shadow: none;
+}
+
+.role-parent .profilepage .form-control:focus {
+  border-color: #AED9D8;
+  box-shadow: 0 0 0 3px #AED9D8;
+}
+
+.role-parent .profilepage .badge-soft {
+  border: 0;
+  border-radius: 999px;
+  background: #DDF0EF;
+  color: #414F67;
+}
+
+/* ---------- the buttons: Save, Cancel and Log out ---------- */
+
+.role-parent .profilepage .btn {
+  border: 0;
+  font-family: inherit;
+  border-radius: 999px;
+  padding: 6px 20px;
+  box-shadow: none;
+  color: #414F67;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.role-parent .profilepage .btn-outline-secondary {
+  background: #DDF0EF;
+}
+
+.role-parent .profilepage .btn-primary {
+  background: #AED9D8;
+}
+
+.role-parent .profilepage .btn-outline-secondary:hover {
+  background: #CFE7E5;
+}
+
+.role-parent .profilepage .btn-primary:hover {
+  background: #9BCFCE;
+}
+
+/* the line above the Log out button */
+.role-parent .profilepage .border-top {
+  border-color: #CFE0DE;
+}
+
+/* ---------- the messages after you save ---------- */
+
+.role-parent .profilepage .alert {
+  border: 0;
+  border-radius: 14px;
+  color: #414F67;
+}
+
+.role-parent .profilepage .alert-success {
+  background: #CDE8D2;
+}
+
+.role-parent .profilepage .alert-danger {
+  background: #F6D1AA;
+}

@@ -24,8 +24,3 @@ client/playwright/.cache/
 .idea
 .DS_Store
 *.log
-
-# Cloudflare build output
-server/.cf/
-cloudflare/pages/site/
-.wrangler/

@@ -37,7 +37,7 @@ const open = ref(true)
 </script>
 
 <template>
-  <div class="cb-card cb-card-blue handover-card" data-test="handover-card">
+  <div class="lapis-card lapis-card-blue handover-card" data-test="handover-card">
     <button type="button" class="handover-header" :aria-expanded="String(open)" @click="open = !open">
       <div class="d-flex flex-wrap align-items-center gap-2">
         <h2 class="handover-title mb-0">
@@ -89,7 +89,7 @@ const open = ref(true)
           </template>
         </dl>
 
-        <p v-else class="small text-muted-cb mb-0">No handover available yet.</p>
+        <p v-else class="small lapis-muted mb-0">No handover available yet.</p>
       </div>
     </div>
   </div>
@@ -188,7 +188,7 @@ const open = ref(true)
 }
 
 .handover-key {
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -196,7 +196,7 @@ const open = ref(true)
 }
 
 .loading-msg {
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
   font-weight: 600;
   font-size: 0.9rem;
 }

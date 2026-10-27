@@ -82,7 +82,7 @@ onMounted(async () => {
         >
           <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
         </div>
-        <div class="small text-muted-cb mt-1">
+        <div class="small lapis-muted mt-1">
           {{ level.progress }}/100 to Level {{ level.level + 1 }}
         </div>
       </div>
@@ -110,14 +110,14 @@ onMounted(async () => {
         <div
           v-for="b in BADGES"
           :key="b.id"
-          class="cb-card p-3 text-center badge-tile"
+          class="lapis-card p-3 text-center badge-tile"
           :class="{ 'badge-earned': earnedIds.has(b.id) }"
           :title="b.rule"
         >
           <div class="fs-2">{{ b.icon }}</div>
           <div class="small fw-bold">{{ b.name }}</div>
           <div v-if="earnedIds.has(b.id)" class="x-small text-success fw-bold mt-1">Earned!</div>
-          <div v-else class="x-small text-muted-cb mt-1">{{ b.rule }}</div>
+          <div v-else class="x-small lapis-muted mt-1">{{ b.rule }}</div>
         </div>
       </div>
     </template>
@@ -127,7 +127,7 @@ onMounted(async () => {
 <style scoped>
 .hero-card {
   background: var(--role-accent-soft, var(--lapis-cream));
-  border-radius: var(--cb-radius);
+  border-radius: var(--lapis-radius);
 }
 
 .badge-tile {

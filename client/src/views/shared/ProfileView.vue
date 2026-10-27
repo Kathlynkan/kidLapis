@@ -5,13 +5,15 @@
   Child:      avatar picker (name is managed by the teacher).
 ============================================================= -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
+import '@/css/parentshared.css' // what the parent pages have in common
+import '@/css/profilepage.css' // the colours of this page for a parent
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -30,6 +32,9 @@ const skills = ref([...(auth.user?.skills || [])])
 const availability = ref([...(auth.user?.availability || [])])
 const avatar = ref('🙂')
 
+// the first letter of the name (not of a title like Mrs), shown in a round picture
+const initial = computed(() => (auth.user?.name || '').replace(/^(mr|mrs|ms|mdm|miss|dr)\.?\s+/i, '').charAt(0).toUpperCase())
+
 const loading = ref(false)
 const success = ref('')
 const error = ref('')
@@ -45,6 +50,12 @@ onMounted(async () => {
 
 function cancel() {
   router.back() // return user to wherever they came from
+}
+
+// log out and go to the login page
+async function logout() {
+  await auth.logout()
+  router.push('/login')
 }
 
 async function save() {
@@ -99,7 +110,7 @@ async function save() {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 profilepage">
     <PageHeader title="My Profile" />
 
     <div class="row justify-content-center">
@@ -113,10 +124,11 @@ async function save() {
           <!-- Account info -->
           <PeelCard title="Account" icon="bi-person-circle" :initial-open="true">
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span class="fs-1 lh-1">{{ auth.role === 'child' ? avatar : '👤' }}</span>
+              <span v-if="auth.role === 'child'" class="fs-1 lh-1">{{ avatar }}</span>
+              <span v-else class="profile-initial">{{ initial }}</span>
               <div>
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
-                <div class="small text-muted-cb">{{ auth.user?.email }}</div>
+                <div class="small lapis-muted">{{ auth.user?.email }}</div>
                 <span class="badge badge-soft text-capitalize mt-1">{{ auth.role }}</span>
               </div>
             </div>
@@ -151,7 +163,7 @@ async function save() {
 
           <!-- Change password (not for child — teacher manages child accounts) -->
           <PeelCard v-if="auth.role !== 'child'" title="Change password" icon="bi-shield-lock" :initial-open="false">
-            <p class="small text-muted-cb mb-3">Leave blank to keep your current password.</p>
+            <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
             <div class="mb-3">
               <label for="current-pw" class="form-label">Current password</label>
@@ -231,6 +243,11 @@ async function save() {
           </div>
 
         </form>
+
+        <!-- log out: at the bottom of the page -->
+        <div class="mt-4 pt-3 border-top">
+          <button type="button" class="btn btn-outline-secondary" data-test="logout" @click="logout">Log out</button>
+        </div>
       </div>
     </div>
   </div>

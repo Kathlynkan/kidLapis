@@ -22,11 +22,11 @@ function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
-  <div class="cb-card cb-card-lime cb-card-top p-3" data-test="session-card">
+  <div class="lapis-card lapis-card-lime lapis-card-top p-3" data-test="session-card">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
       <div>
         <strong style="color:var(--lapis-plum)">{{ session.subject }} - {{ session.topic }}</strong>
-        <div class="small" style="color:var(--cb-muted)">
+        <div class="small" style="color:var(--lapis-muted)">
           {{ formatDate(session.date) }} &middot; by {{ session.volunteerName }}
           <span v-if="mood" class="chip chip-social ms-1">{{ mood.emoji }} {{ mood.label }}</span>
         </div>

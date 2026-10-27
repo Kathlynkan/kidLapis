@@ -32,7 +32,7 @@ defineProps({
 }
 
 .page-subtitle {
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
   font-weight: 600;
   font-size: 0.95rem;
 }

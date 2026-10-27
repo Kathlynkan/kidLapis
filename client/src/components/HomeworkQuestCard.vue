@@ -18,7 +18,7 @@ const isOverdue = computed(
 
 <template>
   <div
-    class="cb-card cb-card-yellow cb-card-top p-3 h-100 d-flex flex-column"
+    class="lapis-card lapis-card-yellow lapis-card-top p-3 h-100 d-flex flex-column"
     data-test="homework-card"
     :style="isOverdue ? 'border-color:var(--topic-alert)' : ''"
   >
@@ -30,7 +30,7 @@ const isOverdue = computed(
       >+{{ homework.points }} ⭐</span>
     </div>
 
-    <div class="small mb-2" style="color:var(--cb-muted)">
+    <div class="small mb-2" style="color:var(--lapis-muted)">
       {{ homework.subject }} &middot; due {{ formatDate(homework.dueDate) }}
       <span
         v-if="isOverdue"
@@ -50,7 +50,7 @@ const isOverdue = computed(
       <p
         v-if="mode === 'child' && homework.status === 'submitted'"
         class="small mb-0 mt-1"
-        style="color:var(--cb-muted)"
+        style="color:var(--lapis-muted)"
         data-test="waiting-message"
       >
         ⏳ Your volunteer will check this — then you'll get your ⭐ stars!

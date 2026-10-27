@@ -3,11 +3,12 @@
   Shows (only what the volunteer filled in): photos, what the child did, the meal,
   getting along with others, something positive and a note from the volunteer.
   Props:  session (Object), childName (String)
-  Its styles are in assets/parentpage.css
+  Its styles are in css/parentpage.css
 ============================================================= -->
 <script setup>
 import { computed } from 'vue'
 import { firstName } from '@/utils/format' // small helper for names
+import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 
 const props = defineProps({
   session: { type: Object, required: true },
@@ -29,9 +30,9 @@ const activityList = computed(() => {
 // the short lines, each with an icon (a line is left out when the volunteer did not fill it in)
 const lines = computed(() => {
   const all = [
-    { icon: '🍱', label: 'Meal', text: props.session.meal },
-    { icon: '🤝', label: 'Getting along with others', text: props.session.interaction },
-    { icon: '⭐', label: 'Something positive', text: props.session.behaviour },
+    { icon: 'bowl', label: 'Meal', text: props.session.meal },
+    { icon: 'people', label: 'Getting along with others', text: props.session.interaction },
+    { icon: 'star', label: 'Something positive', text: props.session.behaviour },
   ]
   return all.filter((line) => line.text)
 })
@@ -74,7 +75,7 @@ const empty = computed(() => {
 
     <!-- the short lines -->
     <div v-for="line in lines" :key="line.label" class="day-line">
-      <span class="day-icon">{{ line.icon }}</span>
+      <span class="day-icon"><LineIcon :name="line.icon" /></span>
       <div><span class="small-label">{{ line.label }}</span>{{ line.text }}</div>
     </div>
 

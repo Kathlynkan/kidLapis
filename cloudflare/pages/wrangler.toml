@@ -1,8 +1,0 @@
-# The web link: https://kids-lapis-wad2g4.pages.dev
-name = "kidslapis"
-pages_build_output_dir = "./site"
-compatibility_date = "2026-09-01"
-
-[[services]]
-binding = "API"
-service = "kids-lapis-api"

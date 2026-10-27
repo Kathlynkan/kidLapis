@@ -13,7 +13,7 @@ const open = ref(props.initialOpen)
 </script>
 
 <template>
-  <div class="peel-card cb-card mb-4" :class="{ 'peel-card--open': open }">
+  <div class="peel-card lapis-card mb-4" :class="{ 'peel-card--open': open }">
     <button
       type="button"
       class="peel-header"
@@ -41,7 +41,7 @@ const open = ref(props.initialOpen)
 }
 
 /* Header uses the lapis strip as a background strip at the top
-   (already handled by .cb-card::before) then cream body */
+   (already handled by .lapis-card::before) then cream body */
 .peel-header {
   width: 100%;
   display: flex;

@@ -98,15 +98,15 @@ function trendLabel(sorted) {
 </script>
 
 <template>
-  <div class="cb-card p-3" data-test="skill-progress-chart">
+  <div class="lapis-card p-3" data-test="skill-progress-chart">
     <h2 class="h6 mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Progress over time</h2>
-    <p v-if="sessions.length === 0" class="small text-muted-cb mb-0">No data yet.</p>
+    <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
     <template v-else>
       <div style="height: 220px; position: relative">
         <Line :data="chartData" :options="chartOptions" />
       </div>
       <ul class="list-unstyled small mt-3 mb-0" data-test="chart-summary">
-        <li v-for="s in summaries" :key="s.topic" class="text-muted-cb">
+        <li v-for="s in summaries" :key="s.topic" class="lapis-muted">
           <strong>{{ s.topic }}:</strong> {{ s.text }}
         </li>
       </ul>

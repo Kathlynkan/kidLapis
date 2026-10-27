@@ -7,7 +7,10 @@
 
 /* ── Palette tokens ─────────────────────────────────────────── */
 :root {
-  --band: 16px;
+  /* The colours of the layers of the cake: the stripes under the navbar and the colour of each role.
+     To add a layer: add its colour here and its name to LAYERS in NavBar.vue. */
+  --layer-parent:    #AED9D8;
+  --layer-volunteer: #9BD3B2;
 
   --lapis-pink:   #E8A0B8; /* rose pink — children */
   --lapis-cream:  #FBF8F3; /* coconut white */
@@ -28,10 +31,6 @@
   --lapis-orange-dark: #C07838;
   --lapis-purple-dark: #8068A8;
 
-  --lapis-apricot: #EBCDB2;
-  --lapis-mint:    #C5DDB9;
-  --lapis-sky:     #B9D9E6;
-
   /* ── Semantic topic colours ──
      children/people = pink, sessions/learning = lime,
      homework/tasks = yellow, messages/communication = blue */
@@ -45,10 +44,7 @@
   --topic-schedule-soft:  #E8F5DC;
   --topic-messages:       #88C0D8;
   --topic-messages-soft:  #DFF0F8;
-  --topic-highlight:      #F5DF98;
-  --topic-highlight-soft: #FBF5DC;
   --topic-alert:          #E8A0B8;
-  --topic-alert-soft:     #FAE8F2;
 
   /* ── PSLE subject colours ──
      English = sky blue, Math = amber, Science = yellow, Mother Tongue = coral */
@@ -61,21 +57,11 @@
   --subject-mother-tongue:      #E8906C;
   --subject-mother-tongue-soft: #FBE4D8;
 
-  /* Legacy cb tokens */
-  --cb-primary:      var(--lapis-lime);
-  --cb-primary-dark: #6E9A63;
-  --cb-primary-soft: #E8F0E3;
-  --cb-accent:       var(--lapis-yellow);
-  --cb-accent-soft:  #FAF1F4;
-  --cb-ruby:         var(--lapis-pink);
-  --cb-ruby-soft:    #FDE3EE;
-  --cb-danger-soft:  #FFE1DE;
-  --cb-bg:           var(--lapis-cream);
-  --cb-surface:      var(--lapis-cream);
-  --cb-text:         var(--lapis-plum);
-  --cb-muted:        #8D7F77;
-  --cb-border:       var(--lapis-cream-dark);
-  --cb-radius:       0px;
+  /* Older tokens, still used by the cards and the muted text */
+  --lapis-primary:      var(--lapis-lime);
+  --lapis-primary-soft: #E8F0E3;
+  --lapis-muted:        #8D7F77;
+  --lapis-radius:       0px;
 
   /* Bootstrap colour overrides */
   --bs-primary:           var(--lapis-pink);
@@ -106,17 +92,6 @@ html, body {
   color: var(--lapis-plum);
 }
 
-/* Speckle: reads as steamed cake texture */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: radial-gradient(circle, rgba(58, 10, 42, 0.06) 1px, transparent 1px);
-  background-size: 12px 12px;
-}
-
 /* ── App shell ──────────────────────────────────────────────── */
 #app {
   min-height: 100vh;
@@ -140,11 +115,11 @@ body::after {
 }
 
 /* ── Role accent colours ────────────────────────────────────── */
-.role-child     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
-.role-parent    { --role-accent: #AED9D8;             --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
-.role-volunteer { --role-accent: var(--lapis-lime);   --role-accent-soft: #EAF5E0; --role-accent-dark: var(--lapis-lime-dark); }
-.role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
+.role-child,
 .role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
+.role-parent    { --role-accent: var(--layer-parent);    --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
+.role-volunteer { --role-accent: var(--layer-volunteer); --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
+.role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
 
 /* ── Typography ─────────────────────────────────────────────── */
 h1, h2, h3, .fw-heavy {
@@ -160,44 +135,30 @@ h4, h5, h6 {
   color: var(--lapis-plum);
 }
 
-.text-muted-cb { color: var(--cb-muted); }
+.lapis-muted { color: var(--lapis-muted); }
 
 /* ── Cards ──────────────────────────────────────────────────── */
-.cb-card {
+.lapis-card {
   position: relative;
   background: var(--lapis-cream);
   border: 1px solid var(--lapis-cream-dark);
-  border-radius: var(--cb-radius);
+  border-radius: var(--lapis-radius);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 /* Semantic card colour variants — pastel fill + matching darker border */
-.cb-card-pink   { background: #FAE8F2; border-color: #C07090; }
-.cb-card-lime   { background: #E8F5DC; border-color: #68A048; }
-.cb-card-yellow { background: #FBF5DC; border-color: #C8A028; }
-.cb-card-blue   { background: #DFF0F8; border-color: #4890B8; }
-.cb-card-orange { background: #FBF0E4; border-color: #C87830; }
-.cb-card-purple { background: #F0EAF8; border-color: #7850B8; }
+.lapis-card-pink   { background: #FAE8F2; border-color: #C07090; }
+.lapis-card-lime   { background: #E8F5DC; border-color: #68A048; }
+.lapis-card-yellow { background: #FBF5DC; border-color: #C8A028; }
+.lapis-card-blue   { background: #DFF0F8; border-color: #4890B8; }
+.lapis-card-orange { background: #FBF0E4; border-color: #C87830; }
+.lapis-card-purple { background: #F0EAF8; border-color: #7850B8; }
 
-.cb-card-hover { cursor: pointer; }
-
-.cb-card-hover:hover {
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
-}
+.lapis-card-hover { cursor: pointer; }
 
 /* Extra top padding utility — used on cards whose header sits flush at the top */
-.cb-card-top { padding-top: 1.25rem !important; }
-
-/* Section dividers */
-.lapis-stripe,
-.lapis-divider {
-  height: 4px;
-  flex-shrink: 0;
-  background: var(--role-accent, var(--lapis-pink));
-  border: none;
-  border-radius: 0;
-}
+.lapis-card-top { padding-top: 1.25rem !important; }
 
 /* ── Buttons ────────────────────────────────────────────────── */
 .btn {
@@ -225,9 +186,6 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
-.btn-primary:active                { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
-
 .btn-outline-primary {
   --bs-btn-color:               var(--lapis-plum);
   --bs-btn-border-color:        var(--lapis-cream-dark);
@@ -241,9 +199,6 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-outline-primary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
-.btn-outline-primary:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
-
 .btn-secondary {
   --bs-btn-bg:                  var(--lapis-orange);
   --bs-btn-border-color:        var(--lapis-orange-dark);
@@ -255,9 +210,6 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-secondary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
-.btn-secondary:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
-
 .btn-outline-secondary {
   --bs-btn-color:               var(--lapis-plum);
   --bs-btn-border-color:        var(--lapis-cream-dark);
@@ -267,8 +219,6 @@ h4, h5, h6 {
   background: var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
-
-.btn-outline-secondary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
 
 .btn-danger {
   --bs-btn-bg:                  var(--lapis-pink);
@@ -280,9 +230,6 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-danger:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12); }
-.btn-danger:active               { box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important; }
-
 .btn-outline-danger {
   --bs-btn-color:               var(--lapis-pink-dark);
   --bs-btn-border-color:        var(--lapis-pink-dark);
@@ -291,6 +238,24 @@ h4, h5, h6 {
   --bs-btn-hover-color:         var(--lapis-cream);
   background: var(--lapis-cream);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+}
+
+/* the cards that can be pressed, and every button, lift a little on hover ... */
+.lapis-card-hover:hover,
+.btn-primary:hover:not(:disabled),
+.btn-outline-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-outline-secondary:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
+}
+
+/* ... and sit back down when pressed */
+.btn-primary:active,
+.btn-outline-primary:active,
+.btn-secondary:active,
+.btn-danger:active {
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
 }
 
 .btn-link {
@@ -331,7 +296,7 @@ h4, h5, h6 {
   outline: none;
 }
 
-.form-control::placeholder { color: var(--cb-muted); }
+.form-control::placeholder { color: var(--lapis-muted); }
 
 .form-check-input:checked {
   background-color: var(--lapis-lime);
@@ -363,18 +328,15 @@ h4, h5, h6 {
   overflow-wrap: anywhere;
 }
 
-.badge-soft        { background: var(--lapis-lime);   color: var(--lapis-plum); border: 1px solid var(--lapis-lime-dark); }
-.badge-accent      { background: var(--lapis-yellow); color: var(--lapis-plum); border: 1px solid var(--lapis-yellow-dark); }
-.badge-ruby        { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
+/* a badge and an alert of the same kind look the same */
+.badge-soft,
+.alert-success { background: var(--lapis-lime);   color: var(--lapis-plum); border: 1px solid var(--lapis-lime-dark); }
+.badge-accent,
+.alert-warning { background: var(--lapis-yellow); color: var(--lapis-plum); border: 1px solid var(--lapis-yellow-dark); }
 .badge-danger-soft { background: var(--lapis-orange); color: var(--lapis-plum); border: 1px solid var(--lapis-orange-dark); }
 
 /* Bootstrap semantic badge overrides */
-.text-bg-primary   { background-color: var(--lapis-pink)   !important; color: var(--lapis-cream) !important; }
 .text-bg-success   { background-color: var(--lapis-lime)   !important; color: var(--lapis-plum)  !important; }
-.text-bg-warning   { background-color: var(--lapis-yellow) !important; color: var(--lapis-plum)  !important; }
-.text-bg-danger    { background-color: var(--lapis-pink)   !important; color: var(--lapis-cream) !important; }
-.text-bg-secondary { background-color: var(--lapis-orange) !important; color: var(--lapis-plum)  !important; }
-.text-bg-light     { background-color: var(--lapis-cream)  !important; color: var(--lapis-plum)  !important; border: 2px solid var(--lapis-cream-dark); }
 
 /* ── Alerts ─────────────────────────────────────────────────── */
 .alert {
@@ -383,9 +345,7 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.alert-success { background: var(--lapis-lime);   color: var(--lapis-plum);  border: 1px solid var(--lapis-lime-dark); }
 .alert-danger  { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
-.alert-warning { background: var(--lapis-yellow); color: var(--lapis-plum);  border: 1px solid var(--lapis-yellow-dark); }
 
 /* ── Avatar circle ──────────────────────────────────────────── */
 .avatar {
@@ -416,32 +376,6 @@ h4, h5, h6 {
   color: var(--lapis-plum);
 }
 
-/* ── List groups ────────────────────────────────────────────── */
-.list-group {
-  --bs-list-group-active-bg:            var(--lapis-pink);
-  --bs-list-group-active-border-color:  var(--lapis-pink-dark);
-  --bs-list-group-active-color:         var(--lapis-cream);
-  border: 1px solid var(--lapis-cream-dark);
-  border-radius: var(--cb-radius);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  overflow: hidden;
-}
-
-.list-group-item {
-  background: var(--lapis-cream);
-  border: 0;
-  border-bottom: 1px solid var(--lapis-cream-dark);
-  color: var(--lapis-plum);
-  font-weight: 500;
-}
-
-.list-group-item:last-child { border-bottom: 0; }
-
-.list-group-item-action:hover {
-  background: var(--lapis-yellow);
-  color: var(--lapis-plum);
-}
-
 /* ── Nav pills ──────────────────────────────────────────────── */
 .nav-pills { --bs-nav-pills-link-active-bg: var(--lapis-pink); }
 
@@ -467,7 +401,7 @@ h4, h5, h6 {
 .modal-content {
   background: var(--lapis-cream);
   border: 2px solid var(--role-accent, var(--lapis-pink));
-  border-radius: var(--cb-radius);
+  border-radius: var(--lapis-radius);
   box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
   overflow: hidden;
 }
@@ -538,55 +472,14 @@ h4, h5, h6 {
 }
 ::-webkit-scrollbar-thumb:hover  { border-color: var(--lapis-shadow); }
 
-/* ── Nav tabs ───────────────────────────────────────────────── */
-.nav-tabs {
-  border-bottom: 1px solid var(--lapis-cream-dark);
-  gap: 4px;
-}
-
-.nav-tabs .nav-link {
-  border: 1px solid transparent;
-  border-radius: 12px 12px 0 0;
-  color: var(--lapis-plum);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.78rem;
-  background: var(--lapis-cream);
-}
-
-.nav-tabs .nav-link:hover {
-  background: var(--lapis-yellow);
-  border-color: var(--lapis-yellow-dark) var(--lapis-yellow-dark) transparent;
-  color: var(--lapis-plum);
-}
-
-.nav-tabs .nav-link.active,
-.nav-tabs .nav-link.active.bg-primary {
-  background: var(--lapis-pink) !important;
-  border-color: var(--lapis-pink-dark) var(--lapis-pink-dark) var(--lapis-pink);
-  color: var(--lapis-cream) !important;
-  box-shadow: none;
-}
-
 /* ── Page transition ────────────────────────────────────────── */
 .page-peel-enter-from  { opacity: 0; transform: translateY(14px) scale(0.99); }
 .page-peel-enter-active { transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .page-peel-leave-to    { opacity: 0; transform: translateY(-8px); }
 .page-peel-leave-active { transition: all 0.18s ease-in; }
 
-/* ── Topic colours ──────────────────────────────────────────── */
-.topic-academic { background: var(--topic-academic-soft); border-color: var(--topic-academic); }
-.topic-social   { background: var(--topic-social-soft);   border-color: var(--topic-social); }
-.topic-homework { background: var(--topic-homework-soft); border-color: var(--topic-homework); }
-.topic-schedule { background: var(--topic-schedule-soft); border-color: var(--topic-schedule); }
-.topic-messages { background: var(--topic-messages-soft); border-color: var(--topic-messages); }
-
 /* ── Chips ──────────────────────────────────────────────────── */
 .chip { display: inline-block; padding: 2px 10px; font-size: 0.8rem; font-weight: 700; color: var(--lapis-plum); }
-.chip-academic { background: var(--topic-academic); }
+
 .chip-social   { background: var(--topic-social); }
-.chip-homework { background: var(--topic-homework); }
-.chip-schedule { background: var(--topic-schedule); }
-.chip-messages { background: var(--topic-messages); }
-.chip-alert    { background: var(--topic-alert); }
+

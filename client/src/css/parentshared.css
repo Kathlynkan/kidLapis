@@ -1,0 +1,51 @@
+/* What the parent pages have in common: the parent home, Messages and Profile (a parent's Profile only).
+   Each of those pages also has its own file with the rules only that page needs.
+   Colours:
+     #414F67 navy       text
+     #DDF0EF pale aqua  the child buttons
+     #AED9D8 aqua       the chosen child button */
+
+/* ---------- the base text ---------- */
+
+.parentpage,
+.messagespage,
+.role-parent .profilepage {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #414F67;
+}
+
+/* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
+.parentpage .lapis-page-header .page-title,
+.messagespage .lapis-page-header .page-title,
+.role-parent .profilepage .lapis-page-header .page-title {
+  font-family: inherit;
+  color: #414F67;
+}
+
+/* ---------- the buttons with the children's names (parent home and Messages) ---------- */
+
+.parentpage .child-buttons,
+.messagespage .child-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.parentpage .child-button,
+.messagespage .child-button {
+  padding: 5px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #DDF0EF;
+  color: #414F67;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.parentpage .child-button.selected,
+.messagespage .child-button.selected {
+  background: #AED9D8;
+}

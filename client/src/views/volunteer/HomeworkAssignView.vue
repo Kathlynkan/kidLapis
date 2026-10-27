@@ -110,7 +110,7 @@ async function handleSubmit() {
 
     <div class="row justify-content-center">
       <div class="col-lg-7">
-        <form class="cb-card p-4 px-5" @submit.prevent="handleSubmit">
+        <form class="lapis-card p-4 px-5" @submit.prevent="handleSubmit">
           <div v-if="error" class="alert alert-warning small">{{ error }}</div>
 
           <!-- optional: a deck of questions. The child answers its questions as a quiz. -->

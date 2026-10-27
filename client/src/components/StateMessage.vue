@@ -24,7 +24,7 @@ defineProps({
   </div>
 
   <!-- Empty -->
-  <div v-else class="cb-card lapis-state text-center py-5 px-3" style="padding-top: 2rem !important;">
+  <div v-else class="lapis-card lapis-state text-center py-5 px-3" style="padding-top: 2rem !important;">
     <div class="lapis-state-strips mb-3" aria-hidden="true">
       <div class="state-strip" style="background:var(--lapis-pink)"></div>
       <div class="state-strip" style="background:var(--lapis-lime)"></div>
@@ -58,7 +58,7 @@ defineProps({
 .state-msg {
   font-weight: 700;
   font-size: 0.95rem;
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }

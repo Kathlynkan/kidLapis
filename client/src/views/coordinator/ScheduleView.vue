@@ -195,7 +195,7 @@ async function removeSlot(volunteer, day, slot) {
 
       <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
 
-      <div class="cb-card p-0 table-responsive">
+      <div class="lapis-card p-0 table-responsive">
         <table class="table table-bordered mb-0 schedule-table" data-test="schedule-table">
           <thead>
             <tr>
@@ -209,7 +209,7 @@ async function removeSlot(volunteer, day, slot) {
             <tr v-for="v in volunteers" :key="v.id" data-test="schedule-row">
               <th scope="row" class="volunteer-col">
                 <div class="fw-semibold">{{ v.name }}</div>
-                <div class="small text-muted-cb fw-normal">{{ (v.skills || []).join(', ') || 'No skills set' }}</div>
+                <div class="small lapis-muted fw-normal">{{ (v.skills || []).join(', ') || 'No skills set' }}</div>
                 <RouterLink
                   v-if="!(v.availability || []).length"
                   :to="{ name: 'manage-volunteers' }"
@@ -270,9 +270,9 @@ async function removeSlot(volunteer, day, slot) {
       </div>
 
       <!-- Assigned but not on the timetable yet -->
-      <div v-if="unscheduled.length" class="cb-card p-3 mt-3" data-test="unscheduled">
+      <div v-if="unscheduled.length" class="lapis-card p-3 mt-3" data-test="unscheduled">
         <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned without a day</h2>
-        <p class="small text-muted-cb mb-2">
+        <p class="small lapis-muted mb-2">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
         </p>
         <ul class="small mb-0">
@@ -306,7 +306,7 @@ async function removeSlot(volunteer, day, slot) {
                 <option value="" disabled>Choose a child</option>
                 <option v-for="o in childOptions" :key="o.child.id" :value="o.child.id">{{ optionLabel(o) }}</option>
               </select>
-              <div class="small text-muted-cb mt-1 mb-3">
+              <div class="small lapis-muted mt-1 mb-3">
                 Children with no volunteer come first, then the best skill match for
                 {{ firstName(adding.volunteer.name) }}.
               </div>
@@ -360,10 +360,10 @@ async function removeSlot(volunteer, day, slot) {
   background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0 6px, rgba(0, 0, 0, 0.06) 6px 12px);
 }
 .is-today:not(.is-off) {
-  background: var(--cb-primary-soft);
+  background: var(--lapis-primary-soft);
 }
 th.is-today {
-  color: var(--cb-primary);
+  color: var(--lapis-primary);
 }
 .slot {
   background: #fff;
@@ -395,6 +395,6 @@ th.is-today {
   background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.04) 0 3px, rgba(0, 0, 0, 0.1) 3px 6px);
 }
 .swatch-today {
-  background: var(--cb-primary-soft);
+  background: var(--lapis-primary-soft);
 }
 </style>

@@ -73,9 +73,9 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="cb-card p-3" data-test="topic-summary-chart">
+  <div class="lapis-card p-3" data-test="topic-summary-chart">
     <h2 class="h6 mb-3"><i class="bi bi-bar-chart me-2"></i>{{ title }}</h2>
-    <p v-if="sessions.length === 0" class="small text-muted-cb mb-0">No data yet.</p>
+    <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
     <div
       v-else
       style="position: relative"

@@ -110,7 +110,7 @@ onMounted(async () => {
                   {{ firstName(entry.name) }}
                   <span v-if="entry.childId === auth.user?.childId" class="badge bg-primary ms-1" style="font-size:0.6rem">You</span>
                 </div>
-                <div class="small text-muted-cb mb-1">⭐ {{ entry.points }}</div>
+                <div class="small lapis-muted mb-1">⭐ {{ entry.points }}</div>
                 <div
                   class="podium-bar d-flex align-items-center justify-content-center fw-heavy"
                   :style="{ height: [100, 70, 55][i] + 'px' }"
@@ -122,7 +122,7 @@ onMounted(async () => {
           </div>
 
           <!-- 4th place onwards -->
-          <div v-if="rest.length" class="cb-card">
+          <div v-if="rest.length" class="lapis-card">
             <table class="table table-sm mb-0">
               <tbody>
                 <tr
@@ -131,7 +131,7 @@ onMounted(async () => {
                   :class="{ 'table-active fw-bold': entry.childId === auth.user?.childId }"
                   data-test="leaderboard-row"
                 >
-                  <td class="text-muted-cb ps-3" style="width: 40px">{{ i + 4 }}</td>
+                  <td class="lapis-muted ps-3" style="width: 40px">{{ i + 4 }}</td>
                   <td>{{ entry.avatar }} {{ firstName(entry.name) }}</td>
                   <td class="text-end pe-3 fw-bold">⭐ {{ entry.points }}</td>
                 </tr>
@@ -139,7 +139,7 @@ onMounted(async () => {
             </table>
           </div>
 
-          <p v-if="isInList" class="small text-muted-cb text-center mt-3">
+          <p v-if="isInList" class="small lapis-muted text-center mt-3">
             Your row is highlighted above.
           </p>
         </template>
@@ -154,7 +154,7 @@ onMounted(async () => {
 }
 .podium-bar {
   background: var(--role-accent-soft, var(--lapis-cream));
-  border-radius: var(--cb-radius) var(--cb-radius) 0 0;
+  border-radius: var(--lapis-radius) var(--lapis-radius) 0 0;
   font-size: 1.6rem;
   width: 100%;
 }

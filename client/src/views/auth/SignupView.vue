@@ -73,9 +73,9 @@ async function handleSignup() {
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-sm-10 col-md-7 col-lg-5">
-        <div class="cb-card p-4 p-md-5">
+        <div class="lapis-card p-4 p-md-5">
           <h1 class="h3 mb-1">Create an account</h1>
-          <p class="text-muted-cb mb-4">Teachers create child accounts for the centre.</p>
+          <p class="lapis-muted mb-4">Teachers create child accounts for the centre.</p>
 
           <div v-if="error" class="alert alert-danger small" data-test="signup-error">
             {{ error }}
@@ -213,7 +213,7 @@ async function handleSignup() {
             <!-- Parents only: links the new account to their child -->
             <div v-if="form.role === 'parent'" class="mb-4">
               <label for="child-code" class="form-label"
-                >Child code <span class="text-muted-cb">(optional)</span></label
+                >Child code <span class="lapis-muted">(optional)</span></label
               >
               <input
                 id="child-code"

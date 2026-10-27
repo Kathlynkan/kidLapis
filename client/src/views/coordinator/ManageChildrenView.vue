@@ -202,7 +202,7 @@ async function confirmDelete() {
             data-test="child-search"
           />
         </div>
-        <div v-if="search.trim()" class="small text-muted-cb mt-1" data-test="child-search-count">
+        <div v-if="search.trim()" class="small lapis-muted mt-1" data-test="child-search-count">
           Showing {{ filteredChildren.length }} of {{ children.length }} children
         </div>
       </div>
@@ -228,13 +228,13 @@ async function confirmDelete() {
           <div
             v-for="c in filteredChildren"
             :key="c.id"
-            class="cb-card p-3 mb-2"
+            class="lapis-card p-3 mb-2"
             data-test="child-card"
           >
             <div class="d-flex justify-content-between align-items-start">
               <div>
                 <div class="fw-semibold">{{ c.avatar }} {{ c.name }}</div>
-                <div class="small text-muted-cb">
+                <div class="small lapis-muted">
                   {{ c.level }}<span v-if="c.school"> · {{ c.school }}</span>
                 </div>
               </div>
@@ -285,7 +285,7 @@ async function confirmDelete() {
         </div>
 
         <!-- Tablet and up: the table -->
-        <div class="cb-card table-responsive d-none d-md-block">
+        <div class="lapis-card table-responsive d-none d-md-block">
           <table class="table align-middle mb-0">
             <thead>
               <tr>
@@ -410,7 +410,7 @@ async function confirmDelete() {
                 </div>
                 <div class="col-sm-8">
                   <label for="child-school" class="form-label"
-                    >School <span class="text-muted-cb">(optional)</span></label
+                    >School <span class="lapis-muted">(optional)</span></label
                   >
                   <input
                     id="child-school"
@@ -423,7 +423,7 @@ async function confirmDelete() {
 
               <div class="mb-3">
                 <label for="child-parent" class="form-label"
-                  >Parent <span class="text-muted-cb">(optional)</span></label
+                  >Parent <span class="lapis-muted">(optional)</span></label
                 >
                 <select
                   id="child-parent"
@@ -459,7 +459,7 @@ async function confirmDelete() {
 
               <template v-if="!editingId">
                 <hr class="my-3" />
-                <p class="small text-muted-cb mb-2">
+                <p class="small lapis-muted mb-2">
                   <strong>Child login account</strong>
                   <span class="ms-1">(optional — leave blank to set up later)</span>
                 </p>

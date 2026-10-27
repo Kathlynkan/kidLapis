@@ -10,7 +10,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="cb-card cb-card-hover cb-card-top p-3 h-100 d-flex align-items-center gap-3" :class="`cb-card-${color}`">
+  <div class="lapis-card lapis-card-hover lapis-card-top p-3 h-100 d-flex align-items-center gap-3" :class="`lapis-card-${color}`">
     <div class="stat-icon" :data-color="color">
       <i class="bi" :class="icon"></i>
     </div>
@@ -54,12 +54,12 @@ defineProps({
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
 }
 
 .stat-hint {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--cb-muted);
+  color: var(--lapis-muted);
 }
 </style>
