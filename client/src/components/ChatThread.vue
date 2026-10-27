@@ -2,7 +2,7 @@
   ChatThread - the chat bubbles and the box to type a message.   Owner: Kat
   It only shows things. The page that uses it (MessagesView.vue)
   loads the messages and sends the new ones to the server.
-  Its styles are in css/messagespage.css
+  Its styles are in css/parent/messagespage.css
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'

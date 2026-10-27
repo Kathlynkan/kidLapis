@@ -1,7 +1,7 @@
 <!-- =============================================================
   Messages: parent <-> teacher, one conversation per child.   Owner: Kat
   Route: /messages/:childId?   (used by parents and teachers)
-  Its styles are in css/messagespage.css
+  Its styles are in css/parent/messagespage.css
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
@@ -12,8 +12,9 @@ import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChatThread from '@/components/ChatThread.vue'
-import '@/css/parentshared.css' // what the parent pages have in common
-import '@/css/messagespage.css' // the styles of this page and of the chat
+import '@/css/parent/parentshared.css' // what the parent pages have in common
+import '@/css/parent/messagespage.css' // the styles of this page and of the chat
+import '@/css/main/labels.css' // the capital-letter captions
 
 const route = useRoute()
 const router = useRouter()

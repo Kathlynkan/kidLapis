@@ -16,6 +16,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import StatCard from '@/components/StatCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
+import '@/css/teacher/coordinatordashboard.css' // the styles of this page
 
 const router = useRouter()
 
@@ -261,9 +262,3 @@ function daysAgo(dateStr) {
     </template>
   </div>
 </template>
-
-<style scoped>
-.alert-row {
-  cursor: pointer;
-}
-</style>

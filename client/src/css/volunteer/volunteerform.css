@@ -1,0 +1,263 @@
+/* Styles for the forms a volunteer fills in: the Record / Edit a session form (SessionFormView.vue) and the Give homework form
+   (HomeworkAssignView.vue). Both pages have the class volunteerformpage.
+   The photo previews and the mood buttons just below are for everyone. Every other rule starts with .role-volunteer .volunteerformpage,
+   so a teacher who edits a session keeps the original look.
+   Only the look changes here: the fields, the layout and the buttons work as before.
+   Colours:
+     #213C31 dark green       text
+     #446C59 green            the title and the line under it
+     #4A735F deep green       the line of a box you are typing in, the Cancel link
+     #3E6B6A dark teal        the chosen mood
+     #B7D8D7 muted teal       the Save button, Choose Files, the chosen mood, the message at the top
+     #A3CAC8 deeper teal      the same buttons when you point at them
+     #F1EAD2 muted sand       the skills the child struggled with
+     #C3D2CA                  the line around a box
+     #9BD3B2 mint             the lines between Academic and Social and above Cancel and Save
+     #8FA39A                  the grey of the example text in a box
+   Look: no card around the form, thin lines, small corners, a teal button. */
+
+/* ---------- the photo previews (for everyone who opens the form) ---------- */
+
+.volunteerformpage .photo-thumb {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+/* the little x on a photo: bootstrap makes it fainter, and fainter again when you point at it */
+.volunteerformpage .photo-remove,
+.volunteerformpage .photo-remove:hover {
+  width: 12px;
+  height: 12px;
+  font-size: 10px;
+  opacity: 1;
+}
+
+/* ---------- the mood buttons: the drawn face and the word on one line (for everyone who opens the form) ---------- */
+
+.volunteerformpage .mood-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- the page: no card around the form ---------- */
+
+.role-volunteer .volunteerformpage form {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 !important; /* the form has the bootstrap classes p-4 px-5, which are important */
+}
+
+.role-volunteer .volunteerformpage .alert {
+  border: 0;
+  border-radius: 6px;
+  background: #B7D8D7;
+  color: #213C31;
+}
+
+.role-volunteer .volunteerformpage h2.h5 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #213C31;
+}
+
+/* the line between Academic and Social: thick and mint, so it is easy to see */
+.role-volunteer .volunteerformpage hr {
+  border-top: 3px solid #9BD3B2;
+  opacity: 1;
+}
+
+/* ---------- the questions of a deck (Give homework) ---------- */
+
+/* the box has the bootstrap classes border and rounded, which are important */
+.role-volunteer .volunteerformpage .deck-preview {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: #F7F4EE;
+  color: #213C31;
+}
+
+.role-volunteer .volunteerformpage .deck-preview .text-muted {
+  color: #6B8177 !important; /* text-muted is important too */
+}
+
+/* ---------- the boxes you type in ---------- */
+
+.role-volunteer .volunteerformpage .form-label {
+  color: #213C31;
+}
+
+.role-volunteer .volunteerformpage .form-control,
+.role-volunteer .volunteerformpage .form-select {
+  padding: 9px 12px;
+  border: 1px solid #C3D2CA;
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  color: #213C31;
+  box-shadow: none;
+}
+
+.role-volunteer .volunteerformpage .form-control::placeholder {
+  color: #8FA39A;
+}
+
+.role-volunteer .volunteerformpage .form-control:focus,
+.role-volunteer .volunteerformpage .form-select:focus {
+  border-color: #4A735F;
+  box-shadow: 0 0 0 3px #B7D8D7;
+}
+
+/* ---------- the mood: separate choices, the chosen one is teal ---------- */
+
+.role-volunteer .volunteerformpage .btn-group {
+  gap: 8px;
+}
+
+/* bootstrap joins the buttons of a group into one bar, so these three lines are important */
+.role-volunteer .volunteerformpage .btn-group > .btn {
+  margin-left: 0 !important;
+  border-radius: 6px !important;
+}
+
+.role-volunteer .volunteerformpage .btn-group > .btn,
+.role-volunteer .volunteerformpage .input-group > .btn {
+  border: 1px solid #C3D2CA;
+  background: #FFFFFF;
+  color: #213C31;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.role-volunteer .volunteerformpage .btn-group > .btn:hover,
+.role-volunteer .volunteerformpage .input-group > .btn:hover {
+  background: #B7D8D7;
+  color: #213C31;
+}
+
+.role-volunteer .volunteerformpage .btn-check:checked + .btn {
+  border-color: #3E6B6A;
+  background: #B7D8D7;
+  color: #213C31;
+  font-weight: 700;
+}
+
+/* ---------- the plus and minus ---------- */
+
+.role-volunteer .volunteerformpage .input-group > .btn {
+  font-size: 18px;
+}
+
+.role-volunteer .volunteerformpage .input-group .form-control {
+  border-radius: 0;
+}
+
+.role-volunteer .volunteerformpage input[type='number'] {
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.role-volunteer .volunteerformpage input[type='number']::-webkit-outer-spin-button,
+.role-volunteer .volunteerformpage input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ---------- the skills and the activities that are added ---------- */
+
+.role-volunteer .volunteerformpage .badge-danger-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px 3px 11px;
+  border-radius: 6px;
+  background: #F1EAD2;
+  box-shadow: none;
+  color: #213C31;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.role-volunteer .volunteerformpage #activity ~ div .badge-danger-soft {
+  background: #B7D8D7;
+}
+
+.role-volunteer .volunteerformpage .badge-danger-soft button {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 4px;
+  color: #213C31;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.role-volunteer .volunteerformpage .badge-danger-soft button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- the photos: Choose Files is a teal, bold section of the bar ---------- */
+
+.role-volunteer .volunteerformpage input[type='file'].form-control {
+  padding: 0 12px 0 0;
+}
+
+.role-volunteer .volunteerformpage input[type='file']::file-selector-button,
+.role-volunteer .volunteerformpage input[type='file']:hover:not(:disabled):not([readonly])::file-selector-button {
+  margin: 0 12px 0 0;
+  padding: 9px 16px;
+  border: 0;
+  border-right: 1px solid #C3D2CA;
+  border-radius: 0;
+  background: #B7D8D7;
+  color: #000000;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-volunteer .volunteerformpage input[type='file']:hover:not(:disabled):not([readonly])::file-selector-button {
+  background: #A3CAC8;
+}
+
+/* ---------- Cancel is a link, Save is the teal button ---------- */
+
+.role-volunteer .volunteerformpage .justify-content-end {
+  align-items: center;
+  gap: 22px !important; /* the row has the bootstrap class gap-2, which is important */
+  padding-top: 22px;
+  border-top: 3px solid #9BD3B2; /* the same line as between Academic and Social */
+}
+
+.role-volunteer .volunteerformpage .justify-content-end .btn {
+  border: 0;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.role-volunteer .volunteerformpage .justify-content-end .btn-outline-secondary {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  color: #4A735F;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.role-volunteer .volunteerformpage .justify-content-end .btn-primary {
+  padding: 10px 22px;
+  background: #B7D8D7;
+  color: #213C31;
+}
+
+.role-volunteer .volunteerformpage .justify-content-end .btn-primary:hover:not(:disabled) {
+  background: #A3CAC8;
+  box-shadow: none;
+}

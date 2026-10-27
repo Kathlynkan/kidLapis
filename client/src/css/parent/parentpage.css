@@ -51,21 +51,8 @@
   box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
-/* ---------- the drawn icons (LineIcon.vue) ---------- */
+/* ---------- an icon in front of a few words (the icon itself is LineIcon.vue) ---------- */
 
-.parentpage .line-icon {
-  display: block;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-}
-
-.parentpage .line-icon.small {
-  width: 14px;
-  height: 14px;
-}
-
-/* an icon in front of a few words */
 .parentpage .with-icon,
 .parentpage .mood-chip {
   display: inline-flex;

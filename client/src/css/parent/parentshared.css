@@ -1,4 +1,4 @@
-/* What the parent pages have in common: the parent home, Messages and Profile (a parent's Profile only).
+/* What the parent pages have in common: the parent home and Messages.
    Each of those pages also has its own file with the rules only that page needs.
    Colours:
      #414F67 navy       text
@@ -8,9 +8,8 @@
 /* ---------- the base text ---------- */
 
 .parentpage,
-.messagespage,
-.role-parent .profilepage {
-  font-family: Georgia, 'Times New Roman', serif;
+.messagespage {
+  font-family: var(--lapis-font);
   font-size: 15px;
   line-height: 1.55;
   color: #414F67;
@@ -18,8 +17,7 @@
 
 /* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
 .parentpage .lapis-page-header .page-title,
-.messagespage .lapis-page-header .page-title,
-.role-parent .profilepage .lapis-page-header .page-title {
+.messagespage .lapis-page-header .page-title {
   font-family: inherit;
   color: #414F67;
 }

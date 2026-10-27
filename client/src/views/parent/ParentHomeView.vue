@@ -8,8 +8,9 @@ import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
 import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
-import '@/css/parentshared.css' // what the parent pages have in common
-import '@/css/parentpage.css' // the styles of this page
+import '@/css/parent/parentshared.css' // what the parent pages have in common
+import '@/css/parent/parentpage.css' // the styles of this page
+import '@/css/main/labels.css' // the capital-letter captions
 
 const auth = useAuthStore()
 

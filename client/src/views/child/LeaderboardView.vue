@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
+import '@/css/child/leaderboard.css' // the styles of this page
 
 const auth = useAuthStore()
 const allTime = ref([])
@@ -108,7 +109,7 @@ onMounted(async () => {
                 <div class="fs-1 mb-1">{{ entry.avatar }}</div>
                 <div class="fw-heavy">
                   {{ firstName(entry.name) }}
-                  <span v-if="entry.childId === auth.user?.childId" class="badge bg-primary ms-1" style="font-size:0.6rem">You</span>
+                  <span v-if="entry.childId === auth.user?.childId" class="badge bg-primary ms-1 leaderboard-you">You</span>
                 </div>
                 <div class="small lapis-muted mb-1">⭐ {{ entry.points }}</div>
                 <div
@@ -131,7 +132,7 @@ onMounted(async () => {
                   :class="{ 'table-active fw-bold': entry.childId === auth.user?.childId }"
                   data-test="leaderboard-row"
                 >
-                  <td class="lapis-muted ps-3" style="width: 40px">{{ i + 4 }}</td>
+                  <td class="lapis-muted ps-3 leaderboard-rank">{{ i + 4 }}</td>
                   <td>{{ entry.avatar }} {{ firstName(entry.name) }}</td>
                   <td class="text-end pe-3 fw-bold">⭐ {{ entry.points }}</td>
                 </tr>
@@ -147,15 +148,3 @@ onMounted(async () => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.podium-col {
-  min-width: 88px;
-}
-.podium-bar {
-  background: var(--role-accent-soft, var(--lapis-cream));
-  border-radius: var(--lapis-radius) var(--lapis-radius) 0 0;
-  font-size: 1.6rem;
-  width: 100%;
-}
-</style>

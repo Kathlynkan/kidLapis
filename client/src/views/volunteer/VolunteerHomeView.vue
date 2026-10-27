@@ -13,7 +13,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildCard from '@/components/ChildCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
-import '@/css/volunteerpage.css' // the styles of this page and of the child card
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/volunteerpage.css' // the styles of this page and of the child card
+import '@/css/main/labels.css' // the capital-letter captions
 
 const auth = useAuthStore() // open auth store
 const router = useRouter()
@@ -70,11 +72,6 @@ const myDays = computed(() => {
     return auth.user.availability
   }
   return []
-})
-
-// is today one of my days?
-const workingToday = computed(() => {
-  return myDays.value.includes(today)
 })
 
 // children scheduled with me on a given day

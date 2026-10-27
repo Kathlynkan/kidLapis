@@ -12,6 +12,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
+import '@/css/teacher/schedule.css' // the styles of this page
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -342,59 +343,3 @@ async function removeSlot(volunteer, day, slot) {
     </template>
   </div>
 </template>
-
-<style scoped>
-.schedule-table {
-  min-width: 960px; /* scrolls sideways on small screens instead of squashing */
-  table-layout: fixed;
-}
-.schedule-table td,
-.schedule-table th {
-  vertical-align: top;
-  padding: 0.5rem;
-}
-.volunteer-col {
-  width: 170px;
-}
-.is-off {
-  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03) 0 6px, rgba(0, 0, 0, 0.06) 6px 12px);
-}
-.is-today:not(.is-off) {
-  background: var(--lapis-primary-soft);
-}
-th.is-today {
-  color: var(--lapis-primary);
-}
-.slot {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 2px 6px;
-  font-size: 0.8rem;
-}
-.slot-time {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.add-btn {
-  font-size: 0.75rem;
-  padding: 0.1rem 0.25rem;
-}
-.legend {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-.swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-.swatch-off {
-  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.04) 0 3px, rgba(0, 0, 0, 0.1) 3px 6px);
-}
-.swatch-today {
-  background: var(--lapis-primary-soft);
-}
-</style>

@@ -8,6 +8,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import '@/css/main/homepage.css' // the styles of this page
 
 const auth = useAuthStore()
 
@@ -128,7 +129,7 @@ const roles = [
                 aria-valuemin="0"
                 aria-valuemax="100"
               >
-                <div class="progress-bar" style="width: 80%"></div>
+                <div class="progress-bar"></div>
               </div>
             </div>
 
@@ -170,57 +171,3 @@ const roles = [
     </div>
   </section>
 </template>
-
-<style scoped>
-.hero {
-  background: transparent; /* lapis bands show through from body */
-}
-
-.handover-demo {
-  border-left: 6px solid var(--lapis-orange);
-}
-
-/* The example update is tilted a little, so it reads as a picture rather than part of the page */
-.hero-preview {
-  max-width: 420px;
-  margin-inline: auto;
-}
-@media (min-width: 992px) {
-  .hero-preview {
-    transform: rotate(1.5deg);
-  }
-}
-
-.preview-avatar {
-  font-size: 1.75rem;
-  line-height: 1;
-}
-
-.preview-progress {
-  height: 10px;
-  background: var(--lapis-cream);
-}
-.preview-progress .progress-bar {
-  background: var(--lapis-lime-dark);
-}
-
-.preview-message {
-  background: var(--lapis-cream);
-  border-left: 4px solid var(--lapis-blue-dark);
-}
-
-.step-num {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--lapis-pink);
-  color: var(--lapis-cream);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--lapis-pink-dark);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.1);
-  flex-shrink: 0;
-}
-</style>

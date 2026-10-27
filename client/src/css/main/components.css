@@ -1,0 +1,368 @@
+/* The small parts that many pages use. Each part is a component in src/components, and the section says which.
+   The look of the same parts for a parent or a volunteer is in the parent and volunteer folders.
+   Sections: line icon, page header, stat card, state message, accordion (PeelCard and HandoverCard),
+   handover, session card, homework card, charts. */
+
+/* ---------- LineIcon.vue ---------- */
+
+.line-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.line-icon.small {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- PageHeader.vue ---------- */
+
+.lapis-page-header {
+  padding: 1.25rem 0 0.5rem;
+}
+
+.page-title {
+  font-family: var(--lapis-font);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--lapis-plum);
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  color: var(--lapis-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* ---------- StatCard.vue ---------- */
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+  flex-shrink: 0;
+}
+
+.stat-icon[data-color='pink']   { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
+.stat-icon[data-color='lime']   { background: var(--lapis-lime);   color: var(--lapis-plum);  border: 1px solid var(--lapis-lime-dark); }
+.stat-icon[data-color='yellow'] { background: var(--lapis-yellow); color: var(--lapis-plum);  border: 1px solid var(--lapis-yellow-dark); }
+.stat-icon[data-color='orange'] { background: var(--lapis-orange); color: var(--lapis-plum);  border: 1px solid var(--lapis-orange-dark); }
+.stat-icon[data-color='purple'] { background: var(--lapis-purple); color: var(--lapis-cream); border: 1px solid var(--lapis-purple-dark); }
+
+.stat-value {
+  font-family: var(--lapis-font);
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--lapis-plum);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--lapis-muted);
+}
+
+.stat-hint {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lapis-muted);
+}
+
+/* ---------- StateMessage.vue ---------- */
+
+.lapis-state { color: var(--lapis-plum); }
+
+/* the empty state has less room above than the bootstrap py-5 gives (that class is important, so this is too) */
+.lapis-card.lapis-state-empty {
+  padding-top: 2rem !important;
+}
+
+/* Stack of kueh strips as the illustration */
+.lapis-state-strips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.state-strip {
+  width: 80px;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+}
+
+.state-strip-pink   { background: var(--lapis-pink); }
+.state-strip-lime   { background: var(--lapis-lime); }
+.state-strip-yellow { background: var(--lapis-yellow); }
+.state-strip-orange { background: var(--lapis-orange); }
+
+.state-spinner { color: var(--lapis-pink); }
+
+.state-icon { color: var(--lapis-purple); }
+
+.state-msg {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--lapis-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- the accordion: PeelCard.vue and HandoverCard.vue open and close the same way ---------- */
+
+.peel-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.peel-header,
+.handover-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem 0.75rem;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.peel-header {
+  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(168, 224, 99, 0.08) 100%);
+}
+
+.peel-header:hover {
+  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(255, 217, 61, 0.15) 100%);
+}
+
+.handover-header {
+  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(68, 144, 184, 0.08) 100%);
+}
+
+.handover-header:hover {
+  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(68, 144, 184, 0.15) 100%);
+}
+
+/* the separator line appears when it is open */
+.peel-card--open .peel-header {
+  border-bottom-color: var(--lapis-cream-dark);
+  border-bottom-width: 3px;
+  border-bottom-style: solid;
+}
+
+.handover-card:has(.peel-body--open) .handover-header {
+  border-bottom: 3px solid var(--lapis-cream-dark);
+}
+
+.peel-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--lapis-plum);
+}
+
+.peel-arrow {
+  color: var(--lapis-purple);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.peel-arrow--open { transform: rotate(-180deg); }
+
+/* the body: its height goes from 0fr to 1fr */
+.peel-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.peel-body--open { grid-template-rows: 1fr; }
+
+.peel-body-inner {
+  overflow: hidden;
+  padding: 1.25rem;
+  transform: translateY(-6px);
+  opacity: 0;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease;
+}
+
+.peel-body--open .peel-body-inner {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ---------- HandoverCard.vue ---------- */
+
+.handover-card {
+  border-left: 6px solid var(--topic-academic);
+  padding: 0;
+  overflow: hidden;
+}
+
+.handover-badge {
+  white-space: normal;
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+  color: var(--lapis-plum);
+}
+
+.handover-source-ai {
+  background: var(--lapis-purple);
+  color: var(--lapis-cream);
+}
+
+.handover-source-last {
+  background: var(--lapis-lime);
+}
+
+.handover-tag {
+  background: var(--lapis-yellow);
+}
+
+.handover-value {
+  overflow-wrap: anywhere;
+  margin-bottom: 0.6rem;
+  color: var(--lapis-plum);
+}
+
+.handover-title {
+  font-family: var(--lapis-font);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--lapis-plum);
+}
+
+.handover-key {
+  color: var(--lapis-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+}
+
+.loading-msg {
+  color: var(--lapis-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* ---------- SessionCard.vue ---------- */
+
+/* "Math - Fractions": the subject and the topic read as one bold title */
+.session-subject {
+  font-weight: 700;
+  color: var(--lapis-plum);
+}
+
+.session-subject::after {
+  content: ' - ';
+}
+
+.session-title {
+  color: var(--lapis-plum);
+}
+
+.session-meta {
+  color: var(--lapis-muted);
+}
+
+.session-mood {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-score {
+  background: var(--topic-academic);
+  color: var(--lapis-plum);
+  font-size: 1rem;
+}
+
+.session-lines {
+  color: var(--lapis-plum);
+}
+
+.session-tag {
+  background: var(--topic-academic-soft);
+  color: var(--lapis-plum);
+}
+
+.icon-struggle { color: var(--lapis-pink); }
+.icon-worked { color: var(--lapis-yellow); }
+.icon-next { color: var(--lapis-purple); }
+
+/* the words in the box that asks if you want to delete a session */
+.session-delete-text {
+  color: var(--lapis-plum);
+  font-weight: 500;
+}
+
+/* ---------- HomeworkQuestCard.vue ---------- */
+
+.quest-title {
+  text-shadow: none;
+  color: var(--lapis-plum);
+}
+
+.quest-meta {
+  color: var(--lapis-muted);
+}
+
+.quest-details {
+  color: var(--lapis-plum);
+}
+
+.quest-late {
+  border-color: var(--topic-alert);
+}
+
+.quest-points {
+  background: var(--lapis-yellow);
+  color: var(--lapis-plum);
+}
+
+.quest-overdue {
+  background: var(--topic-alert);
+  color: var(--lapis-plum);
+}
+
+/* the state of the homework: orange, or lime when it is checked */
+.quest-status,
+.quest-pill {
+  background: var(--lapis-orange);
+  color: var(--lapis-plum);
+}
+
+.quest-status-done,
+.quest-pill-done {
+  background: var(--lapis-lime);
+}
+
+/* ---------- the charts (SkillProgressChart.vue and TopicSummaryChart.vue) ---------- */
+
+/* the box the chart is drawn in; the bar chart's height is set by the number of subjects */
+.chart-box {
+  position: relative;
+}
+
+.chart-box-line {
+  height: 220px;
+}

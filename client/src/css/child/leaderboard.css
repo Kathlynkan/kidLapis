@@ -1,0 +1,21 @@
+/* The leaderboard: the podium for the first three and the list below (LeaderboardView.vue). */
+
+.podium-col {
+  min-width: 88px;
+}
+.podium-bar {
+  background: var(--role-accent-soft, var(--lapis-cream));
+  border-radius: var(--lapis-radius) var(--lapis-radius) 0 0;
+  font-size: 1.6rem;
+  width: 100%;
+}
+
+/* the small "You" tag next to your own name */
+.leaderboard-you {
+  font-size: 0.6rem;
+}
+
+/* the number column of the list */
+.leaderboard-rank {
+  width: 40px;
+}

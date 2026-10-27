@@ -1,6 +1,6 @@
 <!-- =============================================================
   ChildCard - one child in a list.                 Owner: Yuqi
-  Its styles are in css/volunteerpage.css
+  Its styles are in css/volunteer/volunteerpage.css
 ============================================================= -->
 <script setup>
 import { computed } from 'vue'

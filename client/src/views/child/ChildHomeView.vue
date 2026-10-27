@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges } from '@/utils/gamification'
+import '@/css/child/childhome.css' // the styles of this page
 
 const auth = useAuthStore()
 
@@ -73,8 +74,7 @@ onMounted(async () => {
         <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
         <div class="fs-4 fw-heavy mb-3">⭐ {{ me.points }} stars &middot; Level {{ level.level }}</div>
         <div
-          class="progress mx-auto"
-          style="height: 14px; max-width: 260px"
+          class="progress mx-auto level-bar"
           role="progressbar"
           :aria-valuenow="level.progress"
           aria-valuemin="0"
@@ -123,41 +123,3 @@ onMounted(async () => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.hero-card {
-  background: var(--role-accent-soft, var(--lapis-cream));
-  border-radius: var(--lapis-radius);
-}
-
-.badge-tile {
-  width: 130px;
-  opacity: 0.38;
-  transition: opacity 0.3s ease;
-}
-.badge-tile.badge-earned {
-  opacity: 1;
-}
-
-.celebrate-overlay {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  font-size: 4rem;
-  z-index: 9999;
-  pointer-events: none;
-}
-.celebrate-enter-active {
-  animation: pop 2.2s ease forwards;
-}
-@keyframes pop {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  25%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-  65%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -65%) scale(0.8); }
-}
-
-.x-small {
-  font-size: 0.68rem;
-}
-</style>

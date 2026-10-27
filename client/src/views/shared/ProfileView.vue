@@ -6,14 +6,13 @@
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
-import '@/css/parentshared.css' // what the parent pages have in common
-import '@/css/profilepage.css' // the colours of this page for a parent
+import '@/css/main/profilepage.css' // the look of this page (the same for every role, only the colours change)
 
 const auth = useAuthStore()
 const router = useRouter()

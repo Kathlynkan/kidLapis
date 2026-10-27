@@ -8,8 +8,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
+import LineIcon from '@/components/LineIcon.vue' // a small drawn face, instead of an emoji
 import { SUBJECTS, MOODS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/volunteerform.css' // the look of this form for a volunteer
 
 const route = useRoute() // read information
 const router = useRouter() // navigate to another page
@@ -234,7 +237,7 @@ onMounted(() => { // autofill form if edit form
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 volunteerformpage">
     <PageHeader
       :title="isEdit ? 'Edit session' : 'Record a session'"
       subtitle="Takes about a minute. The next volunteer will thank you!"
@@ -276,12 +279,12 @@ onMounted(() => { // autofill form if edit form
                 <template v-for="m in MOODS" :key="m.value">
                   <input :id="'mood-' + m.value" v-model="form.mood" type="radio" class="btn-check" :value="m.value" />
                   <!-- btn-check: hidden radio button for bootstrap button toggle-->
-                  <label class="btn btn-outline-secondary btn-sm" :for="'mood-' + m.value">
+                  <label class="btn btn-outline-secondary btn-sm mood-option" :for="'mood-' + m.value">
                     <!--
                     btn-outline-secondary: gray outlined button style
                     btn-sm: small button size
                     -->
-                    {{ m.emoji }} {{ m.label }}
+                    <LineIcon :name="m.face" small />{{ m.label }}
                   </label>
                 </template>
               </div>
@@ -435,12 +438,10 @@ onMounted(() => { // autofill form if edit form
               <div v-if="form.photos.length > 0" class="d-flex flex-wrap gap-2 mt-2">
                 <div v-for="(photo, index) in form.photos" :key="index" class="position-relative">
                   <img :src="getPhotoURL(photo)"
-                  class="rounded"
-                  style="width: 100px; height: 100px; object-fit: cover;">
+                  class="rounded photo-thumb">
 
                   <button type="button" 
-                    class="btn-close bg-danger position-absolute rounded-circle top-0 end-0 p-1"
-                    style="width: 12px; height: 12px; font-size: 10px; opacity: 1;" 
+                    class="btn-close bg-danger position-absolute rounded-circle top-0 end-0 p-1 photo-remove"
                     @click="removePhoto(index)"></button>
                 </div>
 
@@ -466,21 +467,3 @@ onMounted(() => { // autofill form if edit form
     </div>
   </div>
 </template>
-
-<style scoped>
-  /* Center text and force alignment over Bootstrap defaults */
-  /* override framework styles, browser ignores those standard rules and applies that style 
-  regardless of where it appears or how specific other selectors are */
-  input[type="number"] {
-    text-align: center !important;
-    -moz-appearance: textfield !important; /* Firefox */
-    appearance: textfield !important;
-  }
-
-  /* Hide webkit arrows in Chrome, Safari, Edge, Opera */
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none !important;
-    margin: 0 !important;
-  }
-</style>

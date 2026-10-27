@@ -1,7 +1,7 @@
 /* The stripes under the navbar (NavBar.vue). They show the layers of the cake, one stripe for each layer.
    A role shows the layers up to its own: a parent has one stripe, a volunteer has two (the parent colour first,
    then its own). Every page of a role has the same stripes, because they are part of the navbar.
-   The colours are --layer-parent and --layer-volunteer in assets/main.css.
+   The colours are --layer-parent and --layer-volunteer in main.css.
    To add a layer for another role: add its colour there and its name to LAYERS in NavBar.vue. */
 
 .role-stripes i {

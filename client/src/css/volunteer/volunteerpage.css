@@ -7,6 +7,9 @@
      #9BD3B2 mint             the selected day, the child's letter (the volunteer layer, as in --layer-volunteer)
      #CDE9D8 pale mint        small numbers and buttons
      #E1F2E9 lightest mint    the tabs track, the days, the search box
+     #B7D8D7 muted teal       the last session tag (the same as "Being checked" on the parent page)
+     #E4F0EF pale teal        the search box and the "No children" tag
+     #3E6B6A dark teal        the small icons, the arrows and the search focus line
      #FBE7A1 yellow           needs attention (the same yellow as "due" on the parent page)
      #6B8177 grey green       small text
      #D9E8DF                  thin borders
@@ -14,29 +17,12 @@
 
 /* ---------- the whole page ---------- */
 
-.volunteerpage {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #213C31;
-}
-
 .volunteerpage h1,
 .volunteerpage h2,
 .volunteerpage h3 {
   font-family: inherit;
   color: #213C31;
   text-shadow: none;
-}
-
-/* the title and the sentence under it (PageHeader.vue is shared, so only the colour and the font are set here) */
-.volunteerpage .lapis-page-header .page-title {
-  font-family: inherit;
-  color: #446C59;
-}
-
-.volunteerpage .lapis-page-header .page-subtitle {
-  color: #446C59;
 }
 
 .volunteerpage .muted {
@@ -178,7 +164,7 @@
 }
 
 .volunteerpage .pill-quiet {
-  background: #E1F2E9;
+  background: #E4F0EF;
 }
 
 /* ---------- boxes with a message (nobody today, no children yet) ---------- */
@@ -227,7 +213,7 @@
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 18px;
-  background: #E1F2E9;
+  background: #E4F0EF;
 }
 
 .volunteerpage .form-label {
@@ -259,8 +245,8 @@
 
 .volunteerpage .form-control:focus,
 .volunteerpage .form-select:focus {
-  border-color: #9BD3B2;
-  box-shadow: 0 0 0 3px #CDE9D8;
+  border-color: #3E6B6A;
+  box-shadow: 0 0 0 3px #B7D8D7;
 }
 
 /* ---------- one child (ChildCard.vue) ---------- */
@@ -327,7 +313,7 @@
 
 .volunteerpage .child-facts i {
   margin-right: 5px;
-  color: #4A735F;
+  color: #3E6B6A;
 }
 
 .volunteerpage .child-bottom {
@@ -340,12 +326,12 @@
 .volunteerpage .last-seen {
   padding: 2px 12px;
   border-radius: 999px;
-  background: #E1F2E9;
+  background: #B7D8D7;
   font-size: 12px;
   font-weight: 700;
 }
 
 .volunteerpage .child-arrow {
-  color: #4A735F;
+  color: #3E6B6A;
   font-size: 20px;
 }

@@ -6,6 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import { SUBJECTS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/volunteerform.css' // the look of the forms for a volunteer
 
 const route = useRoute()
 const router = useRouter()
@@ -105,7 +107,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 volunteerformpage">
     <PageHeader title="Give homework" subtitle="Small tasks from the question book work best." />
 
     <div class="row justify-content-center">
@@ -123,7 +125,7 @@ async function handleSubmit() {
           </div>
 
           <!-- the questions of the picked deck, so the volunteer can see them (with the answers) -->
-          <div v-if="chosenDeck" class="border rounded p-3 mb-3 small" data-test="deck-preview">
+          <div v-if="chosenDeck" class="border rounded p-3 mb-3 small deck-preview" data-test="deck-preview">
             <ol class="mb-0">
               <li v-for="(question, number) in chosenDeck.questions" :key="number">
                 {{ question.text }} <span class="text-muted">Answer: {{ question.answer }}</span>

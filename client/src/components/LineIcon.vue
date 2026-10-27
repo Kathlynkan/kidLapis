@@ -4,9 +4,9 @@
   face-hard.svg, people.svg, star.svg, bowl.svg).
   Props:  name (String)  the name of the file, without .svg
           small (Boolean)  true = a smaller icon, for inside a line of text
-  Its size is in css/parentpage.css
 ============================================================= -->
 <script setup>
+import '@/css/main/components.css' // the look of the small parts
 defineProps({
   name: { type: String, required: true },
   small: { type: Boolean, default: false },
