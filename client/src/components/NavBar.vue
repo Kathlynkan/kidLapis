@@ -38,7 +38,7 @@ const LINKS = {
   ],
   child: [
     { to: '/child', label: 'My Quests' },
-    { to: '/child/leaderboard', label: 'Bounty Board' },
+    { to: '/child/leaderboard', label: 'Leaderboard' },
   ],
 }
 

@@ -1,6 +1,7 @@
 <!-- Leaderboard                                          Owner: Jachin -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
@@ -9,42 +10,20 @@ import { firstName } from '@/utils/format'
 import '@/css/child/leaderboard.css' // the styles of this page
 
 const auth = useAuthStore()
-const allTime = ref([])
-const improved = ref([])
+const entries = ref([])
 const loading = ref(true)
-const loadingImproved = ref(false)
-const improvedLoaded = ref(false)
-const error = ref('')
-const activeTab = ref('alltime')
+const error   = ref('')
 
-const current = computed(() => (activeTab.value === 'alltime' ? allTime.value : improved.value))
-const podium = computed(() => current.value.slice(0, 3))
-const rest = computed(() => current.value.slice(3))
-const isInList = computed(() => current.value.some((e) => e.childId === auth.user?.childId))
-
-async function loadImproved() {
-  if (improvedLoaded.value) return
-  loadingImproved.value = true
-  try {
-    const res = await api.get('/homework/leaderboard', { params: { period: 'week' } })
-    improved.value = res.data
-    improvedLoaded.value = true
-  } catch (err) {
-    error.value = errorMessage(err)
-  } finally {
-    loadingImproved.value = false
-  }
-}
-
-function switchTab(tab) {
-  activeTab.value = tab
-  if (tab === 'week') loadImproved()
-}
+const myId     = computed(() => auth.user?.childId)
+const podium   = computed(() => entries.value.slice(0, 3))
+const rest     = computed(() => entries.value.slice(3))
+const myRank   = computed(() => entries.value.findIndex((e) => e.childId === myId.value) + 1)
+const myEntry  = computed(() => entries.value.find((e) => e.childId === myId.value))
 
 onMounted(async () => {
   try {
-    const res = await api.get('/homework/leaderboard')
-    allTime.value = res.data
+    const res = await api.get('/homework/leaderboard', { params: { period: 'week' } })
+    entries.value = res.data
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -55,95 +34,75 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4">
-    <PageHeader title="🏆 Leaderboard" subtitle="Complete quests to earn stars and climb the ranks!" />
+    <PageHeader title="Leaderboard" subtitle="Stars earned this week — resets every Monday!" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
     <template v-else>
-      <!-- Tabs -->
-      <ul class="nav nav-pills mb-4 gap-2">
-        <li class="nav-item">
-          <button
-            class="nav-link"
-            :class="{ active: activeTab === 'alltime' }"
-            data-test="tab-alltime"
-            @click="switchTab('alltime')"
-          >
-            ⭐ All-time stars
-          </button>
-        </li>
-        <li class="nav-item">
-          <button
-            class="nav-link"
-            :class="{ active: activeTab === 'week' }"
-            data-test="tab-improved"
-            @click="switchTab('week')"
-          >
-            🔥 This week
-          </button>
-        </li>
-      </ul>
-
-      <StateMessage v-if="loadingImproved" type="loading" />
+      <template v-if="entries.length === 0">
+        <StateMessage message="No quests verified this week yet — complete one to appear!" />
+        <div class="text-center mt-3">
+          <RouterLink :to="{ name: 'child-home' }" class="btn btn-primary px-4">
+            <i class="bi bi-map me-2"></i>Go do a quest
+          </RouterLink>
+        </div>
+      </template>
 
       <template v-else>
-        <StateMessage
-          v-if="current.length === 0"
-          :message="
-            activeTab === 'week'
-              ? 'No quests verified this week yet — complete one to appear!'
-              : 'No scores yet — complete a quest to appear!'
-          "
-        />
+        <!-- Your rank chip (only shown when not on the podium) -->
+        <div v-if="myRank > 3 && myEntry" class="my-rank-chip mb-3">
+          <span class="my-rank-position">#{{ myRank }}</span>
+          <span class="my-rank-name">{{ myEntry.avatar }} You</span>
+          <span class="my-rank-pts"><i class="bi bi-star-fill me-1"></i>{{ myEntry.points }}</span>
+        </div>
 
-        <template v-else>
-          <!-- Podium top 3 -->
-          <div class="d-flex justify-content-center align-items-end gap-3 mb-4 mt-2">
+        <!-- Podium top 3 -->
+        <div class="podium-stage mb-0">
+          <div class="d-flex justify-content-center align-items-end gap-3">
             <template v-for="(entry, i) in podium" :key="entry.childId">
               <div
                 class="text-center podium-col"
                 :style="{ order: [2, 1, 3][i] }"
-                :data-test="'podium-' + (i + 1)"
+                :data-rank="i + 1"
               >
-                <div class="fs-1 mb-1">{{ entry.avatar }}</div>
+                <div class="podium-avatar mb-2">{{ entry.avatar }}</div>
                 <div class="fw-heavy">
                   {{ firstName(entry.name) }}
-                  <span v-if="entry.childId === auth.user?.childId" class="badge bg-primary ms-1 leaderboard-you">You</span>
+                  <span v-if="entry.childId === myId" class="badge bg-primary ms-1 leaderboard-you">You</span>
                 </div>
-                <div class="small lapis-muted mb-1">⭐ {{ entry.points }}</div>
+                <div class="small lapis-muted mb-1"><i class="bi bi-star-fill me-1"></i>{{ entry.points }}</div>
                 <div
                   class="podium-bar d-flex align-items-center justify-content-center fw-heavy"
-                  :style="{ height: [100, 70, 55][i] + 'px' }"
-                >
-                  {{ ['🥇', '🥈', '🥉'][i] }}
-                </div>
+                  :style="{ height: [160, 100, 70][i] + 'px' }"
+                >{{ i + 1 }}</div>
               </div>
             </template>
           </div>
+        </div>
 
-          <!-- 4th place onwards -->
-          <div v-if="rest.length" class="lapis-card">
-            <table class="table table-sm mb-0">
-              <tbody>
-                <tr
-                  v-for="(entry, i) in rest"
-                  :key="entry.childId"
-                  :class="{ 'table-active fw-bold': entry.childId === auth.user?.childId }"
-                  data-test="leaderboard-row"
-                >
-                  <td class="lapis-muted ps-3 leaderboard-rank">{{ i + 4 }}</td>
-                  <td>{{ entry.avatar }} {{ firstName(entry.name) }}</td>
-                  <td class="text-end pe-3 fw-bold">⭐ {{ entry.points }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p v-if="isInList" class="small lapis-muted text-center mt-3">
-            Your row is highlighted above.
-          </p>
-        </template>
+        <!-- 4th place onwards -->
+        <div v-if="rest.length" class="lapis-card">
+          <table class="table table-sm mb-0">
+            <tbody>
+              <tr
+                v-for="(entry, i) in rest"
+                :key="entry.childId"
+                :class="{ 'table-active fw-bold': entry.childId === myId }"
+                data-test="leaderboard-row"
+              >
+                <td class="lapis-muted ps-3 leaderboard-rank">{{ i + 4 }}</td>
+                <td>{{ entry.avatar }} {{ firstName(entry.name) }}</td>
+                <td class="text-end pe-3 fw-bold"><i class="bi bi-star-fill me-1"></i>{{ entry.points }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-center mt-4">
+          <RouterLink :to="{ name: 'child-home' }" class="btn btn-outline-primary px-4">
+            <i class="bi bi-map me-2"></i>Go do a quest
+          </RouterLink>
+        </div>
       </template>
     </template>
   </div>

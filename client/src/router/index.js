@@ -121,7 +121,7 @@ const routes = [
     meta: { roles: ['teacher'] },
   },
   {
-    path: '/coordinator/schedule',
+    path: '/teacher/schedule',
     name: 'schedule',
     component: () => import('@/views/coordinator/ScheduleView.vue'), // Yu Xuan
     meta: { roles: ['teacher'] },

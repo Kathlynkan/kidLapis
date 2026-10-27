@@ -2,8 +2,8 @@
    Every rule starts with .messagespage so it only affects that page.
    Colours:
      #414F67 navy       text
-     #AED9D8 aqua       the main colour (selected child, my messages)
-     #DDF0EF pale aqua  the send button when it is off
+     #F5DF98 aqua       the main colour (selected child, my messages)
+     #FBF5DC pale aqua  the send button when it is off
      #F6D1AA peach      unread messages
      #F9F1E6 cream      the chat
      #5E6C80 grey       small text
@@ -96,7 +96,7 @@
 .messagespage .from-me .bubble {
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 6px;
-  background: #AED9D8;
+  background: #F5DF98;
 }
 
 .messagespage .bubble-name,
@@ -142,8 +142,8 @@
 
 .messagespage .chat-input:focus {
   outline: none;
-  border-color: #AED9D8;
-  box-shadow: 0 0 0 3px #AED9D8;
+  border-color: #F5DF98;
+  box-shadow: 0 0 0 3px #F5DF98;
 }
 
 .messagespage .chat-input::placeholder {
@@ -154,12 +154,12 @@
   padding: 0 18px;
   border: 0;
   border-radius: 999px;
-  background: #AED9D8;
+  background: #F5DF98;
   color: #414F67;
   font-size: 18px;
 }
 
 .messagespage .send-button:disabled {
-  background: #DDF0EF;
+  background: #FBF5DC;
   color: #5E6C80;
 }

@@ -151,9 +151,9 @@ async function handleSubmit() {
             <div class="col-sm-4">
               <label class="form-label" for="points">Reward points</label>
               <select id="points" v-model.number="form.points" class="form-select">
-                <option :value="10">10 ⭐ (small)</option>
-                <option :value="15">15 ⭐</option>
-                <option :value="20">20 ⭐ (big)</option>
+                <option :value="10">10 stars — small task</option>
+                <option :value="15">15 stars</option>
+                <option :value="20">20 stars — big task</option>
               </select>
             </div>
           </div>
