@@ -34,7 +34,7 @@
 .page-subtitle {
   color: var(--lapis-muted);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
 }
 
 /* ---------- StatCard.vue ---------- */
@@ -66,7 +66,7 @@
 }
 
 .stat-label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -74,7 +74,7 @@
 }
 
 .stat-hint {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--lapis-muted);
 }
@@ -114,7 +114,7 @@
 
 .state-msg {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--lapis-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -246,7 +246,7 @@
 .handover-title {
   font-family: var(--lapis-font);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--lapis-plum);
 }
 
@@ -255,13 +255,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .loading-msg {
   color: var(--lapis-muted);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 /* ---------- SessionCard.vue ---------- */

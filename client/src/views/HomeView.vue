@@ -113,7 +113,7 @@ const roles = [
                 <dt class="col-5">Worked on</dt>
                 <dd class="col-7">Fractions</dd>
                 <dt class="col-5">Mood</dt>
-                <dd class="col-7">😊 Focused</dd>
+                <dd class="col-7">Focused</dd>
                 <dt class="col-5">What helped</dt>
                 <dd class="col-7 mb-0">Drawing the fractions as pizza slices</dd>
               </dl>

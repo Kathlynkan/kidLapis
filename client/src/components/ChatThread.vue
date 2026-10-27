@@ -84,7 +84,7 @@ function time(isDate) {
       <!-- v-model keeps what the user types in draft -->
       <input v-model="draft" class="chat-input" placeholder="Type a message..." data-test="chat-input" />
       <!-- the button is off while a message is being sent, or when the box is empty (spaces do not count) -->
-      <button class="send-button" type="submit" aria-label="Send" :disabled="sending || draft.trim() === ''" data-test="chat-send">➤</button>
+      <button class="send-button" type="submit" aria-label="Send" :disabled="sending || draft.trim() === ''" data-test="chat-send"><i class="bi bi-send-fill"></i></button>
     </form>
   </div>
 </template>
