@@ -31,6 +31,7 @@ const LINKS = {
     { to: '/teacher/volunteers', label: 'Volunteers' },
     { to: '/teacher/matchmaking', label: 'Matchmaking' },
     { to: '/messages', label: 'Messages' },
+    { to: '/teacher/schedule', label: 'Schedule'},
   ],
   parent: [
     { to: '/parent', label: 'My Child' },
