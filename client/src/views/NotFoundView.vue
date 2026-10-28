@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 
 <template>
   <div class="container py-5 text-center">
-    <div class="display-1">🧭</div>
+    <div class="display-1 mb-3 lapis-muted"><i class="bi bi-compass"></i></div>
     <h1 class="h3">Page not found</h1>
     <p class="lapis-muted">The page you are looking for does not exist.</p>
     <RouterLink to="/" class="btn btn-primary">Back to home</RouterLink>

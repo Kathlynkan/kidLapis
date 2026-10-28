@@ -63,7 +63,7 @@
   --lapis-primary:      var(--lapis-lime);
   --lapis-primary-soft: #E8F0E3;
   --lapis-muted:        #8D7F77;
-  --lapis-radius:       0px;
+  --lapis-radius:       12px;
 
   /* Bootstrap colour overrides */
   --bs-primary:           var(--lapis-pink);
@@ -80,7 +80,7 @@
   --bs-body-color:        var(--lapis-plum);
   --bs-body-bg:           var(--lapis-cream);
   --bs-border-color:      var(--lapis-cream-dark);
-  --bs-border-radius:     0px;
+  --bs-border-radius:     12px;
   --bs-border-width: 1px;
 }
 
@@ -119,6 +119,17 @@ html, body {
 /* ── Role accent colours ────────────────────────────────────── */
 .role-child,
 .role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
+
+/* boy theme: override pink → blue across every component that uses the pink/role-accent tokens */
+.role-child.gender-boy {
+  --role-accent:       var(--lapis-blue);
+  --role-accent-soft:  #DFF0F8;
+  --role-accent-dark:  var(--lapis-blue-dark);
+  --lapis-pink:        var(--lapis-blue);
+  --lapis-pink-dark:   var(--lapis-blue-dark);
+  --bs-primary:        var(--lapis-blue);
+  --bs-primary-rgb:    136, 192, 216;
+}
 .role-parent    { --role-accent: var(--layer-parent);    --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
 .role-volunteer { --role-accent: var(--layer-volunteer); --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
 .role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
@@ -165,9 +176,9 @@ h4, h5, h6 {
 /* ── Buttons ────────────────────────────────────────────────── */
 .btn {
   font-family: var(--lapis-font);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
   border-radius: 6px;
   border-width: 3px;
   border-style: solid;
@@ -274,9 +285,7 @@ h4, h5, h6 {
 /* ── Forms ──────────────────────────────────────────────────── */
 .form-label {
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   color: var(--lapis-plum);
 }
 
@@ -320,8 +329,8 @@ h4, h5, h6 {
 /* ── Badges / pills ─────────────────────────────────────────── */
 .badge {
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0;
   border: none;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   border-radius: 4px;
@@ -454,7 +463,7 @@ h4, h5, h6 {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
 }
 
 /* ── Spinner ─────────────────────────────────────────────────── */

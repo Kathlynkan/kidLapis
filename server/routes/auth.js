@@ -183,6 +183,13 @@ router.put('/profile', requireAuth, async (req, res) => {
 
   await user.save()
 
+  // Child: gender drives the colour theme (stored on User so it's in the login response)
+  if (user.role === 'child' && req.body.gender !== undefined) {
+    const g = String(req.body.gender)
+    if (!['boy', 'girl'].includes(g)) return res.status(400).json({ message: 'Invalid gender.' })
+    user.gender = g
+  }
+
   // Child: avatar is stored on the Child document, not the User
   if (user.role === 'child' && req.body.avatar) {
     await Child.findByIdAndUpdate(user.childId, { avatar: String(req.body.avatar) })

@@ -58,11 +58,14 @@
 }
 
 .lapis-nav-link:hover {
-  background: #EAF6F5;
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
 }
 
 .lapis-nav-link.open {
-  border-bottom-color: var(--role-accent, #AED9D8);
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
+  border-bottom-color: transparent;
 }
 
 .lapis-badge {
@@ -72,6 +75,7 @@
   font-size: 12px;
   line-height: 18px;
   text-align: center;
+  border-radius: 999px;
 }
 
 .lapis-user {
@@ -121,6 +125,7 @@
 .lapis-button {
   padding: 5px 12px;
   border: 1px solid #414F67;
+  border-radius: 6px;
   background: transparent;
   color: #414F67;
   font: inherit;
@@ -187,7 +192,8 @@
   .lapis-nav-link.open {
     padding-left: 10px;
     border-bottom-color: #CFE0DE;
-    background: #DDF0EF;
+    background: var(--role-accent-soft, #DDF0EF);
+    border-radius: 0;
   }
 
   .lapis-user {

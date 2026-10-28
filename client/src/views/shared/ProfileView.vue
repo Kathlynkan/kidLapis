@@ -30,13 +30,14 @@ const confirmPassword = ref('')
 const skills = ref([...(auth.user?.skills || [])])
 const availability = ref([...(auth.user?.availability || [])])
 const avatar = ref('🙂')
+const gender = ref(auth.user?.gender || 'girl')
 
 // the first letter of the name (not of a title like Mrs), shown in a round picture
 const initial = computed(() => (auth.user?.name || '').replace(/^(mr|mrs|ms|mdm|miss|dr)\.?\s+/i, '').charAt(0).toUpperCase())
 
 const loading = ref(false)
-const success = ref('')
 const error = ref('')
+const activeCard = ref('account')
 
 onMounted(async () => {
   if (auth.role === 'child') {
@@ -58,7 +59,6 @@ async function logout() {
 }
 
 async function save() {
-  success.value = ''
   error.value = ''
 
   if (auth.role !== 'child' && !name.value.trim()) {
@@ -90,16 +90,16 @@ async function save() {
     body.skills = skills.value
     body.availability = availability.value
   }
-  if (auth.role === 'child') body.avatar = avatar.value
+  if (auth.role === 'child') {
+    body.avatar = avatar.value
+    body.gender = gender.value
+  }
 
   loading.value = true
   try {
     const res = await api.put('/auth/profile', body)
     auth.patchUser(res.data)
-    currentPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-    success.value = 'Profile updated.'
+    router.back()
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -115,13 +115,12 @@ async function save() {
     <div class="row justify-content-center">
       <div class="col-md-7 col-lg-6">
 
-        <div v-if="success" class="alert alert-success" data-test="profile-success">{{ success }}</div>
         <div v-if="error" class="alert alert-danger" data-test="profile-error">{{ error }}</div>
 
         <form data-test="profile-form" @submit.prevent="save">
 
           <!-- Account info -->
-          <PeelCard title="Account" icon="bi-person-circle" :initial-open="true">
+          <PeelCard title="Account" icon="bi-person-circle" :open="activeCard === 'account'" @toggle="activeCard = 'account'">
             <div class="d-flex align-items-center gap-3 mb-4">
               <span v-if="auth.role === 'child'" class="fs-1 lh-1">{{ avatar }}</span>
               <span v-else class="profile-initial">{{ initial }}</span>
@@ -129,6 +128,16 @@ async function save() {
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
                 <div class="small lapis-muted">{{ auth.user?.email }}</div>
                 <span class="badge badge-soft text-capitalize mt-1">{{ auth.role }}</span>
+              </div>
+            </div>
+
+            <div v-if="auth.role === 'child'" class="mt-3">
+              <label class="form-label d-block mb-2">Theme colour</label>
+              <div class="d-flex gap-2">
+                <input id="gender-girl" v-model="gender" type="radio" class="btn-check" value="girl" autocomplete="off" />
+                <label class="btn btn-sm gender-swatch gender-swatch-girl" for="gender-girl">Pink</label>
+                <input id="gender-boy" v-model="gender" type="radio" class="btn-check" value="boy" autocomplete="off" />
+                <label class="btn btn-sm gender-swatch gender-swatch-boy" for="gender-boy">Blue</label>
               </div>
             </div>
 
@@ -146,7 +155,7 @@ async function save() {
           </PeelCard>
 
           <!-- Avatar picker (child only) -->
-          <PeelCard v-if="auth.role === 'child'" title="Pick your avatar" icon="bi-emoji-smile" :initial-open="true">
+          <PeelCard v-if="auth.role === 'child'" title="Pick your avatar" icon="bi-emoji-smile" :open="activeCard === 'avatar'" @toggle="activeCard = 'avatar'">
             <div class="d-flex flex-wrap gap-2">
               <button
                 v-for="emoji in AVATARS"
@@ -161,7 +170,7 @@ async function save() {
           </PeelCard>
 
           <!-- Change password (not for child — teacher manages child accounts) -->
-          <PeelCard v-if="auth.role !== 'child'" title="Change password" icon="bi-shield-lock" :initial-open="false">
+          <PeelCard v-if="auth.role !== 'child'" title="Change password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
             <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
             <div class="mb-3">
@@ -197,7 +206,7 @@ async function save() {
           </PeelCard>
 
           <!-- Skills + availability (volunteer only) -->
-          <PeelCard v-if="auth.role === 'volunteer'" title="Skills &amp; schedule" icon="bi-calendar-check" :initial-open="true">
+          <PeelCard v-if="auth.role === 'volunteer'" title="Skills &amp; schedule" icon="bi-calendar-check" :open="activeCard === 'skills'" @toggle="activeCard = 'skills'">
             <fieldset class="mb-4">
               <legend class="form-label fs-6 mb-2">Skills I can help with</legend>
               <div class="d-flex flex-wrap gap-2">

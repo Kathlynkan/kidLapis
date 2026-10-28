@@ -215,6 +215,29 @@
   border-top-color: var(--pf-line) !important;
 }
 
+/* ---------- theme colour swatches (child only) ---------- */
+
+.gender-swatch-girl { --swatch-bg: #E8A0B8; --swatch-border: #C07090; }
+.gender-swatch-boy  { --swatch-bg: #88C0D8; --swatch-border: #4890B8; }
+
+/* override the shared btn-check styles so swatches always show their actual colour */
+.profilepage .btn-check + .gender-swatch,
+.profilepage .btn-check + .gender-swatch:hover {
+  background: var(--swatch-bg) !important;
+  color: #FBF8F3 !important;
+  border: 2px solid transparent !important;
+  border-radius: 999px;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.profilepage .btn-check:checked + .gender-swatch {
+  background: var(--swatch-bg) !important;
+  color: #FBF8F3 !important;
+  border-color: var(--swatch-border) !important;
+  opacity: 1;
+}
+
 /* ---------- the messages after you save ---------- */
 
 .profilepage .alert {

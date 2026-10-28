@@ -35,7 +35,7 @@ const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be c
   >
     <div class="d-flex justify-content-between align-items-start gap-2">
       <h3 class="h6 mb-1 quest-title">{{ homework.title }}</h3>
-      <span v-if="mode === 'child'" class="badge quest-points">+{{ homework.points }} ⭐</span>
+      <span v-if="mode === 'child'" class="badge quest-points">+{{ homework.points }} <i class="bi bi-star-fill"></i></span>
       <span v-else class="badge quest-pill" :class="`quest-pill-${state}`">
         <i v-if="state === 'done'" class="bi bi-check-lg me-1"></i>{{ STATE_LABELS[state] }}
       </span>
@@ -59,16 +59,16 @@ const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be c
         class="small mb-0 mt-1 quest-meta"
         data-test="waiting-message"
       >
-        ⏳ Your volunteer will check this — then you'll get your ⭐ stars!
+        <i class="bi bi-hourglass-split me-1"></i>Your volunteer will check this — then you'll earn your stars!
       </p>
 
       <button
         v-if="mode === 'child' && homework.status === 'assigned'"
-        class="btn btn-primary btn-lg w-100 mt-1"
+        class="btn btn-primary btn-lg w-100 mt-1 quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        🎉 I'm done!
+        <i class="bi bi-check-circle-fill me-1"></i>I'm done!
       </button>
       <button
         v-if="mode === 'volunteer' && homework.status === 'submitted'"
