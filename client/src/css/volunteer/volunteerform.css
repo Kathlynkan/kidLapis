@@ -251,8 +251,8 @@
 /* ---------- Back button ---------- */
 
 .back-link {
-  display: inline-flex;
-  align-items: center;
+  display: inline-flex; 
+  align-items: center; 
   gap: 6px;
   padding: 3px 14px 3px 10px;
   border-radius: 999px;
@@ -268,4 +268,62 @@
 
 .back-link:hover {
   background: #CDE9D8;
+}
+
+/* ---------- Reward point slider and badge ---------- */
+.form-range::-webkit-slider-thumb {
+  /* remove browser default slider styling */
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 22px;
+  height: 22px;
+  margin-top: -6px; /* visually centre thumb */
+  border: 1px solid #C3D2CA;
+  border-radius: 50%; /* turn square into circle */
+  background: #4A735F;
+  cursor: pointer; /* change mouse cursor to hand when hovering over thumb */
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px #B7D8D7;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 10px; /* make track thicker */
+  border-radius: 999px; /* round the ends */
+  background: #E1E8E4;
+}
+
+.slider-container {
+  position: relative;
+  padding-top: 50px; /* create space for badge above slider */
+}
+
+.reward-badge {
+  position: absolute;
+  top: 0; /* place badge at the top of slider-container*/
+  transform: translateX(-50%); /* shift badge left by half its width, visually centre badge */
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #C3D2CA;
+  border-radius: 6px;
+  background: #fff;
+  color: #213C31;
+  white-space: nowrap; /* prevent wrapping to 2nd line */
+}
+
+.reward-badge::after { /* create little pointer */
+  content: ''; /* need content to exist */
+  position: absolute;
+  left: 50%;
+  bottom: -5px; /* move arrow below badge */
+  width: 10px;
+  height: 10px;
+  background: inherit;
+
+  /* visible border for only right and bottom sides*/
+  border-right: 1px solid #C3D2CA;
+  border-bottom: 1px solid #C3D2CA;
+
+  transform: translateX(-50%) rotate(45deg); /* rotate square 45degrees*/
 }
