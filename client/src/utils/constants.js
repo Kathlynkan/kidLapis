@@ -18,6 +18,14 @@ export const MOODS = [
   { value: 'frustrated', label: 'Frustrated', face: 'face-hard' },
 ]
 
+export const PORTIONS = [
+  { value: 'all', label: 'Finished All' },
+  { value: 'most', label: 'Ate Most' },
+  { value: 'half', label: 'Ate Half' },
+  { value: 'little', label: 'Ate Little' },
+  { value: 'none', label: 'Did Not Eat' },
+]
+
 export const HOMEWORK_STATUS = {
   assigned: { label: 'To do', badge: 'badge-accent' },
   submitted: { label: 'Done - waiting for check', badge: 'badge-soft' },
