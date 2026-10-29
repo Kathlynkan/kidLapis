@@ -181,7 +181,7 @@ function addStruggle() {
   }
 
   // add new struggle
-  form.value.struggles.push(newStruggle.value.trim())
+  form.value.struggles.push(newStruggle.value.trim().toUpperCase())
 
   newStruggle.value = ''
 }
@@ -206,8 +206,8 @@ function addActivity() {
     return
   }
 
-  // add new struggle
-  form.value.activity.push(newActivity.value.trim())
+  // add new activity
+  form.value.activity.push(newActivity.value.trim().toUpperCase())
 
   newActivity.value = ''
 }
@@ -301,7 +301,7 @@ onMounted(() => { // autofill form if edit form
             <div class="col-sm-1"></div>
 
             <div class="col-sm-7">
-              <label class="form-label" for="topic">Topic covered</label>
+              <label class="form-label" for="topic">Topic Covered</label>
               <input id="topic" v-model.trim="form.topic" class="form-control" placeholder="e.g. Fractions"/>
             </div>
 
@@ -326,7 +326,7 @@ onMounted(() => { // autofill form if edit form
             </div>
 
             <div class="col-12">
-              <label class="form-label" for="struggle">Skills the child struggled with</label>
+              <label class="form-label" for="struggle">Skills The Child Struggled With</label>
               <input
                 id="struggle"
                 v-model.trim="newStruggle"
@@ -352,16 +352,16 @@ onMounted(() => { // autofill form if edit form
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="worked">Teaching method that worked</label>
+              <label class="form-label" for="worked">Teaching Method That Worked</label>
               <input id="worked" v-model.trim="form.whatWorked" class="form-control" placeholder="e.g. Visual diagrams" />
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="next">Suggested next step</label>
+              <label class="form-label" for="next">Suggested Next Step</label>
               <input id="next" v-model.trim="form.nextStep" class="form-control" placeholder="e.g. Practise fraction addition" />
             </div>
             <div class="col-12">
-              <label class="form-label" for="notes">Other notes (optional)</label>
+              <label class="form-label" for="notes">Other Notes (Optional)</label>
               <textarea id="notes" v-model="form.notes" rows="3" class="form-control"></textarea>
             </div>
           </div>
