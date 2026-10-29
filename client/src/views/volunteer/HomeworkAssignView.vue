@@ -94,7 +94,7 @@ async function handleSubmit() {
               <input id="title" v-model.trim="form.title" class="form-control" placeholder="e.g. Fraction addition worksheet" data-test="hw-title" />
             </div>
 
-            <div class="col-sm-4">
+            <div class="col-sm-3">
               <label class="form-label" for="subject">Subject</label>
               <select id="subject" v-model="form.subject" class="form-select">
                 <option v-for="s in SUBJECTS" :key="s">{{ s }}</option>
@@ -103,13 +103,13 @@ async function handleSubmit() {
 
             <div class="col-sm-1"></div>
 
-            <div class="col-sm-4">
-              <label class="form-label" for="due">Due date</label>
+            <div class="col-sm-3">
+              <label class="form-label" for="due">Due Date</label>
               <input id="due" v-model="form.dueDate" type="date" class="form-control" data-test="hw-due" />
             </div>
 
             <div class="col-sm-6">
-              <label class="form-label" for="points">Reward points</label>
+              <label class="form-label" for="points">Reward Points</label>
               <input type="range" id="points" v-model.number="form.points" min="5" max="20" step="1" class="form-range">
               <div class="d-flex justify-content-between small mt-2">
                 <span>5⭐</span>
@@ -119,7 +119,7 @@ async function handleSubmit() {
             </div>
 
             <div class="mb-4">
-              <label class="form-label" for="details">Instructions for the child</label>
+              <label class="form-label" for="details">Instructions For The Child</label>
               <textarea id="details" v-model="form.details" rows="3" class="form-control" placeholder="Question book p.42, Q1-10"></textarea>
             </div>
           </div>
