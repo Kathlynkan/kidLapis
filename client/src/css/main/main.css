@@ -13,6 +13,7 @@
      To add a layer: add its colour here and its name to LAYERS in NavBar.vue. */
   --layer-parent:    #AED9D8;
   --layer-volunteer: #9BD3B2;
+  --layer-teacher:   #D5CBEA; /* the last layer, at the bottom of the kueh lapis */
 
   --lapis-pink:   #E8A0B8; /* rose pink — children */
   --lapis-cream:  #FBF8F3; /* coconut white */

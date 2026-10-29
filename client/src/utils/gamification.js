@@ -2,16 +2,17 @@
 // Gamification rules                          Owner: Jachin
 // =============================================================
 
+// Each badge is a kueh. The picture is in public/images/<image>.webp
 export const BADGES = [
-  { id: 'first-quest',    icon: 'bi-compass-fill',  color: '#F5DF98', name: 'First Quest',    rule: 'Complete your first quest' },
-  { id: 'streak-3',       icon: 'bi-fire',           color: '#F5B880', name: 'On Fire',        rule: 'Complete 3 quests in a row on time' },
-  { id: 'quest-champion', icon: 'bi-trophy-fill',    color: '#A8CC90', name: 'Quest Champion', rule: 'Complete 5 quests' },
-  { id: 'bookworm',       icon: 'bi-book-fill',      color: '#88C0D8', name: 'Bookworm',       rule: 'Complete 2 English quests' },
-  { id: 'century',        icon: 'bi-award-fill',     color: '#E8A0B8', name: 'Century',        rule: 'Earn 100 stars' },
-  { id: 'rising-star',    icon: 'bi-lightning-fill', color: '#C0A8D8', name: 'Rising Star',    rule: 'Submit 3 quests before the due date' },
+  { id: 'first-quest',    kueh: 'Kueh Bingka',  image: 'kueh-bingka',  name: 'First Quest',    rule: 'Complete your first quest',           fact: 'A golden baked cake with a soft, bouncy bite. A treat for a first try!' },
+  { id: 'streak-3',       kueh: 'Kueh Salat',   image: 'kueh-salat',   name: 'On Fire',        rule: 'Complete 3 quests in a row on time',  fact: 'Sticky rice with a soft green pandan layer on top. Keep the streak going!' },
+  { id: 'quest-champion', kueh: 'Ondeh-Ondeh',  image: 'kueh-ondeh',   name: 'Quest Champion', rule: 'Complete 5 quests',                   fact: 'Chewy pandan balls that burst with gula melaka.' },
+  { id: 'bookworm',       kueh: 'Kueh Tutu',    image: 'kueh-tutu',    name: 'Bookworm',       rule: 'Complete 2 English quests',           fact: 'Soft steamed rice cakes on a banana leaf. A cosy kueh for readers.' },
+  { id: 'century',        kueh: 'Kueh Bahulu',  image: 'kueh-bahulu',  name: 'Century',        rule: 'Earn 100 stars',                      fact: 'Golden like a coin. Little sponge cakes baked in a mould.' },
+  { id: 'rising-star',    kueh: 'Kueh Talam',   image: 'kueh-talam',   name: 'Rising Star',    rule: 'Submit 3 quests before the due date', fact: 'Pandan and coconut layers, stacked up neat and early.' },
 ]
 
-export function earnedBadges(child, homework, sessions) {
+export function earnedBadges(child, homework) {
   const verified = homework.filter((h) => h.status === 'verified')
 
   return BADGES.filter((badge) => {

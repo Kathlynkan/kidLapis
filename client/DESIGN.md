@@ -15,6 +15,10 @@
 
 Under the navbar there is a stack of thin stripes, one stripe for each layer. A role shows the layers up to its own, so a parent has one stripe and a volunteer has two (the parent colour first, then its own). Every page of a role shows the same stripes, because they are drawn by `NavBar.vue`. The other roles show one stripe in their own accent colour for now. To add a layer, add its `--layer-*` colour in `main/main.css` and its name to `LAYERS` in `NavBar.vue`.
 
+### The kueh lapis and the kueh tin (child home)
+
+The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), parent (`--layer-parent`), volunteer (`--layer-volunteer`), child (`--lapis-pink`). Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/images/`.
+
 ### Where the CSS lives
 
 All the CSS is in `src/css`, in one folder for each part of the app. There are no `<style>` blocks and no fixed `style=""` attributes in the `.vue` files (only values that change, such as a bar's width, stay in `:style`). Each `.vue` file imports the sheet it needs at the top of its script.
@@ -33,7 +37,7 @@ All the CSS is in `src/css`, in one folder for each part of the app. There are n
 | | `volunteerpage.css` | The volunteer home and the child card |
 | | `childprofilepage.css` | One child's page as a volunteer sees it (every rule starts with `.role-volunteer`, so a teacher keeps the original look) |
 | | `volunteerform.css` | The two forms a volunteer fills in, Record / Edit a session and Give homework (the photo previews and mood buttons are for everyone, the rest starts with `.role-volunteer`) |
-| `child/` | `childhome.css`, `leaderboard.css` | The child home page and the leaderboard |
+| `child/` | `childhome.css`, `leaderboard.css` | The child home page (hero, the kueh lapis, quests, the kueh tin) and the leaderboard |
 | `teacher/` | `coordinatordashboard.css`, `schedule.css` | The teacher home page and the weekly schedule |
 
 **Specificity:** a rule that used to be scoped to a component is now a plain class, which is weaker than Bootstrap rules on the same element (for example the cells of a table). If Bootstrap wins, start the selector with the page's class, as `schedule.css` does.
