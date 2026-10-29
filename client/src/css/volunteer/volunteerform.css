@@ -35,7 +35,7 @@
 
 /* ---------- the mood buttons: the drawn face and the word on one line (for everyone who opens the form) ---------- */
 
-.volunteerformpage .mood-option {
+.volunteerformpage .mood-option .portion-option {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -67,20 +67,6 @@
 .role-volunteer .volunteerformpage hr {
   border-top: 3px solid #9BD3B2;
   opacity: 1;
-}
-
-/* ---------- the questions of a deck (Give homework) ---------- */
-
-/* the box has the bootstrap classes border and rounded, which are important */
-.role-volunteer .volunteerformpage .deck-preview {
-  border: 0 !important;
-  border-radius: 6px !important;
-  background: #F7F4EE;
-  color: #213C31;
-}
-
-.role-volunteer .volunteerformpage .deck-preview .text-muted {
-  color: #6B8177 !important; /* text-muted is important too */
 }
 
 /* ---------- the boxes you type in ---------- */
@@ -260,4 +246,26 @@
 .role-volunteer .volunteerformpage .justify-content-end .btn-primary:hover:not(:disabled) {
   background: #A3CAC8;
   box-shadow: none;
+}
+
+/* ---------- Back button ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 14px 3px 10px;
+  border-radius: 999px;
+  background: #E1F2E9;
+  color: #213C31;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;      
+  outline: none;     
+  cursor: pointer;
+}
+
+.back-link:hover {
+  background: #CDE9D8;
 }

@@ -77,10 +77,18 @@ async function handleSubmit() {
     error.value = errorMessage(err)
   }
 }
+
+function cancel() {
+  router.back() // return user to wherever they came from
+}
 </script>
 
 <template>
   <div class="container py-4 volunteerformpage">
+    <button type="button" class="back-link" @click="cancel">
+      <i class="bi bi-chevron-left"></i>Back
+    </button>
+
     <PageHeader title="Give homework" subtitle="Small tasks from the question book work best." />
 
     <div class="row justify-content-center">
@@ -126,7 +134,7 @@ async function handleSubmit() {
           
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-secondary" @click="router.back()">Cancel</button>
-            <button type="submit" class="btn btn-primary" data-test="hw-submit">Assign homework</button>
+            <button type="submit" class="btn btn-primary" data-test="hw-submit">Assign Homework</button>
           </div>
         </form>
       </div>
