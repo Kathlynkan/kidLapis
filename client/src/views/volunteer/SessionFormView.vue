@@ -380,7 +380,7 @@ onMounted(() => { // autofill form if edit form
               <input id="meal" v-model.trim="form.meal" class="form-control" placeholder="e.g. Chicken rice and apples">
             </div>
 
-            <div class="col-sm-7">
+            <div class="col-md-7">
               <span class="form-label d-block">Portion Eaten</span>
               <!-- d-block: display label on its own line, label takes up entire row -->
               <div class="btn-group flex-wrap" role="group">
