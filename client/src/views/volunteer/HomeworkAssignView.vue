@@ -1,7 +1,7 @@
 <!-- Give homework to a child                            Owner: Ning Xuan
   Route: /children/:id/homework/new -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import { SUBJECTS } from '@/utils/constants'
@@ -12,9 +12,6 @@ import '@/css/volunteer/volunteerform.css' // the look of the forms for a volunt
 const route = useRoute()
 const router = useRouter()
 
-const decks = ref([]) // all the decks of questions
-const chosenDeck = ref(null) // the deck the volunteer picked (null = no deck)
-
 const form = ref({
   childId: route.params.id,
   title: '',
@@ -24,6 +21,15 @@ const form = ref({
   points: 10,
 })
 const error = ref('')
+
+const badgePosition = computed(() => {
+  const min = 5
+  const max = 20
+
+  const percentage = ((form.value.points-min) / (max-min))*100
+
+  return `${percentage}%`
+})
 
 async function handleSubmit() {
   try {
@@ -102,7 +108,7 @@ function cancel() {
               <input id="title" v-model.trim="form.title" class="form-control" placeholder="e.g. Fraction addition worksheet" data-test="hw-title" />
             </div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-4">
               <label class="form-label" for="subject">Subject</label>
               <select id="subject" v-model="form.subject" class="form-select">
                 <option v-for="s in SUBJECTS" :key="s">{{ s }}</option>
@@ -111,23 +117,31 @@ function cancel() {
 
             <div class="col-sm-1"></div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-4">
               <label class="form-label" for="due">Due Date</label>
               <input id="due" v-model="form.dueDate" type="date" class="form-control" data-test="hw-due" />
             </div>
 
-            <div class="col-sm-6">
+            <div class="col-12">
               <label class="form-label" for="points">Reward Points</label>
-              <input type="range" id="points" v-model.number="form.points" min="5" max="20" step="1" class="form-range">
-              <div class="d-flex justify-content-between small mt-2">
+
+              <div class="slider-container">
+                <span class="badge badge-light reward-badge text-dark fs-5 fw-bold" 
+                  :style="{left: badgePosition}">
+                  {{ form.points }}⭐
+                </span>
+                <input type="range" id="points" v-model.number="form.points" 
+                min="5" max="20" step="1" class="form-range">
+              </div>
+
+              <div class="d-flex justify-content-between">
                 <span>5⭐</span>
-                <span class="badge  badge-accent fs-6 fw-bold">{{ form.points }}⭐</span>
                 <span>20⭐</span>
               </div>
             </div>
 
             <div class="mb-4">
-              <label class="form-label" for="details">Instructions For The Child</label>
+              <label class="form-label" for="details">Homework Instructions</label>
               <textarea id="details" v-model="form.details" rows="3" class="form-control" placeholder="Question book p.42, Q1-10"></textarea>
             </div>
           </div>
