@@ -4,6 +4,7 @@ import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges, badgeProgress, currentStreak } from '@/utils/gamification'
 import '@/css/child/childhome.css'
@@ -107,7 +108,7 @@ onMounted(async () => {
       <!-- Hero card -->
       <div class="hero-card p-4 mb-4 d-flex flex-wrap align-items-center justify-content-center gap-4">
         <div class="text-center">
-          <div class="hero-avatar display-3">{{ me.avatar }}</div>
+          <div class="hero-avatar display-3"><ChildAvatar :avatar="me.avatar" /></div>
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
             <i class="bi bi-star-fill me-1"></i>{{ me.points }} stars &middot; Level {{ level.level }}

@@ -138,7 +138,7 @@
         "Math"
       ],
       "points": 120,
-      "avatar": "🦊",
+      "avatar": "/photos/ethan.webp",
       "followUp": false
     },
     {
@@ -272,7 +272,7 @@
         "Math"
       ],
       "points": 30,
-      "avatar": "🐰",
+      "avatar": "/photos/mia.webp",
       "followUp": false
     }
   ],
@@ -681,7 +681,12 @@
       "activity": "Outdoor play",
       "interaction": "Excellent",
       "behaviour": "Encouraged a friend who was finding it hard",
-      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session."
+      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session.",
+      "photos": [
+        "/photos/lunch-boys.webp",
+        "/photos/board-games.webp",
+        "/photos/reading-corner.webp"
+      ]
     },
     {
       "id": "s_7",
@@ -952,7 +957,10 @@
       "whatWorked": "Look, cover, write, check",
       "nextStep": "Words that rhyme",
       "mood": "happy",
-      "notes": ""
+      "notes": "",
+      "photos": [
+        "/photos/lunch-girls.webp"
+      ]
     }
   ],
   "homework": [

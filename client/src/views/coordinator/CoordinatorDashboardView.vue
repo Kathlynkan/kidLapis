@@ -13,6 +13,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import StatCard from '@/components/StatCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
@@ -203,7 +204,7 @@ function daysAgo(dateStr) {
                     @click="openChild(a)"
                   >
                     <td class="text-nowrap">
-                      <span class="me-1">{{ a.avatar }}</span>
+                      <span class="me-1"><ChildAvatar :avatar="a.avatar" /></span>
                       <RouterLink
                         :to="
                           a.type === 'unassigned'

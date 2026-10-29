@@ -6,7 +6,7 @@
   Its styles are in css/parent/parentpage.css
 ============================================================= -->
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { firstName } from '@/utils/format' // small helper for names
 import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 
@@ -37,9 +37,22 @@ const lines = computed(() => {
   return all.filter((line) => line.text)
 })
 
-// the photos: the first one is big, the next two are small, the rest are counted
+// the photos: a gallery of square pictures. Three are shown, the last one says how many more there are
+// and opens them all when it is pressed
+const SHOWN_PHOTOS = 3
 const photos = computed(() => props.session.photos || [])
-const extraPhotos = computed(() => Math.max(0, photos.value.length - 3))
+const showAllPhotos = ref(false)
+const shownPhotos = computed(() => (showAllPhotos.value ? photos.value : photos.value.slice(0, SHOWN_PHOTOS)))
+const extraPhotos = computed(() => Math.max(0, photos.value.length - SHOWN_PHOTOS))
+
+// a photo opens full size in a new tab, except the last one while more are hidden: that one shows them
+function pressPhoto(index, event) {
+  const isMoreButton = !showAllPhotos.value && extraPhotos.value > 0 && index === SHOWN_PHOTOS - 1
+  if (isMoreButton) {
+    event.preventDefault()
+    showAllPhotos.value = true
+  }
+}
 
 // "Note from Aisha", or "Note from the volunteer" when we do not know the name
 const noteLabel = computed(() => {
@@ -56,15 +69,22 @@ const empty = computed(() => {
 <template>
   <div class="day" data-test="social-day">
     <!-- photos -->
-    <div v-if="photos.length > 0" class="day-photos">
-      <img class="day-photo-big" :src="photos[0]" alt="Photo from the session" />
-      <div v-if="photos.length > 1" class="day-photo-small">
-        <img :src="photos[1]" alt="Photo from the session" />
-        <div v-if="photos.length > 2" class="day-photo-last">
-          <img :src="photos[2]" alt="Photo from the session" />
-          <span v-if="extraPhotos > 0" class="day-photo-more">+{{ extraPhotos }}</span>
-        </div>
+    <div v-if="photos.length > 0">
+      <div class="day-photos">
+        <a
+          v-for="(photo, index) in shownPhotos"
+          :key="index"
+          class="day-photo"
+          :href="photo"
+          target="_blank"
+          rel="noopener"
+          @click="pressPhoto(index, $event)"
+        >
+          <img :src="photo" alt="Photo from the session" />
+          <span v-if="!showAllPhotos && extraPhotos > 0 && index === SHOWN_PHOTOS - 1" class="day-photo-more">+{{ extraPhotos }}</span>
+        </a>
       </div>
+      <button v-if="showAllPhotos && extraPhotos > 0" type="button" class="show-more" @click="showAllPhotos = false">Show fewer photos</button>
     </div>
 
     <!-- what the child did -->

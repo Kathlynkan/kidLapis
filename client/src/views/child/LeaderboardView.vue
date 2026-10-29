@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
 import '@/css/child/leaderboard.css' // the styles of this page
@@ -53,7 +54,7 @@ onMounted(async () => {
         <!-- Your rank chip (only shown when not on the podium) -->
         <div v-if="myRank > 3 && myEntry" class="my-rank-chip mb-3">
           <span class="my-rank-position">#{{ myRank }}</span>
-          <span class="my-rank-name">{{ myEntry.avatar }} You</span>
+          <span class="my-rank-name"><ChildAvatar :avatar="myEntry.avatar" /> You</span>
           <span class="my-rank-pts"><i class="bi bi-star-fill me-1"></i>{{ myEntry.points }}</span>
         </div>
 
@@ -66,7 +67,7 @@ onMounted(async () => {
                 :style="{ order: [2, 1, 3][i] }"
                 :data-rank="i + 1"
               >
-                <div class="podium-avatar mb-2">{{ entry.avatar }}</div>
+                <div class="podium-avatar mb-2"><ChildAvatar :avatar="entry.avatar" /></div>
                 <div class="fw-heavy">
                   {{ firstName(entry.name) }}
                   <span v-if="entry.childId === myId" class="badge bg-primary ms-1 leaderboard-you">You</span>
@@ -92,7 +93,7 @@ onMounted(async () => {
                 data-test="leaderboard-row"
               >
                 <td class="lapis-muted ps-3 leaderboard-rank">{{ i + 4 }}</td>
-                <td>{{ entry.avatar }} {{ firstName(entry.name) }}</td>
+                <td><ChildAvatar :avatar="entry.avatar" /> {{ firstName(entry.name) }}</td>
                 <td class="text-end pe-3 fw-bold"><i class="bi bi-star-fill me-1"></i>{{ entry.points }}</td>
               </tr>
             </tbody>

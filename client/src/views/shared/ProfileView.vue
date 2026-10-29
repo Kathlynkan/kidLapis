@@ -10,6 +10,7 @@ import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
 import '@/css/main/profilepage.css' // the look of this page (the same for every role, only the colours change)
@@ -122,7 +123,7 @@ async function save() {
           <!-- Account info -->
           <PeelCard title="Account" icon="bi-person-circle" :open="activeCard === 'account'" @toggle="activeCard = 'account'">
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span v-if="auth.role === 'child'" class="fs-1 lh-1">{{ avatar }}</span>
+              <span v-if="auth.role === 'child'" class="fs-1 lh-1"><ChildAvatar :avatar="avatar" /></span>
               <span v-else class="profile-initial">{{ initial }}</span>
               <div>
                 <div class="fw-semibold">{{ auth.user?.name }}</div>

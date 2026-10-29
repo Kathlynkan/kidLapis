@@ -13,6 +13,7 @@ import { RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 
 // ---------- Table of children ----------
@@ -233,7 +234,7 @@ async function confirmDelete() {
           >
             <div class="d-flex justify-content-between align-items-start">
               <div>
-                <div class="fw-semibold">{{ c.avatar }} {{ c.name }}</div>
+                <div class="fw-semibold"><ChildAvatar :avatar="c.avatar" /> {{ c.name }}</div>
                 <div class="small lapis-muted">
                   {{ c.level }}<span v-if="c.school"> · {{ c.school }}</span>
                 </div>
@@ -299,7 +300,7 @@ async function confirmDelete() {
             </thead>
             <tbody>
               <tr v-for="c in filteredChildren" :key="c.id" data-test="child-row">
-                <td>{{ c.avatar }} {{ c.name }}</td>
+                <td><ChildAvatar :avatar="c.avatar" /> {{ c.name }}</td>
                 <td>{{ c.level }}</td>
                 <td>
                   <span v-for="n in c.needs" :key="n" class="badge badge-soft me-1">{{ n }}</span>

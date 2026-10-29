@@ -11,6 +11,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/teacher/schedule.css' // the styles of this page
 
@@ -240,7 +241,7 @@ async function removeSlot(volunteer, day, slot) {
                       class="text-truncate"
                       :title="slot.child.name"
                     >
-                      {{ slot.child.avatar }} {{ firstName(slot.child.name) }}
+                      <ChildAvatar :avatar="slot.child.avatar" /> {{ firstName(slot.child.name) }}
                     </RouterLink>
                     <button
                       type="button"

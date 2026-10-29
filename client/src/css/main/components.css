@@ -17,6 +17,17 @@
   height: 14px;
 }
 
+/* ---------- ChildAvatar.vue ---------- */
+
+/* a photo avatar takes the place of an emoji: as big as the text round it, and round */
+.child-avatar {
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: -0.2em;
+}
+
 /* ---------- PageHeader.vue ---------- */
 
 .lapis-page-header {

@@ -445,46 +445,32 @@
   flex-shrink: 0;
 }
 
-/* photos: one big, two small */
+/* photos: a gallery of square pictures, three in a row (two on a small screen) */
 .parentpage .day-photos {
-  display: flex;
-  gap: 6px;
-  height: 120px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
   margin-bottom: 10px;
 }
 
-.parentpage .day-photos img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.parentpage .day-photo-big {
-  flex: 2;
-  min-width: 0;
-}
-
-.parentpage .day-photo-small {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.parentpage .day-photo-small > img,
-.parentpage .day-photo-last {
-  flex: 1;
-  min-height: 0;
-}
-
-.parentpage .day-photo-last {
+.parentpage .day-photo {
   position: relative;
+  display: block;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 12px;
 }
 
+/* the picture is cropped to the square; the crop keeps the top, where the faces are */
+.parentpage .day-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+/* the last square while more photos are hidden: how many more there are */
 .parentpage .day-photo-more {
   position: absolute;
   inset: 0;
@@ -493,7 +479,14 @@
   justify-content: center;
   background: rgba(65, 79, 103, 0.6);
   color: #FFFFFF;
+  font-size: 18px;
   font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .parentpage .day-photos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ---------- small screens ---------- */
