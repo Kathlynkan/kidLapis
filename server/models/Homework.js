@@ -14,9 +14,6 @@ const homeworkSchema = new mongoose.Schema(
     points: { type: Number, default: 10 },
     status: { type: String, enum: ['assigned', 'submitted', 'verified'], default: 'assigned' },
     completedAt: { type: String, default: null },
-    deckId: String, // the deck the questions came from (the quest keeps its own copy of the questions)
-    // The questions copied from the deck. The right answer stays on the server, the child never gets it.
-    questions: [{ text: String, answer: String, _id: false }],
   },
   { toJSON: jsonOptions },
 )
