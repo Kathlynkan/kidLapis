@@ -9,7 +9,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import LineIcon from '@/components/LineIcon.vue' // a small drawn face, instead of an emoji
-import { SUBJECTS, MOODS } from '@/utils/constants'
+import { SUBJECTS, MOODS, PORTIONS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
 import '@/css/volunteer/volunteerform.css' // the look of this form for a volunteer
@@ -46,7 +46,7 @@ const form = ref({
 
   // social
   meal: '',
-  portion: '',
+  portion: 'all',
   activity: [],
   interaction: '',
   behaviour: '',
@@ -238,6 +238,10 @@ onMounted(() => { // autofill form if edit form
 
 <template>
   <div class="container py-4 volunteerformpage">
+    <button type="button" class="back-link" @click="cancel">
+      <i class="bi bi-chevron-left"></i>Back
+    </button>
+
     <PageHeader
       :title="isEdit ? 'Edit session' : 'Record a session'"
       subtitle="Takes about a minute. The next volunteer will thank you!"
@@ -259,7 +263,7 @@ onMounted(() => { // autofill form if edit form
           <h2 class="h5 mb-3">Academic</h2>
 
           <div class="row g-4">
-            <div class="col-sm-3">
+            <div class="col-sm-4">
               <label class="form-label" for="date">Date</label>
               <!-- form-label: bootstrap form label styling-->
               <input id="date" v-model="form.date" type="date" class="form-control"/>
@@ -268,7 +272,7 @@ onMounted(() => { // autofill form if edit form
 
             <div class="col-sm-1"></div>
 
-            <div class="col-sm-8">
+            <div class="col-sm-7">
               <span class="form-label d-block">How was the child feeling?</span>
               <!-- d-block: display label on its own line, label takes up entire row -->
               <div class="btn-group flex-wrap" role="group">
@@ -290,7 +294,7 @@ onMounted(() => { // autofill form if edit form
               </div>
             </div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-4">
               <label class="form-label" for="subject">Subject</label>
               <select id="subject" v-model="form.subject" class="form-select">
                 <!-- form-select: bootstrap-styled dropdown -->
@@ -305,7 +309,7 @@ onMounted(() => { // autofill form if edit form
               <input id="topic" v-model.trim="form.topic" class="form-control" placeholder="e.g. Fractions"/>
             </div>
 
-            <div class="col-6 col-sm-3">
+            <div class="col-6 col-sm-4">
               <label class="form-label" for="attempted">Attempted</label>
               <div class="input-group">
                 <button type="button" class="btn btn-outline-secondary" @click="form.attempted = Math.max(0,(form.attempted || 0)-1)">-</button>
@@ -316,7 +320,7 @@ onMounted(() => { // autofill form if edit form
 
             <div class="col-sm-1"></div>
 
-            <div class="col-6 col-sm-3">
+            <div class="col-6 col-sm-4">
               <label class="form-label" for="correct">Correct</label>
               <div class="input-group">
                 <button type="button" class="btn btn-outline-secondary" @click="form.correct = Math.max(0,(form.correct || 0)-1)">-</button>
@@ -376,16 +380,26 @@ onMounted(() => { // autofill form if edit form
               <input id="meal" v-model.trim="form.meal" class="form-control" placeholder="e.g. Chicken rice and apples">
             </div>
 
-            <div class="col-md-6">
-              <label class="form-label" for="portion">Portion Eaten</label>
-              <select id="portion" v-model="form.portion" class="form-select">
-                <option value="">Select</option>
-                <option>All</option>
-                <option>Most</option>
-                <option>Half</option>
-                <option>Little</option>
-                <option>None</option>
-              </select>
+            <div class="col-sm-7">
+              <span class="form-label d-block">Portion Eaten</span>
+              <!-- d-block: display label on its own line, label takes up entire row -->
+              <div class="btn-group flex-wrap" role="group">
+                <!-- 
+                btn-group: group mood buttons together
+                flex-wrap: allow buttons to wrap onto next line on smaller screens
+                 -->
+                <template v-for="p in PORTIONS" :key="p.value">
+                  <input :id="'portion-' + p.value" v-model="form.portion" type="radio" class="btn-check" :value="p.value" />
+                  <!-- btn-check: hidden radio button for bootstrap button toggle-->
+                  <label class="btn btn-outline-secondary btn-sm portion-option" :for="'portion-' + p.value">
+                    <!--
+                    btn-outline-secondary: gray outlined button style
+                    btn-sm: small button size
+                    -->
+                    {{ p.label }}
+                  </label>
+                </template>
+              </div>
             </div>
 
             <div class="col-12">
@@ -459,7 +473,7 @@ onMounted(() => { // autofill form if edit form
             <!-- right-aligned buttons with gap in between and top margin -->
             <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="saving" data-test="session-submit">
-              {{ isEdit ? 'Save changes' : 'Save session' }}
+              {{ isEdit ? 'Save Changes' : 'Save Session' }}
             </button>
           </div>
         </form>
