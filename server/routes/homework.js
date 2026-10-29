@@ -195,8 +195,6 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
       dueDate: req.body.dueDate,
       points: Number(req.body.points) || 10,
       volunteerId: req.user.id,
-      deckId: deck ? deck.id : undefined,
-      questions
     })
 
     // return new homework
