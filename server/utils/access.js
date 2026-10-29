@@ -1,5 +1,5 @@
 // Who is allowed to see which child? (shared helper - owner: Kai Sen)
-//   coordinator -> every child
+//   teacher     -> every child
 //   volunteer   -> children assigned to them (child.volunteerIds)
 //   parent      -> their own children (child.parentId)
 //   child       -> only themselves (user.childId)

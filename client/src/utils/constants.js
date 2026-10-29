@@ -10,11 +10,12 @@ export const LEVELS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 
+// face: the name of the drawn face (an image in public/icons) that goes with the mood
 export const MOODS = [
-  { value: 'happy', label: 'Happy', emoji: '😊' },
-  { value: 'okay', label: 'Okay', emoji: '🙂' },
-  { value: 'tired', label: 'Tired', emoji: '🥱' },
-  { value: 'frustrated', label: 'Frustrated', emoji: '😣' },
+  { value: 'happy', label: 'Happy', face: 'face-happy' },
+  { value: 'okay', label: 'Okay', face: 'face-okay' },
+  { value: 'tired', label: 'Tired', face: 'face-tired' },
+  { value: 'frustrated', label: 'Frustrated', face: 'face-hard' },
 ]
 
 export const HOMEWORK_STATUS = {

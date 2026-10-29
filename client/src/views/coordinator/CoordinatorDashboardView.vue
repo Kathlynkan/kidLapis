@@ -16,6 +16,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import StatCard from '@/components/StatCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
+import '@/css/teacher/coordinatordashboard.css' // the styles of this page
 
 const router = useRouter()
 
@@ -155,7 +156,7 @@ function daysAgo(dateStr) {
       <div class="row g-4">
         <!-- Needs attention -->
         <div class="col-lg-7">
-          <div class="cb-card cb-card-yellow p-3">
+          <div class="lapis-card lapis-card-yellow p-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
               <h2 class="h6 mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Needs attention</h2>
               <div class="d-flex align-items-center gap-2">
@@ -177,10 +178,10 @@ function daysAgo(dateStr) {
 
             <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
 
-            <p v-if="!alerts.length" class="small text-muted-cb mb-0" data-test="no-alerts">
+            <p v-if="!alerts.length" class="small lapis-muted mb-0" data-test="no-alerts">
               Nothing needs attention right now. Every child has a volunteer and a recent session.
             </p>
-            <p v-else-if="!filteredAlerts.length" class="small text-muted-cb mb-0">
+            <p v-else-if="!filteredAlerts.length" class="small lapis-muted mb-0">
               No alerts of this type. Choose "All" to see everything.
             </p>
 
@@ -244,15 +245,15 @@ function daysAgo(dateStr) {
           <TopicSummaryChart :sessions="sessions" title="Centre-wide accuracy by subject" />
 
           <!-- Recent activity -->
-          <div class="cb-card p-3" data-test="activity-feed">
+          <div class="lapis-card p-3" data-test="activity-feed">
             <h2 class="h6"><i class="bi bi-clock-history me-2"></i>Recent sessions</h2>
-            <p v-if="!recentSessions.length" class="small text-muted-cb mb-0">No sessions logged yet.</p>
+            <p v-if="!recentSessions.length" class="small lapis-muted mb-0">No sessions logged yet.</p>
             <ul v-else class="list-unstyled small mb-0">
               <li v-for="s in recentSessions" :key="s.id" class="py-2 border-bottom">
                 <strong>{{ firstName(volunteerNames[s.volunteerId]) }}</strong> worked with
                 <strong>{{ firstName(childNames[s.childId]) }}</strong> on {{ s.topic }}
                 <span v-if="s.attempted">({{ s.correct }}/{{ s.attempted }} correct)</span>
-                <div class="text-muted-cb">{{ s.subject }}, {{ daysAgo(s.date) }}</div>
+                <div class="lapis-muted">{{ s.subject }}, {{ daysAgo(s.date) }}</div>
               </li>
             </ul>
           </div>
@@ -261,9 +262,3 @@ function daysAgo(dateStr) {
     </template>
   </div>
 </template>
-
-<style scoped>
-.alert-row {
-  cursor: pointer;
-}
-</style>

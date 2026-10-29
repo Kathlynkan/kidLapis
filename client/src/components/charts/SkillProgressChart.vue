@@ -1,5 +1,6 @@
 <!-- SkillProgressChart - accuracy over time, one line per PSLE subject.   Owner: Jachin
      Props: sessions (Array) - from GET /sessions?childId=...
+            calm (Boolean) - the quiet look for a volunteer: one teal line for the score of each session
      Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>
 import { computed } from 'vue'
@@ -12,13 +13,17 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js'
 import { accuracy, formatDate } from '@/utils/format'
+import '@/css/main/components.css' // the look of the small parts
 
-ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend)
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler)
+ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif' // the same font as the rest of the app
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
+  calm: { type: Boolean, default: false },
 })
 
 const SUBJECT_COLORS = {
@@ -64,6 +69,51 @@ const chartOptions = {
   },
 }
 
+// the quiet look: one teal line for the score of each session, oldest to newest
+const calmData = computed(() => {
+  const sorted = [...props.sessions].sort((a, b) => a.date.localeCompare(b.date))
+  return {
+    labels: sorted.map((s) => formatDate(s.date)),
+    datasets: [
+      {
+        label: 'Score',
+        data: sorted.map((s) => accuracy(s)),
+        borderColor: '#B7D8D7',
+        backgroundColor: 'rgba(183, 216, 215, 0.35)',
+        fill: true,
+        borderWidth: 4,
+        tension: 0.3,
+        pointBackgroundColor: '#FFFFFF',
+        pointBorderColor: '#3E6B6A',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        clip: false, // a dot on the edge of the chart (100%) is drawn whole, not cut in half
+      },
+    ],
+  }
+})
+
+const CALM_TEXT = { color: '#6B8177', font: { family: ChartJS.defaults.font.family } }
+const calmOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  layout: { padding: { top: 8, right: 8 } }, // room for the dots on the edge
+  scales: {
+    y: {
+      min: 0,
+      max: 100,
+      ticks: { ...CALM_TEXT, stepSize: 50, callback: (v) => v + '%' },
+      grid: { color: '#E4E9E6' },
+      border: { display: false },
+    },
+    x: { ticks: CALM_TEXT, grid: { display: false }, border: { display: false } },
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+  },
+}
+
 const summaries = computed(() => {
   const bySubject = {}
   for (const s of props.sessions) {
@@ -98,15 +148,15 @@ function trendLabel(sorted) {
 </script>
 
 <template>
-  <div class="cb-card p-3" data-test="skill-progress-chart">
+  <div class="lapis-card p-3" data-test="skill-progress-chart">
     <h2 class="h6 mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Progress over time</h2>
-    <p v-if="sessions.length === 0" class="small text-muted-cb mb-0">No data yet.</p>
+    <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
     <template v-else>
-      <div style="height: 220px; position: relative">
-        <Line :data="chartData" :options="chartOptions" />
+      <div class="chart-box chart-box-line">
+        <Line :data="calm ? calmData : chartData" :options="calm ? calmOptions : chartOptions" />
       </div>
       <ul class="list-unstyled small mt-3 mb-0" data-test="chart-summary">
-        <li v-for="s in summaries" :key="s.topic" class="text-muted-cb">
+        <li v-for="s in summaries" :key="s.topic" class="lapis-muted">
           <strong>{{ s.topic }}:</strong> {{ s.text }}
         </li>
       </ul>

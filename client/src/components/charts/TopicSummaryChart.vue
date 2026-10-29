@@ -1,6 +1,7 @@
 <!-- TopicSummaryChart - average accuracy per subject (bar chart)  Owner: Jachin
      Used on: Child profile (Yuqi), Teacher dashboard (Yu Xuan)
-     Props: sessions (Array), title (String) -->
+     Props: sessions (Array), title (String),
+            calm (Boolean) - the quiet look for a volunteer: plain teal bars with the percentage -->
 <script setup>
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'
@@ -11,12 +12,15 @@ import {
   LinearScale,
   Tooltip,
 } from 'chart.js'
+import '@/css/main/components.css' // the look of the small parts
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip)
+ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif' // the same font as the rest of the app
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
   title: { type: String, default: 'Accuracy by subject' },
+  calm: { type: Boolean, default: false },
 })
 
 // Fixed order matches PSLE subjects
@@ -73,12 +77,18 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="cb-card p-3" data-test="topic-summary-chart">
+  <div class="lapis-card p-3" data-test="topic-summary-chart">
     <h2 class="h6 mb-3"><i class="bi bi-bar-chart me-2"></i>{{ title }}</h2>
-    <p v-if="sessions.length === 0" class="small text-muted-cb mb-0">No data yet.</p>
+    <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
+    <div v-else-if="calm" class="topic-bars">
+      <div v-for="t in bySubject" :key="t.subject" class="topic-bar">
+        <div class="topic-bar-top"><span>{{ t.subject }}</span><b>{{ t.accuracy }}%</b></div>
+        <div class="topic-bar-track"><div class="topic-bar-fill" :style="{ width: t.accuracy + '%' }"></div></div>
+      </div>
+    </div>
     <div
       v-else
-      style="position: relative"
+      class="chart-box"
       :style="{ height: Math.max(120, bySubject.length * 52) + 'px' }"
     >
       <Bar :data="chartData" :options="chartOptions" />

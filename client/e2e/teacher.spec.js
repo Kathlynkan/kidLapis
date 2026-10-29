@@ -91,7 +91,9 @@ test.describe('Teacher: manage children', () => {
   })
 
   test('children table loads with rows', async ({ page }) => {
-    await expect(page.locator('[data-test="child-row"]').first()).toBeVisible()
+    // Desktop shows a table row per child, phones show a card per child (Kai Sen's responsive layout)
+    const child = page.locator('[data-test="child-row"]:visible, [data-test="child-card"]:visible')
+    await expect(child.first()).toBeVisible()
   })
 
   test('add-child button is visible', async ({ page }) => {

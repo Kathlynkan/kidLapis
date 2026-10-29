@@ -135,17 +135,17 @@ onMounted(async () => {
         <option value="">All skills</option>
         <option v-for="skill in allSkills" :key="skill" :value="skill">{{ skill }}</option>
       </select>
-      <span class="small text-muted-cb">
+      <span class="small lapis-muted">
         Showing {{ filtered_Volunteers.length }} of {{ volunteers.length }}
       </span>
-      <p v-if="!filtered_Volunteers.length" class="text-muted-cb" data-test="no-volunteers">
+      <p v-if="!filtered_Volunteers.length" class="lapis-muted" data-test="no-volunteers">
         No volunteer can "{{ skill_Filter }}" yet.
       </p>
 
       <div v-for="v in filtered_Volunteers" :key="v.id" class="col-md-6 col-lg-4">
-        <div class="cb-card p-3 h-100" data-test="volunteer-card">
+        <div class="lapis-card p-3 h-100" data-test="volunteer-card">
           <h2 class="h6 mb-1"><i class="bi bi-person-circle me-1"></i>{{ v.name }}</h2>
-          <div class="small text-muted-cb mb-2">{{ v.email }}</div>
+          <div class="small lapis-muted mb-2">{{ v.email }}</div>
           <div class="d-flex gap-2 mb-2">
             <button
               v-if="editing_ID !== v.id && confirmDeleteId !== v.id"
@@ -195,13 +195,13 @@ onMounted(async () => {
             {{ workloadOf(v).length === 1 ? 'child' : 'children' }}:
             {{ workloadOf(v).map((c) => c.name.split(' ')[0]).join(', ') }}
           </template>
-          <span v-else class="text-muted-cb">No assigned children</span>
+          <span v-else class="lapis-muted">No assigned children</span>
         </div>
 
         <template v-if="editing_ID !== v.id">
           <div class="mb-2">
             <span v-for="s in v.skills" :key="s" class="badge badge-soft me-1 mb-1">{{  s }}</span>
-            <span v-if="!v.skills?.length" class="small text-muted-cb">No skills to display</span>
+            <span v-if="!v.skills?.length" class="small lapis-muted">No skills to display</span>
           <div class="small"><i class="bi bi-calendar-week me-1"></i>{{ (v.availability || []).join(', ') || 'Not set' }}</div>
           </div>
         </template>

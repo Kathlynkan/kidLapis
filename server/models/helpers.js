@@ -8,6 +8,15 @@ export function newId(prefix) {
   return `${prefix}_${crypto.randomBytes(4).toString('hex')}`
 }
 
+// Child codes like "K7P3QX" that the centre gives to a parent, so they can link their
+// account to their child when they sign up. No 0/O or 1/I, so they are easy to read out.
+const CODE_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+export function newLinkCode() {
+  let code = ''
+  for (let i = 0; i < 6; i++) code += CODE_LETTERS[crypto.randomInt(CODE_LETTERS.length)]
+  return code
+}
+
 // What the client receives when a document is sent with res.json(doc):
 //   _id  -> id        (the Vue code uses `.id` everywhere)
 //   __v and password are removed

@@ -1,0 +1,27 @@
+/* The small captions of the parent, Messages, volunteer and child pages: capital letters with a little space between the letters.
+   It is the same style as the form labels and the tags in main.css, so every page of the app reads the same.
+   The size and the weight of each caption stay in the file of its page.
+   The selectors start with body, so these rules win whatever order the css files load in. */
+
+body .parentpage .small-label,
+body .parentpage .group-heading,
+body .parentpage .tile span,
+body .parentpage .row-tag,
+body .parentpage .row-score,
+body .parentpage .mood-chip,
+body .parentpage .tab,
+body .parentpage .child-button,
+body .parentpage .show-more,
+body .messagespage .child-button,
+body .messagespage .unread-badge,
+body .messagespage .date-pill,
+body .volunteerpage .tab,
+body .volunteerpage .pill,
+body .volunteerpage .last-seen,
+body .volunteerpage .needs-attention,
+body .volunteerpage .soft-button,
+body .role-volunteer .childprofilepage .back-link,
+body .role-volunteer .childprofilepage .session-subject {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

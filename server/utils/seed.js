@@ -11,6 +11,7 @@ import { readFile } from 'node:fs/promises'
 import bcrypt from 'bcryptjs'
 import { connectDb, disconnectDb } from './db.js'
 import { User, Child, Session, Homework, Message, Handover, Deck } from '../models/index.js'
+import { newLinkCode } from '../models/helpers.js'
 
 const DATE_FIELDS = ['date', 'dueDate', 'sentAt', 'createdAt', 'completedAt']
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -44,9 +45,12 @@ const hashedUsers = await Promise.all(
   seed.users.map(async (u) => ({ ...u, password: await bcrypt.hash(u.password, 10) })),
 )
 
+// Every child gets a fresh child code (parents use it to link their account at sign up)
+const childrenWithCodes = seed.children.map((c) => ({ ...c, linkCode: newLinkCode() }))
+
 const collections = [
   [User, hashedUsers],
-  [Child, seed.children],
+  [Child, childrenWithCodes],
   [Session, seed.sessions],
   [Deck, seed.decks],
   [Homework, seed.homework],

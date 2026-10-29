@@ -1,16 +1,18 @@
 // =============================================================
 // /matchmaking  - suggest + assign volunteers    Owner: Yu Xuan
+// Used by the Matchmaking page AND the Schedule (timetable) page.
 // =============================================================
 import { Router } from 'express'
 import { Child, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { rankVolunteers } from '../utils/matchmaking.js'
+import { findClash, TIME_PATTERN } from '../utils/schedule.js'
 
 const router = Router()
-router.use(requireAuth, requireRole('teacher')) // every matchmaking route is coordinator-only
+router.use(requireAuth, requireRole('coordinator')) // every matchmaking route is coordinator-only
 
 // Mongoose keeps the id in _id. This gives the same { id, ... } shape the client and
-// seed.json use, which is what the pure scoring functions expect.
+// seed.json use, which is what the pure functions in utils/ expect.
 const toPlain = (doc) => ({ ...doc.toJSON(), id: doc.id })
 
 // GET /matchmaking/:childId -> { child, suggestions: [...ranked volunteers] }
@@ -27,10 +29,12 @@ router.get('/:childId', async (req, res) => {
 })
 
 // PUT /matchmaking/:childId/assign
-//   assign:   { action: 'assign',   volunteerId, day }
-//   unassign: { action: 'unassign', volunteerId }
+//   assign:   { action: 'assign',   volunteerId, day, time? }   time like '16:00'
+//   unassign: { action: 'unassign', volunteerId, day? }
+//             with day    -> remove just that day's slot (Schedule page)
+//             without day -> remove the volunteer completely (Matchmaking page)
 router.put('/:childId/assign', async (req, res) => {
-  const { volunteerId, day, action = 'assign' } = req.body
+  const { volunteerId, day, time, action = 'assign' } = req.body
 
   if (!['assign', 'unassign'].includes(action)) {
     return res.status(400).json({ message: 'Action must be "assign" or "unassign".' })
@@ -39,25 +43,49 @@ router.put('/:childId/assign', async (req, res) => {
 
   const child = await Child.findById(req.params.childId)
   if (!child) return res.status(404).json({ message: 'Child not found' })
+  if (!child.schedule) child.schedule = [] // safe even before the schema has the field
 
   if (action === 'unassign') {
-    // Remove the volunteer AND all their schedule slots for this child.
-    child.volunteerIds = child.volunteerIds.filter((id) => id !== volunteerId)
-    child.schedule = child.schedule.filter((slot) => slot.volunteerId !== volunteerId)
+    if (day) {
+      child.schedule = child.schedule.filter((s) => !(s.volunteerId === volunteerId && s.day === day))
+    } else {
+      child.schedule = child.schedule.filter((s) => s.volunteerId !== volunteerId)
+    }
+    // Only drop the volunteer from the child once they have no days left together.
+    if (!child.schedule.some((s) => s.volunteerId === volunteerId)) {
+      child.volunteerIds = child.volunteerIds.filter((id) => id !== volunteerId)
+    }
   } else {
     const volunteer = await User.findOne({ _id: volunteerId, role: 'volunteer' })
     if (!volunteer) return res.status(404).json({ message: 'Volunteer not found' })
     if (!day) return res.status(400).json({ message: 'Pick a day for the session.' })
 
-    // Never trust the browser: re-check the day is one the volunteer is actually free.
+    // Never trust the browser: re-check everything the page already checks.
     if (!(volunteer.availability || []).includes(day)) {
       return res.status(400).json({ message: `${volunteer.name} isn't available on ${day}.` })
     }
+    if (time && !TIME_PATTERN.test(time)) {
+      return res.status(400).json({ message: 'Time must look like 16:00.' })
+    }
+
+    const allChildren = (await Child.find()).map(toPlain)
+    const clash = findClash(allChildren, {
+      childId: child.id,
+      volunteerId,
+      volunteerName: volunteer.name,
+      day,
+      time,
+    })
+    if (clash) return res.status(409).json({ message: clash }) // 409 Conflict
 
     if (!child.volunteerIds.includes(volunteerId)) child.volunteerIds.push(volunteerId)
 
-    const alreadyBooked = child.schedule.some((s) => s.volunteerId === volunteerId && s.day === day)
-    if (!alreadyBooked) child.schedule.push({ volunteerId, day })
+    const existing = child.schedule.find((s) => s.volunteerId === volunteerId && s.day === day)
+    if (existing) {
+      if (time) existing.time = time // same volunteer + day again = change the time
+    } else {
+      child.schedule.push(time ? { volunteerId, day, time } : { volunteerId, day })
+    }
   }
 
   await child.save()

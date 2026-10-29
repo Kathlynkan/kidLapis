@@ -5,6 +5,7 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { Child, User, Session, Homework, Message, Handover } from '../models/index.js'
+import { newLinkCode } from '../models/helpers.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild, childFilterFor } from '../utils/access.js'
 
@@ -14,8 +15,20 @@ const router = Router()
 router.use(requireAuth)
 
 // GET /children  -> only the children this user is allowed to see
+// Teachers also get each child's linkCode (the code parents use at sign up).
 router.get('/', async (req, res) => {
-  const children = await Child.find(childFilterFor(req.user)).sort({ name: 1 })
+  const isTeacher = req.user.role === 'teacher'
+  let query = Child.find(childFilterFor(req.user)).sort({ name: 1 })
+  if (isTeacher) query = query.select('+linkCode')
+  const children = await query
+
+  // Children added before child codes existed don't have one yet: give them one now
+  if (isTeacher) {
+    for (const child of children.filter((c) => !c.linkCode)) {
+      child.linkCode = newLinkCode()
+      await child.save()
+    }
+  }
   res.json(children)
 })
 
@@ -73,8 +86,9 @@ router.post('/', requireRole('teacher'), async (req, res) => {
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ message: 'Child login email is not valid.' })
     }
-    if (typeof childPassword !== 'string' || childPassword.length < 6) {
-      return res.status(400).json({ message: 'Child login password must be at least 6 characters.' })
+    // Same minimum as every other account (MIN_PASSWORD_LENGTH in routes/auth.js)
+    if (typeof childPassword !== 'string' || childPassword.length < 8) {
+      return res.status(400).json({ message: 'Child login password must be at least 8 characters.' })
     }
     const exists = await User.exists({ email })
     if (exists) {
@@ -92,6 +106,7 @@ router.post('/', requireRole('teacher'), async (req, res) => {
       needs: needs || [],
       volunteerIds: [],
       avatar: avatar || undefined,
+      linkCode: newLinkCode(), // the teacher gives this to the parent for sign up
     })
 
     // 4. Optionally create the child User account
@@ -119,8 +134,8 @@ router.post('/', requireRole('teacher'), async (req, res) => {
 // Edits the child's profile only. Volunteers (Yu Xuan), points (Jachin) and
 // follow-up flags are changed by their own features, so they are not touched here.
 router.put('/:id', requireRole('teacher'), async (req, res) => {
-  // 1. Does this child exist?
-  const child = await Child.findById(req.params.id)
+  // 1. Does this child exist? (+linkCode so the reply still has the child code for the table)
+  const child = await Child.findById(req.params.id).select('+linkCode')
   if (!child) {
     return res.status(404).json({ message: 'Child not found' })
   }

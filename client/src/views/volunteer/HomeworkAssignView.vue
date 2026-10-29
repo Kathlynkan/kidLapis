@@ -6,6 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import { SUBJECTS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/volunteerform.css' // the look of the forms for a volunteer
 
 const route = useRoute()
 const router = useRouter()
@@ -78,7 +80,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 volunteerformpage">
     <PageHeader title="Give homework" subtitle="Small tasks from the question book work best." />
 
     <div class="row justify-content-center">

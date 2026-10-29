@@ -1,0 +1,43 @@
+/* What the volunteer pages have in common: the volunteer home, one child's page and the two forms (as a volunteer sees them).
+   Each of those pages also has its own file with the rules only that page needs.
+   Colours:
+     #213C31 dark green  text
+     #446C59 green       the title and the line under it */
+
+/* ---------- the base text ---------- */
+
+.volunteerpage,
+.role-volunteer .childprofilepage,
+.role-volunteer .volunteerformpage {
+  font-family: var(--lapis-font);
+  font-size: 15px;
+  line-height: 1.55;
+  color: #213C31;
+}
+
+/* the title and the sentence under it (PageHeader.vue is shared, so only the colours and the font are set here) */
+.volunteerpage .lapis-page-header .page-title,
+.role-volunteer .childprofilepage .lapis-page-header .page-title,
+.role-volunteer .volunteerformpage .lapis-page-header .page-title {
+  font-family: inherit;
+  color: #446C59;
+}
+
+.volunteerpage .lapis-page-header .page-subtitle,
+.role-volunteer .childprofilepage .lapis-page-header .page-subtitle,
+.role-volunteer .volunteerformpage .lapis-page-header .page-subtitle {
+  color: #446C59;
+}
+
+/* the pages you open from the home page have a slightly smaller title */
+.role-volunteer .childprofilepage .lapis-page-header .page-title,
+.role-volunteer .volunteerformpage .lapis-page-header .page-title {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.role-volunteer .childprofilepage .lapis-page-header .page-subtitle,
+.role-volunteer .volunteerformpage .lapis-page-header .page-subtitle {
+  font-size: 15px;
+  font-weight: 700;
+}

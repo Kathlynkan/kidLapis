@@ -246,7 +246,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 | Should | Sign up extras: volunteers pick skills + days, parents enter a **child code** from the centre to link their child. |
 | Should | Navbar unread-message badge (using Kat's endpoint). Landing page polish. Remove the demo-account box before submission (keep the accounts in the README). |
 | ✅ Must | **MongoDB Atlas setup** for the team: one free cluster, one database user, Network Access `0.0.0.0/0`. Share the connection string privately. Everyone uses their own database name for development (see README, Step 0). |
-| Should | **Deployment:** API worker on Cloudflare with `DB=` pointing at the shared database + Vue on Cloudflare Pages. |
+| Should | **Deployment:** API and Vue site hosted online on Render, with `DB=` pointing at the shared database. |
 | ✅ Should | **Integration lead:** review/merge PRs, keep `main` green (run all tests before merging), final README. |
 | Stretch | Swap the in-memory tokens for JWT, so logins survive server restarts on deployment. |
 
@@ -306,7 +306,7 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 ## 4. Shared rules (everyone)
 
 1. **Your own tests.** At least 2 Playwright E2E tests for your journey + 1 Vitest unit test. Use `data-test="..."` selectors, which the rubric calls "stable selectors". Testing is 10% of the grade.
-2. **Your own responsive styling.** Check your pages at iPhone 6 (375 px) and Bootstrap XL in Chrome DevTools. Graders test exactly this range. Use the shared classes and colours in `assets/main.css` (`cb-card`, `badge-soft`, `--cb-primary`) so the app looks like one product.
+2. **Your own responsive styling.** Check your pages at iPhone 6 (375 px) and Bootstrap XL in Chrome DevTools. Graders test exactly this range. Use the shared classes and colours in `assets/main.css` (`lapis-card`, `badge-soft`, `--lapis-primary`) so the app looks like one product.
 3. **Loading / error / empty states** on every page that loads data: `<StateMessage>`.
 4. **Don't break shared contracts.** These props are used by other people's pages:
    - `SkillProgressChart` / `TopicSummaryChart` take a `sessions` array.

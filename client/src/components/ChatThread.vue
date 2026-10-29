@@ -2,6 +2,7 @@
   ChatThread - the chat bubbles and the box to type a message.   Owner: Kat
   It only shows things. The page that uses it (MessagesView.vue)
   loads the messages and sends the new ones to the server.
+  Its styles are in css/parent/messagespage.css
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
@@ -57,9 +58,9 @@ function time(isDate) {
 </script>
 
 <template>
-  <div class="cb-card cb-card-blue chat">
+  <div class="chat">
     <!-- the messages -->
-    <div class="chat-messages" data-test="chat-messages"> <!-- data test is for the testing -->
+    <div class="chat-messages" data-test="chat-messages">
       <p v-if="messages.length === 0" class="empty-chat">No messages yet. Say hello!</p>
 
       <!-- A loop draws one bubble for each message. It checks whether the logged-in person wrote that message, to put it on the right or the left, and fills the bubble with the sender’s name, the text and the time -->
@@ -78,98 +79,12 @@ function time(isDate) {
     </div>
 
     <!-- the box to type a new message -->
-    <form class="chat-input-row" @submit.prevent="submit"> <!--runs the submit button and prevents the page frm reloading-->
-
-      <input v-model="draft" class="form-control" placeholder="Type a message..." data-test="chat-input" /> <!-- saves a draft of whatever user types -->
-      <button class="btn btn-primary" type="submit" aria-label="Send" :disabled="sending || draft.trim() === ''" data-test="chat-send"> <!-- the button is disabkles whenit is sending a message or when the message is empty after white spaces are trimmed -->
-        ➤
-      </button>
+    <!-- pressing send (or Enter) runs submit, and the page does not reload -->
+    <form class="chat-input-row" @submit.prevent="submit">
+      <!-- v-model keeps what the user types in draft -->
+      <input v-model="draft" class="chat-input" placeholder="Type a message..." data-test="chat-input" />
+      <!-- the button is off while a message is being sent, or when the box is empty (spaces do not count) -->
+      <button class="send-button" type="submit" aria-label="Send" :disabled="sending || draft.trim() === ''" data-test="chat-send"><i class="bi bi-send-fill"></i></button>
     </form>
   </div>
 </template>
-
-<style scoped>
-/* the whole chat: the messages grow, the typing box stays at the bottom */
-.chat {
-  display: flex; 
-  flex-direction: column;
-  height: 500px; 
-  padding-top: 8px;
-}
-
-.chat-messages {
-  flex-grow: 1; /* tells the messages area to take up all the leftover space, so the typing box is pushed to the bottom */
-  overflow: auto; /* adds a scroll bar when there are too many msgs */
-  padding: 16px;
-}
-
-.empty-chat {
-  margin-top: 24px; 
-  text-align: center;
-  color: #8D7F77; 
-}
-
-/* the date in the middle of the chat, like Telegram */
-.date-pill {
-  width: fit-content;
-  margin: 12px auto;
-  padding: 2px 12px;
-  border-radius: 12px;
-  background: rgba(74, 63, 58, 0.55);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* one line of the chat: on the left, unless the message is mine */
-.message-row {
-  display: flex;
-  margin-bottom: 8px;
-}
-.message-row.from-me {
-  justify-content: flex-end;
-}
-
-/* the bubble: light blue for the other person */
-.bubble {
-  max-width: 78%;
-  padding: 8px 14px;
-  border: 1px solid #4890B8;
-  border-radius: 14px;
-  border-bottom-left-radius: 4px;
-  background: #DFF0F8;
-  font-weight: 500;
-}
-
-/* my bubble: darker blue, with the small corner on the right */
-.from-me .bubble {
-  background: #88C0D8;
-  border-bottom-left-radius: 14px;
-  border-bottom-right-radius: 4px;
-}
-
-.bubble-name {
-  margin-bottom: 2px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.bubble-text {
-  font-size: 15px;
-}
-
-.bubble-time {
-  margin-top: 3px;
-  text-align: right;
-  font-size: 11px;
-}
-
-/* the typing box */
-.chat-input-row {
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  border-top: 3px solid #4890B8;
-}
-</style>

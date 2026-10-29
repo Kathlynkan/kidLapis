@@ -1,10 +1,13 @@
 <!-- =============================================================
   SessionCard - one past session in the history list.   Owner: Ning Xuan
+  The look for a volunteer is in css/volunteer/childprofilepage.css
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
 import { formatDate, accuracy } from '@/utils/format'
 import { MOODS } from '@/utils/constants'
+import LineIcon from '@/components/LineIcon.vue'
+import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
   session: { type: Object, required: true },
@@ -22,39 +25,33 @@ function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
-  <div class="cb-card cb-card-lime cb-card-top p-3" data-test="session-card">
+  <div class="lapis-card lapis-card-lime lapis-card-top session-card p-3" data-test="session-card">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
       <div>
-        <strong style="color:var(--lapis-plum)">{{ session.subject }} - {{ session.topic }}</strong>
-        <div class="small" style="color:var(--cb-muted)">
+        <span class="session-subject">{{ session.subject }}</span><strong class="session-title">{{ session.topic }}</strong>
+        <div class="small session-meta">
           {{ formatDate(session.date) }} &middot; by {{ session.volunteerName }}
-          <span v-if="mood" class="chip chip-social ms-1">{{ mood.emoji }} {{ mood.label }}</span>
+          <span v-if="mood" class="chip chip-social session-mood ms-1">
+            <LineIcon :name="mood.face" small />{{ mood.label }}
+          </span>
         </div>
       </div>
-      <span
-        class="badge align-self-start fs-6"
-        style="background:var(--topic-academic);color:var(--lapis-plum)"
-      >
+      <span class="badge session-score align-self-start">
         {{ session.correct }}/{{ session.attempted }} &middot; {{ accuracy(session) }}%
       </span>
     </div>
 
-    <div class="small" style="color:var(--lapis-plum)">
+    <div class="small session-lines">
       <div v-if="session.struggles.length">
-        <i class="bi bi-exclamation-circle me-1" style="color:var(--lapis-pink)"></i>Struggled with:
-        <span
-          v-for="s in session.struggles"
-          :key="s"
-          class="badge me-1"
-          style="background:var(--topic-academic-soft);color:var(--lapis-plum)"
-        >{{ s }}</span>
+        <i class="bi bi-exclamation-circle me-1 session-icon icon-struggle"></i>Struggled with:
+        <span v-for="s in session.struggles" :key="s" class="badge session-tag me-1">{{ s }}</span>
       </div>
       <div>
-        <i class="bi bi-lightbulb me-1" style="color:var(--lapis-yellow)"></i>
+        <i class="bi bi-lightbulb me-1 session-icon icon-worked"></i>
         What worked: {{ session.whatWorked || '-' }}
       </div>
       <div>
-        <i class="bi bi-flag me-1" style="color:var(--lapis-purple)"></i>
+        <i class="bi bi-flag me-1 session-icon icon-next"></i>
         Next step: {{ session.nextStep || '-' }}
       </div>
 
@@ -91,7 +88,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         <div class="modal-header">
           <h5 class="modal-title">Delete Session</h5>
         </div>
-        <div class="modal-body" style="color:var(--lapis-plum);font-weight:500">
+        <div class="modal-body session-delete-text">
           <p>Are you sure you want to delete this session?</p>
         </div>
         <div class="modal-footer">

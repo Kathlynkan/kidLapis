@@ -13,6 +13,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildCard from '@/components/ChildCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/volunteerpage.css' // the styles of this page and of the child card
+import '@/css/main/labels.css' // the capital-letter captions
 
 const auth = useAuthStore() // open auth store
 const router = useRouter()
@@ -69,11 +72,6 @@ const myDays = computed(() => {
     return auth.user.availability
   }
   return []
-})
-
-// is today one of my days?
-const workingToday = computed(() => {
-  return myDays.value.includes(today)
 })
 
 // children scheduled with me on a given day
@@ -157,112 +155,76 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 volunteerpage">
     <PageHeader
-      :title="`Hi ${firstName(auth.user?.name)} 👋`"
+      :title="`Hi, ${firstName(auth.user?.name)}`"
       subtitle="Open a child to see their handover before your session."
     />
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
     <template v-else>
-      <!-- Toggle Tabs -->
-      <ul class="nav nav-tabs mb-3">
+      <!-- the two tabs -->
+      <div class="tabs">
         <!-- schedule tab -->
-        <li class="nav-item">
-          <button
-            type="button"
-            class="nav-link"
-            :class="activeTab === 'today' ? 'active bg-primary text-white' : ''"
-            data-test="tab-today"
-            @click="activeTab = 'today'"
-          >
-            <i class="bi bi-calendar-check me-1"></i>My Schedule
-            <span class="badge ms-1" :class="activeTab === 'today' ? 'text-bg-light' : 'text-bg-secondary'">
-              {{ selectedDayChildren.length }}
-            </span>
-          </button>
-        </li>
+        <button type="button" class="tab" :class="{ active: activeTab === 'today' }" data-test="tab-today" @click="activeTab = 'today'">
+          My Schedule
+          <span class="tab-count">{{ selectedDayChildren.length }}</span>
+        </button>
         <!-- all children -->
-        <li class="nav-item">
-          <button
-            type="button"
-            class="nav-link"
-            :class="activeTab === 'all' ? 'active bg-primary text-white' : ''"
-            data-test="tab-all"
-            @click="activeTab = 'all'"
-          >
-            <i class="bi bi-people me-1"></i>All my children
-            <span class="badge ms-1" :class="activeTab === 'all' ? 'text-bg-light' : 'text-bg-secondary'">
-              {{ children.length }}
-            </span>
-          </button>
-        </li>
-      </ul>
+        <button type="button" class="tab" :class="{ active: activeTab === 'all' }" data-test="tab-all" @click="activeTab = 'all'">
+          All my children
+          <span class="tab-count">{{ children.length }}</span>
+        </button>
+      </div>
 
       <!-- ===== SCHEDULE TAB ===== -->
       <div v-if="activeTab === 'today'">
         <!-- no children at all -->
-        <div v-if="children.length === 0" class="cb-card p-4 text-center">
-          <i class="bi bi-person-plus fs-2 text-muted-cb"></i>
-          <p class="mb-5 mt-2">No children assigned to you yet. Your teacher will assign them.</p>
+        <div v-if="children.length === 0" class="empty-box">
+          <i class="bi bi-person-plus"></i>
+          <p>No children assigned to you yet. Your teacher will assign them.</p>
         </div>
 
         <template v-else>
           <!-- Week calendar strip -->
-          <div class="d-flex gap-2 mb-4">
+          <div class="week">
             <button
               v-for="day in WEEK"
               :key="day"
               type="button"
-              class="btn btn-sm flex-fill text-center px-1"
-              :class="[
-                selectedDay === day
-                  ? 'btn-primary'
-                  : myDays.includes(day)
-                    ? 'btn-outline-primary'
-                    : 'btn-outline-secondary opacity-50',
-              ]"
+              class="week-day"
+              :class="{ selected: selectedDay === day, off: !myDays.includes(day) }"
               data-test="cal-day"
               @click="selectedDay = day"
             >
-              <div class="fw-semibold">{{ day }}</div>
-              <div class="small lh-1 mt-1">
-                <span
-                  v-if="day === today"
-                  class="d-block"
-                  style="font-size: 0.6rem; letter-spacing: 0.03em"
-                  :class="selectedDay === day ? 'text-white' : 'text-primary'"
-                >TODAY</span>
-                <span
-                  class="badge rounded-pill"
-                  :class="selectedDay === day ? 'text-bg-light' : 'text-bg-secondary'"
-                >{{ childrenOnDay(day).length }}</span>
-              </div>
+              <span class="week-name">{{ day }}</span>
+              <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
+              <span class="week-count">{{ childrenOnDay(day).length }}</span>
             </button>
           </div>
 
           <!-- selected day heading -->
-          <div class="mb-3 d-flex align-items-center gap-2">
-            <h6 class="mb-0 text-muted-cb">
+          <div class="day-heading">
+            <h3 class="day-title">
               {{ selectedDay === today ? `Today (${today})` : selectedDay }}
-            </h6>
-            <span v-if="!myDays.includes(selectedDay)" class="badge text-bg-secondary">Day off</span>
-            <span v-else-if="selectedDayChildren.length === 0" class="badge text-bg-secondary">No children</span>
-            <span v-else class="badge text-bg-primary">{{ selectedDayChildren.length }} child{{ selectedDayChildren.length !== 1 ? 'ren' : '' }}</span>
+            </h3>
+            <span v-if="!myDays.includes(selectedDay)" class="pill pill-quiet">Day off</span>
+            <span v-else-if="selectedDayChildren.length === 0" class="pill pill-quiet">No children</span>
+            <span v-else class="pill pill-green">{{ selectedDayChildren.length }} child{{ selectedDayChildren.length !== 1 ? 'ren' : '' }}</span>
           </div>
 
           <!-- nobody scheduled on selected day -->
-          <div v-if="selectedDayChildren.length === 0" class="cb-card p-4 text-center" data-test="not-today">
-            <i class="bi bi-calendar-x fs-2 text-muted-cb"></i>
-            <p class="mb-1 mt-2">
+          <div v-if="selectedDayChildren.length === 0" class="empty-box" data-test="not-today">
+            <i class="bi bi-calendar-x"></i>
+            <p>
               <strong v-if="myDays.includes(selectedDay)">No children scheduled with you on {{ selectedDay }}.</strong>
               <strong v-else>You're not volunteering on {{ selectedDay }}.</strong>
             </p>
-            <p class="small text-muted-cb">
+            <p class="muted">
               Your days: {{ myDays.length > 0 ? myDays.join(', ') : 'not set' }}
             </p>
-            <button type="button" class="btn btn-outline-primary btn-sm" @click="activeTab = 'all'">
+            <button type="button" class="soft-button" @click="activeTab = 'all'">
               View all my children
             </button>
           </div>
@@ -289,10 +251,10 @@ onMounted(loadData)
 
         <template v-else>
           <!-- search + filter -->
-          <div class="cb-card cb-card-lime p-3 mb-3">
+          <div class="filter-box">
             <div class="row g-2 align-items-end">
               <div class="col-12 col-md-7">
-                <label for="search" class="form-label small mb-1">Search</label>
+                <label for="search" class="form-label mb-1">Search</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input
@@ -313,7 +275,7 @@ onMounted(loadData)
                 </select>
               </div>
               <div class="col-4 col-md-2 d-grid">
-                <button type="button" class="btn btn-outline-secondary" @click="clearFilters">Clear</button>
+                <button type="button" class="soft-button" @click="clearFilters">Clear</button>
               </div>
             </div>
           </div>

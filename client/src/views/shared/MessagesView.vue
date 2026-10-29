@@ -1,6 +1,7 @@
 <!-- =============================================================
   Messages: parent <-> teacher, one conversation per child.   Owner: Kat
   Route: /messages/:childId?   (used by parents and teachers)
+  Its styles are in css/parent/messagespage.css
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
@@ -11,41 +12,65 @@ import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChatThread from '@/components/ChatThread.vue'
+import '@/css/parent/parentshared.css' // what the parent pages have in common
+import '@/css/parent/messagespage.css' // the styles of this page and of the chat
+import '@/css/main/labels.css' // the capital-letter captions
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
+// the sentence under the title, for each kind of user
 const subtitle = computed(() => {
   if (auth.role === 'parent') return "Chat with your child's teachers."
-  if (auth.role === 'teacher') return 'Chat with parents about their child.'
-  return "Chat about your child's progress."
+  return 'Chat with parents about their child.'
 })
 
-const children = ref([])
-const messages = ref([])
-const loading = ref(true)
-const sending = ref(false)
-const error = ref('')
+// ---------- the things this page remembers ----------
+const children = ref([]) // the children this user can chat about
+const messages = ref([]) // the messages of the child we are showing
+const unread = ref({}) // how many unread messages each child has, like { c_1: 2 }
+const loading = ref(true) // true while the page is first loading
+const sending = ref(false) // true while a message is on its way to the server
+const error = ref('') // the error sentence, empty if there is no error
 
-// ── Socket.io (real-time delivery) ───────────────────────────────────────────
-const socket = ref(null)
-const currentRoom = ref(null)
+// ---------- live messages (socket.io) ----------
+// the live connection, and the "room" of the child we are showing (the server only sends us that child's messages)
+let socket = null
+let currentRoom = null
 
 function joinRoom(childId) {
-  if (!socket.value || !childId || childId === currentRoom.value) return
-  if (currentRoom.value) socket.value.emit('leave', currentRoom.value)
-  currentRoom.value = childId
-  socket.value.emit('join', childId)
+  if (!socket || !childId || childId === currentRoom) return
+  if (currentRoom) socket.emit('leave', currentRoom)
+  currentRoom = childId
+  socket.emit('join', childId)
 }
 
-// ── HTTP helpers ──────────────────────────────────────────────────────────────
+// add a message to the chat, unless it is already there.
+// Our own message can arrive twice (live and as the answer to our request), so we check first.
+function addMessage(message) {
+  if (!messages.value.find((item) => item.id === message.id)) {
+    messages.value.push(message)
+  }
+}
+
+// ---------- talking to the server ----------
+async function loadUnread() {
+  try {
+    const response = await api.get('/messages/unread')
+    unread.value = response.data
+  } catch {
+    unread.value = {} // the badges are not important, the page works without them
+  }
+}
+
 async function loadMessages(childId) {
   if (!childId) return
   try {
-    const res = await api.get('/messages', { params: { childId } })
-    messages.value = res.data
-    // Mark all messages in this thread as read (clears the navbar unread badge)
+    const response = await api.get('/messages', { params: { childId } })
+    messages.value = response.data
+    unread.value[childId] = 0
+    // tell the server these messages are read (this also clears the badge in the top bar)
     api.put('/messages/read', { childId }).catch(() => {})
   } catch (err) {
     error.value = errorMessage(err)
@@ -53,11 +78,11 @@ async function loadMessages(childId) {
 }
 
 async function onSend(text) {
-  if (!text?.trim() || !route.params.childId) return
+  if (!route.params.childId) return // no child is open, so there is nobody to message
   sending.value = true
   try {
-    const res = await api.post('/messages', { childId: route.params.childId, text })
-    messages.value.push(res.data)
+    const response = await api.post('/messages', { childId: route.params.childId, text })
+    addMessage(response.data)
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -65,11 +90,12 @@ async function onSend(text) {
   }
 }
 
+// open the chat of a child: the child goes into the address, like /messages/c_1
 function selectChild(childId) {
   router.push({ name: 'messages', params: { childId } })
 }
 
-// When the URL changes (/messages/c_1 -> /messages/c_2), reload and switch room
+// when the address changes (/messages/c_1 -> /messages/c_7), load that child and join its room
 watch(
   () => route.params.childId,
   (childId) => {
@@ -79,21 +105,17 @@ watch(
 )
 
 onMounted(async () => {
-  // Connect socket for real-time message delivery
+  // connect for live messages. The server refuses a connection without a valid login (auth.token).
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-  socket.value = io(apiBase, { transports: ['websocket', 'polling'] })
-  socket.value.on('new-message', (message) => {
-    // Deduplicate: onSend already pushed our own message optimistically
-    if (!messages.value.find((m) => m.id === message.id)) {
-      messages.value.push(message)
-    }
-  })
+  socket = io(apiBase, { auth: { token: auth.token }, transports: ['websocket', 'polling'] })
+  socket.on('new-message', addMessage)
 
   try {
-    const res = await api.get('/children')
-    children.value = res.data
-    if (!route.params.childId && children.value.length) {
-      selectChild(children.value[0].id)
+    const response = await api.get('/children')
+    children.value = response.data
+    await loadUnread()
+    if (!route.params.childId && children.value.length > 0) {
+      selectChild(children.value[0].id) // no child in the address yet: open the first one
     } else {
       await loadMessages(route.params.childId)
       joinRoom(route.params.childId)
@@ -106,36 +128,35 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (socket.value) socket.value.disconnect()
+  if (socket) socket.disconnect()
 })
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 messagespage">
     <PageHeader title="Messages" :subtitle="subtitle" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <div v-else class="row g-3">
-      <div class="col-md-4">
-        <div class="list-group" data-test="child-list">
-          <button
-            v-for="c in children"
-            :key="c.id"
-            type="button"
-            class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-            :class="{ active: c.id === route.params.childId }"
-            data-test="child-item"
-            @click="selectChild(c.id)"
-          >
-            <span>{{ c.avatar }}</span> {{ c.name }}
-          </button>
-        </div>
+    <template v-else>
+      <!-- one button for each child -->
+      <div class="child-buttons" data-test="child-list">
+        <button
+          v-for="child in children"
+          :key="child.id"
+          type="button"
+          class="child-button"
+          :class="{ selected: child.id === route.params.childId }"
+          data-test="child-item"
+          @click="selectChild(child.id)"
+        >
+          {{ child.name }}
+          <span v-if="unread[child.id] > 0" class="unread-badge">{{ unread[child.id] }}</span>
+        </button>
       </div>
-      <div class="col-md-8">
-        <ChatThread :messages="messages" :current-user-id="auth.user.id" :sending="sending" @send="onSend" />
-      </div>
-    </div>
+
+      <ChatThread :messages="messages" :current-user-id="auth.user.id" :sending="sending" @send="onSend" />
+    </template>
   </div>
 </template>

@@ -56,9 +56,20 @@ describe('earnedBadges', () => {
     expect(result.map((b) => b.id)).not.toContain('century')
   })
 
-  it('awards fraction-hero when session has 80%+ on Fractions', () => {
-    const result = earnedBadges(child0, [], [session({ correct: 4, attempted: 5 })])
+  it('awards fraction-hero when 2 sessions have 80%+ on Fractions', () => {
+    const result = earnedBadges(child0, [], [
+      session({ correct: 4, attempted: 5 }),
+      session({ date: '2026-10-03', correct: 5, attempted: 5 }),
+    ])
     expect(result.map((b) => b.id)).toContain('fraction-hero')
+  })
+
+  it('does not award fraction-hero after only 1 session with 80%+ on Fractions', () => {
+    const result = earnedBadges(child0, [], [
+      session({ correct: 4, attempted: 5 }),
+      session({ date: '2026-10-03', correct: 2, attempted: 5 }), // 40%, doesn't count
+    ])
+    expect(result.map((b) => b.id)).not.toContain('fraction-hero')
   })
 
   it('does not award fraction-hero on a non-fraction topic', () => {

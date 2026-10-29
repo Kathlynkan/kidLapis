@@ -7,6 +7,7 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { User, Child } from '../models/index.js'
+import { newLinkCode } from '../models/helpers.js'
 import { issueToken, revokeToken, requireAuth } from '../middleware/auth.js'
 
 const router = Router()
@@ -30,8 +31,10 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 const isPickedFrom = (list, allowed) =>
   Array.isArray(list) && list.length > 0 && list.every((item) => allowed.includes(item))
 
-// POST /auth/signup   body: { name, email, password, role, skills?, availability? }
+// POST /auth/signup   body: { name, email, password, role, skills?, availability?, childCode? }
 // skills and availability are only for volunteers.
+// childCode is optional, for parents: the code the centre gave them, which links
+// the new account to their child. Without it, a teacher can link them later.
 router.post('/signup', async (req, res) => {
   const { password, role } = req.body
   const name = String(req.body.name ?? '').trim()
@@ -67,7 +70,27 @@ router.post('/signup', async (req, res) => {
     return res.status(409).json({ message: 'An account with this email already exists.' })
   }
 
-  // 3. Save. Mongoose fills in _id and createdAt using the defaults in models/User.js
+  // 3. Parents with a child code: find that child before creating the account,
+  //    so a wrong code doesn't leave behind an account with no child
+  let childToLink = null
+  const childCode = String(req.body.childCode ?? '')
+    .trim()
+    .toUpperCase()
+  if (role === 'parent' && childCode) {
+    childToLink = await Child.findOne({ linkCode: childCode })
+    if (!childToLink) {
+      return res
+        .status(400)
+        .json({ message: 'That child code does not match any child. Please check it with the centre.' })
+    }
+    if (childToLink.parentId) {
+      return res.status(409).json({
+        message: 'This child is already linked to a parent account. Please ask the centre for help.',
+      })
+    }
+  }
+
+  // 4. Save. Mongoose fills in _id and createdAt using the defaults in models/User.js
   try {
     const user = await User.create({
       name,
@@ -78,6 +101,12 @@ router.post('/signup', async (req, res) => {
       skills: role === 'volunteer' ? [...new Set(req.body.skills)] : [],
       availability: role === 'volunteer' ? [...new Set(req.body.availability)] : [],
     })
+    // 5. Link the parent to their child. A new code replaces the used one, so each code works once.
+    if (childToLink) {
+      childToLink.parentId = user.id
+      childToLink.linkCode = newLinkCode()
+      await childToLink.save()
+    }
     const token = issueToken(user.id)
     res.status(201).json({ token, user }) // password is removed by toJSON (models/helpers.js)
   } catch (error) {
@@ -94,7 +123,9 @@ router.post('/login', async (req, res) => {
   const { password } = req.body
   const user = await User.findOne({ email: cleanEmail(req.body.email) })
 
-  const valid = user && (await bcrypt.compare(password, user.password))
+  // typeof check: bcrypt.compare throws (-> 500) if password is missing or not text
+  const valid =
+    user && typeof password === 'string' && (await bcrypt.compare(password, user.password))
   if (!valid) {
     return res.status(401).json({ message: 'Incorrect email or password.' })
   }
@@ -151,6 +182,13 @@ router.put('/profile', requireAuth, async (req, res) => {
   }
 
   await user.save()
+
+  // Child: gender drives the colour theme (stored on User so it's in the login response)
+  if (user.role === 'child' && req.body.gender !== undefined) {
+    const g = String(req.body.gender)
+    if (!['boy', 'girl'].includes(g)) return res.status(400).json({ message: 'Invalid gender.' })
+    user.gender = g
+  }
 
   // Child: avatar is stored on the Child document, not the User
   if (user.role === 'child' && req.body.avatar) {

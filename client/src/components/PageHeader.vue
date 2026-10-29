@@ -1,5 +1,6 @@
-<!-- Page title + optional buttons on the right -->
+<!-- Page title + optional buttons on the right (and an optional picture before the title: the "lead" slot) -->
 <script setup>
+import '@/css/main/components.css' // the look of the small parts
 defineProps({
   title:    { type: String, required: true },
   subtitle: String,
@@ -8,32 +9,15 @@ defineProps({
 
 <template>
   <div class="lapis-page-header d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
-    <div>
-      <h1 class="page-title mb-1">{{ title }}</h1>
-      <p v-if="subtitle" class="page-subtitle mb-0">{{ subtitle }}</p>
+    <div class="d-flex align-items-center gap-3">
+      <slot name="lead"></slot>
+      <div>
+        <h1 class="page-title mb-1">{{ title }}</h1>
+        <p v-if="subtitle" class="page-subtitle mb-0">{{ subtitle }}</p>
+      </div>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <slot></slot>
     </div>
   </div>
 </template>
-
-<style scoped>
-.lapis-page-header {
-  padding: 1.25rem 0 0.5rem;
-}
-
-.page-title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 700;
-  font-size: 2rem;
-  color: var(--lapis-plum);
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  color: var(--cb-muted);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-</style>

@@ -117,7 +117,7 @@ const firstName = (name) => name.split(' ')[0]
     <StateMessage v-else-if="error" type="error" :message="error" />
 
     <template v-else>
-      <div class="cb-card p-3 mb-4">
+      <div class="lapis-card p-3 mb-4">
         <label class="form-label" for="child">Child</label>
         <select id="child" v-model="selectedId" class="form-select" data-test="child-select">
           <option value="" disabled>Choose a child</option>
@@ -126,14 +126,14 @@ const firstName = (name) => name.split(' ')[0]
             {{ (c.needs || []).join(', ') }}
           </option>
         </select>
-        <div v-if="unassignedCount" class="small text-muted-cb mt-2">
+        <div v-if="unassignedCount" class="small lapis-muted mt-2">
           <i class="bi bi-exclamation-circle me-1"></i>
           {{ unassignedCount }} {{ unassignedCount === 1 ? 'child has' : 'children have' }} no volunteer yet,
           shown first.
         </div>
       </div>
 
-      <p v-if="!selectedId" class="text-muted-cb">Choose a child to see suggested volunteers.</p>
+      <p v-if="!selectedId" class="lapis-muted">Choose a child to see suggested volunteers.</p>
 
       <StateMessage v-else-if="loadingSuggestions && !suggestions.length" type="loading" />
       <StateMessage v-else-if="suggestionsError" type="error" :message="suggestionsError" />
@@ -141,7 +141,7 @@ const firstName = (name) => name.split(' ')[0]
       <template v-else-if="selectedChild">
         <h2 class="h6 mb-3">
           Suggested volunteers for {{ firstName(selectedChild.name) }}
-          <span class="text-muted-cb fw-normal">(best match first)</span>
+          <span class="lapis-muted fw-normal">(best match first)</span>
         </h2>
 
         <div v-if="actionError" class="alert alert-danger py-2 small" data-test="action-error">{{ actionError }}</div>
@@ -150,7 +150,7 @@ const firstName = (name) => name.split(' ')[0]
           <div
             v-for="s in suggestions"
             :key="s.volunteerId"
-            class="cb-card p-3"
+            class="lapis-card p-3"
             data-test="suggestion-card"
           >
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
@@ -165,11 +165,11 @@ const firstName = (name) => name.split(' ')[0]
                 <!-- WHY this volunteer -->
                 <div class="small" data-test="match-reason">
                   <template v-if="s.matchedSkills.length">Matches: {{ s.matchedSkills.join(', ') }}</template>
-                  <span v-else class="text-muted-cb">No matching skills</span>
+                  <span v-else class="lapis-muted">No matching skills</span>
                   · Free on {{ s.availability.join(', ') || 'no days set' }}
                   · {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
                 </div>
-                <div class="small text-muted-cb">
+                <div class="small lapis-muted">
                   Score {{ s.score }}: skills +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
                   workload {{ s.breakdown.workload }}
                 </div>
@@ -208,7 +208,7 @@ const firstName = (name) => name.split(' ')[0]
                   </button>
                 </template>
 
-                <span v-else class="small text-muted-cb">Set this volunteer's days on the Volunteers page first</span>
+                <span v-else class="small lapis-muted">Set this volunteer's days on the Volunteers page first</span>
               </div>
             </div>
           </div>

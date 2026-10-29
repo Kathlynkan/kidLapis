@@ -13,6 +13,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
+import { daysSince } from '@/utils/format'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -22,6 +23,9 @@ import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import SkillProgressChart from '@/components/charts/SkillProgressChart.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
 import PeelCard from '@/components/PeelCard.vue'
+import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
+import '@/css/volunteer/childprofilepage.css' // the look of this page for a volunteer
+import '@/css/main/labels.css' // the capital-letter captions
 
 const route = useRoute()
 const router = useRouter()
@@ -39,12 +43,23 @@ const error = ref('')
 
 const pendingHomework = computed(() => homework.value.filter((h) => h.status !== 'verified'))
 
+// the first letter of the child's name, shown in the round picture next to the name
+const initial = computed(() => child.value.name.charAt(0).toUpperCase())
+
+// the homework in the order a volunteer needs it: overdue, to do, waiting to be checked, checked
+function homeworkRank(h) {
+  if (h.status === 'verified') return 3
+  if (h.status === 'submitted') return 2
+  return daysSince(h.dueDate) > 0 ? 0 : 1
+}
+const sortedHomework = computed(() => [...homework.value].sort((a, b) => homeworkRank(a) - homeworkRank(b)))
+
 async function loadHandover() {
   handoverLoading.value = true
   try {
     const response = await api.post(`/handover/${childId}`, { audience: 'volunteer' })
     handover.value = response.data
-  } catch (err) {
+  } catch {
     handover.value = null // the rest of the page still works without the summary
   }
   handoverLoading.value = false
@@ -124,14 +139,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 childprofilepage">
     <StateMessage v-if="loading" type="loading" />
 
     <template v-else>
       <div v-if="success" class="alert alert-success">{{ success }}</div>
       <StateMessage v-else-if="error" type="error" :message="error" />
 
+      <RouterLink v-if="auth.role === 'volunteer'" class="back-link" :to="{ name: 'volunteer-home' }">
+        <i class="bi bi-chevron-left"></i>My children
+      </RouterLink>
+
       <PageHeader :title="child.name" :subtitle="`${child.level} · ${child.school}`">
+        <template #lead>
+          <span v-if="auth.role === 'volunteer'" class="child-initial">{{ initial }}</span>
+        </template>
         <RouterLink
           v-if="auth.role === 'volunteer'"
           :to="{ name: 'session-new', params: { id: child.id } }"
@@ -148,7 +170,12 @@ onMounted(() => {
         >
           <i class="bi bi-journal-plus me-1"></i>Give homework
         </RouterLink>
-        <RouterLink :to="{ name: 'messages', params: { childId: child.id } }" class="btn btn-outline-secondary">
+        <!-- Teachers only: volunteers can't use Messages (chat is parent <-> teacher) -->
+        <RouterLink
+          v-if="auth.role === 'teacher'"
+          :to="{ name: 'messages', params: { childId: child.id } }"
+          class="btn btn-outline-secondary"
+        >
           <i class="bi bi-chat-dots me-1"></i>Message parent
         </RouterLink>
       </PageHeader>
@@ -174,17 +201,17 @@ onMounted(() => {
 
         <div class="col-lg-5 d-flex flex-column gap-4">
           <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
-            <SkillProgressChart :sessions="sessions" />
+            <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
 
           <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
-            <TopicSummaryChart :sessions="sessions" />
+            <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
 
           <PeelCard :title="`Homework (${pendingHomework.length} pending)`" icon="bi-journal-check" :initial-open="true">
             <div class="d-flex flex-column gap-2">
               <HomeworkQuestCard
-                v-for="h in homework"
+                v-for="h in sortedHomework"
                 :key="h.id"
                 :homework="h"
                 mode="volunteer"

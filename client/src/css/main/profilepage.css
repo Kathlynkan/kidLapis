@@ -1,0 +1,255 @@
+/* Styles for the profile page (ProfileView.vue). Every role has the same look, only the colours change.
+   The colours of each role are the variables just below (the names start with --pf).
+   Child and teacher use the accent colour of their role (--role-accent in main.css).
+   Look: no dark outlines, soft corners, bold small captions, and buttons with small corners (Cancel and Log out are the light colour, Save is the main colour).
+   To change a colour for one role, change it in that role's block. To change the look, change the rules after the blocks. */
+
+/* ---------- the colours of each role ---------- */
+
+/* child and teacher: the accent of the role on warm brown text */
+.profilepage {
+  --pf-text: var(--lapis-plum);       /* text */
+  --pf-title: var(--lapis-plum);      /* the page title */
+  --pf-muted: var(--lapis-muted);     /* small text */
+  --pf-card: #FFFFFF;                 /* the sections */
+  --pf-shadow: rgba(74, 63, 58, 0.1); /* the shadow under a section */
+  --pf-line: var(--lapis-cream-dark); /* the line around a box and between things */
+  --pf-focus: var(--role-accent);     /* the line of a box you are typing in */
+  --pf-main: var(--role-accent);      /* Save, the chosen skills and days, the ring of a box you are typing in */
+  --pf-main-hover: color-mix(in srgb, var(--role-accent), #000000 12%);
+  --pf-soft: var(--role-accent-soft); /* the role tag, Log out, Cancel */
+  --pf-soft-hover: color-mix(in srgb, var(--role-accent-soft), #000000 6%);
+  --pf-ok: var(--topic-academic);     /* the message after you save */
+  --pf-error: var(--topic-alert);     /* the message when something is wrong */
+}
+
+.role-parent .profilepage {
+  --pf-text: #414F67;
+  --pf-title: #414F67;
+  --pf-muted: #5E6C80;
+  --pf-card: #FFFFFF;
+  --pf-shadow: rgba(65, 79, 103, 0.1);
+  --pf-line: #CFE0DE;
+  --pf-focus: #AED9D8;
+  --pf-main: #AED9D8;
+  --pf-main-hover: #9BCFCE;
+  --pf-soft: #DDF0EF;
+  --pf-soft-hover: #CFE7E5;
+  --pf-ok: #CDE8D2;
+  --pf-error: #F6D1AA;
+}
+
+.role-volunteer .profilepage {
+  --pf-text: #213C31;
+  --pf-title: #446C59;
+  --pf-muted: #6B8177;
+  --pf-card: #FFFFFF;
+  --pf-shadow: rgba(33, 60, 49, 0.1);
+  --pf-line: #C3D2CA;
+  --pf-focus: #4A735F;
+  --pf-main: #B7D8D7;
+  --pf-main-hover: #A3CAC8;
+  --pf-soft: #CDE9D8;
+  --pf-soft-hover: #9BD3B2;
+  --pf-ok: #CDE9D8;
+  --pf-error: #EE9F96;
+}
+
+/* ---------- the base text and the title ---------- */
+
+.profilepage {
+  font-family: var(--lapis-font);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--pf-text);
+}
+
+/* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
+.profilepage .lapis-page-header .page-title {
+  font-family: inherit;
+  color: var(--pf-title);
+}
+
+/* the round picture with the first letter of the name, in the colour of the role */
+.profilepage .profile-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--role-accent, #AED9D8);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profilepage .lapis-muted {
+  color: var(--pf-muted);
+}
+
+/* ---------- the sections (PeelCard.vue) ---------- */
+
+.profilepage .peel-card {
+  border: 0;
+  border-radius: 22px;
+  background: var(--pf-card);
+  box-shadow: 0 1px 6px var(--pf-shadow);
+  overflow: hidden;
+}
+
+/* the little stripe on the edge of a shared card is not used here */
+.profilepage .peel-card::before {
+  display: none;
+}
+
+.profilepage .peel-header,
+.profilepage .peel-header:hover {
+  background: transparent;
+}
+
+.profilepage .peel-card--open .peel-header {
+  border-bottom: 1px solid var(--pf-line);
+}
+
+.profilepage .peel-title {
+  color: var(--pf-text);
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.profilepage .peel-arrow {
+  color: var(--pf-text);
+}
+
+/* ---------- the boxes you type in ---------- */
+
+.profilepage .form-label {
+  color: var(--pf-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* the headings of the skills and the days have the bootstrap class fs-6, which is important */
+.profilepage legend.form-label {
+  font-size: 14px !important;
+}
+
+.profilepage .form-control {
+  border: 1px solid var(--pf-line);
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: var(--pf-text);
+  box-shadow: none;
+}
+
+.profilepage .form-control:focus {
+  border-color: var(--pf-focus);
+  box-shadow: 0 0 0 3px var(--pf-main);
+}
+
+.profilepage .badge-soft {
+  border: 0;
+  border-radius: 999px;
+  background: var(--pf-soft);
+  color: var(--pf-text);
+}
+
+/* ---------- the skills and the days: separate choices in black text, the chosen ones have the main colour ---------- */
+
+.profilepage .btn-check + .btn {
+  padding: 4px 14px;
+  border: 1px solid var(--pf-line);
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #000000;
+  font-weight: 600;
+}
+
+.profilepage .btn-check + .btn:hover {
+  background: var(--pf-soft);
+  color: #000000;
+}
+
+.profilepage .btn-check:checked + .btn {
+  border-color: var(--pf-main);
+  background: var(--pf-main);
+  color: #000000;
+}
+
+/* ---------- the buttons: Save, Cancel and Log out ---------- */
+
+.profilepage .btn {
+  border: 0;
+  font-family: inherit;
+  border-radius: 6px;
+  padding: 10px 22px;
+  box-shadow: none;
+  color: var(--pf-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.profilepage .btn-outline-secondary {
+  background: var(--pf-soft);
+}
+
+.profilepage .btn-primary {
+  background: var(--pf-main);
+}
+
+.profilepage .btn-outline-secondary:hover {
+  background: var(--pf-soft-hover);
+}
+
+.profilepage .btn-primary:hover {
+  background: var(--pf-main-hover);
+}
+
+/* the line above the Log out button (border-top is important in bootstrap, so this is too) */
+.profilepage .border-top {
+  border-top-color: var(--pf-line) !important;
+}
+
+/* ---------- theme colour swatches (child only) ---------- */
+
+.gender-swatch-girl { --swatch-bg: #E8A0B8; --swatch-border: #C07090; }
+.gender-swatch-boy  { --swatch-bg: #88C0D8; --swatch-border: #4890B8; }
+
+/* override the shared btn-check styles so swatches always show their actual colour */
+.profilepage .btn-check + .gender-swatch,
+.profilepage .btn-check + .gender-swatch:hover {
+  background: var(--swatch-bg) !important;
+  color: #FBF8F3 !important;
+  border: 2px solid transparent !important;
+  border-radius: 999px;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.profilepage .btn-check:checked + .gender-swatch {
+  background: var(--swatch-bg) !important;
+  color: #FBF8F3 !important;
+  border-color: var(--swatch-border) !important;
+  opacity: 1;
+}
+
+/* ---------- the messages after you save ---------- */
+
+.profilepage .alert {
+  border: 0;
+  border-radius: 14px;
+  color: var(--pf-text);
+}
+
+.profilepage .alert-success {
+  background: var(--pf-ok);
+}
+
+.profilepage .alert-danger {
+  background: var(--pf-error);
+}
