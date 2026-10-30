@@ -58,7 +58,7 @@ function cancelDelete()  { showDeleteModal.value = false }
       <div v-if="session.notes" class="mt-1 fst-italic text-break">
         <template v-if="showFullNotes">"{{ session.notes }}"</template>
         <template v-else>
-          "{{ session.notes.slice(0, 100) }}<span v-if="session.notes.length > 100">..."</span>
+          "{{ session.notes.slice(0, 100) }}"<span v-if="session.notes.length > 100">..."</span>
         </template>
         <br />
         <button
