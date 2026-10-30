@@ -2,7 +2,7 @@
      mode "child": the child's gamified view. mode "volunteer": the volunteer checks or removes it.
      The look for a volunteer is in css/volunteer/childprofilepage.css -->
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { formatDate, daysSince } from '@/utils/format'
 import { HOMEWORK_STATUS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
@@ -11,7 +11,7 @@ const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
 })
-const emit = defineEmits(['submit', 'verify', 'delete'])
+const emit = defineEmits(['submit', 'verify', 'edit', 'delete'])
 
 const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
@@ -25,6 +25,12 @@ const state = computed(() => {
   return isOverdue.value ? 'late' : 'todo'
 })
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be checked', done: 'Checked' }
+
+const showDeleteModal = ref(false)
+
+function handleDelete() { showDeleteModal.value = true }
+function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
+function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
@@ -70,22 +76,41 @@ const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be c
       >
         <i class="bi bi-check-circle-fill me-1"></i>I'm done!
       </button>
-      <button
-        v-if="mode === 'volunteer' && homework.status === 'submitted'"
-        class="btn btn-outline-primary w-100 mt-1"
-        data-test="verify-quest-btn"
-        @click="emit('verify', homework.id)"
-      >
-        Check and give points
-      </button>
-      <button
-        v-if="mode === 'volunteer' && homework.status !== 'verified'"
-        class="btn btn-outline-secondary btn-sm mt-1"
-        data-test="delete-homework-btn"
-        @click="emit('delete', homework.id)"
-      >
-        Remove
-      </button>
+      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+        class="mt-2 d-flex gap-2">
+        <button
+          class="btn btn-sm btn-outline-primary"
+          data-test="edit-homework-btn"
+          @click="emit('edit', homework.id)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+
+        <button
+          class="btn btn-sm btn-outline-danger"
+          data-test="delete-homework-btn"
+          @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
     </div>
   </div>
+
+  <!-- Delete confirm modal -->
+  <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Homework</h5>
+        </div>
+        <div class="modal-body session-delete-text">
+          <p>Are you sure you want to delete this homework?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">Cancel</button>
+          <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
 </template>

@@ -12,6 +12,15 @@ import '@/css/volunteer/volunteerform.css' // the look of the forms for a volunt
 const route = useRoute()
 const router = useRouter()
 
+const isEdit = computed(() => {
+  if (route.params.homeworkId) {
+    return true
+  } else {
+    return false
+  }
+})
+
+const childId = ref(route.params.id)
 const form = ref({
   childId: route.params.id,
   title: '',
@@ -20,7 +29,26 @@ const form = ref({
   dueDate: '',
   points: 10,
 })
+const saving = ref(false)
 const error = ref('')
+
+async function loadHomework() {
+  try {
+    const res = await api.get(`/homework/${route.params.homeworkId}`)
+    const homework = res.data
+
+    form.value.title = homework.title
+    form.value.subject = homework.subject
+    form.value.details = homework.details
+    form.value.dueDate = homework.dueDate
+    form.value.points = homework.points
+
+    childId.value = homework.childId // retrieve childId
+    form.value.childId = homework.childId
+  } catch (err) {
+    error.value = errorMessage(err)
+  }
+}
 
 const badgePosition = computed(() => {
   const min = 5
@@ -33,6 +61,7 @@ const badgePosition = computed(() => {
 
 async function handleSubmit() {
   try {
+    saving.value = true
     error.value = ''
 
     const today = new Date().toISOString().slice(0, 10)
@@ -56,37 +85,62 @@ async function handleSubmit() {
     }
 
     // validate points
-    if (form.value.points < 0) {
-      error.value = 'Points cannot be negative'
+    if (form.value.points < 5 || form.value.points > 20) {
+      error.value = 'Points must be between 5 and 20'
       return
     }
 
-    await api.post('/homework', {
-      childId: form.value.childId,
-      title: form.value.title,
-      subject: form.value.subject,
-      details: form.value.details,
-      dueDate: form.value.dueDate,
-      points: form.value.points,
-    })
+    // if edit form, update existing homework
+    if (isEdit.value) {
+      await api.put(
+        `/homework/${route.params.homeworkId}`, 
+        form.value
+      )
 
-    // push /children/childId=c_1
-    // redirect to child profile page after successful submission
-    router.push({
-      name: 'child-profile',
-      params: {
-        id: route.params.id
-      }
-    })
+      // redirect to child profile page after successful submission
+      router.push({
+        name: 'child-profile',
+        params: {id: childId.value},
+        query: {success: 'Homework updated successfully'}
+      })
+    } else {
+      // else, create new homework
+      await api.post('/homework', {
+        childId: form.value.childId,
+        title: form.value.title,
+        subject: form.value.subject,
+        details: form.value.details,
+        dueDate: form.value.dueDate,
+        points: form.value.points,
+      })
+
+      // Refresh the handover immediately so the next volunteer doesn't see a stale summary.
+      // Fire-and-forget: we navigate away regardless of whether the AI call succeeds.
+      api.post(`/handover/${childId.value}`, { audience: 'volunteer' }).catch(() => {})
+
+      router.push({
+        name: 'child-profile',
+        params: {id: childId.value},
+        query: {success: 'Homework created successfully'}
+      })
+    }
   } catch (err) {
     // convert error message into readable text
     error.value = errorMessage(err)
+  } finally {
+    saving.value = false
   }
 }
 
 function cancel() {
   router.back() // return user to wherever they came from
 }
+
+onMounted(() => { // autofill form if edit form
+  if (isEdit.value) {
+    loadHomework()
+  }
+})
 </script>
 
 <template>
@@ -95,7 +149,10 @@ function cancel() {
       <i class="bi bi-chevron-left"></i>Back
     </button>
 
-    <PageHeader title="Give homework" subtitle="Small tasks from the question book work best." />
+    <PageHeader
+      :title="isEdit ? 'Edit Homework' : 'Give Homework'"
+      subtitle="Small tasks from the question book work best."
+    />
 
     <div class="row justify-content-center">
       <div class="col-lg-8">
@@ -148,7 +205,9 @@ function cancel() {
           
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-secondary" @click="router.back()">Cancel</button>
-            <button type="submit" class="btn btn-primary" data-test="hw-submit">Assign Homework</button>
+            <button type="submit" class="btn btn-primary" :disabled="saving" data-test="hw-submit">
+              {{ isEdit ? 'Save Changes' : 'Assign Homework' }}
+            </button>
           </div>
         </form>
       </div>

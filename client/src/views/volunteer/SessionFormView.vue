@@ -82,8 +82,11 @@ async function loadSession() {
     form.value.photos = session.photos || []
 
     childId.value = session.childId // retrieve childId
+    form.value.childId = session.childId
   } catch (err) {
     error.value = errorMessage(err)
+  } finally {
+    saving.value = false
   }
 }
 

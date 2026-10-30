@@ -87,6 +87,9 @@ function editSession(sessionId) {
   router.push({ name: 'session-edit', params: { sessionId } })
 }
 
+function editHomework(homeworkId) {
+  router.push({ name: 'homework-edit', params: { id: childId, homeworkId } })
+}
 // The child handed a quest in; the volunteer checks it and the child is paid the berries (PUT /homework/:id/verify)
 const checkingQuestId = ref(null)
 async function verifyQuest(homeworkId) {
@@ -217,6 +220,7 @@ onMounted(() => {
                 mode="volunteer"
                 :busy="checkingQuestId !== null"
                 @verify="verifyQuest"
+                @edit="editHomework"
                 @delete="deleteHomework"
               />
             </div>
