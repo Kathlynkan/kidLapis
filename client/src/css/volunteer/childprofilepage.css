@@ -67,7 +67,7 @@
 /* the buttons of the page: round pills, no capital letters */
 .role-volunteer .childprofilepage .btn {
   border: 0;
-  border-radius: 999px;
+  border-radius: 5px;
   box-shadow: none;
   font-family: inherit;
   font-size: 14px;
@@ -120,54 +120,66 @@
 
 /* ---------- the box that asks if you want to delete a session ---------- */
 
-.role-volunteer .childprofilepage .modal-content {
+.modal-content {
   border: 0;
-  border-radius: 22px;
-  background: #FFFFFF;
-  box-shadow: 0 6px 24px rgba(33, 60, 49, 0.18);
+  border-radius: 15px;
+  background: #F7F4EE;
+  box-shadow: 0 1px 6px rgba(33, 60, 49, 0.1);
 }
 
-.role-volunteer .childprofilepage .modal-header,
-.role-volunteer .childprofilepage .modal-footer {
-  border: 0;
-  background: transparent;
+.modal-header{
+  background: #B7D8D7;
+  border-bottom: 0;
 }
 
-.role-volunteer .childprofilepage .modal-title {
+.modal-title {
   font-family: inherit;
   font-size: 20px;
   font-weight: 700;
   color: #213C31;
 }
 
-.role-volunteer .childprofilepage .modal-body {
+.modal-body, .session-delete-text {
   color: #213C31;
+  border-top: 0;
+  font-size: 15px;
+}
+
+.modal-footer {
+  border-top: 0;
+  background: transparent;
 }
 
 /* Cancel is the soft mint button, Delete is the same soft red as the Delete on a session */
-.role-volunteer .childprofilepage .btn-secondary {
+.btn-secondary {
   background: #CDE9D8;
   color: #213C31;
 }
 
-.role-volunteer .childprofilepage .btn-secondary:hover:not(:disabled) {
+.btn-secondary:hover:not(:disabled) {
   background: #9BD3B2;
   color: #213C31;
 }
 
-.role-volunteer .childprofilepage .btn-danger {
+.btn-danger {
   background: #EE9F96;
   color: #213C31;
 }
 
-.role-volunteer .childprofilepage .btn-danger:hover:not(:disabled) {
+.btn-danger:hover:not(:disabled) {
   background: #E68C81;
   color: #213C31;
 }
 
+.modal-footer .btn {
+  border-radius: 5px;
+  border: 0;
+  box-shadow: none;
+}
+
 /* the dark green behind the box (the original one is purple and important) */
-.role-volunteer .childprofilepage .modal-backdrop {
-  background-color: #213C31 !important;
+.modal-backdrop {
+  background-color: #4A735F !important;
   opacity: 0.45 !important;
 }
 
