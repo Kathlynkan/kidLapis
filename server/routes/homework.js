@@ -108,10 +108,28 @@ router.get('/leaderboard', async (req, res) => {
 
 // ---------------------------------------------------------------
 // POST /homework      (Ning Xuan: assign homework, done  +  Jachin: the questions come from a deck)
-//   body = { childId, dueDate, points, title, subject, details, deckId (optional) }
-// With a deckId, the quest gets a COPY of the questions of the deck. The title, subject and details of the deck are used
-// when the volunteer did not type their own. Without a deckId the quest has no questions.
 // ---------------------------------------------------------------
+// GET /homework/:id
+router.get('/:id', async (req, res) => {
+  const homework = await Homework.findById(req.params.id)
+
+  if (!homework) {
+    return res.status(404).json({
+      message: 'Homework not found'
+    })
+  }
+
+  const visible = await visibleChildIds(req.user)
+
+  if (!visible.includes(homework.childId)) {
+    return res.status(403).json({
+      message: 'No access'
+    })
+  }
+
+  res.json(homework)
+})
+
 router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
   // only volunteers and coordinators can assign homework
   try {

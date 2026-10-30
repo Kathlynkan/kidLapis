@@ -81,22 +81,24 @@ function cancelDelete()  { showDeleteModal.value = false }
     </div>
   </div>
 
-  <!-- Delete confirm modal -->
-  <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Delete Session</h5>
-        </div>
-        <div class="modal-body session-delete-text">
-          <p>Are you sure you want to delete this session?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">Cancel</button>
-          <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">Delete</button>
+  <Teleport to="body">
+    <!-- Delete confirm modal -->
+    <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Session</h5>
+          </div>
+          <div class="modal-body session-delete-text">
+            <p>Are you sure you want to delete this session?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">Delete</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
+    <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
+  </Teleport>
 </template>

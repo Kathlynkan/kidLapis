@@ -76,41 +76,55 @@ function cancelDelete()  { showDeleteModal.value = false }
       >
         <i class="bi bi-check-circle-fill me-1"></i>I'm done!
       </button>
-      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
-        class="mt-2 d-flex gap-2">
-        <button
-          class="btn btn-sm btn-outline-primary"
-          data-test="edit-homework-btn"
-          @click="emit('edit', homework.id)">
-          <i class="bi bi-pencil"></i> Edit
-        </button>
+
+      <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 
+      class="mt-2 d-flex align-items-center">
 
         <button
-          class="btn btn-sm btn-outline-danger"
-          data-test="delete-homework-btn"
-          @click="handleDelete">
-          <i class="bi bi-trash"></i> Delete
+          v-if="homework.status === 'submitted'"
+          class="btn btn-sm btn-primary"
+          data-test="verify-homework-btn"
+          @click="emit('verify', homework.id)">
+          <i class="bi bi-check-circle"></i> Mark as Checked
         </button>
+
+        <div v-else>
+          <button
+            class="btn btn-sm btn-outline-primary"
+            data-test="edit-homework-btn"
+            @click="emit('edit', homework.id)">
+            <i class="bi bi-pencil"></i> Edit
+          </button>
+
+          <button
+            class="btn btn-sm btn-outline-danger ms-2"
+            data-test="delete-homework-btn"
+            @click="handleDelete">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Delete confirm modal -->
-  <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Delete Homework</h5>
-        </div>
-        <div class="modal-body session-delete-text">
-          <p>Are you sure you want to delete this homework?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">Cancel</button>
-          <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">Delete</button>
+  <Teleport to="body">
+      <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Homework</h5>
+          </div>
+          <div class="modal-body session-delete-text">
+            <p>Are you sure you want to delete this homework?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">Delete</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
+    <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
+  </Teleport>
 </template>
