@@ -246,7 +246,7 @@ onMounted(() => { // autofill form if edit form
     </button>
 
     <PageHeader
-      :title="isEdit ? 'Edit session' : 'Record a session'"
+      :title="isEdit ? 'Edit Session' : 'Record Session'"
       subtitle="Takes about a minute. The next volunteer will thank you!"
     />
 
