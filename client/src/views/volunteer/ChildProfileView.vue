@@ -41,8 +41,6 @@ const loading = ref(true)
 const success = ref('')
 const error = ref('')
 
-const pendingHomework = computed(() => homework.value.filter((h) => h.status !== 'verified'))
-
 // the first letter of the child's name, shown in the round picture next to the name
 const initial = computed(() => child.value.name.charAt(0).toUpperCase())
 
@@ -52,7 +50,22 @@ function homeworkRank(h) {
   if (h.status === 'submitted') return 2
   return daysSince(h.dueDate) > 0 ? 0 : 1
 }
-const sortedHomework = computed(() => [...homework.value].sort((a, b) => homeworkRank(a) - homeworkRank(b)))
+
+const activeHomework = computed(() =>
+  [...homework.value]
+    .filter(h => h.status !== 'verified')
+    .sort((a, b) => homeworkRank(a) - homeworkRank(b))
+)
+
+const completedHomework = computed(() =>
+  [...homework.value]
+    .filter(h => h.status === 'verified')
+    .sort((a, b) => {
+      const dateA = a.completedAt || ''
+      const dateB = b.completedAt || ''
+      return dateB.localeCompare(dateA)
+    })
+)
 
 async function loadHandover() {
   handoverLoading.value = true
@@ -187,7 +200,6 @@ onMounted(() => {
         <div class="col-lg-7">
           <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
 
-          <PeelCard title="Session history" icon="bi-clock-history" :initial-open="true">
             <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
             <div class="d-flex flex-column gap-3">
               <SessionCard
@@ -199,7 +211,6 @@ onMounted(() => {
                 @delete="deleteSession"
               />
             </div>
-          </PeelCard>
         </div>
 
         <div class="col-lg-5 d-flex flex-column gap-4">
@@ -211,10 +222,14 @@ onMounted(() => {
             <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
 
-          <PeelCard :title="`Homework (${pendingHomework.length} pending)`" icon="bi-journal-check" :initial-open="true">
+          <PeelCard
+            :title="`Pending Homework (${activeHomework.length})`"
+            icon="bi-journal-check"
+            :initial-open="true"
+          >
             <div class="d-flex flex-column gap-2">
               <HomeworkQuestCard
-                v-for="h in sortedHomework"
+                v-for="h in activeHomework"
                 :key="h.id"
                 :homework="h"
                 mode="volunteer"
@@ -224,6 +239,22 @@ onMounted(() => {
                 @delete="deleteHomework"
               />
             </div>
+          </PeelCard>
+          
+          <PeelCard
+          v-if="completedHomework.length"
+          :title="`Completed Homework (${completedHomework.length})`"
+          icon="bi-check-circle-fill"
+          :initial-open="true"
+          >
+          <div class="d-flex flex-column gap-2">
+          <HomeworkQuestCard
+          v-for="h in completedHomework"
+          :key="h.id"
+          :homework="h"
+          mode="volunteer"
+          />
+          </div>
           </PeelCard>
         </div>
       </div>
