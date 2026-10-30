@@ -56,6 +56,12 @@ const routes = [
     component: () => import('@/views/volunteer/HomeworkAssignView.vue'), // Ning Xuan
     meta: { roles: ['volunteer'] },
   },
+  {
+    path: '/children/:id/homework/:homeworkId/edit', // edit existing homework
+    name: 'homework-edit',
+    component: () => import('@/views/volunteer/HomeworkAssignView.vue'), // Ning Xuan
+    meta: { roles: ['volunteer'] },
+  },
 
   // ---------- Profile - all roles ----------
   {
