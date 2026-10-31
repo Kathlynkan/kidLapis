@@ -16,22 +16,21 @@ test.describe('Teacher dashboard', () => {
     await expect(page).toHaveURL(/\/teacher$/)
   })
 
-  test('shows KPI stat cards', async ({ page }) => {
-    // scope to .stat-label to avoid matching the NavBar links with the same words
-    await expect(page.locator('.stat-label', { hasText: 'Children' })).toBeVisible()
-    await expect(page.locator('.stat-label', { hasText: 'Volunteers' })).toBeVisible()
-    await expect(page.locator('.stat-label', { hasText: 'Sessions this week' })).toBeVisible()
+  test('shows the count tiles', async ({ page }) => {
+    // scope to .tile-label to avoid matching the NavBar links with the same words
+    await expect(page.locator('.tile-label', { hasText: 'Children' })).toBeVisible()
+    await expect(page.locator('.tile-label', { hasText: 'Volunteers' })).toBeVisible()
+    await expect(page.locator('.tile-label', { hasText: 'Sessions this week' })).toBeVisible()
   })
 
-  test('alerts table loads with at least one row', async ({ page }) => {
+  test('alerts list loads with at least one row', async ({ page }) => {
     await expect(page.locator('[data-test="alerts-table"]')).toBeVisible()
     await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
   })
 
-  test('alert type filter narrows the table', async ({ page }) => {
-    const filter = page.locator('[data-test="alert-type-filter"]')
-    await expect(filter).toBeVisible()
-    await filter.selectOption('unassigned')
+  test('alert type filter narrows the list', async ({ page }) => {
+    await expect(page.locator('[data-test="alert-type-filter"]')).toBeVisible()
+    await page.locator('[data-test="alert-filter-unassigned"]').click()
     // Every remaining row should be an "unassigned" alert
     const rows = page.locator('[data-test="alert-row"]')
     const count = await rows.count()
@@ -41,7 +40,7 @@ test.describe('Teacher dashboard', () => {
   })
 
   test('clicking an unassigned alert navigates to matchmaking', async ({ page }) => {
-    await page.locator('[data-test="alert-type-filter"]').selectOption('unassigned')
+    await page.locator('[data-test="alert-filter-unassigned"]').click()
     await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
     await page.locator('[data-test="alert-row"]').first().click()
     await expect(page).toHaveURL(/\/teacher\/matchmaking/)
@@ -90,10 +89,8 @@ test.describe('Teacher: manage children', () => {
     await page.goto('/teacher/children')
   })
 
-  test('children table loads with rows', async ({ page }) => {
-    // Desktop shows a table row per child, phones show a card per child (Kai Sen's responsive layout)
-    const child = page.locator('[data-test="child-row"]:visible, [data-test="child-card"]:visible')
-    await expect(child.first()).toBeVisible()
+  test('children page loads with a card per child', async ({ page }) => {
+    await expect(page.locator('[data-test="child-card"]').first()).toBeVisible()
   })
 
   test('add-child button is visible', async ({ page }) => {

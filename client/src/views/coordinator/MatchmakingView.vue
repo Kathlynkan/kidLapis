@@ -14,8 +14,10 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
+import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const route = useRoute()
 const router = useRouter()
@@ -109,15 +111,16 @@ const unassign = (s) => changeAssignment(s, { action: 'unassign' })
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 teacherpage">
     <PageHeader title="Matchmaking" subtitle="Match each child with volunteers who have the right skills." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <template v-else>
-      <div class="lapis-card p-3 mb-4">
-        <label class="form-label" for="child">Child</label>
+    <!-- the sandy board: the child picker and the white cards -->
+    <div v-else class="board">
+      <div class="t-card pick">
+        <label class="fact-key" for="child">Child</label>
         <select id="child" v-model="selectedId" class="form-select" data-test="child-select">
           <option value="" disabled>Choose a child</option>
           <option v-for="c in sortedChildren" :key="c.id" :value="c.id">
@@ -125,60 +128,54 @@ const unassign = (s) => changeAssignment(s, { action: 'unassign' })
             {{ (c.needs || []).join(', ') }}
           </option>
         </select>
-        <div v-if="unassignedCount" class="small lapis-muted mt-2">
+        <div v-if="unassignedCount" class="person-sub">
           <i class="bi bi-exclamation-circle me-1"></i>
           {{ unassignedCount }} {{ unassignedCount === 1 ? 'child has' : 'children have' }} no volunteer yet,
           shown first.
         </div>
       </div>
 
-      <p v-if="!selectedId" class="lapis-muted">Choose a child to see suggested volunteers.</p>
+      <div v-if="!selectedId" class="t-card empty">
+        <strong>Choose a child</strong>
+        Pick a child above to see the volunteers who could work with them.
+      </div>
 
       <StateMessage v-else-if="loadingSuggestions && !suggestions.length" type="loading" />
       <StateMessage v-else-if="suggestionsError" type="error" :message="suggestionsError" />
 
       <template v-else-if="selectedChild">
-        <h2 class="h6 mb-3">
+        <h2 class="section-title">
           Suggested volunteers for {{ firstName(selectedChild.name) }}
-          <span class="lapis-muted fw-normal">(best match first)</span>
+          <span class="muted">(best match first)</span>
         </h2>
 
-        <div v-if="actionError" class="alert alert-danger py-2 small" data-test="action-error">{{ actionError }}</div>
+        <div v-if="actionError" class="note note-bad" data-test="action-error">{{ actionError }}</div>
 
-        <div class="d-flex flex-column gap-3">
-          <div
-            v-for="s in suggestions"
-            :key="s.volunteerId"
-            class="lapis-card p-3"
-            data-test="suggestion-card"
-          >
-            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-              <div>
-                <h3 class="h6 mb-1">
-                  <i class="bi bi-person-circle me-1"></i>{{ s.name }}
-                  <span v-if="s.assigned" class="badge bg-success ms-1" data-test="assigned-badge">
-                    Assigned{{ s.scheduledDays.length ? ` on ${s.scheduledDays.join(', ')}` : '' }}
-                  </span>
-                </h3>
-
-                <!-- WHY this volunteer -->
-                <div class="small" data-test="match-reason">
-                  <template v-if="s.matchedSkills.length">Matches: {{ s.matchedSkills.join(', ') }}</template>
-                  <span v-else class="lapis-muted">No matching skills</span>
-                  · Free on {{ s.availability.join(', ') || 'no days set' }}
-                  · {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
-                </div>
-                <div class="small lapis-muted">
-                  Score {{ s.score }}: skills +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
-                  workload {{ s.breakdown.workload }}
+        <div class="suggestions">
+          <article v-for="s in suggestions" :key="s.volunteerId" class="t-card person" data-test="suggestion-card">
+            <div class="suggest-top">
+              <div class="person-top">
+                <ChildInitial class="is-volunteer" :child="{ name: s.name }" />
+                <div>
+                  <div class="suggest-title">
+                    <h3 class="person-name">{{ s.name }}</h3>
+                    <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">
+                      Assigned{{ s.scheduledDays.length ? ` on ${s.scheduledDays.join(', ')}` : '' }}
+                    </span>
+                  </div>
+                  <div class="person-sub">
+                    Score {{ s.score }}: skills +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
+                    workload {{ s.breakdown.workload }}
+                  </div>
                 </div>
               </div>
 
               <!-- Actions -->
-              <div class="d-flex align-items-center gap-2">
+              <div class="suggest-actions">
                 <button
                   v-if="s.assigned"
-                  class="btn btn-sm btn-outline-danger"
+                  type="button"
+                  class="t-btn t-btn-soft"
                   :disabled="busyId !== null"
                   data-test="unassign-btn"
                   @click="unassign(s)"
@@ -191,14 +188,15 @@ const unassign = (s) => changeAssignment(s, { action: 'unassign' })
                   <select
                     :id="`day-${s.volunteerId}`"
                     v-model="dayChoice[s.volunteerId]"
-                    class="form-select form-select-sm w-auto"
+                    class="form-select skill-select"
                     data-test="day-select"
                   >
                     <option :value="undefined" disabled>Pick a day</option>
                     <option v-for="d in s.availability" :key="d" :value="d">{{ d }}</option>
                   </select>
                   <button
-                    class="btn btn-sm btn-primary"
+                    type="button"
+                    class="t-btn"
                     :disabled="!dayChoice[s.volunteerId] || busyId !== null"
                     data-test="assign-btn"
                     @click="assign(s)"
@@ -207,12 +205,30 @@ const unassign = (s) => changeAssignment(s, { action: 'unassign' })
                   </button>
                 </template>
 
-                <span v-else class="small lapis-muted">Set this volunteer's days on the Volunteers page first</span>
+                <span v-else class="person-sub">Set this volunteer's days on the Volunteers page first</span>
               </div>
             </div>
-          </div>
+
+            <!-- WHY this volunteer -->
+            <div class="facts" data-test="match-reason">
+              <div class="fact">
+                <span class="fact-key">Matches</span>
+                <span class="fact-value">{{ s.matchedSkills.join(', ') || 'No matching skills' }}</span>
+              </div>
+              <div class="fact">
+                <span class="fact-key">Free on</span>
+                <span class="fact-value">{{ s.availability.join(', ') || 'No days set' }}</span>
+              </div>
+              <div class="fact">
+                <span class="fact-key">Works with</span>
+                <span class="fact-value">
+                  {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
+                </span>
+              </div>
+            </div>
+          </article>
         </div>
       </template>
-    </template>
+    </div>
   </div>
 </template>

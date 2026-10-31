@@ -14,7 +14,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
-import '@/css/teacher/schedule.css' // the styles of this page
+import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -182,27 +182,28 @@ async function removeSlot(volunteer, day, slot) {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 teacherpage">
     <PageHeader title="Weekly schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <template v-else>
-      <div class="d-flex flex-wrap align-items-center gap-3 small mb-3">
-        <span><strong>{{ sessionCount }}</strong> sessions every week</span>
+    <!-- the sandy board: the legend and the white timetable -->
+    <div v-else class="board">
+      <div class="toolbar">
+        <span class="tag"><strong>{{ sessionCount }}</strong>&nbsp;sessions every week</span>
         <span class="legend"><span class="swatch swatch-off"></span>Volunteer not free</span>
         <span class="legend"><span class="swatch swatch-today"></span>Today</span>
       </div>
 
-      <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
+      <div v-if="actionError" class="note note-bad">{{ actionError }}</div>
 
-      <div class="lapis-card p-0 table-responsive">
-        <table class="table table-bordered mb-0 schedule-table" data-test="schedule-table">
+      <div class="t-card schedule-wrap">
+        <table class="schedule-table" data-test="schedule-table">
           <thead>
             <tr>
               <th scope="col" class="volunteer-col">Volunteer</th>
-              <th v-for="d in DAYS" :key="d" scope="col" class="text-center" :class="{ 'is-today': d === TODAY }">
+              <th v-for="d in DAYS" :key="d" scope="col" class="day-head" :class="{ 'is-today': d === TODAY }">
                 {{ d }}
               </th>
             </tr>
@@ -211,11 +212,11 @@ async function removeSlot(volunteer, day, slot) {
             <tr v-for="v in volunteers" :key="v.id" data-test="schedule-row">
               <th scope="row" class="volunteer-col">
                 <div class="fw-semibold">{{ v.name }}</div>
-                <div class="small lapis-muted fw-normal">{{ (v.skills || []).join(', ') || 'No skills set' }}</div>
+                <div class="person-sub fw-normal">{{ (v.skills || []).join(', ') || 'No skills set' }}</div>
                 <RouterLink
                   v-if="!(v.availability || []).length"
                   :to="{ name: 'manage-volunteers' }"
-                  class="small fw-normal"
+                  class="person-sub fw-normal"
                 >
                   Set available days
                 </RouterLink>
@@ -229,23 +230,18 @@ async function removeSlot(volunteer, day, slot) {
                 data-test="schedule-cell"
               >
                 <template v-if="isFree(v, d)">
-                  <div
-                    v-for="slot in slotsFor(v, d)"
-                    :key="slot.child.id"
-                    class="slot d-flex align-items-center gap-1 mb-1"
-                    data-test="schedule-slot"
-                  >
+                  <div v-for="slot in slotsFor(v, d)" :key="slot.child.id" class="slot" data-test="schedule-slot">
                     <span class="slot-time">{{ slot.time || '--:--' }}</span>
                     <RouterLink
                       :to="{ name: 'child-profile', params: { id: slot.child.id } }"
-                      class="text-truncate"
+                      class="slot-name"
                       :title="slot.child.name"
                     >
                       <ChildAvatar :avatar="slot.child.avatar" /> {{ firstName(slot.child.name) }}
                     </RouterLink>
                     <button
                       type="button"
-                      class="btn btn-link btn-sm p-0 ms-auto text-danger"
+                      class="slot-remove"
                       :disabled="busyKey !== null"
                       :aria-label="`Remove ${slot.child.name} from ${v.name} on ${d}`"
                       data-test="remove-slot"
@@ -256,7 +252,7 @@ async function removeSlot(volunteer, day, slot) {
                   </div>
                   <button
                     type="button"
-                    class="btn btn-sm btn-outline-primary w-100 add-btn"
+                    class="t-btn t-btn-soft add-btn"
                     :aria-label="`Add a session for ${v.name} on ${d}`"
                     data-test="add-slot"
                     @click="openAdd(v, d)"
@@ -272,16 +268,16 @@ async function removeSlot(volunteer, day, slot) {
       </div>
 
       <!-- Assigned but not on the timetable yet -->
-      <div v-if="unscheduled.length" class="lapis-card p-3 mt-3" data-test="unscheduled">
-        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned without a day</h2>
-        <p class="small lapis-muted mb-2">
+      <div v-if="unscheduled.length" class="t-card person" data-test="unscheduled">
+        <h2>Assigned without a day</h2>
+        <p class="person-sub mb-0">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
         </p>
         <ul class="small mb-0">
           <li v-for="u in unscheduled" :key="u.key">{{ u.child.name }} with {{ u.volunteerName }}</li>
         </ul>
       </div>
-    </template>
+    </div>
 
     <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue) -->
     <template v-if="adding">
@@ -308,7 +304,7 @@ async function removeSlot(volunteer, day, slot) {
                 <option value="" disabled>Choose a child</option>
                 <option v-for="o in childOptions" :key="o.child.id" :value="o.child.id">{{ optionLabel(o) }}</option>
               </select>
-              <div class="small lapis-muted mt-1 mb-3">
+              <div class="muted mt-1 mb-3">
                 Children with no volunteer come first, then the best skill match for
                 {{ firstName(adding.volunteer.name) }}.
               </div>
@@ -319,18 +315,16 @@ async function removeSlot(volunteer, day, slot) {
                 <option v-for="t in TIMES" :key="t" :value="t">{{ t }}</option>
               </select>
 
-              <div v-if="formError" class="alert alert-danger small py-2 mt-3 mb-0" data-test="add-error">
+              <div v-if="formError" class="note note-bad mt-3" data-test="add-error">
                 {{ formError }}
               </div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" :disabled="saving" @click="closeAdd">
-                Cancel
-              </button>
+              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="closeAdd">Cancel</button>
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="t-btn"
                 :disabled="!form.childId || !form.time || saving"
                 data-test="add-submit"
               >

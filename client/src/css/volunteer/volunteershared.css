@@ -1,5 +1,7 @@
+/* EXTERNAL CSS: the volunteer home, one child's page and the two forms. It is imported at the top of each of those files. */
 /* What the volunteer pages have in common: the volunteer home, one child's page and the two forms (as a volunteer sees them).
-   Each of those pages also has its own file with the rules only that page needs.
+   The colours of the volunteer and the teacher on these pages are the --cp-... variables in main.css.
+   Each of those pages also has its own rules, in the style block of its .vue file.
    Colours:
      #213C31 dark green  text
      #446C59 green       the title and the line under it */
@@ -40,4 +42,25 @@
 .role-volunteer .volunteerformpage .lapis-page-header .page-subtitle {
   font-size: 15px;
   font-weight: 700;
+}
+
+/* the form of a teacher who edits a session has the same text as a volunteer's form, in the teacher's colours */
+.role-teacher .volunteerformpage {
+  font-family: var(--lapis-font);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--cp-text);
+}
+
+.role-teacher .volunteerformpage .lapis-page-header .page-title {
+  font-family: inherit;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--cp-title);
+}
+
+.role-teacher .volunteerformpage .lapis-page-header .page-subtitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cp-grey);
 }

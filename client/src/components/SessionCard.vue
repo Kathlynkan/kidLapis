@@ -1,6 +1,6 @@
 <!-- =============================================================
   SessionCard - one past session in the history list.   Owner: Ning Xuan
-  The look for a volunteer is in css/volunteer/childprofilepage.css
+  The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'

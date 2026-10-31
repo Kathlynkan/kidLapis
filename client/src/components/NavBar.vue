@@ -8,8 +8,6 @@ import { computed, ref, watch, onMounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
-import '@/css/main/stripes.css' // the colours and the size of the stripes under the bar
-import '@/css/main/navbar.css' // the bar
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -157,3 +155,231 @@ onMounted(() => {
     </div>
   </nav>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* The stripes under the navbar (NavBar.vue). They show the layers of the cake, one stripe for each layer.
+   A role shows the layers up to its own: a parent has one stripe, a volunteer has two (the parent colour first,
+   then its own). A child has four: pink, mint, aqua and the teacher's lavender at the bottom, the whole kueh lapis.
+   Every page of a role has the same stripes, because they are part of the navbar.
+   The colours are --layer-child, --layer-parent, --layer-volunteer and --layer-teacher in main.css.
+   To add a layer for another role: add its colour there and its name to LAYERS in NavBar.vue. */
+
+.role-stripes i {
+  display: block;
+  height: 5px;
+}
+
+/* The navbar (NavBar.vue): a cream bar with the links, the user and the menu button on a small screen.
+   The stripes under it are styled in the style block at the bottom of this file, and their colours are the colours of the user's role. */
+
+.lapis-nav {
+  background: #FDFAF4;
+  color: #414F67;
+  font-family: var(--lapis-font);
+}
+
+.lapis-nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+}
+
+.lapis-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+  color: #414F67;
+  font-size: 19px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* the menu: one row on a wide screen */
+.lapis-menu {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex: 1;
+  min-width: 0;
+}
+
+.lapis-links {
+  display: flex;
+  align-self: stretch;
+  justify-content: flex-start;
+  flex: 1;
+  gap: 2px;
+}
+
+.lapis-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-bottom: 4px solid transparent;
+  color: #414F67;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lapis-nav-link:hover {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
+}
+
+.lapis-nav-link.open {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
+  border-bottom-color: transparent;
+}
+
+.lapis-badge {
+  min-width: 18px;
+  padding: 0 5px;
+  background: #F6D1AA;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 999px;
+}
+
+.lapis-user {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.lapis-user-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.lapis-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--role-accent, #AED9D8);
+  font-weight: 700;
+  overflow: hidden;
+}
+
+/* the photo of a child fills the circle */
+.lapis-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lapis-who {
+  line-height: 1.2;
+}
+
+.lapis-who b {
+  display: block;
+  font-size: 14px;
+}
+
+.lapis-who small {
+  color: #5E6C80;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.lapis-button {
+  padding: 5px 12px;
+  border: 1px solid #414F67;
+  border-radius: 6px;
+  background: transparent;
+  color: #414F67;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lapis-button-filled {
+  background: var(--role-accent, #AED9D8);
+}
+
+/* the menu button: only shown on a small screen */
+.lapis-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  margin-left: auto;
+  border: 1px solid #414F67;
+  background: transparent;
+  color: #414F67;
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* a small screen: the menu hides behind the button and opens as a list */
+@media (max-width: 1099px) {
+  .lapis-burger {
+    display: flex;
+  }
+
+  .lapis-brand {
+    margin-right: 0;
+    font-size: 17px;
+  }
+
+  .lapis-menu {
+    display: none;
+    flex: 0 0 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 8px;
+  }
+
+  .lapis-menu.open {
+    display: flex;
+  }
+
+  .lapis-links {
+    flex: none;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .lapis-nav-link {
+    justify-content: space-between;
+    min-height: 46px;
+    padding: 0 4px;
+    border-bottom: 1px solid #CFE0DE;
+  }
+
+  .lapis-nav-link.open {
+    padding-left: 10px;
+    border-bottom-color: #CFE0DE;
+    background: var(--role-accent-soft, #DDF0EF);
+    border-radius: 0;
+  }
+
+  .lapis-user {
+    justify-content: space-between;
+    margin: 10px 0 0;
+  }
+}
+</style>

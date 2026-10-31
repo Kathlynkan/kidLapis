@@ -3,7 +3,9 @@
 import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
+import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 const Days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const volunteers = ref([])
@@ -120,94 +122,80 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 teacherpage">
     <PageHeader title="Volunteers" subtitle="Skills and availability power the matchmaking." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <div v-else class="row g-3">
-      <label for="skill-filter" class="small mb-0">Filter by skill</label>
-      <select id="skill-filter"
-      v-model="skill_Filter"
-      class="form-select form-select-sm w-auto"
-      data-test="skill-filter">
-        <option value="">All skills</option>
-        <option v-for="skill in allSkills" :key="skill" :value="skill">{{ skill }}</option>
-      </select>
-      <span class="small lapis-muted">
-        Showing {{ filtered_Volunteers.length }} of {{ volunteers.length }}
-      </span>
-      <p v-if="!filtered_Volunteers.length" class="lapis-muted" data-test="no-volunteers">
-        No volunteer can "{{ skill_Filter }}" yet.
-      </p>
+    <div v-else class="board">
+      <div class="toolbar">
+        <label for="skill-filter" class="visually-hidden">Filter by skill</label>
+        <select id="skill-filter" v-model="skill_Filter" class="form-select skill-select" data-test="skill-filter">
+          <option value="">All skills</option>
+          <option v-for="skill in allSkills" :key="skill" :value="skill">{{ skill }}</option>
+        </select>
+        <span class="tag">Showing {{ filtered_Volunteers.length }} of {{ volunteers.length }}</span>
+      </div>
 
-      <div v-for="v in filtered_Volunteers" :key="v.id" class="col-md-6 col-lg-4">
-        <div class="lapis-card p-3 h-100" data-test="volunteer-card">
-          <h2 class="h6 mb-1"><i class="bi bi-person-circle me-1"></i>{{ v.name }}</h2>
-          <div class="small lapis-muted mb-2">{{ v.email }}</div>
-          <div class="d-flex gap-2 mb-2">
-            <button
-              v-if="editing_ID !== v.id && confirmDeleteId !== v.id"
-              class="btn btn-sm btn-outline-secondary"
-              :disabled="editing_ID !== null || confirmDeleteId !== null"
-              data-test="edit-volunteer"
-              @click="startEdit(v)"
-            >
-              <i class="bi bi-pencil me-1"></i>Edit
-            </button>
-            <button
-              v-if="editing_ID !== v.id && confirmDeleteId !== v.id"
-              class="btn btn-sm btn-outline-danger"
-              :disabled="editing_ID !== null || confirmDeleteId !== null"
-              data-test="delete-volunteer"
-              @click="startDelete(v)"
-            >
-              <i class="bi bi-trash me-1"></i>Remove
-            </button>
+      <div v-if="!filtered_Volunteers.length" class="t-card empty" data-test="no-volunteers">
+        <strong>No volunteers found</strong>
+        No volunteer can "{{ skill_Filter }}" yet.
+      </div>
+
+      <div v-else class="grid">
+        <article v-for="v in filtered_Volunteers" :key="v.id" class="t-card person" data-test="volunteer-card">
+          <div class="person-top">
+            <ChildInitial class="is-volunteer" :child="v" />
+            <div>
+              <h2 class="person-name">{{ v.name }}</h2>
+              <div class="person-sub">{{ v.email }}</div>
+            </div>
           </div>
 
-          <div v-if="confirmDeleteId === v.id" class="border rounded p-2 mb-2 small">
+          <div class="person-sub" data-test="workload">
+            <i class="bi bi-people me-1"></i>
+            <template v-if="workloadOf(v).length">
+              <strong>{{ workloadOf(v).length }}</strong>
+              {{ workloadOf(v).length === 1 ? 'child' : 'children' }}:
+              {{ workloadOf(v).map((c) => c.name.split(' ')[0]).join(', ') }}
+            </template>
+            <span v-else>No assigned children</span>
+          </div>
+
+          <!-- Remove asks first -->
+          <div v-if="confirmDeleteId === v.id" class="confirm-box">
             <p class="mb-2">Remove <strong>{{ v.name }}</strong>? Their sessions and records stay — only the login is deleted.</p>
             <div v-if="delete_error" class="text-danger mb-2">{{ delete_error }}</div>
             <div class="d-flex gap-2">
               <button
-                class="btn btn-sm btn-danger"
+                type="button"
+                class="t-btn t-btn-red"
                 :disabled="deleting"
                 data-test="confirm-delete-volunteer"
                 @click="confirmDelete(v)"
               >
                 {{ deleting ? 'Removing...' : 'Yes, remove' }}
               </button>
-              <button
-                class="btn btn-sm btn-outline-secondary"
-                :disabled="deleting"
-                @click="cancelDelete"
-              >
-                Cancel
-              </button>
+              <button type="button" class="t-btn t-btn-soft" :disabled="deleting" @click="cancelDelete">Cancel</button>
             </div>
           </div>
-        <div class="small mb-2" data-test="workload">
-          <i class="bi bi-people me-1"></i>
-          <template v-if="workloadOf(v).length">
-            <strong>{{ workloadOf(v).length }}</strong>
-            {{ workloadOf(v).length === 1 ? 'child' : 'children' }}:
-            {{ workloadOf(v).map((c) => c.name.split(' ')[0]).join(', ') }}
-          </template>
-          <span v-else class="lapis-muted">No assigned children</span>
-        </div>
 
-        <template v-if="editing_ID !== v.id">
-          <div class="mb-2">
-            <span v-for="s in v.skills" :key="s" class="badge badge-soft me-1 mb-1">{{  s }}</span>
-            <span v-if="!v.skills?.length" class="small lapis-muted">No skills to display</span>
-          <div class="small"><i class="bi bi-calendar-week me-1"></i>{{ (v.availability || []).join(', ') || 'Not set' }}</div>
+          <!-- what they teach and when they are free -->
+          <div v-if="editing_ID !== v.id" class="facts">
+            <div class="fact">
+              <span class="fact-key">Teaches</span>
+              <span class="fact-value">{{ (v.skills || []).join(', ') || 'No skills to display' }}</span>
+            </div>
+            <div class="fact">
+              <span class="fact-key">Free on</span>
+              <span class="fact-value">{{ (v.availability || []).join(', ') || 'Not set' }}</span>
+            </div>
           </div>
-        </template>
+
           <form v-else @submit.prevent="save(v)" data-test="edit-form">
             <fieldset class="mb-2">
-              <legend class="small fw-semibold mb-1">Skills</legend>
+              <legend class="fact-key mb-1">Skills</legend>
               <label v-for="s in allSkills" :key="s" class="form-check small mb-0">
                 <input v-model="draft.skills" class="form-check-input" type="checkbox" :value="s">
                 <span class="form-check-label">{{ s }}</span>
@@ -215,7 +203,7 @@ onMounted(async () => {
             </fieldset>
 
             <fieldset class="mb-2">
-              <legend class="small fw-semibold mb-1">Available days</legend>
+              <legend class="fact-key mb-1">Available days</legend>
               <div class="d-flex flex-wrap gap-2">
                 <label v-for="d in Days" :key="d" class="form-check form-check-inline small mb-0 me-0">
                   <input v-model="draft.availability" class="form-check-input" type="checkbox" :value="d">
@@ -226,15 +214,34 @@ onMounted(async () => {
             <div v-if="save_error" class="small text-danger mb-2">{{ save_error }}</div>
 
             <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-sm btn-primary" :disabled="saving" data-test="save-volunteer">
+              <button type="submit" class="t-btn" :disabled="saving" data-test="save-volunteer">
                 {{ saving ? 'Saving...' : 'Save changes' }}
               </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary" :disabled="saving" @click="cancelEdit">
-                Cancel
-              </button>
+              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="cancelEdit">Cancel</button>
             </div>
           </form>
-        </div>
+
+          <div v-if="editing_ID !== v.id && confirmDeleteId !== v.id" class="person-foot">
+            <button
+              type="button"
+              class="t-btn t-btn-edit"
+              :disabled="editing_ID !== null || confirmDeleteId !== null"
+              data-test="edit-volunteer"
+              @click="startEdit(v)"
+            >
+              <i class="bi bi-pencil"></i>Edit
+            </button>
+            <button
+              type="button"
+              class="t-btn t-btn-red"
+              :disabled="editing_ID !== null || confirmDeleteId !== null"
+              data-test="delete-volunteer"
+              @click="startDelete(v)"
+            >
+              <i class="bi bi-trash"></i>Remove
+            </button>
+          </div>
+        </article>
       </div>
     </div>
   </div>

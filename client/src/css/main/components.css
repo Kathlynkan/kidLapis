@@ -1,6 +1,7 @@
+/* EXTERNAL CSS: the small parts (components) that many pages use. It is imported at the top of each of those files. */
 /* The small parts that many pages use. Each part is a component in src/components, and the section says which.
    The look of the same parts for a parent or a volunteer is in the parent and volunteer folders.
-   Sections: line icon, page header, stat card, state message, accordion (PeelCard and HandoverCard),
+   Sections: line icon, page header, state message, accordion (PeelCard and HandoverCard),
    handover, session card, homework card, charts. */
 
 /* ---------- LineIcon.vue ---------- */
@@ -19,7 +20,8 @@
 
 /* ---------- ChildAvatar.vue ---------- */
 
-/* a photo avatar takes the place of an emoji: as big as the text round it, and round */
+/* a photo avatar takes the place of an emoji: as big as the text round it, and round.
+   This is the one place that uses em: it has to grow and shrink with the size of the text it sits in (a name or a big heading). */
 .child-avatar {
   width: 1.15em;
   height: 1.15em;
@@ -44,63 +46,21 @@
 /* ---------- PageHeader.vue ---------- */
 
 .lapis-page-header {
-  padding: 1.25rem 0 0.5rem;
+  padding: 20px 0 8px;
 }
 
 .page-title {
   font-family: var(--lapis-font);
   font-weight: 700;
-  font-size: 2rem;
+  font-size: 32px;
   color: var(--lapis-plum);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.6px;
 }
 
 .page-subtitle {
   color: var(--lapis-muted);
   font-weight: 600;
-  font-size: 0.875rem;
-}
-
-/* ---------- StatCard.vue ---------- */
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  flex-shrink: 0;
-}
-
-.stat-icon[data-color='pink']   { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
-.stat-icon[data-color='lime']   { background: var(--lapis-lime);   color: var(--lapis-plum);  border: 1px solid var(--lapis-lime-dark); }
-.stat-icon[data-color='yellow'] { background: var(--lapis-yellow); color: var(--lapis-plum);  border: 1px solid var(--lapis-yellow-dark); }
-.stat-icon[data-color='orange'] { background: var(--lapis-orange); color: var(--lapis-plum);  border: 1px solid var(--lapis-orange-dark); }
-.stat-icon[data-color='purple'] { background: var(--lapis-purple); color: var(--lapis-cream); border: 1px solid var(--lapis-purple-dark); }
-
-.stat-value {
-  font-family: var(--lapis-font);
-  font-weight: 700;
-  font-size: 1.75rem;
-  color: var(--lapis-plum);
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--lapis-muted);
-}
-
-.stat-hint {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--lapis-muted);
+  font-size: 14px;
 }
 
 /* ---------- StateMessage.vue ---------- */
@@ -109,7 +69,7 @@
 
 /* the empty state has less room above than the bootstrap py-5 gives (that class is important, so this is too) */
 .lapis-card.lapis-state-empty {
-  padding-top: 2rem !important;
+  padding-top: 32px !important;
 }
 
 /* Stack of kueh strips as the illustration */
@@ -138,10 +98,10 @@
 
 .state-msg {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 16px;
   color: var(--lapis-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 1px;
 }
 
 /* ---------- the accordion: PeelCard.vue and HandoverCard.vue open and close the same way ---------- */
@@ -157,7 +117,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem 0.75rem;
+  padding: 16px 20px 12px;
   border: none;
   cursor: pointer;
   text-align: left;
@@ -188,15 +148,15 @@
   border-bottom-style: solid;
 }
 
-.handover-card:has(.peel-body--open) .handover-header {
+.handover-card--open .handover-header {
   border-bottom: 3px solid var(--lapis-cream-dark);
 }
 
 .peel-title {
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.8px;
   color: var(--lapis-plum);
 }
 
@@ -219,7 +179,7 @@
 
 .peel-body-inner {
   overflow: hidden;
-  padding: 1.25rem;
+  padding: 20px;
   transform: translateY(-6px);
   opacity: 0;
   transition:
@@ -263,14 +223,14 @@
 
 .handover-value {
   overflow-wrap: anywhere;
-  margin-bottom: 0.6rem;
+  margin-bottom: 9.6px;
   color: var(--lapis-plum);
 }
 
 .handover-title {
   font-family: var(--lapis-font);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 16px;
   color: var(--lapis-plum);
 }
 
@@ -278,14 +238,14 @@
   color: var(--lapis-muted);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  font-size: 12px;
 }
 
 .loading-msg {
   color: var(--lapis-muted);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 /* ---------- SessionCard.vue ---------- */
@@ -317,7 +277,7 @@
 .session-score {
   background: var(--topic-academic);
   color: var(--lapis-plum);
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .session-lines {

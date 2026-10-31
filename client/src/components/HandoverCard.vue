@@ -1,6 +1,6 @@
 <!-- =============================================================
   HandoverCard - "Today's Handover" box.             Owner: Yuqi
-  The look for a volunteer is in css/volunteer/childprofilepage.css
+  The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
@@ -23,7 +23,7 @@ const open = ref(true)
 </script>
 
 <template>
-  <div class="lapis-card lapis-card-blue handover-card" data-test="handover-card">
+  <div class="lapis-card lapis-card-blue handover-card" :class="{ 'handover-card--open': open }" data-test="handover-card">
     <button type="button" class="handover-header" :aria-expanded="String(open)" @click="open = !open">
       <div class="d-flex flex-wrap align-items-center gap-2">
         <h2 class="handover-title mb-0">

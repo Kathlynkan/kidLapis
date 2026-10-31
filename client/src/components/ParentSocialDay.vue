@@ -3,7 +3,7 @@
   Shows (only what the volunteer filled in): photos, what the child did, the meal,
   getting along with others, something positive and a note from the volunteer.
   Props:  session (Object), childName (String)
-  Its styles are in css/parent/parentpage.css
+  Its styles are in the style block of views/parent/ParentHomeView.vue
 ============================================================= -->
 <script setup>
 import { computed, ref } from 'vue'

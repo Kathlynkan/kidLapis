@@ -1,6 +1,7 @@
 <!-- SkillProgressChart - accuracy over time, one line per PSLE subject.   Owner: Jachin
      Props: sessions (Array) - from GET /sessions?childId=...
-            calm (Boolean) - the quiet look for a volunteer: one teal line for the score of each session
+            calm (Boolean) - the quiet look for a volunteer or teacher: one line for the score of each session
+            tone ('teal' | 'lavender') - the colour of the quiet look: teal for a volunteer, lavender for a teacher
      Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>
 import { computed } from 'vue'
@@ -24,6 +25,7 @@ ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif' // the same font a
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
   calm: { type: Boolean, default: false },
+  tone: { type: String, default: 'teal' },
 })
 
 const SUBJECT_COLORS = {
@@ -69,7 +71,14 @@ const chartOptions = {
   },
 }
 
-// the quiet look: one teal line for the score of each session, oldest to newest
+// the colours of the quiet look: the line, its dots, the small text and the grid
+const TONES = {
+  teal: { line: '#B7D8D7', fill: 'rgba(183, 216, 215, 0.35)', dot: '#3E6B6A', text: '#6B8177', grid: '#E4E9E6' },
+  lavender: { line: '#B8A9DD', fill: 'rgba(184, 169, 221, 0.3)', dot: '#6B5CA5', text: '#7D7690', grid: '#ECE7F5' },
+}
+const tone = computed(() => TONES[props.tone] ?? TONES.teal)
+
+// the quiet look: one line for the score of each session, oldest to newest
 const calmData = computed(() => {
   const sorted = [...props.sessions].sort((a, b) => a.date.localeCompare(b.date))
   return {
@@ -78,13 +87,13 @@ const calmData = computed(() => {
       {
         label: 'Score',
         data: sorted.map((s) => accuracy(s)),
-        borderColor: '#B7D8D7',
-        backgroundColor: 'rgba(183, 216, 215, 0.35)',
+        borderColor: tone.value.line,
+        backgroundColor: tone.value.fill,
         fill: true,
         borderWidth: 4,
         tension: 0.3,
         pointBackgroundColor: '#FFFFFF',
-        pointBorderColor: '#3E6B6A',
+        pointBorderColor: tone.value.dot,
         pointBorderWidth: 2,
         pointRadius: 4,
         clip: false, // a dot on the edge of the chart (100%) is drawn whole, not cut in half
@@ -93,26 +102,28 @@ const calmData = computed(() => {
   }
 })
 
-const CALM_TEXT = { color: '#6B8177', font: { family: ChartJS.defaults.font.family } }
-const calmOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  layout: { padding: { top: 8, right: 8 } }, // room for the dots on the edge
-  scales: {
-    y: {
-      min: 0,
-      max: 100,
-      ticks: { ...CALM_TEXT, stepSize: 50, callback: (v) => v + '%' },
-      grid: { color: '#E4E9E6' },
-      border: { display: false },
+const calmOptions = computed(() => {
+  const text = { color: tone.value.text, font: { family: ChartJS.defaults.font.family } }
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { top: 8, right: 8 } }, // room for the dots on the edge
+    scales: {
+      y: {
+        min: 0,
+        max: 100,
+        ticks: { ...text, stepSize: 50, callback: (v) => v + '%' },
+        grid: { color: tone.value.grid },
+        border: { display: false },
+      },
+      x: { ticks: text, grid: { display: false }, border: { display: false } },
     },
-    x: { ticks: CALM_TEXT, grid: { display: false }, border: { display: false } },
-  },
-  plugins: {
-    legend: { display: false },
-    tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
-  },
-}
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+    },
+  }
+})
 
 const summaries = computed(() => {
   const bySubject = {}

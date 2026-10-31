@@ -1,5 +1,8 @@
 /* =============================================================
    Kids Lapis — Kueh Lapis design system.
+   EXTERNAL CSS: the whole app uses it (loaded once in main.js).
+   What is in it: the colours and fonts (--variables), the Bootstrap overrides, the classes every page shares,
+   and the colours of the volunteer's and the teacher's pages (--cp-...).
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -33,37 +36,22 @@
   --lapis-yellow-dark: #C8A028;
   --lapis-blue-dark:   #4890B8;
   --lapis-orange-dark: #C07838;
-  --lapis-purple-dark: #8068A8;
 
   /* ── Semantic topic colours ──
-     children/people = pink, sessions/learning = lime,
-     homework/tasks = yellow, messages/communication = blue */
+     success / learning = lime, messages / social = blue, alert = pink */
   --topic-academic:       #A8CC90;
   --topic-academic-soft:  #E8F5DC;
   --topic-social:         #88C0D8;
-  --topic-social-soft:    #DFF0F8;
-  --topic-homework:       #F5DF98;
-  --topic-homework-soft:  #FBF5DC;
-  --topic-schedule:       #A8CC90;
-  --topic-schedule-soft:  #E8F5DC;
-  --topic-messages:       #88C0D8;
-  --topic-messages-soft:  #DFF0F8;
   --topic-alert:          #E8A0B8;
 
   /* ── PSLE subject colours ──
      English = sky blue, Math = amber, Science = yellow, Mother Tongue = coral */
   --subject-english:            #88C0D8;
-  --subject-english-soft:       #DFF0F8;
   --subject-math:               #D4B840;
-  --subject-math-soft:          #FBF0C8;
   --subject-science:            #F5DF98;
-  --subject-science-soft:       #FBF5DC;
   --subject-mother-tongue:      #E8906C;
-  --subject-mother-tongue-soft: #FBE4D8;
 
   /* Older tokens, still used by the cards and the muted text */
-  --lapis-primary:      var(--lapis-lime);
-  --lapis-primary-soft: #E8F0E3;
   --lapis-muted:        #8D7F77;
   --lapis-radius:       12px;
 
@@ -118,19 +106,84 @@ html, body {
   background: transparent !important;
 }
 
+/* ── The board ─────────────────────────────────────────────────
+   The sandy box that holds the white cards on every restyled page (child, parent, volunteer and teacher).
+   A page only adds what is its own, for example the gap between the cards inside it. */
+.board {
+  padding: 14px;
+  border-radius: 22px;
+  background: #F9F1E6;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
+}
+
 /* ── Role accent colours ────────────────────────────────────── */
 .role-child,
 .role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
 
 .role-parent    { --role-accent: var(--layer-parent);    --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
 .role-volunteer { --role-accent: var(--layer-volunteer); --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
-.role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }
+.role-teacher   { --role-accent: var(--layer-teacher);   --role-accent-soft: #F0EAF8; --role-accent-dark: #5B4B8A; }
+
+/* ── Colours of the volunteer's and the teacher's pages ─────────
+   Used by one child's page, its pop-ups and the forms (volunteer and teacher).
+   The volunteer is the default. The teacher has the lavender of the other teacher pages (teacherpage.css).
+   The teacher's are set on the body, so the pop-ups (which are moved to the end of the body) have them too. */
+
+:root {
+  --cp-text: #213C31;
+  --cp-title: #446C59;
+  --cp-deep: #4A735F;
+  --cp-key: #3E6B6A;
+  --cp-letter: #9BD3B2;
+  --cp-soft: #CDE9D8;
+  --cp-lightest: #E1F2E9;
+  --cp-teal: #B7D8D7;
+  --cp-teal-soft: #E4F0EF;
+  --cp-fill: #B7D8D7;
+  --cp-fill-hover: #A3CAC8;
+  --cp-line: #C3D2CA;
+  --cp-placeholder: #8FA39A;
+  --cp-slider: #E1E8E4;
+  --cp-grey: #6B8177;
+  --cp-shadow: rgba(33, 60, 49, 0.1);
+  --cp-main: #4A735F;
+  --cp-main-text: #FFFFFF;
+  --cp-main-hover: #3B6050;
+  --cp-bar: #B7D8D7;
+  --cp-track: #EEEAE2;
+  --cp-waiting-text: #414F67;
+}
+
+body.role-teacher {
+  --cp-text: #3D3454;
+  --cp-title: #5B4B8A;
+  --cp-deep: #6B5CA5;
+  --cp-key: #6B5CA5;
+  --cp-letter: #D5CBEA;
+  --cp-soft: #F0EAF8;
+  --cp-lightest: #F0EAF8;
+  --cp-teal: #E3DBF2;
+  --cp-teal-soft: #F0EAF8;
+  --cp-fill: #D5CBEA;
+  --cp-fill-hover: #C7BBE0;
+  --cp-line: #E3DBF0;
+  --cp-placeholder: #A39DB5;
+  --cp-slider: #ECE7F5;
+  --cp-grey: #7D7690;
+  --cp-shadow: rgba(61, 52, 84, 0.1);
+  --cp-main: #D5CBEA;
+  --cp-main-text: #3D3454;
+  --cp-main-hover: #C7BBE0;
+  --cp-bar: #B8A9DD;
+  --cp-track: #F0EAF8;
+  --cp-waiting-text: #3D3454;
+}
 
 /* ── Typography ─────────────────────────────────────────────── */
 h1, h2, h3, .fw-heavy {
   font-family: var(--lapis-font);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.4px;
   color: var(--lapis-plum);
 }
 
@@ -163,7 +216,7 @@ h4, h5, h6 {
 .lapis-card-hover { cursor: pointer; }
 
 /* Extra top padding utility — used on cards whose header sits flush at the top */
-.lapis-card-top { padding-top: 1.25rem !important; }
+.lapis-card-top { padding-top: 20px !important; }
 
 /* ── Buttons ────────────────────────────────────────────────── */
 .btn {
@@ -247,11 +300,11 @@ h4, h5, h6 {
 
 /* the cards that can be pressed, and every button, lift a little on hover ... */
 .lapis-card-hover:hover,
-.btn-primary:hover:not(:disabled),
-.btn-outline-primary:hover:not(:disabled),
-.btn-secondary:hover:not(:disabled),
-.btn-outline-secondary:hover:not(:disabled),
-.btn-danger:hover:not(:disabled) {
+.btn-primary:hover,
+.btn-outline-primary:hover,
+.btn-secondary:hover,
+.btn-outline-secondary:hover,
+.btn-danger:hover {
   box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
 }
 
@@ -277,7 +330,7 @@ h4, h5, h6 {
 /* ── Forms ──────────────────────────────────────────────────── */
 .form-label {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 14px;
   color: var(--lapis-plum);
 }
 
@@ -360,7 +413,7 @@ h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  font-size: 25.6px;
   background: var(--lapis-yellow);
   border: 1px solid var(--lapis-yellow-dark);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
@@ -419,7 +472,7 @@ h4, h5, h6 {
   color: var(--lapis-cream);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.8px;
   border-bottom: 1px solid rgba(251, 248, 243, 0.2) !important;
   border-color: rgba(251, 248, 243, 0.2) !important;
 }
@@ -435,8 +488,8 @@ h4, h5, h6 {
   color: var(--lapis-plum);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
+  letter-spacing: 1px;
+  font-size: 12px;
 }
 
 /* ── Spinner ─────────────────────────────────────────────────── */
@@ -463,7 +516,7 @@ h4, h5, h6 {
 .page-peel-leave-active { transition: all 0.18s ease-in; }
 
 /* ── Chips ──────────────────────────────────────────────────── */
-.chip { display: inline-block; padding: 2px 10px; font-size: 0.8rem; font-weight: 700; color: var(--lapis-plum); }
+.chip { display: inline-block; padding: 2px 10px; font-size: 12.8px; font-weight: 700; color: var(--lapis-plum); }
 
 .chip-social   { background: var(--topic-social); }
 
