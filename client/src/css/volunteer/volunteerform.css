@@ -10,7 +10,7 @@
      #3E6B6A dark teal        the chosen mood
      #B7D8D7 muted teal       the Save button, Choose Files, the chosen mood, the message at the top
      #A3CAC8 deeper teal      the same buttons when you point at them
-     #F1EAD2 muted sand       the skills the child struggled with
+     #EEDFA6 muted yellow     the skills the child struggled with
      #C3D2CA                  the line around a box
      #9BD3B2 mint             the lines between Academic and Social and above Cancel and Save
      #8FA39A                  the grey of the example text in a box
@@ -160,7 +160,7 @@
   gap: 8px;
   padding: 3px 4px 3px 11px;
   border-radius: 6px;
-  background: #F1EAD2;
+  background: #EEDFA6;
   box-shadow: none;
   color: #213C31;
   font-size: 14px;

@@ -639,6 +639,7 @@
       "mood": "happy",
       "notes": "",
       "activity": "Board games",
+      "photos": ["/photos/board-games.webp"],
       "interaction": "Excellent",
       "behaviour": "Led a group game of Snakes and Ladders"
     },
@@ -659,6 +660,7 @@
       "mood": "okay",
       "notes": "",
       "activity": "Reading corner",
+      "photos": ["/photos/reading-corner.webp"],
       "interaction": "Good",
       "socialNotes": "Spent some quiet time reading with a friend after the session."
     },
@@ -683,9 +685,7 @@
       "behaviour": "Encouraged a friend who was finding it hard",
       "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session.",
       "photos": [
-        "/photos/lunch-boys.webp",
-        "/photos/board-games.webp",
-        "/photos/reading-corner.webp"
+        "/photos/lunch-boys.webp"
       ]
     },
     {

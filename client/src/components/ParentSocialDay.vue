@@ -46,11 +46,17 @@ const shownPhotos = computed(() => (showAllPhotos.value ? photos.value : photos.
 const extraPhotos = computed(() => Math.max(0, photos.value.length - SHOWN_PHOTOS))
 
 // a photo opens full size in a new tab, except the last one while more are hidden: that one shows them
+// A photo a volunteer uploaded is kept as text (data:...) and a browser does not follow a link to that,
+// so it is shown in a new tab with an image tag instead.
 function pressPhoto(index, event) {
   const isMoreButton = !showAllPhotos.value && extraPhotos.value > 0 && index === SHOWN_PHOTOS - 1
   if (isMoreButton) {
     event.preventDefault()
     showAllPhotos.value = true
+  } else if (shownPhotos.value[index].startsWith('data:')) {
+    event.preventDefault()
+    const tab = window.open('', '_blank')
+    if (tab) tab.document.body.innerHTML = `<img src="${shownPhotos.value[index]}" style="max-width:100%">`
   }
 }
 

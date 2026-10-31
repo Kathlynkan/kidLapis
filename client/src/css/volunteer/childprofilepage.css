@@ -13,7 +13,7 @@
                               (the same as "Being checked" on the parent page)
      #E4F0EF pale teal        small tags on the teal box
      #F7F4EE warm cream       the cards inside a section
-     #F1EAD2 muted sand       "struggled with"
+     #EEDFA6 muted yellow     "struggled with" and the topics that keep coming back
      #EE9F96 soft red         overdue and delete (the same soft red for both)
      #2E8B57 / #E6F4EC        checked homework (the only strong green)
      #CFC9BC                  the edge of a card with nothing special about it
@@ -306,8 +306,10 @@
   color: #213C31;
 }
 
+/* the topics that keep coming back are struggles too: the same muted yellow as "struggled with" */
 .role-volunteer .childprofilepage .handover-tag {
-  background: #FFFFFF;
+  background: #EEDFA6;
+  color: #213C31;
 }
 
 /* ---------- a session ---------- */
@@ -382,7 +384,7 @@
 
 .role-volunteer .childprofilepage .session-tag {
   padding: 2px 10px;
-  background: #F1EAD2;
+  background: #EEDFA6;
   color: #213C31;
   font-weight: 600;
 }

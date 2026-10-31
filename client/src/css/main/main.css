@@ -331,24 +331,26 @@ h4, h5, h6 {
   overflow-wrap: anywhere;
 }
 
-/* a badge and an alert of the same kind look the same */
-.badge-soft,
-.alert-success { background: var(--lapis-lime);   color: var(--lapis-plum); border: 1px solid var(--lapis-lime-dark); }
-.badge-accent,
-.alert-warning { background: var(--lapis-yellow); color: var(--lapis-plum); border: 1px solid var(--lapis-yellow-dark); }
+.badge-soft   { background: var(--lapis-lime);   color: var(--lapis-plum); border: 1px solid var(--lapis-lime-dark); }
+.badge-accent { background: var(--lapis-yellow); color: var(--lapis-plum); border: 1px solid var(--lapis-yellow-dark); }
 .badge-danger-soft { background: var(--lapis-orange); color: var(--lapis-plum); border: 1px solid var(--lapis-orange-dark); }
 
 /* Bootstrap semantic badge overrides */
 .text-bg-success   { background-color: var(--lapis-lime)   !important; color: var(--lapis-plum)  !important; }
 
 /* ── Alerts ─────────────────────────────────────────────────── */
+/* The soft look of the newer pages: no outline, soft corners, a pale colour and dark text */
 .alert {
-  border-radius: 6px;
+  border: 0;
+  border-radius: 14px;
   font-weight: 600;
+  color: var(--lapis-plum);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.alert-danger  { background: var(--lapis-pink);   color: var(--lapis-cream); border: 1px solid var(--lapis-pink-dark); }
+.alert-danger  { background: #F5B8B0; } /* soft red */
+.alert-warning { background: #FBE7A1; } /* soft yellow */
+.alert-success { background: #CDE8D2; } /* soft green */
 
 /* ── Avatar circle ──────────────────────────────────────────── */
 .avatar {
