@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
 import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
+import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/parent/parentpage.css' // the styles of this page
@@ -55,9 +56,6 @@ const DAY_NUMBERS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 // ---------- values worked out from the things above ----------
 // the child we are showing now (found in the list by its id)
 const selectedChild = computed(() => children.value.find((child) => child.id === selectedId.value))
-
-// the first letter of the child's name, shown in the round picture
-const childInitial = computed(() => (selectedChild.value ? selectedChild.value.name.charAt(0).toUpperCase() : ''))
 
 // the child's first name, used in the sentences
 const childName = computed(() => (selectedChild.value ? firstName(selectedChild.value.name) : ''))
@@ -286,7 +284,7 @@ onMounted(async () => {
       <!-- the child's name and level, and the child buttons (only when the parent has 2 or more children) -->
       <div class="child-row" data-test="child-switcher">
         <div class="child-info">
-          <span class="child-initial">{{ childInitial }}</span>
+          <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
             <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><LineIcon name="star" small />{{ selectedChild.points }} stars earned</span></div>

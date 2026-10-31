@@ -23,6 +23,7 @@ import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import SkillProgressChart from '@/components/charts/SkillProgressChart.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
 import PeelCard from '@/components/PeelCard.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
 import '@/css/volunteer/childprofilepage.css' // the look of this page for a volunteer
 import '@/css/main/labels.css' // the capital-letter captions
@@ -40,9 +41,6 @@ const handoverLoading = ref(false)
 const loading = ref(true)
 const success = ref('')
 const error = ref('')
-
-// the first letter of the child's name, shown in the round picture next to the name
-const initial = computed(() => child.value.name.charAt(0).toUpperCase())
 
 // the homework in the order a volunteer needs it: overdue, to do, waiting to be checked, checked
 function homeworkRank(h) {
@@ -168,7 +166,7 @@ onMounted(() => {
 
       <PageHeader :title="child.name" :subtitle="`${child.level} · ${child.school}`">
         <template #lead>
-          <span v-if="auth.role === 'volunteer'" class="child-initial">{{ initial }}</span>
+          <ChildInitial v-if="auth.role === 'volunteer'" :child="child" />
         </template>
         <RouterLink
           v-if="auth.role === 'volunteer'"

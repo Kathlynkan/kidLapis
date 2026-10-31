@@ -5,6 +5,7 @@
 <script setup>
 import { computed } from 'vue'
 import { relativeDay, accuracy } from '@/utils/format'
+import ChildInitial from '@/components/ChildInitial.vue'
 
 const props = defineProps({
   child:          { type: Object, required: true },
@@ -16,15 +17,12 @@ const emit = defineEmits(['open'])
 const lastSeen = computed(() =>
   props.lastSession ? relativeDay(props.lastSession.date) : 'Never'
 )
-
-// the first letter of the child's name, shown in the round picture
-const initial = computed(() => props.child.name.charAt(0).toUpperCase())
 </script>
 
 <template>
   <div class="child-card" role="button" data-test="child-card" @click="emit('open', child.id)">
     <div class="child-top">
-      <span class="child-initial">{{ initial }}</span>
+      <ChildInitial :child="child" />
       <div>
         <h2 class="child-name">{{ child.name }}</h2>
         <div class="muted">{{ child.level }} &middot; {{ child.school }}</div>
