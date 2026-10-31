@@ -2,7 +2,7 @@
 // Gamification rules                          Owner: Jachin
 // =============================================================
 
-// Each badge is a kueh. The picture is in public/images/<image>.webp
+// Each badge is a kueh. The picture is in public/child_badges_images/<image>.webp
 export const BADGES = [
   { id: 'first-quest',    kueh: 'Kueh Bingka',  image: 'kueh-bingka',  name: 'First Quest',    rule: 'Complete your first quest',           fact: 'A golden baked cake with a soft, bouncy bite. A treat for a first try!' },
   { id: 'streak-3',       kueh: 'Kueh Salat',   image: 'kueh-salat',   name: 'On Fire',        rule: 'Complete 3 quests in a row on time',  fact: 'Sticky rice with a soft green pandan layer on top. Keep the streak going!' },
@@ -12,53 +12,15 @@ export const BADGES = [
   { id: 'rising-star',    kueh: 'Kueh Talam',   image: 'kueh-talam',   name: 'Rising Star',    rule: 'Submit 3 quests before the due date', fact: 'Pandan and coconut layers, stacked up neat and early.' },
 ]
 
+// A badge is earned when its progress has reached its target (the rules are written once, in badgeProgress)
 export function earnedBadges(child, homework) {
-  const verified = homework.filter((h) => h.status === 'verified')
-
   return BADGES.filter((badge) => {
-    switch (badge.id) {
-      case 'first-quest':
-        return verified.length >= 1
-
-      case 'streak-3': {
-        const sorted = [...verified]
-          .filter((h) => h.completedAt)
-          .sort((a, b) => a.completedAt.localeCompare(b.completedAt))
-        let streak = 0
-        for (const h of sorted) {
-          if (h.completedAt.slice(0, 10) <= h.dueDate) {
-            streak++
-            if (streak >= 3) return true
-          } else {
-            streak = 0
-          }
-        }
-        return false
-      }
-
-      case 'quest-champion':
-        return verified.length >= 5
-
-      case 'bookworm':
-        return verified.filter((h) => h.subject === 'English').length >= 2
-
-      case 'century':
-        return (child.points || 0) >= 100
-
-      case 'rising-star':
-        return (
-          verified.filter(
-            (h) => h.completedAt && h.dueDate && h.completedAt.slice(0, 10) < h.dueDate,
-          ).length >= 3
-        )
-
-      default:
-        return false
-    }
+    const { current, target } = badgeProgress(badge, child, homework)
+    return current >= target
   })
 }
 
-// Progress toward a single badge (current / target) — used for "next badge" nudge
+// Progress toward a single badge (current / target) — used for "next badge" nudge and for earnedBadges
 export function badgeProgress(badge, child, homework) {
   const verified = homework.filter((h) => h.status === 'verified')
   switch (badge.id) {
@@ -96,30 +58,6 @@ export function badgeProgress(badge, child, homework) {
     default:
       return { current: 0, target: 1 }
   }
-}
-
-// Current submission streak — consecutive unique days with a submission, ending today or yesterday
-export function currentStreak(homework) {
-  const dates = [...new Set(
-    homework
-      .filter((h) => h.status !== 'assigned' && h.completedAt)
-      .map((h) => h.completedAt.slice(0, 10)),
-  )].sort().reverse()
-
-  if (!dates.length) return 0
-
-  const today     = new Date().toISOString().slice(0, 10)
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
-  if (dates[0] !== today && dates[0] !== yesterday) return 0
-
-  let streak = 1
-  for (let i = 1; i < dates.length; i++) {
-    const prev = new Date(dates[i - 1] + 'T12:00:00')
-    const curr = new Date(dates[i]     + 'T12:00:00')
-    if ((prev - curr) / 86400000 === 1) streak++
-    else break
-  }
-  return streak
 }
 
 export function levelFor(points) {

@@ -13,6 +13,7 @@ import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
+import { firstName } from '@/utils/format'
 import '@/css/teacher/schedule.css' // the styles of this page
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -82,7 +83,6 @@ const slotsByCell = computed(() => {
 
 const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
 const isFree = (v, day) => (v.availability || []).includes(day)
-const firstName = (name) => name.split(' ')[0]
 
 const sessionCount = computed(() => children.value.reduce((n, c) => n + (c.schedule || []).length, 0))
 

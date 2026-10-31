@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { scoreVolunteer, rankVolunteers } from '../utils/matchmaking.js'
@@ -32,7 +32,7 @@ test('the child being matched does not count towards workload', () => {
 test('seed: Priya is the top match for Sofia', () => {
   const ranked = rankVolunteers(childNamed('Sofia'), volunteers, seed.children)
   assert.equal(ranked[0].name, 'Priya Nair')
-  assert.deepEqual(ranked[0].matchedSkills, ['Spelling'])
+  assert.deepEqual(ranked[0].matchedSkills, ['English'])
 })
 
 test('seed: Ethan scores his two assigned volunteers with their schedule days', () => {

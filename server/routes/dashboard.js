@@ -12,6 +12,7 @@ import { Router } from 'express'
 import { Child, User, Session, Homework } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { buildAlerts, todayKey } from '../utils/alerts.js'
+import { toPlain } from '../utils/toPlain.js'
 
 const router = Router()
 router.use(requireAuth, requireRole('teacher'))
@@ -36,10 +37,6 @@ router.get('/summary', async (req, res) => {
     // TODO (Yu Xuan): add averageAccuracy, childrenNeedingFollowUp, ...
   })
 })
-
-
-
-const toPlain = (doc) => ({ ...doc.toJSON(), id: doc.id })
 
 // GET /dashboard/alerts -> [{ id, type, severity, childId, childName, avatar, followUp, message }]
 router.get('/alerts', requireAuth, requireRole('teacher'), async (req, res) => {

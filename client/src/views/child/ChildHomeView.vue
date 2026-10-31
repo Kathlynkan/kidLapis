@@ -179,7 +179,7 @@ onMounted(async () => {
                 :aria-pressed="shown.id === b.id"
                 @click="picked = b"
               >
-                <span class="kueh-cup"><img :src="`/images/${b.image}.webp`" alt="" /></span>
+                <span class="kueh-cup"><img :src="`/child_badges_images/${b.image}.webp`" alt="" /></span>
                 <span class="kueh-name">{{ b.kueh }}</span>
                 <span class="kueh-badge-name">{{ b.name }}</span>
                 <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
@@ -188,7 +188,7 @@ onMounted(async () => {
 
             <!-- the label of the kueh you picked -->
             <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
-              <img :src="`/images/${shown.image}.webp`" alt="" />
+              <img :src="`/child_badges_images/${shown.image}.webp`" alt="" />
               <div>
                 <div class="kueh-detail-badge">{{ shown.name }}</div>
                 <h3 class="kueh-detail-name">{{ shown.kueh }}</h3>

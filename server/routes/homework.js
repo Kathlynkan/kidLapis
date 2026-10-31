@@ -18,7 +18,7 @@
 import { Router } from 'express'
 import { Homework, Child, Deck } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
-import { canAccessChild, visibleChildIds } from '../utils/access.js'
+import { visibleChildIds } from '../utils/access.js'
 
 const router = Router()
 
@@ -122,27 +122,6 @@ router.get('/:id', async (req, res) => {
 // ---------------------------------------------------------------
 // POST /homework      (Ning Xuan: assign homework, done  +  Jachin: the questions come from a deck)
 // ---------------------------------------------------------------
-// GET /homework/:id
-router.get('/:id', async (req, res) => {
-  const homework = await Homework.findById(req.params.id)
-
-  if (!homework) {
-    return res.status(404).json({
-      message: 'Homework not found'
-    })
-  }
-
-  const visible = await visibleChildIds(req.user)
-
-  if (!visible.includes(homework.childId)) {
-    return res.status(403).json({
-      message: 'No access'
-    })
-  }
-
-  res.json(homework)
-})
-
 router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
   // only volunteers and coordinators can assign homework
   try {

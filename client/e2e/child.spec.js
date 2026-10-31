@@ -16,9 +16,9 @@ test.describe('Child quests', () => {
     await expect(page).toHaveURL(/\/child$/)
   })
 
-  test('My Quests page shows the quest and finished sections', async ({ page }) => {
+  test('My Quests page shows the quest and completed sections', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /Quests to do/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /Finished/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Completed quests/i })).toBeVisible()
     // Ethan always has homework in some state regardless of prior test mutations
     await expect(page.locator('[data-test="homework-card"]').first()).toBeVisible()
   })
@@ -56,17 +56,17 @@ test.describe('Quest verification (volunteer)', () => {
     await page.goto('/children/c_1')
     await expect(page).toHaveURL(/\/children\/c_1/)
 
-    // The submitted quest (h_1) shows a "Verify & give points" button to volunteers.
+    // The submitted quest (h_1) shows a "Mark as Checked" button to volunteers.
     // This button only appears when homework.status === 'submitted' in the DB.
-    const verifyBtn = page.locator('[data-test="verify-quest-btn"]').first()
+    const verifyBtn = page.locator('[data-test="verify-homework-btn"]').first()
     await expect(verifyBtn).toBeVisible()
-    const countBefore = await page.locator('[data-test="verify-quest-btn"]').count()
+    const countBefore = await page.locator('[data-test="verify-homework-btn"]').count()
 
     await verifyBtn.click()
 
     // PUT /homework/:id/verify writes to MongoDB: sets status → 'verified', adds points.
     // The view reloads homework from the DB; one fewer verify button should appear.
-    await expect(page.locator('[data-test="verify-quest-btn"]')).toHaveCount(countBefore - 1)
+    await expect(page.locator('[data-test="verify-homework-btn"]')).toHaveCount(countBefore - 1)
   })
 })
 
@@ -106,10 +106,5 @@ test.describe('Leaderboard', () => {
   test('leaderboard page loads and shows entries', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /Leaderboard/i })).toBeVisible()
     await expect(page.locator('[data-test="podium-1"]')).toBeVisible()
-  })
-
-  test('switching to Most improved tab activates it', async ({ page }) => {
-    await page.locator('[data-test="tab-improved"]').click()
-    await expect(page.locator('[data-test="tab-improved"]')).toHaveClass(/active/)
   })
 })

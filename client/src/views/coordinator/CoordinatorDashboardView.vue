@@ -17,6 +17,7 @@ import ChildAvatar from '@/components/ChildAvatar.vue'
 import StatCard from '@/components/StatCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
+import { firstName } from '@/utils/format'
 import '@/css/teacher/coordinatordashboard.css' // the styles of this page
 
 const router = useRouter()
@@ -119,8 +120,6 @@ const volunteerNames = computed(() => nameById(volunteers.value))
 const recentSessions = computed(() =>
   [...sessions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6),
 )
-
-const firstName = (name) => (name || 'Someone').split(' ')[0]
 
 function daysAgo(dateStr) {
   const today = new Date().toLocaleDateString('en-CA') // 'YYYY-MM-DD' in local time
@@ -251,8 +250,8 @@ function daysAgo(dateStr) {
             <p v-if="!recentSessions.length" class="small lapis-muted mb-0">No sessions logged yet.</p>
             <ul v-else class="list-unstyled small mb-0">
               <li v-for="s in recentSessions" :key="s.id" class="py-2 border-bottom">
-                <strong>{{ firstName(volunteerNames[s.volunteerId]) }}</strong> worked with
-                <strong>{{ firstName(childNames[s.childId]) }}</strong> on {{ s.topic }}
+                <strong>{{ firstName(volunteerNames[s.volunteerId] || 'Someone') }}</strong> worked with
+                <strong>{{ firstName(childNames[s.childId] || 'Someone') }}</strong> on {{ s.topic }}
                 <span v-if="s.attempted">({{ s.correct }}/{{ s.attempted }} correct)</span>
                 <div class="lapis-muted">{{ s.subject }}, {{ daysAgo(s.date) }}</div>
               </li>

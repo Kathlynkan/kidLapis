@@ -15,6 +15,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
+import { firstName } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -105,8 +106,6 @@ async function changeAssignment(s, body) {
 
 const assign = (s) => changeAssignment(s, { action: 'assign', day: dayChoice.value[s.volunteerId] })
 const unassign = (s) => changeAssignment(s, { action: 'unassign' })
-
-const firstName = (name) => name.split(' ')[0]
 </script>
 
 <template>

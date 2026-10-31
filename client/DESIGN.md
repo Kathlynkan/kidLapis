@@ -17,7 +17,7 @@ Under the navbar there is a stack of thin stripes, one stripe for each layer. A 
 
 ### The kueh lapis and the kueh tin (child home)
 
-The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), parent (`--layer-parent`), volunteer (`--layer-volunteer`), child (`--lapis-pink`). Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/images/`.
+The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), parent (`--layer-parent`), volunteer (`--layer-volunteer`), child (`--lapis-pink`). Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/child_badges_images/`.
 
 ### Where the CSS lives
 

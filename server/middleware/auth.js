@@ -48,7 +48,7 @@ export async function requireAuth(req, res, next) {
   next()
 }
 
-// Usage: router.post('/', requireAuth, requireRole('coordinator'), handler)
+// Usage: router.post('/', requireAuth, requireRole('teacher'), handler)
 export function requireRole(...roles) {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

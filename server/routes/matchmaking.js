@@ -7,13 +7,10 @@ import { Child, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { rankVolunteers } from '../utils/matchmaking.js'
 import { findClash, TIME_PATTERN } from '../utils/schedule.js'
+import { toPlain } from '../utils/toPlain.js'
 
 const router = Router()
-router.use(requireAuth, requireRole('coordinator')) // every matchmaking route is coordinator-only
-
-// Mongoose keeps the id in _id. This gives the same { id, ... } shape the client and
-// seed.json use, which is what the pure functions in utils/ expect.
-const toPlain = (doc) => ({ ...doc.toJSON(), id: doc.id })
+router.use(requireAuth, requireRole('teacher')) // every matchmaking route is for the teacher (the coordinator) only
 
 // GET /matchmaking/:childId -> { child, suggestions: [...ranked volunteers] }
 router.get('/:childId', async (req, res) => {

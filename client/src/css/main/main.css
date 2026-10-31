@@ -381,27 +381,6 @@ h4, h5, h6 {
   color: var(--lapis-plum);
 }
 
-/* ── Nav pills ──────────────────────────────────────────────── */
-.nav-pills { --bs-nav-pills-link-active-bg: var(--lapis-pink); }
-
-.nav-pills .nav-link {
-  color: var(--lapis-plum);
-  font-weight: 700;
-  border: 2px solid transparent;
-}
-
-.nav-pills .nav-link:hover {
-  background: var(--lapis-yellow);
-  color: var(--lapis-plum);
-  border-color: var(--lapis-yellow-dark);
-}
-
-.nav-pills .nav-link.active {
-  border: 1px solid var(--lapis-pink-dark);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  color: var(--lapis-cream);
-}
-
 /* ── Modals ─────────────────────────────────────────────────── */
 .modal-content {
   background: var(--lapis-cream);

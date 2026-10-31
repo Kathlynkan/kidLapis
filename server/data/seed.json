@@ -639,6 +639,9 @@
       "mood": "happy",
       "notes": "",
       "activity": "Board games",
+      "photos": [
+        "/photos/board-games.webp"
+      ],
       "interaction": "Excellent",
       "behaviour": "Led a group game of Snakes and Ladders"
     },
@@ -659,6 +662,9 @@
       "mood": "okay",
       "notes": "",
       "activity": "Reading corner",
+      "photos": [
+        "/photos/reading-corner.webp"
+      ],
       "interaction": "Good",
       "socialNotes": "Spent some quiet time reading with a friend after the session."
     },
@@ -679,14 +685,13 @@
       "mood": "happy",
       "notes": "Much more confident today!",
       "activity": "Outdoor play",
-      "interaction": "Excellent",
-      "behaviour": "Encouraged a friend who was finding it hard",
-      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session.",
       "photos": [
         "/photos/lunch-boys.webp",
-        "/photos/board-games.webp",
-        "/photos/reading-corner.webp"
-      ]
+        "/photos/outdoor-play.webp"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Encouraged a friend who was finding it hard",
+      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session."
     },
     {
       "id": "s_101",
@@ -1550,6 +1555,162 @@
       "points": 10,
       "status": "assigned",
       "completedAt": null
+    },
+    {
+      "id": "h_15",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "title": "Mixed numbers practice",
+      "subject": "Math",
+      "details": "Do the mixed numbers sheet, questions 1 to 8.",
+      "dueDate": "2026-10-02",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-03T10:30:00.000Z"
+    },
+    {
+      "id": "h_16",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "title": "Times tables 6 to 9",
+      "subject": "Math",
+      "details": "Fill in the times table grid and check it.",
+      "dueDate": "2026-10-04",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-04T09:15:00.000Z"
+    },
+    {
+      "id": "h_17",
+      "childId": "c_1",
+      "volunteerId": "u_vol2",
+      "title": "Parts of a flower",
+      "subject": "Science",
+      "details": "Draw a flower and label five parts.",
+      "dueDate": "2026-10-06",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-06T08:40:00.000Z"
+    },
+    {
+      "id": "h_18",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "title": "Reading log",
+      "subject": "English",
+      "details": "Read for 15 minutes and write one sentence.",
+      "dueDate": "2026-10-03",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-03T15:00:00.000Z"
+    },
+    {
+      "id": "h_19",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "title": "Spelling list 1",
+      "subject": "English",
+      "details": "Write each word three times.",
+      "dueDate": "2026-10-05",
+      "points": 10,
+      "status": "verified",
+      "completedAt": "2026-10-05T14:20:00.000Z"
+    },
+    {
+      "id": "h_20",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "title": "Number patterns",
+      "subject": "Math",
+      "details": "Finish the number patterns on the sheet.",
+      "dueDate": "2026-10-06",
+      "points": 10,
+      "status": "verified",
+      "completedAt": "2026-10-06T09:00:00.000Z"
+    },
+    {
+      "id": "h_21",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "title": "Area worksheet part 1",
+      "subject": "Math",
+      "details": "Work out the area of each shape.",
+      "dueDate": "2026-10-02",
+      "points": 20,
+      "status": "verified",
+      "completedAt": "2026-10-02T13:00:00.000Z"
+    },
+    {
+      "id": "h_22",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "title": "Comprehension A",
+      "subject": "English",
+      "details": "Read the passage and answer the questions.",
+      "dueDate": "2026-10-05",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-04T16:30:00.000Z"
+    },
+    {
+      "id": "h_23",
+      "childId": "c_5",
+      "volunteerId": "u_vol2",
+      "title": "Percentage basics",
+      "subject": "Math",
+      "details": "Change each fraction into a percentage.",
+      "dueDate": "2026-10-01",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-01T12:00:00.000Z"
+    },
+    {
+      "id": "h_24",
+      "childId": "c_5",
+      "volunteerId": "u_vol2",
+      "title": "States of matter",
+      "subject": "Science",
+      "details": "Copy the table and fill in the examples.",
+      "dueDate": "2026-10-05",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-05T11:30:00.000Z"
+    },
+    {
+      "id": "h_25",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "title": "Before-after sums set 1",
+      "subject": "Math",
+      "details": "Solve the first set of before-after problem sums.",
+      "dueDate": "2026-10-04",
+      "points": 20,
+      "status": "verified",
+      "completedAt": "2026-10-03T14:00:00.000Z"
+    },
+    {
+      "id": "h_26",
+      "childId": "c_3",
+      "volunteerId": "u_vol3",
+      "title": "Spelling list 5",
+      "subject": "English",
+      "details": "Learn the words and test yourself.",
+      "dueDate": "2026-10-05",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-10-05T10:00:00.000Z"
+    },
+    {
+      "id": "h_27",
+      "childId": "c_6",
+      "volunteerId": "u_vol2",
+      "title": "Phonics sheet",
+      "subject": "English",
+      "details": "Circle the letters that make the sound.",
+      "dueDate": "2026-10-03",
+      "points": 10,
+      "status": "verified",
+      "completedAt": "2026-10-03T09:45:00.000Z"
     }
   ],
   "messages": [
