@@ -13,7 +13,7 @@
      #6B5CA5 deep lavender    the small icons and the pressed flag
      #C7BBE0                  a button when the mouse is on it
      #EE9F96 red              not seen, no volunteer, overdue, and Delete
-     #EEDFA6 muted yellow     struggling (the same as "struggled with" on the volunteer pages)
+     #EEDFA6 muted yellow     the line round the struggling tag (the same yellow as "struggled with" on the volunteer pages)
      #EFE9F7                  the thin lines between rows
      #F9F1E6 sand             the board (the same as on the other pages)
    Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (12px to 22px, round pills),
@@ -36,9 +36,6 @@
   --t-struggle: #EEDFA6;
   --t-line: #EFE9F7;
   --t-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: var(--t-ink);
 }
 
@@ -76,8 +73,8 @@
 
 .teacherpage .t-card h2 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--t-ink);
 }
 
@@ -140,10 +137,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
   color: var(--t-muted);
 }
 
@@ -242,17 +237,23 @@
   border-radius: 999px;
   background: var(--t-soft);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-/* red for the three that need action, muted yellow for struggling */
+/* the warnings are quiet: a pale fill, dark words and a thin line in the same colour family.
+   Pink for the three that need action (not seen, no volunteer, overdue), so the solid red is left to the Delete button,
+   and pale yellow for struggling. */
 .teacherpage .tag-red {
-  background: var(--t-red);
+  background: #FBE3DF;
+  box-shadow: inset 0 0 0 1.5px #F2B8B0;
+  color: #9A3F36;
 }
 
 .teacherpage .tag-struggle {
-  background: var(--t-struggle);
+  background: #FAF4D8;
+  box-shadow: inset 0 0 0 1.5px var(--t-struggle);
+  color: #7A6420;
 }
 
 /* ---------- the round picture: a letter, or the photo ---------- */
@@ -314,13 +315,13 @@
   background: var(--t-soft);
 }
 
-/* Edit: pale lavender, like the pale green Edit a volunteer sees; Delete is the same soft red (t-btn-red) */
+/* Edit: the same pale green as the Edit a volunteer sees; Delete is the same soft red (t-btn-red) */
 .teacherpage .t-btn-edit {
-  background: var(--t-soft);
+  background: #CDE9D8;
 }
 
 .teacherpage .t-btn-edit:hover {
-  background: var(--t-lav);
+  background: #9BD3B2;
 }
 
 .teacherpage .t-btn-red {
@@ -557,16 +558,14 @@
 
 .teacherpage .kv-key,
 .teacherpage .fact-key {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
   color: var(--t-muted);
 }
 
 .teacherpage .kv-key {
   flex: none;
-  width: 92px;
+  width: 104px;
 }
 
 /* what a volunteer teaches and when they are free: two pale lavender boxes, so they stand out from the white card */
@@ -711,8 +710,8 @@
 
 .teacherpage .section-title {
   margin: 4px 2px 0;
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .teacherpage .section-title .muted {
@@ -777,7 +776,7 @@
 
 .teacherpage .schedule-table thead th {
   border-top: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;

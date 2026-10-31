@@ -8,7 +8,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
-import LineIcon from '@/components/LineIcon.vue' // a small drawn face, instead of an emoji
 import { SUBJECTS, MOODS, PORTIONS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
@@ -313,7 +312,7 @@ onMounted(() => { // autofill form if edit form
                     btn-outline-secondary: gray outlined button style
                     btn-sm: small button size
                     -->
-                    <LineIcon :name="m.face" small />{{ m.label }}
+                    <i class="bi" :class="m.face"></i>{{ m.label }}
                   </label>
                 </template>
               </div>

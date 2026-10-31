@@ -294,22 +294,23 @@ onMounted(() => {
 
 /* the text of the page: the same size and weight as a volunteer sees (volunteershared.css), in the teacher's colours */
 .role-teacher .childprofilepage {
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: var(--cp-text);
 }
 
 .role-teacher .childprofilepage .lapis-page-header .page-title {
-  font-family: inherit;
-  font-size: 30px;
-  font-weight: 600;
   color: #5B4B8A;
 }
 
+/* the Edit buttons on a session and on a homework: the same pale green as a volunteer sees */
+.role-teacher .childprofilepage .btn-outline-primary {
+  background: #CDE9D8;
+}
+
+.role-teacher .childprofilepage .btn-outline-primary:hover {
+  background: #9BD3B2;
+}
+
 .role-teacher .childprofilepage .lapis-page-header .page-subtitle {
-  font-size: 15px;
-  font-weight: 700;
   color: #7D7690;
 }
 
@@ -413,71 +414,6 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-/* ---------- the box that asks if you want to delete a session ---------- */
-
-.modal-content {
-  border: 0;
-  border-radius: 15px;
-  background: #F7F4EE;
-  box-shadow: 0 1px 6px var(--cp-shadow);
-}
-
-.modal-header{
-  background: var(--cp-teal);
-  border-bottom: 0;
-}
-
-.modal-title {
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--cp-text);
-}
-
-.modal-body, .session-delete-text {
-  color: var(--cp-text);
-  border-top: 0;
-  font-size: 15px;
-}
-
-.modal-footer {
-  border-top: 0;
-  background: transparent;
-}
-
-/* Cancel is the soft mint button, Delete is the same soft red as the Delete on a session */
-.btn-secondary {
-  background: var(--cp-soft);
-  color: var(--cp-text);
-}
-
-.btn-secondary:hover {
-  background: var(--cp-letter);
-  color: var(--cp-text);
-}
-
-.btn-danger {
-  background: #EE9F96;
-  color: var(--cp-text);
-}
-
-.btn-danger:hover {
-  background: #E68C81;
-  color: var(--cp-text);
-}
-
-.modal-footer .btn {
-  border-radius: 6px;
-  border: 0;
-  box-shadow: none;
-}
-
-/* the dark green behind the box (the original one is purple and important) */
-.modal-backdrop {
-  background-color: var(--cp-deep) !important;
-  opacity: 0.45 !important;
-}
-
 /* ---------- the sections (the handover and the PeelCard sections) ---------- */
 
 .childprofilepage .peel-card,
@@ -513,7 +449,7 @@ onMounted(() => {
 .childprofilepage .handover-title {
   font-family: inherit;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
   color: var(--cp-text);

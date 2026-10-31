@@ -10,12 +10,12 @@ export const LEVELS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 
-// face: the name of the drawn face (an image in public/icons) that goes with the mood
+// face: the Bootstrap icon that goes with the mood
 export const MOODS = [
-  { value: 'happy', label: 'Happy', face: 'face-happy' },
-  { value: 'okay', label: 'Okay', face: 'face-okay' },
-  { value: 'tired', label: 'Tired', face: 'face-tired' },
-  { value: 'frustrated', label: 'Frustrated', face: 'face-hard' },
+  { value: 'happy', label: 'Happy', face: 'bi-emoji-smile' },
+  { value: 'okay', label: 'Okay', face: 'bi-emoji-neutral' },
+  { value: 'tired', label: 'Tired', face: 'bi-emoji-expressionless' },
+  { value: 'frustrated', label: 'Frustrated', face: 'bi-emoji-angry' },
 ]
 
 export const PORTIONS = [

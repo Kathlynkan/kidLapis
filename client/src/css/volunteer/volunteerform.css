@@ -34,9 +34,10 @@
   opacity: 1;
 }
 
-/* ---------- the mood buttons: the drawn face and the word on one line (for everyone who opens the form) ---------- */
+/* ---------- the mood buttons: the face icon and the word on one line (for everyone who opens the form) ---------- */
 
-.volunteerformpage .mood-option .portion-option {
+.volunteerformpage .mood-option,
+.volunteerformpage .portion-option {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -59,8 +60,8 @@
 }
 
 .volunteerformpage h2.h5 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--cp-text);
 }
 

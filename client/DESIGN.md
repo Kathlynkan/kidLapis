@@ -8,16 +8,16 @@
 
 **Kueh lapis.** The app should feel like layers of a cake, one layer for each role.
 
-- **Parent and volunteer pages (the soft look):** no dark outlines, soft corners (14 px to 22 px, round pills for tags, tabs and buttons), a very light shadow, Inter text, and small line icons (`LineIcon.vue`) instead of emoji. Every parent page shares one look and every volunteer page shares another.
+- **Parent and volunteer pages (the soft look):** no dark outlines, soft corners (14 px to 22 px, round pills for tags, tabs and buttons), a very light shadow, Inter text, and Bootstrap icons (`bi bi-...`) instead of emoji, the same icons on every page (a star is `bi-star-fill`, the moods are `bi-emoji-*`). Every parent page shares one look and every volunteer page shares another.
 - **Child, parent, volunteer and teacher pages (the soft look):** the same, in each role's colour. A few older parts (the login and sign-up pages, the 404 page and the public home page) still have the original look: 0 px corner radius and a solid border that is a darker shade of the card's fill colour.
 
 ### Layer stripes
 
-Under the navbar there is a stack of thin stripes, one stripe for each layer. A role shows the layers up to its own, so a parent has one stripe and a volunteer has two (the parent colour first, then its own). Every page of a role shows the same stripes, because they are drawn by `NavBar.vue`. The other roles show one stripe in their own accent colour for now. To add a layer, add its `--layer-*` colour in `main/main.css` and its name to `LAYERS` in `NavBar.vue`.
+Under the navbar there is a stack of thin stripes, one stripe for each layer. Purple is the bottom layer, then green, aqua and pink on top. A role shows the layers up to its own: a teacher has one stripe (purple), a volunteer has two (green on purple), a parent has three (aqua on green on purple) and a child has all four (pink on aqua on green on purple). Every page of a role shows the same stripes, because they are drawn by `NavBar.vue`. To add a layer, add its `--layer-*` colour in `main/main.css` and its name to `LAYERS` in `NavBar.vue`.
 
 ### The kueh lapis and the kueh tin (child home)
 
-The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), parent (`--layer-parent`), volunteer (`--layer-volunteer`), child (`--lapis-pink`). Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/child_badges_images/`.
+The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), volunteer (`--layer-volunteer`), parent (`--layer-parent`), child (`--lapis-pink`), the same order as the stripes under the navbar. Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/child_badges_images/`.
 
 ### Where the CSS lives
 
@@ -122,7 +122,10 @@ Both charts group sessions by **subject** (not by free-text topic), so each chil
 
 - **One font for the whole app:** Inter (400, 500, 600, 700), set once as `--lapis-font` in `main/main.css`. Headings, buttons, the navbar and the chart labels all use it.
 - **Small captions** (form labels, tags, tab names, group headings): capital letters with a little space between the letters (`letter-spacing: 0.06em`). `main/main.css` does this for `.form-label`, `.badge` and `.btn`, and `main/labels.css` does it for the captions on the parent, Messages, volunteer and child pages.
-- **Base size:** 16 px
+- **Base size:** 15 px, line height 1.55 (set once on `body` in `main/main.css`, the same as the parent page). Do not set it again on a page.
+- **Page title:** 32 px, bold, `letter-spacing: -0.6px` (`.page-title` in `main/main.css`). The sentence under it is 14 px, semi-bold (`.page-subtitle`). Every page uses these, including the login pages and the 404 page. A page only sets their colour.
+- **Section headings** (the title of a card or a section): 18 px, semi-bold.
+- **Messages:** loading is a ring in the role colour, an error is a quiet pink bar, and an empty list is a white card with a round icon. All three come from `StateMessage.vue`.
 - **Text colour:** `--lapis-plum` (`#4A3F3A`) everywhere. Never raw black.
 - **Muted text:** `--lapis-muted` (`#8D7F77`)
 

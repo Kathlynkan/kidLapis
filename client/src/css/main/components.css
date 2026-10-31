@@ -1,21 +1,14 @@
 /* EXTERNAL CSS: the small parts (components) that many pages use. It is imported at the top of each of those files. */
 /* The small parts that many pages use. Each part is a component in src/components, and the section says which.
    The look of the same parts for a parent or a volunteer is in the parent and volunteer folders.
-   Sections: line icon, page header, state message, accordion (PeelCard and HandoverCard),
+   Sections: icon with words, page header, state message, accordion (PeelCard and HandoverCard),
    handover, session card, homework card, charts. */
 
-/* ---------- LineIcon.vue ---------- */
-
-.line-icon {
-  display: block;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-}
-
-.line-icon.small {
-  width: 14px;
-  height: 14px;
+/* an icon and a few words on one line (the star and the points, a face and the mood) */
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* ---------- ChildAvatar.vue ---------- */
@@ -49,52 +42,66 @@
   padding: 20px 0 8px;
 }
 
-.page-title {
-  font-family: var(--lapis-font);
-  font-weight: 700;
-  font-size: 32px;
-  color: var(--lapis-plum);
-  letter-spacing: -0.6px;
-}
-
-.page-subtitle {
-  color: var(--lapis-muted);
-  font-weight: 600;
-  font-size: 14px;
-}
-
 /* ---------- StateMessage.vue ---------- */
 
 .lapis-state { color: var(--lapis-plum); }
 
-/* the empty state has less room above than the bootstrap py-5 gives (that class is important, so this is too) */
-.lapis-card.lapis-state-empty {
-  padding-top: 32px !important;
+/* the loading ring: one turning ring in the colours of the role (--role-accent is set for every role in main.css) */
+.state-ring {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 10px;
+  border: 4px solid var(--role-accent-soft);
+  border-top-color: var(--role-accent);
+  border-radius: 50%;
+  animation: state-spin 0.9s linear infinite;
 }
 
-/* Stack of kueh strips as the illustration */
-.lapis-state-strips {
+@keyframes state-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-ring {
+    animation-duration: 3s;
+  }
+}
+
+/* the error message: the quiet bar, a pale pink fill with a thin red line (the same as the warning tags on the teacher pages) */
+.state-error {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #FBE3DF;
+  box-shadow: inset 0 0 0 1.5px #F2B8B0;
+  color: #9A3F36;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.state-strip {
-  width: 80px;
-  height: 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+/* the empty message: a white card with a round icon in the pale colour of the role */
+.state-empty {
+  padding: 24px 16px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
+  text-align: center;
 }
 
-.state-strip-pink   { background: var(--lapis-pink); }
-.state-strip-lime   { background: var(--lapis-lime); }
-.state-strip-yellow { background: var(--lapis-yellow); }
-.state-strip-orange { background: var(--lapis-orange); }
-
-.state-spinner { color: var(--lapis-pink); }
-
-.state-icon { color: var(--lapis-purple); }
+.state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--role-accent-soft);
+  color: var(--lapis-plum);
+  font-size: 22px;
+}
 
 .state-msg {
   font-weight: 700;

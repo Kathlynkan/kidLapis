@@ -109,7 +109,7 @@ onMounted(async () => {
           <div class="hero-avatar display-3"><ChildAvatar :avatar="me.avatar" /></div>
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
-            <i class="bi bi-star-fill me-1"></i>{{ me.points }} stars &middot; Level {{ level.level }}
+            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ me.points }} stars</span> &middot; Level {{ level.level }}
           </div>
           <div
             class="progress mx-auto level-bar mb-1"
@@ -260,16 +260,16 @@ onMounted(async () => {
 
 /* ── Type: the sizes of the parent and volunteer pages ──────── */
 
-/* the title: 30px, semi-bold, tight (the parent title is 32px bold, the volunteer title is 30px semi-bold) */
+/* the title "Hi Ethan!" has the same size and weight as the title of every other page (32px, bold: from .page-title in main.css) */
 .childhomepage .hero-card h1 {
-  font-size: 30px;
-  font-weight: 600;
+  font-size: 32px;
+  font-weight: 700;
   letter-spacing: -0.6px;
 }
 
 /* the headings of the sections (Quests to do, My Kueh Tin): semi-bold and not bigger than a title */
 .childhomepage h2.h4 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -380,10 +380,10 @@ onMounted(async () => {
 .cake-layer:last-child { border-radius: 8px 8px 0 0; }
 .cake-layer:only-child { border-radius: 8px; }
 
-/* the colours of the layers, bottom to top: teacher, parent, volunteer, child */
+/* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
 .cake-layer-1 { --c: var(--layer-teacher); }
-.cake-layer-2 { --c: var(--layer-parent); }
-.cake-layer-3 { --c: var(--layer-volunteer); }
+.cake-layer-2 { --c: var(--layer-volunteer); }
+.cake-layer-3 { --c: var(--layer-parent); }
 .cake-layer-4 { --c: var(--lapis-pink); }
 
 /* the layer being built: a white bar that fills up */

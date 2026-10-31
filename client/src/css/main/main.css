@@ -17,7 +17,7 @@
   --layer-child:     #E8A0B8; /* rose pink, the top layer of the child's stripes */
   --layer-parent:    #AED9D8;
   --layer-volunteer: #9BD3B2;
-  --layer-teacher:   #D5CBEA; /* the last layer, at the bottom of the kueh lapis */
+  --layer-teacher:   #D5CBEA; /* purple, the bottom layer of every role's stripes */
 
   --lapis-pink:   #E8A0B8; /* rose pink — children */
   --lapis-cream:  #FBF8F3; /* coconut white */
@@ -78,8 +78,8 @@
 html, body {
   min-height: 100%;
   background-color: var(--lapis-cream);
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 15px;   /* the one text size of the app (the parent page's) */
+  line-height: 1.55;
   font-weight: 500;
   color: var(--lapis-plum);
 }
@@ -187,6 +187,20 @@ h1, h2, h3, .fw-heavy {
   color: var(--lapis-plum);
 }
 
+/* the page title and the sentence under it (PageHeader.vue and the login pages): the same on every page */
+.page-title {
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--lapis-plum);
+  letter-spacing: -0.6px;
+}
+
+.page-subtitle {
+  color: var(--lapis-muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+
 h4, h5, h6 {
   font-family: var(--lapis-font);
   font-weight: 600;
@@ -212,8 +226,6 @@ h4, h5, h6 {
 .lapis-card-blue   { background: #DFF0F8; border-color: #4890B8; }
 .lapis-card-orange { background: #FBF0E4; border-color: #C87830; }
 .lapis-card-purple { background: #F0EAF8; border-color: #7850B8; }
-
-.lapis-card-hover { cursor: pointer; }
 
 /* Extra top padding utility — used on cards whose header sits flush at the top */
 .lapis-card-top { padding-top: 20px !important; }
@@ -257,15 +269,16 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
+/* Cancel in a pop-up: the soft colour of the role */
 .btn-secondary {
-  --bs-btn-bg:                  var(--lapis-orange);
-  --bs-btn-border-color:        var(--lapis-orange-dark);
-  --bs-btn-color:               var(--lapis-plum);
-  --bs-btn-hover-bg:            #488CA8;
-  --bs-btn-hover-border-color:  var(--lapis-orange-dark);
-  --bs-btn-hover-color:         var(--lapis-plum);
-  --bs-btn-active-bg:           #488CA8;
+  background: var(--cp-soft);
+  color: var(--cp-text);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+}
+
+.btn-secondary:hover {
+  background: var(--cp-letter);
+  color: var(--cp-text);
 }
 
 .btn-outline-secondary {
@@ -278,14 +291,16 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
+/* Delete in a pop-up: the same soft red as the Delete on a session */
 .btn-danger {
-  --bs-btn-bg:                  var(--lapis-pink);
-  --bs-btn-border-color:        var(--lapis-pink-dark);
-  --bs-btn-color:               var(--lapis-cream);
-  --bs-btn-hover-bg:            #B0446A;
-  --bs-btn-hover-border-color:  var(--lapis-pink-dark);
-  --bs-btn-hover-color:         var(--lapis-cream);
+  background: #EE9F96;
+  color: var(--cp-text);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+}
+
+.btn-danger:hover {
+  background: #E68C81;
+  color: var(--cp-text);
 }
 
 .btn-outline-danger {
@@ -298,8 +313,7 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-/* the cards that can be pressed, and every button, lift a little on hover ... */
-.lapis-card-hover:hover,
+/* every button lifts a little on hover ... */
 .btn-primary:hover,
 .btn-outline-primary:hover,
 .btn-secondary:hover,
@@ -405,21 +419,6 @@ h4, h5, h6 {
 .alert-warning { background: #FBE7A1; } /* soft yellow */
 .alert-success { background: #CDE8D2; } /* soft green */
 
-/* ── Avatar circle ──────────────────────────────────────────── */
-.avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 25.6px;
-  background: var(--lapis-yellow);
-  border: 1px solid var(--lapis-yellow-dark);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  flex-shrink: 0;
-}
-
 /* ── Progress bars ──────────────────────────────────────────── */
 .progress {
   background: var(--lapis-cream);
@@ -434,52 +433,50 @@ h4, h5, h6 {
   color: var(--lapis-plum);
 }
 
-/* ── Modals ─────────────────────────────────────────────────── */
+/* ── Modals (pop-up boxes) ───────────────────────────────────
+   The pop-ups are moved to the end of the body, so their colours come from the --cp-... variables above. */
 .modal-content {
-  background: var(--lapis-cream);
-  border: 2px solid var(--role-accent, var(--lapis-pink));
-  border-radius: var(--lapis-radius);
-  box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
+  border: 0;
+  border-radius: 15px;
+  background: #F7F4EE;
+  box-shadow: 0 1px 6px var(--cp-shadow);
   overflow: hidden;
 }
 
-.modal-header { border-bottom: 1px solid var(--lapis-cream-dark); background: var(--lapis-cream); }
-.modal-footer { border-top:    1px solid var(--lapis-cream-dark); background: var(--lapis-cream); }
+.modal-header {
+  background: var(--cp-teal);
+  border-bottom: 0;
+}
 
 .modal-title {
   font-family: var(--lapis-font);
+  font-size: 20px;
   font-weight: 700;
-  color: var(--lapis-plum);
+  color: var(--cp-text);
+}
+
+.modal-body,
+.session-delete-text {
+  color: var(--cp-text);
+  border-top: 0;
+  font-size: 15px;
+}
+
+.modal-footer {
+  border-top: 0;
+  background: transparent;
+}
+
+.modal-footer .btn {
+  border-radius: 6px;
+  border: 0;
+  box-shadow: none;
 }
 
 .modal-backdrop {
-  background-color: var(--lapis-purple) !important;
-  opacity: 0.55 !important;
+  background-color: var(--cp-deep) !important;
+  opacity: 0.45 !important;
 }
-
-/* ── Tables ─────────────────────────────────────────────────── */
-.table {
-  color: var(--lapis-plum);
-  --bs-table-bg: var(--lapis-cream);
-  --bs-table-striped-bg: var(--lapis-cream);
-  border: 1px solid var(--lapis-cream-dark);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.table th {
-  background: var(--lapis-plum);
-  color: var(--lapis-cream);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: 1px solid rgba(251, 248, 243, 0.2) !important;
-  border-color: rgba(251, 248, 243, 0.2) !important;
-}
-
-.table td { border-color: rgba(42, 6, 24, 0.2); font-weight: 500; }
-
-.table tbody tr:nth-child(even) { background: rgba(74, 63, 58, 0.03); }
 
 /* ── Footer ─────────────────────────────────────────────────── */
 .app-footer {

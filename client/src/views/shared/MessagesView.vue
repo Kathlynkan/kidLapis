@@ -178,11 +178,9 @@ onUnmounted(() => {
 
 /* ---------- the whole page ---------- */
 
-/* the sentence under the title (PageHeader.vue is shared, so only the colour and the size are set here) */
+/* the sentence under the title (PageHeader.vue is shared, so only the colour is set here) */
 .messagespage .lapis-page-header .page-subtitle {
   color: #5E6C80;
-  font-size: 14px;
-  font-weight: 400;
 }
 
 /* ---------- the child buttons ---------- */

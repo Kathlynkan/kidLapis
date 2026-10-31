@@ -11,9 +11,6 @@
 .volunteerpage,
 .role-volunteer .childprofilepage,
 .role-volunteer .volunteerformpage {
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: #213C31;
 }
 
@@ -31,36 +28,15 @@
   color: #446C59;
 }
 
-/* the pages you open from the home page have a slightly smaller title */
-.role-volunteer .childprofilepage .lapis-page-header .page-title,
-.role-volunteer .volunteerformpage .lapis-page-header .page-title {
-  font-size: 30px;
-  font-weight: 600;
-}
-
-.role-volunteer .childprofilepage .lapis-page-header .page-subtitle,
-.role-volunteer .volunteerformpage .lapis-page-header .page-subtitle {
-  font-size: 15px;
-  font-weight: 700;
-}
-
 /* the form of a teacher who edits a session has the same text as a volunteer's form, in the teacher's colours */
 .role-teacher .volunteerformpage {
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: var(--cp-text);
 }
 
 .role-teacher .volunteerformpage .lapis-page-header .page-title {
-  font-family: inherit;
-  font-size: 30px;
-  font-weight: 600;
   color: var(--cp-title);
 }
 
 .role-teacher .volunteerformpage .lapis-page-header .page-subtitle {
-  font-size: 15px;
-  font-weight: 700;
   color: var(--cp-grey);
 }

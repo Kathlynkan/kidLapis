@@ -6,7 +6,6 @@ import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
-import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
 import '@/css/parent/parentshared.css' // what the parent pages have in common
@@ -43,10 +42,10 @@ const MOOD_WORDS = {
 
 // the face icon that goes with each mood
 const MOOD_FACES = {
-  happy: 'face-happy',
-  okay: 'face-okay',
-  tired: 'face-tired',
-  frustrated: 'face-hard',
+  happy: 'bi-emoji-smile',
+  okay: 'bi-emoji-neutral',
+  tired: 'bi-emoji-expressionless',
+  frustrated: 'bi-emoji-angry',
 }
 
 // the number of each weekday, the way JavaScript counts them (Sunday is 0)
@@ -289,7 +288,7 @@ onMounted(async () => {
           <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><LineIcon name="star" small />{{ selectedChild.points }} stars earned</span></div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">
@@ -375,14 +374,14 @@ onMounted(async () => {
                   </span>
                   <span v-if="group.key === 'done' && scoreOf(sessionFor(item))" class="row-score">{{ scoreOf(sessionFor(item)) }}</span>
                   <span class="muted">{{ rowMeta(item, group.key) }}</span>
-                  <span v-if="group.key === 'done'" class="muted with-icon"><LineIcon name="star" small />{{ item.points }} stars</span>
+                  <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
 
                 <!-- what the volunteer wrote down for it -->
                 <p v-if="group.key === 'todo' && item.details" class="row-details">{{ item.details }}</p>
                 <template v-if="group.key === 'done'">
                   <template v-if="sessionFor(item)">
-                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <LineIcon :name="MOOD_FACES[sessionFor(item).mood]" small />{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
+                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[sessionFor(item).mood]"></i>{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
                     <div v-for="note in resultNotes(sessionFor(item))" :key="note.label" class="note-box">
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
@@ -409,7 +408,7 @@ onMounted(async () => {
                   <h3 class="day-title">{{ daysSince(sessions[0].date) === 0 ? 'Today at student care' : 'Latest day at student care' }}</h3>
                   <div class="muted">{{ formatDate(sessions[0].date) }}<template v-if="sessions[0].volunteerName"> &middot; with {{ sessions[0].volunteerName }}</template></div>
                 </div>
-                <span class="mood-chip"><LineIcon v-if="MOOD_FACES[sessions[0].mood]" :name="MOOD_FACES[sessions[0].mood]" small />{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
+                <span class="mood-chip"><i v-if="MOOD_FACES[sessions[0].mood]" class="bi" :class="MOOD_FACES[sessions[0].mood]"></i>{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
               </div>
               <ParentSocialDay :session="sessions[0]" :child-name="childName" />
             </div>
@@ -420,7 +419,7 @@ onMounted(async () => {
               <summary>
                 <span class="day-head">
                   <strong>{{ formatDate(session.date) }}</strong>
-                  <span class="mood-chip"><LineIcon v-if="MOOD_FACES[session.mood]" :name="MOOD_FACES[session.mood]" small />{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
+                  <span class="mood-chip"><i v-if="MOOD_FACES[session.mood]" class="bi" :class="MOOD_FACES[session.mood]"></i>{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
                 </span>
                 <span v-if="activitiesOf(session).length > 0" class="muted">{{ activitiesOf(session).join(', ') }}</span>
               </summary>
@@ -491,9 +490,8 @@ onMounted(async () => {
   box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
-/* ---------- an icon in front of a few words (the icon itself is LineIcon.vue) ---------- */
+/* ---------- an icon in front of a few words ---------- */
 
-.parentpage .with-icon,
 .parentpage .mood-chip {
   display: inline-flex;
   align-items: center;
@@ -880,6 +878,7 @@ onMounted(async () => {
   width: 26px;
   height: 26px;
   flex-shrink: 0;
+  font-size: 18px;
 }
 
 /* photos: a gallery of square pictures, three in a row (two on a small screen) */

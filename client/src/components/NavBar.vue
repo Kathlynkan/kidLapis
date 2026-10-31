@@ -42,16 +42,15 @@ const LINKS = {
 
 const links = computed(() => LINKS[auth.role] || [])
 
-// the layers of the cake, in order. A role shows the layers up to its own: a parent has one stripe, a volunteer has two.
-// A child keeps the colours of the pages before it: its own pink on top and the teacher's lavender as the last layer.
-// The other roles have one stripe in their own colour for now.
-const LAYERS = ['parent', 'volunteer']
-const CHILD_LAYERS = ['child', 'volunteer', 'parent', 'teacher']
+// the layers of the cake, from the bottom up: purple at the bottom, then green, aqua and pink on top.
+// A role shows the layers up to its own: a teacher has one stripe (purple), a volunteer has two (purple, green),
+// a parent has three (purple, green, aqua) and a child has all four (purple, green, aqua, pink).
+const LAYERS = ['teacher', 'volunteer', 'parent', 'child']
 const stripes = computed(() => {
-  if (auth.role === 'child') return CHILD_LAYERS.map((layer) => `var(--layer-${layer})`)
   const place = LAYERS.indexOf(auth.role)
-  if (place < 0) return ['var(--role-accent)']
-  return LAYERS.slice(0, place + 1).map((layer) => `var(--layer-${layer})`)
+  if (place < 0) return ['var(--role-accent)'] // not logged in
+  // the stripes are drawn from the top down, so the bottom layer (purple) comes last
+  return LAYERS.slice(0, place + 1).reverse().map((layer) => `var(--layer-${layer})`)
 })
 
 // true when this link is the page we are on.
@@ -160,8 +159,9 @@ onMounted(() => {
 /* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
 
 /* The stripes under the navbar (NavBar.vue). They show the layers of the cake, one stripe for each layer.
-   A role shows the layers up to its own: a parent has one stripe, a volunteer has two (the parent colour first,
-   then its own). A child has four: pink, mint, aqua and the teacher's lavender at the bottom, the whole kueh lapis.
+   Purple is the bottom layer, then green, aqua and pink on top. A role shows the layers up to its own: a teacher has one
+   stripe (purple), a volunteer has two (green on purple), a parent has three (aqua on green on purple) and a child has four
+   (pink on aqua on green on purple), the whole kueh lapis.
    Every page of a role has the same stripes, because they are part of the navbar.
    The colours are --layer-child, --layer-parent, --layer-volunteer and --layer-teacher in main.css.
    To add a layer for another role: add its colour there and its name to LAYERS in NavBar.vue. */

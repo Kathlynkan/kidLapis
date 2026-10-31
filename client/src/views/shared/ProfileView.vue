@@ -285,9 +285,6 @@ async function save() {
   --pf-ok: var(--topic-academic);
   /* the message after you save */
   --pf-error: var(--topic-alert);
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: var(--pf-text);
 }
 
@@ -392,8 +389,8 @@ async function save() {
 
 .profilepage .peel-title {
   color: var(--pf-text);
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
 }

@@ -10,9 +10,6 @@
 
 .parentpage,
 .messagespage {
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: #414F67;
 }
 

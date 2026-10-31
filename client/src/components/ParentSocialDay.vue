@@ -8,7 +8,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { firstName } from '@/utils/format' // small helper for names
-import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
 
 const props = defineProps({
   session: { type: Object, required: true },
@@ -30,9 +29,9 @@ const activityList = computed(() => {
 // the short lines, each with an icon (a line is left out when the volunteer did not fill it in)
 const lines = computed(() => {
   const all = [
-    { icon: 'bowl', label: 'Meal', text: props.session.meal },
-    { icon: 'people', label: 'Getting along with others', text: props.session.interaction },
-    { icon: 'star', label: 'Something positive', text: props.session.behaviour },
+    { icon: 'bi-egg-fried', label: 'Meal', text: props.session.meal },
+    { icon: 'bi-people', label: 'Getting along with others', text: props.session.interaction },
+    { icon: 'bi-star-fill', label: 'Something positive', text: props.session.behaviour },
   ]
   return all.filter((line) => line.text)
 })
@@ -101,7 +100,7 @@ const empty = computed(() => {
 
     <!-- the short lines -->
     <div v-for="line in lines" :key="line.label" class="day-line">
-      <span class="day-icon"><LineIcon :name="line.icon" /></span>
+      <span class="day-icon"><i class="bi" :class="line.icon"></i></span>
       <div><span class="small-label">{{ line.label }}</span>{{ line.text }}</div>
     </div>
 
