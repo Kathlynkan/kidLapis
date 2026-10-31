@@ -20,7 +20,7 @@ const children = ref([]) // all the children of this parent
 const selectedId = ref(null) // the id of the child we are showing now
 const sessions = ref([]) // the sessions of that child, newest first
 const homework = ref([]) // the homework of that child
-const handover = ref(null) // the AI summary of that child
+const handover = ref(null) // the weekly AI summary of that child (Mon - Fri, learning + social)
 const handoverLoading = ref(false) // true while we wait for the summary
 const loading = ref(true) // true while the page is first loading
 const error = ref('') // the error sentence, empty if there is no error
@@ -148,15 +148,16 @@ function activitiesOf(session) {
   return []
 }
 
-// the lines of the AI summary, each with its label (a line is left out when it is empty)
+// the lines of the weekly AI summary, each with its label (a line is left out when it is empty)
 const summaryLines = computed(() => {
   if (!handover.value) return []
   const lines = [
-    { label: 'Working on', text: handover.value.continueTopic },
-    { label: 'Latest score', text: handover.value.lastResult },
-    { label: 'What helped', text: handover.value.whatWorked },
-    { label: 'Finding tricky', text: handover.value.struggle },
-    { label: 'Coming up next', text: handover.value.nextStep },
+    { label: 'This week', text: handover.value.headline },
+    { label: 'Learning', text: handover.value.learning },
+    { label: 'Friends', text: handover.value.friends },
+    { label: 'Worth knowing', text: handover.value.worthKnowing },
+    { label: 'Proud moment', text: handover.value.celebrate },
+    { label: 'Try at home', text: handover.value.atHome },
   ]
   return lines.filter((line) => line.text && line.text !== '-')
 })
@@ -218,14 +219,16 @@ async function showHomework() {
   document.getElementById('homework-board').scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
-// ---------- ask the server for the AI summary ----------
+// ---------- ask the server for the weekly AI summary ----------
+// Fri - Sun: this week (Mon - Fri). Mon - Thu: last week, because this week is not finished yet.
 async function loadHandover(childId) {
   handover.value = null
   handoverLoading.value = true
   let summary = null // stays empty if something goes wrong, the rest of the page still works
   try {
     // audience: 'parent' makes the AI write in simple, friendly words
-    const response = await api.post(`/handover/${childId}`, { audience: 'parent' })
+    // type: 'weekly' sums up the whole week, learning and social, from every volunteer's notes
+    const response = await api.post(`/handover/${childId}`, { audience: 'parent', type: 'weekly' })
     summary = response.data
   } catch {
     summary = null
@@ -321,9 +324,11 @@ onMounted(async () => {
         </component>
       </div>
 
-      <!-- today at a glance: the AI summary -->
+      <!-- parent weekly AI summary: learning, friends, anything worth knowing, what to try at home   (Yuqi) -->
       <div class="glance" data-test="handover-card">
-        <span class="small-label">How things are going</span>
+        <span class="small-label">This week at student care</span>
+        <!-- which week it covers, e.g. 2026-10-19 to 2026-10-23 -->
+        <p v-if="handover && handover.periodLabel" class="muted">{{ handover.periodLabel }}</p>
         <p v-if="handoverLoading" class="muted">Getting the update...</p>
         <template v-else-if="summaryLines.length > 0">
           <p v-for="line in summaryLines" :key="line.label" class="glance-line">
