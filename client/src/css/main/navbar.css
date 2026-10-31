@@ -105,6 +105,14 @@
   border-radius: 50%;
   background: var(--role-accent, #AED9D8);
   font-weight: 700;
+  overflow: hidden;
+}
+
+/* the photo of a child fills the circle */
+.lapis-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .lapis-who {

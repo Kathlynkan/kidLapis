@@ -1,23 +1,31 @@
 /* The child home page: hero card with the kueh lapis, quests, the kueh tin (ChildHomeView.vue).
-   The soft look of the parent and volunteer pages: no dark outlines, soft corners (14px to 22px, round pills),
-   pale fills with dark text and a very light shadow. */
+   The soft look of the parent and volunteer pages: a cream page, a sandy board with white cards on it,
+   no dark outlines, soft corners (18px to 22px, round pills), pale fills with dark text and a very light shadow. */
+
+/* the very light shadow under the boxes */
+.hero-card,
+.childhomepage .board,
+.childhomepage .quest-card {
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.10);
+}
 
 /* ── Hero card ──────────────────────────────────────────────── */
 
 .hero-card {
   background: var(--role-accent-soft, var(--lapis-cream));
   border-radius: 22px;
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
 .hero-avatar {
   display: inline-block;
-  animation: hero-bob 3s ease-in-out infinite;
 }
 
-@keyframes hero-bob {
-  0%, 100% { transform: translateY(0);    }
-  50%       { transform: translateY(-7px); }
+/* ── The board: the sandy box that holds the white cards ────── */
+
+.childhomepage .board {
+  padding: 14px;
+  border-radius: 22px;
+  background: #F9F1E6;
 }
 
 .level-bar .progress-bar {
@@ -32,6 +40,21 @@
 
 .level-bar { height: 14px; max-width: 260px; }
 
+/* ── Type: the sizes of the parent and volunteer pages ──────── */
+
+/* the title: 30px, semi-bold, tight (the parent title is 32px bold, the volunteer title is 30px semi-bold) */
+.childhomepage .hero-card h1 {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* the headings of the sections (Quests to do, My Kueh Tin): semi-bold and not bigger than a title */
+.childhomepage h2.h4 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
 /* ── Quest cards ────────────────────────────────────────────── */
 
 /* a white card: no outline, soft corners */
@@ -43,8 +66,10 @@
 
 /* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */
 .childhomepage .badge {
+  padding: 3px 10px;
   border-radius: 99px;
   box-shadow: none;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -62,7 +87,8 @@
 .childhomepage .quest-overdue { background: #EE9F96; }
 .childhomepage .quest-status-done { background: #E6F4EC; color: #2E8B57; }
 
-/* the I'm done! button: pale pink with dark text, no outline */
+/* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
+   in pale pink with dark text */
 .childhomepage .quest-submit {
   --bs-btn-color: var(--lapis-plum);
   --bs-btn-bg: #F3C1D3;
@@ -70,27 +96,26 @@
   --bs-btn-hover-bg: #EBAAC2;
   --bs-btn-active-color: var(--lapis-plum);
   --bs-btn-active-bg: #EBAAC2;
+  align-self: flex-end;
   border: 0;
-  border-radius: 14px;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 14px;
   font-weight: 700;
-  animation: breathe 3s ease-in-out infinite 1.5s;
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1);     box-shadow: 0 1px 3px rgba(74,63,58,0.10); }
-  50%       { transform: scale(1.03); box-shadow: 0 4px 14px rgba(232,160,184,0.45); }
 }
 
 /* ── Completed quests toggle ────────────────────────────────── */
 
+/* a white pill the whole width of the board, like "Show more days" on the parent page */
 .quest-history-toggle {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 12px 16px;
+  min-height: 44px;
+  padding: 10px 16px;
   border: 0;
-  border-radius: 14px;
-  background: var(--role-accent-soft, var(--lapis-cream));
+  border-radius: 999px;
+  background: #FFFFFF;
   color: var(--lapis-plum);
   font: inherit;
   font-size: 1rem;
@@ -111,7 +136,7 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 99px;
-  background: #FFFFFF;
+  background: var(--role-accent-soft, var(--lapis-cream));
   color: var(--lapis-plum);
   font-size: 0.75rem;
   font-weight: 700;
@@ -122,17 +147,20 @@
 .kueh-cake {
   display: flex;
   flex-direction: column-reverse;   /* the first layer is at the bottom */
-  gap: 3px;
   width: 170px;
   max-width: 100%;
   margin: 0 auto;
 }
 
+/* the layers touch: only the bottom of the first layer and the top of the last one are round */
 .cake-layer {
   height: 24px;
-  border-radius: 8px;
   background: var(--c);
 }
+
+.cake-layer:first-child { border-radius: 0 0 8px 8px; }
+.cake-layer:last-child { border-radius: 8px 8px 0 0; }
+.cake-layer:only-child { border-radius: 8px; }
 
 /* the colours of the layers, bottom to top: teacher, parent, volunteer, child */
 .cake-layer-1 { --c: var(--layer-teacher); }
@@ -353,9 +381,7 @@
 /* ── Reduced motion ─────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-avatar,
   .level-bar .progress-bar,
-  .quest-submit,
   .celebrate-main,
   .celebrate-spark { animation: none; }
   .level-bar .progress-bar { transform: scaleX(1); }

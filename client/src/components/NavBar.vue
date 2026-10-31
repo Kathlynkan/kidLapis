@@ -15,16 +15,15 @@ const auth = useAuthStore()
 const route = useRoute()
 const menuOpen = ref(false) // on a small screen the menu is hidden until this is true
 
-// every time the user goes to another page: close the menu and look for new messages
+// every time the user goes to another page: close the menu, look for new messages and for the photo of a child
 watch(() => route.fullPath, () => {
   menuOpen.value = false
   fetchUnread()
+  fetchPhoto()
 })
 
 const LINKS = {
-  volunteer: [
-    { to: '/volunteer', label: 'My Children' },
-  ],
+  volunteer: [], // the Kids Lapis logo goes to the home page of the volunteer, so there is no link here
   teacher: [
     { to: '/teacher', label: 'Dashboard' },
     { to: '/teacher/children', label: 'Children' },
@@ -74,6 +73,22 @@ const initial = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 
+// the photo of a child, shown in the round avatar instead of the letter (it is saved on the child, not on the user)
+const photo = ref('')
+
+async function fetchPhoto() {
+  if (auth.role !== 'child' || !auth.user?.childId) {
+    photo.value = ''
+    return
+  }
+  try {
+    const res = await api.get(`/children/${auth.user.childId}`)
+    photo.value = (res.data.avatar || '').startsWith('/') ? res.data.avatar : ''
+  } catch {
+    photo.value = '' // the letter is shown instead
+  }
+}
+
 // how many messages the user has not read yet (shown next to Messages)
 const unreadTotal = ref(0)
 
@@ -87,7 +102,10 @@ async function fetchUnread() {
   }
 }
 
-onMounted(fetchUnread)
+onMounted(() => {
+  fetchUnread()
+  fetchPhoto()
+})
 </script>
 
 <template>
@@ -115,7 +133,10 @@ onMounted(fetchUnread)
         <!-- the user, on the right -->
         <div v-if="auth.isLoggedIn" class="lapis-user">
           <RouterLink to="/profile" class="lapis-user-link" data-test="nav-profile">
-            <span class="lapis-avatar">{{ initial }}</span>
+            <span class="lapis-avatar">
+              <img v-if="photo" :src="photo" alt="" />
+              <template v-else>{{ initial }}</template>
+            </span>
             <span class="lapis-who">
               <b>{{ auth.user.name }}</b>
               <small>{{ auth.role }}</small>

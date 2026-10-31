@@ -2,8 +2,9 @@
    Every rule starts with .messagespage so it only affects that page.
    Colours:
      #414F67 navy       text
-     #F5DF98 aqua       the main colour (selected child, my messages)
-     #FBF5DC pale aqua  the send button when it is off
+     #DDF0EF pale aqua  my messages (the same pale aqua as the tiles and tags of the parent page)
+     #F5DF98 yellow     the line round the typing box and the send button
+     #FBF5DC pale yellow the send button when it is off
      #F6D1AA peach      unread messages
      #F9F1E6 cream      the chat
      #5E6C80 grey       small text
@@ -83,7 +84,7 @@
   justify-content: flex-end;
 }
 
-/* the bubble: white for the other person, aqua for me */
+/* the bubble: white for the other person, pale aqua for me */
 .messagespage .bubble {
   max-width: 78%;
   padding: 9px 15px;
@@ -96,7 +97,7 @@
 .messagespage .from-me .bubble {
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 6px;
-  background: #F5DF98;
+  background: #DDF0EF;
 }
 
 .messagespage .bubble-name,

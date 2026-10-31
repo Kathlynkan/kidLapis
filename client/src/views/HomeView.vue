@@ -8,6 +8,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 import '@/css/main/homepage.css' // the styles of this page
 
 const auth = useAuthStore()
@@ -101,7 +102,7 @@ const roles = [
 
             <div class="lapis-card lapis-card-blue p-3 p-sm-4 handover-demo">
               <div class="d-flex align-items-center gap-2 mb-3">
-                <span class="preview-avatar" aria-hidden="true">🦊</span>
+                <span class="preview-avatar" aria-hidden="true"><ChildAvatar avatar="/photos/ethan.webp" /></span>
                 <div>
                   <div class="fw-heavy">Ethan · P4</div>
                   <div class="small lapis-muted">Today at student care</div>

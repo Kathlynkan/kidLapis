@@ -194,66 +194,69 @@ onMounted(() => {
         </RouterLink>
       </PageHeader>
 
-      <div class="row g-4">
-        <div class="col-lg-7">
-          <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
+      <!-- the sandy board that holds the sections -->
+      <div class="board">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
 
-            <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
-            <div class="d-flex flex-column gap-3">
-              <SessionCard
-                v-for="s in sessions"
-                :key="s.id"
-                :session="s"
-                :can-edit="s.volunteerId === auth.user?.id || auth.role === 'teacher'"
-                @edit="editSession"
-                @delete="deleteSession"
-              />
-            </div>
-        </div>
-
-        <div class="col-lg-5 d-flex flex-column gap-4">
-          <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
-            <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
-          </PeelCard>
-
-          <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
-            <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
-          </PeelCard>
-
-          <PeelCard
-            :title="`Pending Homework (${activeHomework.length})`"
-            icon="bi-journal-check"
-            :initial-open="true"
-          >
-            <div class="d-flex flex-column gap-2">
-              <HomeworkQuestCard
-                v-for="h in activeHomework"
-                :key="h.id"
-                :homework="h"
-                mode="volunteer"
-                :busy="checkingQuestId !== null"
-                @verify="verifyQuest"
-                @edit="editHomework"
-                @delete="deleteHomework"
-              />
-            </div>
-          </PeelCard>
-          
-          <PeelCard
-          v-if="completedHomework.length"
-          :title="`Completed Homework (${completedHomework.length})`"
-          icon="bi-check-circle-fill"
-          :initial-open="true"
-          >
-          <div class="d-flex flex-column gap-2">
-          <HomeworkQuestCard
-          v-for="h in completedHomework"
-          :key="h.id"
-          :homework="h"
-          mode="volunteer"
-          />
+              <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
+              <div class="d-flex flex-column gap-3">
+                <SessionCard
+                  v-for="s in sessions"
+                  :key="s.id"
+                  :session="s"
+                  :can-edit="s.volunteerId === auth.user?.id || auth.role === 'teacher'"
+                  @edit="editSession"
+                  @delete="deleteSession"
+                />
+              </div>
           </div>
-          </PeelCard>
+
+          <div class="col-lg-5 d-flex flex-column gap-4">
+            <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
+              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+            </PeelCard>
+
+            <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
+              <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+            </PeelCard>
+
+            <PeelCard
+              :title="`Pending Homework (${activeHomework.length})`"
+              icon="bi-journal-check"
+              :initial-open="true"
+            >
+              <div class="d-flex flex-column gap-2">
+                <HomeworkQuestCard
+                  v-for="h in activeHomework"
+                  :key="h.id"
+                  :homework="h"
+                  mode="volunteer"
+                  :busy="checkingQuestId !== null"
+                  @verify="verifyQuest"
+                  @edit="editHomework"
+                  @delete="deleteHomework"
+                />
+              </div>
+            </PeelCard>
+          
+            <PeelCard
+            v-if="completedHomework.length"
+            :title="`Completed Homework (${completedHomework.length})`"
+            icon="bi-check-circle-fill"
+            :initial-open="true"
+            >
+            <div class="d-flex flex-column gap-2">
+            <HomeworkQuestCard
+            v-for="h in completedHomework"
+            :key="h.id"
+            :homework="h"
+            mode="volunteer"
+            />
+            </div>
+            </PeelCard>
+          </div>
         </div>
       </div>
     </template>

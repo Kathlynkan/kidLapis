@@ -143,73 +143,76 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Quests to do -->
-      <h2 class="h4 mb-3"><i class="bi bi-map me-2"></i>Quests to do</h2>
+      <!-- the sandy board: the quests, the kueh tin and the finished quests, on white cards -->
+      <div class="board">
+        <!-- Quests to do -->
+        <h2 class="h4 mb-3"><i class="bi bi-map me-2"></i>Quests to do</h2>
 
-      <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
-        <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
-        <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
-      </div>
-
-      <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
-      <div class="row g-3 mb-4">
-        <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
-          <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
+        <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
+          <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
         </div>
-      </div>
 
-      <!-- My Kueh Tin: one kueh for every badge -->
-      <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
-      <section class="kueh-tin">
-        <h3 class="kueh-tin-title">
-          Your Kueh Tin
-          <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
-        </h3>
-
-        <div class="kueh-tin-body">
-          <div class="kueh-grid">
-            <button
-              v-for="b in BADGES"
-              :key="b.id"
-              type="button"
-              class="kueh-tile"
-              :class="{ 'kueh-locked': !earnedIds.has(b.id) }"
-              :aria-pressed="shown.id === b.id"
-              @click="picked = b"
-            >
-              <span class="kueh-cup"><img :src="`/images/${b.image}.webp`" alt="" /></span>
-              <span class="kueh-name">{{ b.kueh }}</span>
-              <span class="kueh-badge-name">{{ b.name }}</span>
-              <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
-            </button>
+        <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
+        <div class="row g-3 mb-4">
+          <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
+            <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
           </div>
+        </div>
 
-          <!-- the label of the kueh you picked -->
-          <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
-            <img :src="`/images/${shown.image}.webp`" alt="" />
-            <div>
-              <div class="kueh-detail-badge">{{ shown.name }}</div>
-              <h3 class="kueh-detail-name">{{ shown.kueh }}</h3>
-              <div class="kueh-detail-rule">{{ shown.rule }}</div>
-              <div class="kueh-detail-fact">{{ shown.fact }}</div>
-              <span class="kueh-state" :class="{ 'kueh-todo': !earnedIds.has(shown.id) }">
-                {{ earnedIds.has(shown.id) ? 'You earned this kueh!' : `${shownProgress.current} of ${shownProgress.target} done` }}
-              </span>
+        <!-- My Kueh Tin: one kueh for every badge -->
+        <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
+        <section class="kueh-tin">
+          <h3 class="kueh-tin-title">
+            Your Kueh Tin
+            <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
+          </h3>
+
+          <div class="kueh-tin-body">
+            <div class="kueh-grid">
+              <button
+                v-for="b in BADGES"
+                :key="b.id"
+                type="button"
+                class="kueh-tile"
+                :class="{ 'kueh-locked': !earnedIds.has(b.id) }"
+                :aria-pressed="shown.id === b.id"
+                @click="picked = b"
+              >
+                <span class="kueh-cup"><img :src="`/images/${b.image}.webp`" alt="" /></span>
+                <span class="kueh-name">{{ b.kueh }}</span>
+                <span class="kueh-badge-name">{{ b.name }}</span>
+                <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
+              </button>
+            </div>
+
+            <!-- the label of the kueh you picked -->
+            <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
+              <img :src="`/images/${shown.image}.webp`" alt="" />
+              <div>
+                <div class="kueh-detail-badge">{{ shown.name }}</div>
+                <h3 class="kueh-detail-name">{{ shown.kueh }}</h3>
+                <div class="kueh-detail-rule">{{ shown.rule }}</div>
+                <div class="kueh-detail-fact">{{ shown.fact }}</div>
+                <span class="kueh-state" :class="{ 'kueh-todo': !earnedIds.has(shown.id) }">
+                  {{ earnedIds.has(shown.id) ? 'You earned this kueh!' : `${shownProgress.current} of ${shownProgress.target} done` }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Completed quests (collapsed by default, auto-opens after submit) -->
-      <div v-if="done.length > 0" class="mt-4">
-        <button class="quest-history-toggle" @click="showDone = !showDone">
-          <i class="bi bi-check-lg me-2"></i>Completed quests
-          <span class="quest-history-count">{{ done.length }}</span>
-          <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
-        </button>
-        <div v-if="showDone" class="row g-3 mt-1">
-          <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
-            <HomeworkQuestCard :homework="h" mode="child" />
+        <!-- Completed quests (collapsed by default, auto-opens after submit) -->
+        <div v-if="done.length > 0" class="mt-4">
+          <button class="quest-history-toggle" @click="showDone = !showDone">
+            <i class="bi bi-check-lg me-2"></i>Completed quests
+            <span class="quest-history-count">{{ done.length }}</span>
+            <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
+          </button>
+          <div v-if="showDone" class="row g-3 mt-1">
+            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
+              <HomeworkQuestCard :homework="h" mode="child" />
+            </div>
           </div>
         </div>
       </div>

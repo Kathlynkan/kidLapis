@@ -62,7 +62,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
       <button
         v-if="mode === 'child' && homework.status === 'assigned'"
-        class="btn btn-primary btn-lg w-100 mt-1 quest-submit"
+        class="btn btn-primary btn-sm mt-1 quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >

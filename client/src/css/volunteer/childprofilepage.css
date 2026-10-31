@@ -17,9 +17,19 @@
      #EE9F96 soft red         overdue and delete (the same soft red for both)
      #2E8B57 / #E6F4EC        checked homework (the only strong green)
      #CFC9BC                  the edge of a card with nothing special about it
-   Look: no outlines, soft corners (18px to 22px, round pills) and a very light shadow. */
+     #F9F1E6 sand             the board that holds the sections (the same as on the parent page)
+   Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (18px to 22px, round pills)
+   and a very light shadow. */
 
 /* ---------- the whole page ---------- */
+
+/* the board: the sandy box that holds the sections */
+.role-volunteer .childprofilepage .board {
+  padding: 14px;
+  border-radius: 22px;
+  background: #F9F1E6;
+  box-shadow: 0 1px 6px rgba(33, 60, 49, 0.1);
+}
 
 .role-volunteer .childprofilepage .alert {
   border: 0;
@@ -320,6 +330,12 @@
   border-radius: 18px;
   background: #F7F4EE;
   box-shadow: none;
+}
+
+/* a session on the sandy board is a white card (the homework inside a white section stays warm cream) */
+.role-volunteer .childprofilepage .board .session-card {
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(33, 60, 49, 0.1);
 }
 
 .role-volunteer .childprofilepage .session-subject {

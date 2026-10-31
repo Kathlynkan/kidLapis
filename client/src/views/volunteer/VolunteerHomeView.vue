@@ -164,134 +164,137 @@ onMounted(loadData)
     <StateMessage v-else-if="error" type="error" :message="error" />
 
     <template v-else>
-      <!-- the two tabs -->
-      <div class="tabs">
-        <!-- schedule tab -->
-        <button type="button" class="tab" :class="{ active: activeTab === 'today' }" data-test="tab-today" @click="activeTab = 'today'">
-          My Schedule
-          <span class="tab-count">{{ selectedDayChildren.length }}</span>
-        </button>
-        <!-- all children -->
-        <button type="button" class="tab" :class="{ active: activeTab === 'all' }" data-test="tab-all" @click="activeTab = 'all'">
-          All my children
-          <span class="tab-count">{{ children.length }}</span>
-        </button>
-      </div>
-
-      <!-- ===== SCHEDULE TAB ===== -->
-      <div v-if="activeTab === 'today'">
-        <!-- no children at all -->
-        <div v-if="children.length === 0" class="empty-box">
-          <i class="bi bi-person-plus"></i>
-          <p>No children assigned to you yet. Your teacher will assign them.</p>
+      <!-- the sandy board: the tabs and the white cards -->
+      <div class="board">
+        <!-- the two tabs -->
+        <div class="tabs">
+          <!-- schedule tab -->
+          <button type="button" class="tab" :class="{ active: activeTab === 'today' }" data-test="tab-today" @click="activeTab = 'today'">
+            My Schedule
+            <span class="tab-count">{{ selectedDayChildren.length }}</span>
+          </button>
+          <!-- all children -->
+          <button type="button" class="tab" :class="{ active: activeTab === 'all' }" data-test="tab-all" @click="activeTab = 'all'">
+            All my children
+            <span class="tab-count">{{ children.length }}</span>
+          </button>
         </div>
 
-        <template v-else>
-          <!-- Week calendar strip -->
-          <div class="week">
-            <button
-              v-for="day in WEEK"
-              :key="day"
-              type="button"
-              class="week-day"
-              :class="{ selected: selectedDay === day, off: !myDays.includes(day) }"
-              data-test="cal-day"
-              @click="selectedDay = day"
-            >
-              <span class="week-name">{{ day }}</span>
-              <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
-              <span class="week-count">{{ childrenOnDay(day).length }}</span>
-            </button>
+        <!-- ===== SCHEDULE TAB ===== -->
+        <div v-if="activeTab === 'today'">
+          <!-- no children at all -->
+          <div v-if="children.length === 0" class="empty-box">
+            <i class="bi bi-person-plus"></i>
+            <p>No children assigned to you yet. Your teacher will assign them.</p>
           </div>
 
-          <!-- selected day heading -->
-          <div class="day-heading">
-            <h3 class="day-title">
-              {{ selectedDay === today ? `Today (${today})` : selectedDay }}
-            </h3>
-            <span v-if="!myDays.includes(selectedDay)" class="pill pill-quiet">Day off</span>
-            <span v-else-if="selectedDayChildren.length === 0" class="pill pill-quiet">No children</span>
-            <span v-else class="pill pill-green">{{ selectedDayChildren.length }} child{{ selectedDayChildren.length !== 1 ? 'ren' : '' }}</span>
-          </div>
-
-          <!-- nobody scheduled on selected day -->
-          <div v-if="selectedDayChildren.length === 0" class="empty-box" data-test="not-today">
-            <i class="bi bi-calendar-x"></i>
-            <p>
-              <strong v-if="myDays.includes(selectedDay)">No children scheduled with you on {{ selectedDay }}.</strong>
-              <strong v-else>You're not volunteering on {{ selectedDay }}.</strong>
-            </p>
-            <p class="muted">
-              Your days: {{ myDays.length > 0 ? myDays.join(', ') : 'not set' }}
-            </p>
-            <button type="button" class="soft-button" @click="activeTab = 'all'">
-              View all my children
-            </button>
-          </div>
-
-          <!-- selected day's children -->
-          <div v-else class="row g-3">
-            <div v-for="child in selectedDayChildren" :key="child.id" class="col-sm-6 col-lg-4">
-              <ChildCard
-              :child="child"
-              :last-session="lastSessionByChild[child.id]"
-              :needs-attention="needsAttentionByChild[child.id]"
-              @open="openChild" />
+          <template v-else>
+            <!-- Week calendar strip -->
+            <div class="week">
+              <button
+                v-for="day in WEEK"
+                :key="day"
+                type="button"
+                class="week-day"
+                :class="{ selected: selectedDay === day, off: !myDays.includes(day) }"
+                data-test="cal-day"
+                @click="selectedDay = day"
+              >
+                <span class="week-name">{{ day }}</span>
+                <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
+                <span class="week-count">{{ childrenOnDay(day).length }}</span>
+              </button>
             </div>
-          </div>
-        </template>
-      </div>
 
-      <!-- ===== ALL MY CHILDREN TAB ===== -->
-      <div v-else>
-        <StateMessage
-          v-if="children.length === 0"
-          message="No children assigned to you yet. Your teacher will assign them."
-        />
+            <!-- selected day heading -->
+            <div class="day-heading">
+              <h3 class="day-title">
+                {{ selectedDay === today ? `Today (${today})` : selectedDay }}
+              </h3>
+              <span v-if="!myDays.includes(selectedDay)" class="pill pill-quiet">Day off</span>
+              <span v-else-if="selectedDayChildren.length === 0" class="pill pill-quiet">No children</span>
+              <span v-else class="pill pill-green">{{ selectedDayChildren.length }} child{{ selectedDayChildren.length !== 1 ? 'ren' : '' }}</span>
+            </div>
 
-        <template v-else>
-          <!-- search + filter -->
-          <div class="filter-box">
-            <div class="row g-2 align-items-end">
-              <div class="col-12 col-md-7">
-                <label for="search" class="form-label mb-1">Search</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-search"></i></span>
-                  <input
-                    id="search"
-                    v-model.trim="searchText"
-                    type="text"
-                    class="form-control"
-                    placeholder="Type a child's name"
-                    data-test="child-search"
-                  />
+            <!-- nobody scheduled on selected day -->
+            <div v-if="selectedDayChildren.length === 0" class="empty-box" data-test="not-today">
+              <i class="bi bi-calendar-x"></i>
+              <p>
+                <strong v-if="myDays.includes(selectedDay)">No children scheduled with you on {{ selectedDay }}.</strong>
+                <strong v-else>You're not volunteering on {{ selectedDay }}.</strong>
+              </p>
+              <p class="muted">
+                Your days: {{ myDays.length > 0 ? myDays.join(', ') : 'not set' }}
+              </p>
+              <button type="button" class="soft-button" @click="activeTab = 'all'">
+                View all my children
+              </button>
+            </div>
+
+            <!-- selected day's children -->
+            <div v-else class="row g-3">
+              <div v-for="child in selectedDayChildren" :key="child.id" class="col-sm-6 col-lg-4">
+                <ChildCard
+                :child="child"
+                :last-session="lastSessionByChild[child.id]"
+                :needs-attention="needsAttentionByChild[child.id]"
+                @open="openChild" />
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- ===== ALL MY CHILDREN TAB ===== -->
+        <div v-else>
+          <StateMessage
+            v-if="children.length === 0"
+            message="No children assigned to you yet. Your teacher will assign them."
+          />
+
+          <template v-else>
+            <!-- search + filter -->
+            <div class="filter-box">
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-7">
+                  <label for="search" class="form-label mb-1">Search</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input
+                      id="search"
+                      v-model.trim="searchText"
+                      type="text"
+                      class="form-control"
+                      placeholder="Type a child's name"
+                      data-test="child-search"
+                    />
+                  </div>
+                </div>
+                <!-- filter by level -->
+                <div class="col-8 col-md-3">
+                  <select v-model="selectedLevel" class="form-select" data-test="level-filter">
+                    <option value="">All levels</option>
+                    <option v-for="level in levelOptions" :key="level" :value="level">{{ level }}</option>
+                  </select>
+                </div>
+                <div class="col-4 col-md-2 d-grid">
+                  <button type="button" class="soft-button" @click="clearFilters">Clear</button>
                 </div>
               </div>
-              <!-- filter by level -->
-              <div class="col-8 col-md-3">
-                <select v-model="selectedLevel" class="form-select" data-test="level-filter">
-                  <option value="">All levels</option>
-                  <option v-for="level in levelOptions" :key="level" :value="level">{{ level }}</option>
-                </select>
-              </div>
-              <div class="col-4 col-md-2 d-grid">
-                <button type="button" class="soft-button" @click="clearFilters">Clear</button>
+            </div>
+
+            <StateMessage v-if="filteredChildren.length === 0" message="No children match your search." />
+
+            <div v-else class="row g-3">
+              <div v-for="child in filteredChildren" :key="child.id" class="col-sm-6 col-lg-4">
+                <ChildCard
+                :child="child"
+                :last-session="lastSessionByChild[child.id]"
+                :needs-attention="needsAttentionByChild[child.id]"
+                @open="openChild" />
               </div>
             </div>
-          </div>
-
-          <StateMessage v-if="filteredChildren.length === 0" message="No children match your search." />
-
-          <div v-else class="row g-3">
-            <div v-for="child in filteredChildren" :key="child.id" class="col-sm-6 col-lg-4">
-              <ChildCard
-              :child="child"
-              :last-session="lastSessionByChild[child.id]"
-              :needs-attention="needsAttentionByChild[child.id]"
-              @open="openChild" />
-            </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </template>
   </div>

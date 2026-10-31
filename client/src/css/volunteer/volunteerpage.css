@@ -13,7 +13,9 @@
      #FBE7A1 yellow           needs attention (the same yellow as "due" on the parent page)
      #6B8177 grey green       small text
      #D9E8DF                  thin borders
-   Look: no outlines, soft corners (14px to 18px, round pills) and a very light shadow. */
+     #F9F1E6 sand             the board (the same as on the parent page)
+   Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (14px to 22px, round pills)
+   and a very light shadow. */
 
 /* ---------- the whole page ---------- */
 
@@ -28,6 +30,15 @@
 .volunteerpage .muted {
   color: #6B8177;
   font-size: 13px;
+}
+
+/* ---------- the board: the sandy box that holds the tabs and the white cards (the same as on the parent page) ---------- */
+
+.volunteerpage .board {
+  padding: 14px;
+  border-radius: 22px;
+  background: #F9F1E6;
+  box-shadow: 0 1px 6px rgba(33, 60, 49, 0.1);
 }
 
 /* ---------- the two tabs: two pills in a pale track ---------- */
