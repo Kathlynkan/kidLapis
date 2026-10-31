@@ -31,7 +31,6 @@ const confirmPassword = ref('')
 const skills = ref([...(auth.user?.skills || [])])
 const availability = ref([...(auth.user?.availability || [])])
 const avatar = ref('🙂')
-const gender = ref(auth.user?.gender || 'girl')
 
 // the first letter of the name (not of a title like Mrs), shown in a round picture
 const initial = computed(() => (auth.user?.name || '').replace(/^(mr|mrs|ms|mdm|miss|dr)\.?\s+/i, '').charAt(0).toUpperCase())
@@ -93,7 +92,6 @@ async function save() {
   }
   if (auth.role === 'child') {
     body.avatar = avatar.value
-    body.gender = gender.value
   }
 
   loading.value = true
@@ -129,16 +127,6 @@ async function save() {
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
                 <div class="small lapis-muted">{{ auth.user?.email }}</div>
                 <span class="badge badge-soft text-capitalize mt-1">{{ auth.role }}</span>
-              </div>
-            </div>
-
-            <div v-if="auth.role === 'child'" class="mt-3">
-              <label class="form-label d-block mb-2">Theme colour</label>
-              <div class="d-flex gap-2">
-                <input id="gender-girl" v-model="gender" type="radio" class="btn-check" value="girl" autocomplete="off" />
-                <label class="btn btn-sm gender-swatch gender-swatch-girl" for="gender-girl">Pink</label>
-                <input id="gender-boy" v-model="gender" type="radio" class="btn-check" value="boy" autocomplete="off" />
-                <label class="btn btn-sm gender-swatch gender-swatch-boy" for="gender-boy">Blue</label>
               </div>
             </div>
 

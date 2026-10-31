@@ -11,6 +11,7 @@
 
   /* The colours of the layers of the cake: the stripes under the navbar and the colour of each role.
      To add a layer: add its colour here and its name to LAYERS in NavBar.vue. */
+  --layer-child:     #E8A0B8; /* rose pink, the top layer of the child's stripes */
   --layer-parent:    #AED9D8;
   --layer-volunteer: #9BD3B2;
   --layer-teacher:   #D5CBEA; /* the last layer, at the bottom of the kueh lapis */
@@ -121,16 +122,6 @@ html, body {
 .role-child,
 .role-guest     { --role-accent: var(--lapis-pink);   --role-accent-soft: #FAE8F0; --role-accent-dark: var(--lapis-pink-dark); }
 
-/* boy theme: override pink → blue across every component that uses the pink/role-accent tokens */
-.role-child.gender-boy {
-  --role-accent:       var(--lapis-blue);
-  --role-accent-soft:  #DFF0F8;
-  --role-accent-dark:  var(--lapis-blue-dark);
-  --lapis-pink:        var(--lapis-blue);
-  --lapis-pink-dark:   var(--lapis-blue-dark);
-  --bs-primary:        var(--lapis-blue);
-  --bs-primary-rgb:    136, 192, 216;
-}
 .role-parent    { --role-accent: var(--layer-parent);    --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
 .role-volunteer { --role-accent: var(--layer-volunteer); --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
 .role-teacher   { --role-accent: var(--lapis-purple); --role-accent-soft: #F0EAF8; --role-accent-dark: var(--lapis-purple-dark); }

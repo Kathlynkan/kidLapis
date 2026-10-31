@@ -25,7 +25,7 @@ test.describe('Child quests', () => {
 
   // Mutates h_1 from 'assigned' -> 'submitted'; only run once on chromium so the
   // mobile project (which runs after) is not left with zero assigned quests.
-  test('clicking I\'m done! submits the quest and shows waiting message', async ({ page }, testInfo) => {
+  test('clicking I\'m done! submits the quest and shows it as waiting for check', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'state-mutating test runs on chromium only')
 
     await expect(page.locator('[data-test="submit-quest-btn"]').first()).toBeVisible()
@@ -34,7 +34,7 @@ test.describe('Child quests', () => {
     await page.locator('[data-test="submit-quest-btn"]').first().click()
 
     await expect(page.locator('[data-test="submit-quest-btn"]')).toHaveCount(todoBefore - 1)
-    await expect(page.locator('[data-test="waiting-message"]').first()).toBeVisible()
+    await expect(page.getByText('Done - waiting for check').first()).toBeVisible()
   })
 
   test('badge shelf renders all expected badges', async ({ page }) => {

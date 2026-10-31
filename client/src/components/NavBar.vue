@@ -46,9 +46,12 @@ const LINKS = {
 const links = computed(() => LINKS[auth.role] || [])
 
 // the layers of the cake, in order. A role shows the layers up to its own: a parent has one stripe, a volunteer has two.
+// A child keeps the colours of the pages before it: its own pink on top and the teacher's lavender as the last layer.
 // The other roles have one stripe in their own colour for now.
 const LAYERS = ['parent', 'volunteer']
+const CHILD_LAYERS = ['child', 'volunteer', 'parent', 'teacher']
 const stripes = computed(() => {
+  if (auth.role === 'child') return CHILD_LAYERS.map((layer) => `var(--layer-${layer})`)
   const place = LAYERS.indexOf(auth.role)
   if (place < 0) return ['var(--role-accent)']
   return LAYERS.slice(0, place + 1).map((layer) => `var(--layer-${layer})`)

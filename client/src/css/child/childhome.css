@@ -1,10 +1,13 @@
-/* The child home page: hero card with the kueh lapis, quests, the kueh tin (ChildHomeView.vue). */
+/* The child home page: hero card with the kueh lapis, quests, the kueh tin (ChildHomeView.vue).
+   The soft look of the parent and volunteer pages: no dark outlines, soft corners (14px to 22px, round pills),
+   pale fills with dark text and a very light shadow. */
 
 /* ── Hero card ──────────────────────────────────────────────── */
 
 .hero-card {
   background: var(--role-accent-soft, var(--lapis-cream));
-  border-radius: var(--lapis-radius);
+  border-radius: 22px;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
 .hero-avatar {
@@ -29,25 +32,47 @@
 
 .level-bar { height: 14px; max-width: 260px; }
 
-.hero-streak-badge {
+/* ── Quest cards ────────────────────────────────────────────── */
+
+/* a white card: no outline, soft corners */
+.childhomepage .quest-card {
+  background: #FFFFFF;
+  border: 0;
+  border-radius: 18px;
+}
+
+/* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */
+.childhomepage .badge {
+  border-radius: 99px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.childhomepage .quest-points,
+.childhomepage .quest-status { background: #FBE7A1; }
+
+/* the points stay on one line: the star sits next to the number, never under it */
+.childhomepage .quest-points {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 10px;
-  border-radius: 99px;
-  background: rgba(245, 184, 128, 0.18);
-  border: 1px solid rgba(245, 184, 128, 0.35);
-  color: #F5B880;
-  font-size: 0.82rem;
-  font-weight: 700;
-  margin-left: 8px;
-  vertical-align: middle;
+  flex: none;
+  white-space: nowrap;
 }
+.childhomepage .quest-overdue { background: #EE9F96; }
+.childhomepage .quest-status-done { background: #E6F4EC; color: #2E8B57; }
 
-
-/* ── Quest cards ────────────────────────────────────────────── */
-
-.quest-submit {
+/* the I'm done! button: pale pink with dark text, no outline */
+.childhomepage .quest-submit {
+  --bs-btn-color: var(--lapis-plum);
+  --bs-btn-bg: #F3C1D3;
+  --bs-btn-hover-color: var(--lapis-plum);
+  --bs-btn-hover-bg: #EBAAC2;
+  --bs-btn-active-color: var(--lapis-plum);
+  --bs-btn-active-bg: #EBAAC2;
+  border: 0;
+  border-radius: 14px;
+  font-weight: 700;
   animation: breathe 3s ease-in-out infinite 1.5s;
 }
 
@@ -64,7 +89,7 @@
   width: 100%;
   padding: 12px 16px;
   border: 0;
-  border-radius: var(--lapis-radius);
+  border-radius: 14px;
   background: var(--role-accent-soft, var(--lapis-cream));
   color: var(--lapis-plum);
   font: inherit;
@@ -86,8 +111,8 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 99px;
-  background: var(--role-accent, var(--lapis-pink));
-  color: #fff;
+  background: #FFFFFF;
+  color: var(--lapis-plum);
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -97,6 +122,7 @@
 .kueh-cake {
   display: flex;
   flex-direction: column-reverse;   /* the first layer is at the bottom */
+  gap: 3px;
   width: 170px;
   max-width: 100%;
   margin: 0 auto;
@@ -104,14 +130,9 @@
 
 .cake-layer {
   height: 24px;
-  border: 2px solid #2F4A3E;
+  border-radius: 8px;
   background: var(--c);
 }
-
-.cake-layer + .cake-layer { margin-bottom: -2px; }          /* the outlines overlap: no gap */
-.cake-layer:first-child { border-radius: 0 0 4px 4px; }
-.cake-layer:last-child { border-radius: 4px 4px 0 0; }
-.cake-layer:only-child { border-radius: 4px; }
 
 /* the colours of the layers, bottom to top: teacher, parent, volunteer, child */
 .cake-layer-1 { --c: var(--layer-teacher); }
@@ -119,12 +140,10 @@
 .cake-layer-3 { --c: var(--layer-volunteer); }
 .cake-layer-4 { --c: var(--lapis-pink); }
 
-/* the layer being built: a dashed bar that fills up */
+/* the layer being built: a white bar that fills up */
 .cake-layer-next {
   overflow: hidden;
   background: #FFFFFF;
-  border-style: dashed;
-  border-color: #4A735F;
 }
 
 .cake-layer-next > div {
@@ -144,48 +163,21 @@
 /* ── The kueh tin ───────────────────────────────────────────── */
 
 .kueh-tin {
-  position: relative;
-  padding: 26px 28px 30px;
-  border: 3px solid var(--lapis-pink-dark);
-  border-radius: 14px;
-  background: var(--lapis-pink);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--role-accent-soft, var(--lapis-cream));
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
-
-/* the line pressed round the edge of the lid */
-.kueh-tin::before {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-/* the label on the lid, with the four layer stripes on top */
-.kueh-tin-label {
-  position: relative;
-  width: min(470px, 100%);
-  margin: 0 auto;
-  overflow: hidden;
-  background: #FFF8EE;
-  border: 2px solid var(--lapis-pink-dark);
-  border-radius: 4px;
-}
-
-.kueh-tin-stripes i { display: block; height: 5px; }
-.kueh-tin-stripes i:nth-child(1) { background: var(--lapis-pink); }
-.kueh-tin-stripes i:nth-child(2) { background: var(--layer-volunteer); }
-.kueh-tin-stripes i:nth-child(3) { background: var(--layer-parent); }
-.kueh-tin-stripes i:nth-child(4) { background: var(--layer-teacher); }
 
 .kueh-tin-title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 8px 12px;
   margin: 0;
-  padding: 10px 18px;
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--lapis-plum);
@@ -194,18 +186,15 @@
 .kueh-tin-count {
   padding: 2px 12px;
   border-radius: 99px;
-  background: #CDE9D8;
+  background: #FFFFFF;
   font-size: 0.8rem;
 }
 
-/* the inside of the tin */
+/* the kueh and the label of the one you picked */
 .kueh-tin-body {
-  position: relative;
-  margin-top: 22px;
-  padding: 20px 16px 24px;
-  border: 3px solid var(--lapis-pink-dark);
-  border-radius: 6px;
-  background: #DDF0EF;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .kueh-grid {
@@ -227,37 +216,26 @@
   text-align: center;
 }
 
-/* the paper cup the kueh sits in, seen from above: pleats round the edge */
+/* the round white cup the kueh sits in */
 .kueh-cup {
-  position: relative;
   display: grid;
   place-items: center;
-  width: 112px;
-  height: 112px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: repeating-conic-gradient(#FFFFFF 0 9deg, #E3F3EA 9deg 18deg);
-  box-shadow: inset 0 0 0 3px #C9E5D5, 0 2px 4px rgba(33, 60, 49, 0.18);
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
   transition: transform 0.2s;
 }
 
-.kueh-cup::before {
-  content: '';
-  position: absolute;
-  inset: 15px;
-  border-radius: 50%;
-  background: #FFFDF7;
-  box-shadow: inset 0 2px 5px rgba(33, 60, 49, 0.18);
-}
-
 .kueh-cup img {
-  position: relative;
-  width: 66%;
-  height: 66%;
+  width: 80%;
+  height: 80%;
   object-fit: contain;
 }
 
 .kueh-tile:hover .kueh-cup { transform: translateY(-3px); }
-.kueh-tile[aria-pressed='true'] .kueh-cup { outline: 3px solid var(--lapis-pink-dark); outline-offset: 3px; }
+.kueh-tile[aria-pressed='true'] .kueh-cup { box-shadow: 0 0 0 3px #A9577A; }
 
 .kueh-name { margin-top: 2px; font-size: 0.875rem; font-weight: 700; line-height: 1.2; }
 .kueh-badge-name { font-size: 0.75rem; font-weight: 600; color: var(--lapis-muted); }
@@ -266,25 +244,21 @@
   display: inline-block;
   padding: 2px 10px;
   border-radius: 99px;
-  background: #4A735F; /* the dark green of the volunteer layer */
-  color: #FFFFFF;
+  background: #E6F4EC;
+  color: #2E8B57;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-/* a kueh you have not earned yet: grey paper cup, faded picture */
-.kueh-locked .kueh-cup {
-  background: repeating-conic-gradient(#F3F0E8 0 9deg, #E7E2D6 9deg 18deg);
-  box-shadow: inset 0 0 0 3px #DAD4C5, 0 1px 3px rgba(33, 60, 49, 0.12);
-}
-
-.kueh-locked .kueh-cup::before { background: #F6F3EC; }
-.kueh-locked img { filter: grayscale(1); opacity: 0.3; }
+/* a kueh you have not earned yet: faded grey picture */
+.kueh-locked img { filter: grayscale(1); opacity: 0.35; }
 .kueh-locked .kueh-name { color: var(--lapis-muted); }
-.kueh-locked .kueh-state,
-.kueh-state.kueh-todo { background: #FFFFFF; color: var(--lapis-muted); }
+.kueh-locked .kueh-state { background: #FFFFFF; color: var(--lapis-muted); }
+
+/* in the label of the kueh you picked, "x of y done" is soft yellow */
+.kueh-detail .kueh-state.kueh-todo { background: #FBE7A1; color: var(--lapis-plum); }
 
 /* the label of the kueh you picked */
 .kueh-detail {
@@ -292,7 +266,6 @@
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 20px;
   align-items: center;
-  margin-top: 22px;
   padding: 20px 22px;
   border-radius: 18px;
   background: #FFFFFF;
@@ -305,7 +278,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--lapis-pink-dark);
+  color: #A9577A;
 }
 
 .kueh-detail-name { margin: 0; font-size: 1.4rem; font-weight: 700; }
@@ -313,7 +286,7 @@
 .kueh-detail-fact { margin: 6px 0 10px; font-size: 0.875rem; color: var(--lapis-muted); }
 
 @media (max-width: 520px) {
-  .kueh-tin { padding: 18px 12px 22px; }
+  .kueh-tin { padding: 16px 12px 20px; }
   .kueh-detail { grid-template-columns: minmax(0, 1fr); }
 }
 

@@ -60,21 +60,13 @@ function cancelDelete()  { showDeleteModal.value = false }
         {{ status?.label }}
       </span>
 
-      <p
-        v-if="mode === 'child' && homework.status === 'submitted'"
-        class="small mb-0 mt-1 quest-meta"
-        data-test="waiting-message"
-      >
-        <i class="bi bi-hourglass-split me-1"></i>Your volunteer will check this — then you'll earn your stars!
-      </p>
-
       <button
         v-if="mode === 'child' && homework.status === 'assigned'"
         class="btn btn-primary btn-lg w-100 mt-1 quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-circle-fill me-1"></i>I'm done!
+        <i class="bi bi-check-lg me-1"></i>I'm done!
       </button>
 
       <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 

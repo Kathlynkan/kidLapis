@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildAvatar from '@/components/ChildAvatar.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
-import { BADGES, levelFor, earnedBadges, badgeProgress, currentStreak } from '@/utils/gamification'
+import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
 import '@/css/child/childhome.css'
 
 const auth = useAuthStore()
@@ -20,7 +20,6 @@ const submitError  = ref('')
 
 // ── Computed ─────────────────────────────────────────────────
 const level     = computed(() => levelFor(me.value?.points || 0))
-const streak    = computed(() => currentStreak(homework.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
 const todo      = computed(() => homework.value.filter((h) => h.status === 'assigned'))
@@ -88,7 +87,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 childhomepage">
     <Transition name="celebrate">
       <div v-if="celebrating" class="celebrate-overlay" aria-hidden="true">
         <i class="bi bi-award-fill celebrate-main"></i>
@@ -112,9 +111,6 @@ onMounted(async () => {
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
             <i class="bi bi-star-fill me-1"></i>{{ me.points }} stars &middot; Level {{ level.level }}
-            <span v-if="streak > 0" class="hero-streak-badge">
-              <i class="bi bi-fire"></i> {{ streak }}-day streak
-            </span>
           </div>
           <div
             class="progress mx-auto level-bar mb-1"
@@ -165,13 +161,10 @@ onMounted(async () => {
       <!-- My Kueh Tin: one kueh for every badge -->
       <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
       <section class="kueh-tin">
-        <div class="kueh-tin-label">
-          <div class="kueh-tin-stripes" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-          <h3 class="kueh-tin-title">
-            Your Kueh Tin
-            <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
-          </h3>
-        </div>
+        <h3 class="kueh-tin-title">
+          Your Kueh Tin
+          <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
+        </h3>
 
         <div class="kueh-tin-body">
           <div class="kueh-grid">
@@ -210,7 +203,7 @@ onMounted(async () => {
       <!-- Completed quests (collapsed by default, auto-opens after submit) -->
       <div v-if="done.length > 0" class="mt-4">
         <button class="quest-history-toggle" @click="showDone = !showDone">
-          <i class="bi bi-check-circle-fill me-2"></i>Completed quests
+          <i class="bi bi-check-lg me-2"></i>Completed quests
           <span class="quest-history-count">{{ done.length }}</span>
           <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
         </button>
