@@ -5,7 +5,7 @@
 <script setup>
 import { ref } from 'vue'
 import { formatDate, accuracy } from '@/utils/format'
-import { MOODS } from '@/utils/constants'
+import { MOODS, SUBJECT_COLORS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
@@ -18,6 +18,10 @@ const mood = MOODS.find((m) => m.value === props.session.mood)
 const showDeleteModal = ref(false)
 const showFullNotes = ref(false)
 
+function subjectStyle(subj) {
+  return {backgroundColor: SUBJECT_COLORS[subj]}
+}
+
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.session.id); showDeleteModal.value = false }
 function cancelDelete()  { showDeleteModal.value = false }
@@ -27,7 +31,7 @@ function cancelDelete()  { showDeleteModal.value = false }
   <div class="lapis-card lapis-card-lime lapis-card-top session-card p-3" data-test="session-card">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
       <div>
-        <span class="session-subject">{{ session.subject }}</span><strong class="session-title">{{ session.topic }}</strong>
+        <span class="session-subject" :style="subjectStyle(session.subject)">{{ session.subject }}</span><strong class="session-title">{{ session.topic }}</strong>
         <div class="small session-meta">
           {{ formatDate(session.date) }} &middot; by {{ session.volunteerName }}
           <span v-if="mood" class="chip chip-social session-mood ms-1">

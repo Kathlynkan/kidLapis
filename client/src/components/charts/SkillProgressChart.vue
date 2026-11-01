@@ -200,7 +200,7 @@ function trendLabel(sorted) {
 
 .spc-pill {
   padding: 3px 12px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1.5px solid transparent;
   background: transparent;
   color: #4A3F3A;
