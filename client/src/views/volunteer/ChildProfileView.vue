@@ -176,7 +176,7 @@ onMounted(() => {
           class="btn btn-primary"
           data-test="record-session"
         >
-          <i class="bi bi-plus-lg me-1"></i>Record session
+          <i class="bi bi-plus-lg me-1"></i>Record Session
         </RouterLink>
         <RouterLink
           v-if="auth.role === 'volunteer'"
@@ -184,7 +184,7 @@ onMounted(() => {
           class="btn btn-outline-primary"
           data-test="assign-homework"
         >
-          <i class="bi bi-journal-plus me-1"></i>Give homework
+          <i class="bi bi-journal-plus me-1"></i>Assign Homework
         </RouterLink>
         <!-- Teachers only: volunteers can't use Messages (chat is parent <-> teacher) -->
         <RouterLink
@@ -214,11 +214,11 @@ onMounted(() => {
         </div>
 
         <div class="col-lg-5 d-flex flex-column gap-4">
-          <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
+          <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
             <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
 
-          <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
+          <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
             <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
 
