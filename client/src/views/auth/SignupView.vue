@@ -1,7 +1,7 @@
 <!-- =============================================================
   Sign up page (volunteers and parents).              Owner: Kai Sen
   Done: checks on the page (name, email format, password >= 8, passwords match)
-        with Bootstrap .is-invalid / .invalid-feedback. The server checks again.
+        with .is-invalid on the box and the problem written under it. The server checks again.
         Volunteers pick their skills + available days (used by matchmaking).
         Parents can enter the child code from the centre to link to their child.
 ============================================================= -->
@@ -12,6 +12,8 @@ import { useAuthStore } from '@/stores/auth'
 import { errorMessage } from '@/services/api'
 import { validateSignup, MIN_PASSWORD_LENGTH } from '@/utils/validation'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
+import '@/css/main/components.css' // the look of the small parts (the error message)
+import '@/css/main/authpage.css' // the look of this page and of the log in page
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -70,155 +72,137 @@ async function handleSignup() {
 </script>
 
 <template>
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-sm-10 col-md-7 col-lg-5">
-        <div class="lapis-card p-4 p-md-5">
-          <h1 class="page-title mb-1">Create an account</h1>
-          <p class="page-subtitle mb-4">Teachers create child accounts for the centre.</p>
+  <div class="container py-4 authpage signuppage">
+    <div class="auth-box">
+      <div class="board">
+        <div class="auth-card">
+          <header>
+            <h1 class="page-title">Create an account</h1>
+            <p class="page-subtitle">Teachers create child accounts for the centre.</p>
+          </header>
 
-          <div v-if="error" class="alert alert-danger small" data-test="signup-error">
-            {{ error }}
+          <div v-if="error" class="state-error" role="alert" data-test="signup-error">
+            <i class="bi bi-exclamation-triangle"></i>{{ error }}
           </div>
 
-          <!-- novalidate: use our own Bootstrap messages instead of the browser's pop-ups -->
+          <!-- novalidate: use our own messages instead of the browser's pop-ups -->
           <form novalidate data-test="signup-form" @submit.prevent="handleSignup">
-            <div class="mb-3">
-              <span class="form-label d-block">I am a...</span>
-              <div class="btn-group w-100" role="group">
-                <input
-                  id="role-vol"
-                  v-model="form.role"
-                  type="radio"
-                  class="btn-check"
-                  value="volunteer"
-                />
-                <label class="btn btn-outline-primary" for="role-vol">Volunteer</label>
-                <input
-                  id="role-par"
-                  v-model="form.role"
-                  type="radio"
-                  class="btn-check"
-                  value="parent"
-                />
-                <label class="btn btn-outline-primary" for="role-par">Parent</label>
+            <div class="auth-field">
+              <span class="auth-label">I am a...</span>
+              <div class="choices" role="group">
+                <input id="role-vol" v-model="form.role" type="radio" class="tick" value="volunteer" />
+                <label class="choice choice-green" for="role-vol"><i class="bi bi-person-heart"></i>Volunteer</label>
+                <input id="role-par" v-model="form.role" type="radio" class="tick" value="parent" />
+                <label class="choice choice-aqua" for="role-par"><i class="bi bi-house-heart"></i>Parent</label>
               </div>
             </div>
 
-            <div class="mb-3">
-              <label for="name" class="form-label">Full name</label>
+            <div class="auth-field">
+              <label for="name" class="auth-label">Full name</label>
               <input
                 id="name"
                 v-model="form.name"
-                class="form-control"
+                class="auth-input"
                 :class="{ 'is-invalid': shown.name }"
                 autocomplete="name"
                 data-test="signup-name"
               />
-              <div class="invalid-feedback">{{ shown.name }}</div>
+              <div v-if="shown.name" class="auth-problem">{{ shown.name }}</div>
             </div>
 
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
+            <div class="auth-field">
+              <label for="email" class="auth-label">Email</label>
               <input
                 id="email"
                 v-model="form.email"
                 type="email"
-                class="form-control"
+                class="auth-input"
                 :class="{ 'is-invalid': shown.email }"
                 autocomplete="email"
                 data-test="signup-email"
               />
-              <div class="invalid-feedback">{{ shown.email }}</div>
+              <div v-if="shown.email" class="auth-problem">{{ shown.email }}</div>
             </div>
 
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
+            <div class="auth-field">
+              <label for="password" class="auth-label">Password</label>
               <input
                 id="password"
                 v-model="form.password"
                 type="password"
-                class="form-control"
+                class="auth-input"
                 :class="{ 'is-invalid': shown.password }"
                 autocomplete="new-password"
                 aria-describedby="password-help"
                 data-test="signup-password"
               />
-              <div v-if="!shown.password" id="password-help" class="form-text">
-                At least {{ MIN_PASSWORD_LENGTH }} characters.
-              </div>
-              <div class="invalid-feedback">{{ shown.password }}</div>
+              <div v-if="shown.password" class="auth-problem">{{ shown.password }}</div>
+              <div v-else id="password-help" class="auth-hint">At least {{ MIN_PASSWORD_LENGTH }} characters.</div>
             </div>
 
-            <div class="mb-4">
-              <label for="confirm-password" class="form-label">Confirm password</label>
+            <div class="auth-field">
+              <label for="confirm-password" class="auth-label">Confirm password</label>
               <input
                 id="confirm-password"
                 v-model="form.confirmPassword"
                 type="password"
-                class="form-control"
+                class="auth-input"
                 :class="{ 'is-invalid': shown.confirmPassword }"
                 autocomplete="new-password"
                 data-test="signup-confirm"
               />
-              <div class="invalid-feedback">{{ shown.confirmPassword }}</div>
+              <div v-if="shown.confirmPassword" class="auth-problem">{{ shown.confirmPassword }}</div>
             </div>
 
             <!-- Volunteers only: these feed Yu Xuan's skills-based matchmaking -->
             <template v-if="form.role === 'volunteer'">
-              <fieldset class="mb-3" data-test="signup-skills">
-                <legend class="form-label fs-6 mb-2">Skills I can help with</legend>
-                <div class="d-flex flex-wrap gap-2">
+              <fieldset class="auth-field" data-test="signup-skills">
+                <legend class="auth-label">Skills I can help with</legend>
+                <div class="chips">
                   <template v-for="(skill, i) in SKILL_OPTIONS" :key="skill">
                     <!-- v-model on an array: ticking adds the skill, unticking removes it -->
                     <input
                       :id="`skill-${i}`"
                       v-model="form.skills"
                       type="checkbox"
-                      class="btn-check"
+                      class="tick"
                       :value="skill"
                       autocomplete="off"
                     />
-                    <label class="btn btn-sm btn-outline-primary" :for="`skill-${i}`">
-                      {{ skill }}
-                    </label>
+                    <label class="chip-choice" :for="`skill-${i}`">{{ skill }}</label>
                   </template>
                 </div>
-                <div v-if="shown.skills" class="small text-danger mt-1">{{ shown.skills }}</div>
+                <div v-if="shown.skills" class="auth-problem">{{ shown.skills }}</div>
               </fieldset>
 
-              <fieldset class="mb-4" data-test="signup-days">
-                <legend class="form-label fs-6 mb-2">Days I can come in</legend>
-                <div class="d-flex flex-wrap gap-2">
+              <fieldset class="auth-field" data-test="signup-days">
+                <legend class="auth-label">Days I can come in</legend>
+                <div class="chips">
                   <template v-for="day in DAYS" :key="day">
                     <input
                       :id="`day-${day}`"
                       v-model="form.availability"
                       type="checkbox"
-                      class="btn-check"
+                      class="tick"
                       :value="day"
                       autocomplete="off"
                     />
-                    <label class="btn btn-sm btn-outline-primary" :for="`day-${day}`">
-                      {{ day }}
-                    </label>
+                    <label class="chip-choice" :for="`day-${day}`">{{ day }}</label>
                   </template>
                 </div>
-                <div v-if="shown.availability" class="small text-danger mt-1">
-                  {{ shown.availability }}
-                </div>
+                <div v-if="shown.availability" class="auth-problem">{{ shown.availability }}</div>
               </fieldset>
             </template>
 
             <!-- Parents only: links the new account to their child -->
-            <div v-if="form.role === 'parent'" class="mb-4">
-              <label for="child-code" class="form-label"
-                >Child code <span class="lapis-muted">(optional)</span></label
+            <div v-if="form.role === 'parent'" class="auth-field">
+              <label for="child-code" class="auth-label"
+                >Child code <span class="optional">(optional)</span></label
               >
               <input
                 id="child-code"
                 v-model="form.childCode"
-                class="form-control text-uppercase"
+                class="auth-input code-input"
                 :class="{ 'is-invalid': shown.childCode }"
                 maxlength="6"
                 autocomplete="off"
@@ -226,29 +210,131 @@ async function handleSignup() {
                 aria-describedby="child-code-help"
                 data-test="signup-child-code"
               />
-              <div v-if="!shown.childCode" id="child-code-help" class="form-text">
+              <div v-if="shown.childCode" class="auth-problem">{{ shown.childCode }}</div>
+              <div v-else id="child-code-help" class="auth-hint">
                 The 6-character code from your child's centre. No code yet? Leave it blank and the
                 centre can link your child later.
               </div>
-              <div class="invalid-feedback">{{ shown.childCode }}</div>
             </div>
 
-            <button
-              type="submit"
-              class="btn btn-primary w-100"
-              :disabled="loading"
-              data-test="signup-submit"
-            >
-              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-              Sign up
+            <button type="submit" class="auth-submit" :disabled="loading" data-test="signup-submit">
+              {{ loading ? 'Signing up...' : 'Sign up' }}
             </button>
           </form>
 
-          <p class="small text-center mt-3 mb-0">
-            Already have an account? <RouterLink to="/login">Log in</RouterLink>
-          </p>
+          <p class="auth-small">Already have an account? <RouterLink to="/login">Log in</RouterLink></p>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* The sign up page (SignupView.vue). The card, the title, the boxes and the buttons are shared with the log in page
+   (css/main/authpage.css). Here are only the two choices (Volunteer, Parent), the round chips (skills and days) and the code box. */
+
+/* the radio buttons and the tick boxes are hidden: their labels are what you see and press */
+.signuppage .tick {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.signuppage fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.signuppage legend {
+  float: none;
+  width: auto;
+  margin-bottom: 7px;
+  padding: 0;
+}
+
+/* ---------- I am a...: two big choices in the colour of the role ---------- */
+
+.signuppage .choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.signuppage .choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #4A3F3A;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* not chosen: the pale colour. chosen: the colour of the role with a darker edge */
+.signuppage .choice-green {
+  background: #E1F2E9;
+}
+
+.signuppage .choice-aqua {
+  background: #DDF0EF;
+}
+
+.signuppage .tick:checked + .choice-green {
+  background: #9BD3B2;
+  box-shadow: inset 0 0 0 2px #6FB38C;
+}
+
+.signuppage .tick:checked + .choice-aqua {
+  background: #AED9D8;
+  box-shadow: inset 0 0 0 2px #7FBDBB;
+}
+
+/* ---------- skills and days: round chips, lavender when ticked ---------- */
+
+.signuppage .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signuppage .chip-choice {
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #F0EAF8;
+  color: #4A3F3A;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.signuppage .tick:checked + .chip-choice {
+  background: #D5CBEA;
+  box-shadow: inset 0 0 0 1.5px #B8A9DD;
+}
+
+.signuppage .tick:focus + .choice,
+.signuppage .tick:focus + .chip-choice {
+  outline: 2px solid #4A3F3A;
+  outline-offset: 2px;
+}
+
+/* ---------- the child code ---------- */
+
+.signuppage .code-input {
+  text-transform: uppercase;
+}
+
+.signuppage .optional {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+</style>

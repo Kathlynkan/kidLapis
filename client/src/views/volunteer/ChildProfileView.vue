@@ -372,14 +372,12 @@ onMounted(() => {
   text-transform: none;
 }
 
-.childprofilepage .btn-primary,
-.childprofilepage .btn-outline-primary.w-100 {
+.childprofilepage .btn-primary {
   background: var(--cp-main);
   color: var(--cp-main-text);
 }
 
-.childprofilepage .btn-primary:hover,
-.childprofilepage .btn-outline-primary.w-100:hover {
+.childprofilepage .btn-primary:hover {
   background: var(--cp-main-hover);
   color: var(--cp-main-text);
 }

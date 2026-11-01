@@ -236,7 +236,7 @@ onMounted(async () => {
 /* ── Hero card ──────────────────────────────────────────────── */
 
 .hero-card {
-  background: var(--role-accent-soft, var(--lapis-cream));
+  background: var(--role-accent-soft, #FBF8F3);
   border-radius: 22px;
 }
 
@@ -308,11 +308,11 @@ onMounted(async () => {
 /* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
    in pale pink with dark text */
 .childhomepage .quest-submit {
-  --bs-btn-color: var(--lapis-plum);
+  --bs-btn-color: #4A3F3A;
   --bs-btn-bg: #F3C1D3;
-  --bs-btn-hover-color: var(--lapis-plum);
+  --bs-btn-hover-color: #4A3F3A;
   --bs-btn-hover-bg: #EBAAC2;
-  --bs-btn-active-color: var(--lapis-plum);
+  --bs-btn-active-color: #4A3F3A;
   --bs-btn-active-bg: #EBAAC2;
   align-self: flex-end;
   border: 0;
@@ -334,7 +334,7 @@ onMounted(async () => {
   border: 0;
   border-radius: 999px;
   background: #FFFFFF;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font: inherit;
   font-size: 16px;
   font-weight: 700;
@@ -354,8 +354,8 @@ onMounted(async () => {
   height: 22px;
   padding: 0 6px;
   border-radius: 99px;
-  background: var(--role-accent-soft, var(--lapis-cream));
-  color: var(--lapis-plum);
+  background: var(--role-accent-soft, #FBF8F3);
+  color: #4A3F3A;
   font-size: 12px;
   font-weight: 700;
 }
@@ -381,10 +381,10 @@ onMounted(async () => {
 .cake-layer:only-child { border-radius: 8px; }
 
 /* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
-.cake-layer-1 { --c: var(--layer-teacher); }
-.cake-layer-2 { --c: var(--layer-volunteer); }
-.cake-layer-3 { --c: var(--layer-parent); }
-.cake-layer-4 { --c: var(--lapis-pink); }
+.cake-layer-1 { --c: #D5CBEA; }
+.cake-layer-2 { --c: #9BD3B2; }
+.cake-layer-3 { --c: #AED9D8; }
+.cake-layer-4 { --c: #E8A0B8; }
 
 /* the layer being built: a white bar that fills up */
 .cake-layer-next {
@@ -403,7 +403,7 @@ onMounted(async () => {
   font-weight: 700;
   letter-spacing: 0.7px;
   text-transform: uppercase;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 /* ── The kueh tin ───────────────────────────────────────────── */
@@ -414,7 +414,7 @@ onMounted(async () => {
   gap: 18px;
   padding: 20px;
   border-radius: 22px;
-  background: var(--role-accent-soft, var(--lapis-cream));
+  background: var(--role-accent-soft, #FBF8F3);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
@@ -426,7 +426,7 @@ onMounted(async () => {
   margin: 0;
   font-size: 17.6px;
   font-weight: 700;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .kueh-tin-count {
@@ -475,7 +475,7 @@ onMounted(async () => {
   padding: 4px 4px 8px;
   border: 0;
   background: transparent;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font: inherit;
   text-align: center;
 }
@@ -502,7 +502,7 @@ onMounted(async () => {
 .kueh-tile[aria-pressed='true'] .kueh-cup { box-shadow: 0 0 0 3px #A9577A; }
 
 .kueh-name { margin-top: 2px; font-size: 14px; font-weight: 700; line-height: 1.2; }
-.kueh-badge-name { font-size: 12px; font-weight: 600; color: var(--lapis-muted); }
+.kueh-badge-name { font-size: 12px; font-weight: 600; color: #8D7F77; }
 
 .kueh-state {
   display: inline-block;
@@ -518,11 +518,11 @@ onMounted(async () => {
 
 /* a kueh you have not earned yet: faded grey picture */
 .kueh-locked img { filter: grayscale(1); opacity: 0.35; }
-.kueh-locked .kueh-name { color: var(--lapis-muted); }
-.kueh-locked .kueh-state { background: #FFFFFF; color: var(--lapis-muted); }
+.kueh-locked .kueh-name { color: #8D7F77; }
+.kueh-locked .kueh-state { background: #FFFFFF; color: #8D7F77; }
 
 /* in the label of the kueh you picked, "x of y done" is soft yellow */
-.kueh-detail .kueh-state.kueh-todo { background: #FBE7A1; color: var(--lapis-plum); }
+.kueh-detail .kueh-state.kueh-todo { background: #FBE7A1; color: #4A3F3A; }
 
 /* the label of the kueh you picked */
 .kueh-detail {
@@ -547,7 +547,7 @@ onMounted(async () => {
 
 .kueh-detail-name { margin: 0; font-size: 22.4px; font-weight: 700; }
 .kueh-detail-rule { margin-top: 8px; font-weight: 600; }
-.kueh-detail-fact { margin: 6px 0 10px; font-size: 14px; color: var(--lapis-muted); }
+.kueh-detail-fact { margin: 6px 0 10px; font-size: 14px; color: #8D7F77; }
 
 @media (max-width: 520px) {
   .kueh-tin { padding: 16px 12px 20px; }
@@ -579,7 +579,7 @@ onMounted(async () => {
   left: 0; top: 0;
   transform: translate(-50%, -50%);
   font-size: 64px;
-  color: var(--lapis-yellow);
+  color: #F5DF98;
   filter: drop-shadow(0 0 18px rgba(245, 223, 152, 0.95));
   animation: celebrate-main-pop 2.2s ease forwards;
 }
@@ -601,12 +601,12 @@ onMounted(async () => {
   animation: celebrate-spark-fly 1.9s ease-out forwards;
 }
 
-.celebrate-s1 { color: var(--lapis-yellow); --dx: -88px; --dx2: -132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.10s; }
-.celebrate-s2 { color: var(--lapis-pink);   --dx:  88px; --dx2: 132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.15s; }
-.celebrate-s3 { color: var(--lapis-lime);   --dx: -112px; --dx2: -168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.12s; }
-.celebrate-s4 { color: var(--lapis-orange); --dx:  112px; --dx2: 168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.18s; }
-.celebrate-s5 { color: var(--lapis-purple); --dx: -50px; --dx2: -75px; --dy2: -168px; --dy: -112px; animation-delay: 0.08s; }
-.celebrate-s6 { color: var(--lapis-blue);   --dx:  50px; --dx2: 75px; --dy2: -168px; --dy: -112px; animation-delay: 0.20s; }
+.celebrate-s1 { color: #F5DF98; --dx: -88px; --dx2: -132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.10s; }
+.celebrate-s2 { color: #E8A0B8;   --dx:  88px; --dx2: 132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.15s; }
+.celebrate-s3 { color: #A8CC90;   --dx: -112px; --dx2: -168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.12s; }
+.celebrate-s4 { color: #F5B880; --dx:  112px; --dx2: 168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.18s; }
+.celebrate-s5 { color: #C0A8D8; --dx: -50px; --dx2: -75px; --dy2: -168px; --dy: -112px; animation-delay: 0.08s; }
+.celebrate-s6 { color: #88C0D8;   --dx:  50px; --dx2: 75px; --dy2: -168px; --dy: -112px; animation-delay: 0.20s; }
 
 @keyframes celebrate-spark-fly {
   0%   { transform: translate(0, 0) scale(0)   rotate(0deg);   opacity: 0; }

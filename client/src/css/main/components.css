@@ -44,7 +44,7 @@
 
 /* ---------- StateMessage.vue ---------- */
 
-.lapis-state { color: var(--lapis-plum); }
+.lapis-state { color: #4A3F3A; }
 
 /* the loading ring: one turning ring in the colours of the role (--role-accent is set for every role in main.css) */
 .state-ring {
@@ -99,14 +99,14 @@
   margin: 0 auto 10px;
   border-radius: 50%;
   background: var(--role-accent-soft);
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font-size: 22px;
 }
 
 .state-msg {
   font-weight: 700;
   font-size: 16px;
-  color: var(--lapis-muted);
+  color: #8D7F77;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -133,30 +133,30 @@
 }
 
 .peel-header {
-  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(168, 224, 99, 0.08) 100%);
+  background: linear-gradient(160deg, #FBF8F3 0%, rgba(168, 224, 99, 0.08) 100%);
 }
 
 .peel-header:hover {
-  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(255, 217, 61, 0.15) 100%);
+  background: linear-gradient(160deg, #FBF8F3 0%, rgba(255, 217, 61, 0.15) 100%);
 }
 
 .handover-header {
-  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(68, 144, 184, 0.08) 100%);
+  background: linear-gradient(160deg, #FBF8F3 0%, rgba(68, 144, 184, 0.08) 100%);
 }
 
 .handover-header:hover {
-  background: linear-gradient(160deg, var(--lapis-cream) 0%, rgba(68, 144, 184, 0.15) 100%);
+  background: linear-gradient(160deg, #FBF8F3 0%, rgba(68, 144, 184, 0.15) 100%);
 }
 
 /* the separator line appears when it is open */
 .peel-card--open .peel-header {
-  border-bottom-color: var(--lapis-cream-dark);
+  border-bottom-color: #C8B8A8;
   border-bottom-width: 3px;
   border-bottom-style: solid;
 }
 
 .handover-card--open .handover-header {
-  border-bottom: 3px solid var(--lapis-cream-dark);
+  border-bottom: 3px solid #C8B8A8;
 }
 
 .peel-title {
@@ -164,11 +164,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .peel-arrow {
-  color: var(--lapis-purple);
+  color: #C0A8D8;
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
 }
@@ -202,7 +202,7 @@
 /* ---------- HandoverCard.vue ---------- */
 
 .handover-card {
-  border-left: 6px solid var(--topic-academic);
+  border-left: 6px solid #A8CC90;
   padding: 0;
   overflow: hidden;
 }
@@ -212,37 +212,37 @@
   max-width: 100%;
   text-align: left;
   overflow-wrap: anywhere;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .handover-source-ai {
-  background: var(--lapis-purple);
-  color: var(--lapis-cream);
+  background: #C0A8D8;
+  color: #FBF8F3;
 }
 
 .handover-source-last {
-  background: var(--lapis-lime);
+  background: #A8CC90;
 }
 
 .handover-tag {
-  background: var(--lapis-yellow);
+  background: #F5DF98;
 }
 
 .handover-value {
   overflow-wrap: anywhere;
   margin-bottom: 9.6px;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .handover-title {
-  font-family: var(--lapis-font);
+  font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
   font-weight: 700;
   font-size: 16px;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .handover-key {
-  color: var(--lapis-muted);
+  color: #8D7F77;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -250,7 +250,7 @@
 }
 
 .loading-msg {
-  color: var(--lapis-muted);
+  color: #8D7F77;
   font-weight: 600;
   font-size: 14px;
 }
@@ -260,7 +260,7 @@
 /* "Math - Fractions": the subject and the topic read as one bold title */
 .session-subject {
   font-weight: 700;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .session-subject::after {
@@ -268,11 +268,11 @@
 }
 
 .session-title {
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .session-meta {
-  color: var(--lapis-muted);
+  color: #8D7F77;
 }
 
 .session-mood {
@@ -282,27 +282,27 @@
 }
 
 .session-score {
-  background: var(--topic-academic);
-  color: var(--lapis-plum);
+  background: #A8CC90;
+  color: #4A3F3A;
   font-size: 16px;
 }
 
 .session-lines {
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .session-tag {
-  background: var(--topic-academic-soft);
-  color: var(--lapis-plum);
+  background: #E8F5DC;
+  color: #4A3F3A;
 }
 
-.icon-struggle { color: var(--lapis-pink); }
-.icon-worked { color: var(--lapis-yellow); }
-.icon-next { color: var(--lapis-purple); }
+.icon-struggle { color: #E8A0B8; }
+.icon-worked { color: #F5DF98; }
+.icon-next { color: #C0A8D8; }
 
 /* the words in the box that asks if you want to delete a session */
 .session-delete-text {
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font-weight: 500;
 }
 
@@ -310,41 +310,41 @@
 
 .quest-title {
   text-shadow: none;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .quest-meta {
-  color: var(--lapis-muted);
+  color: #8D7F77;
 }
 
 .quest-details {
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .quest-late {
-  border-color: var(--topic-alert);
+  border-color: #E8A0B8;
 }
 
 .quest-points {
-  background: var(--lapis-yellow);
-  color: var(--lapis-plum);
+  background: #F5DF98;
+  color: #4A3F3A;
 }
 
 .quest-overdue {
-  background: var(--topic-alert);
-  color: var(--lapis-plum);
+  background: #E8A0B8;
+  color: #4A3F3A;
 }
 
 /* the state of the homework: orange, or lime when it is checked */
 .quest-status,
 .quest-pill {
-  background: var(--lapis-orange);
-  color: var(--lapis-plum);
+  background: #F5B880;
+  color: #4A3F3A;
 }
 
 .quest-status-done,
 .quest-pill-done {
-  background: var(--lapis-lime);
+  background: #A8CC90;
 }
 
 /* ---------- the charts (SkillProgressChart.vue and TopicSummaryChart.vue) ---------- */
