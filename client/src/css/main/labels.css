@@ -1,3 +1,4 @@
+/* EXTERNAL CSS: the parent home, Messages, the volunteer home, one child's page and the teacher pages. It is imported at the top of each of those files. */
 /* The small captions of the parent, Messages, volunteer and child pages: capital letters with a little space between the letters.
    It is the same style as the form labels and the tags in main.css, so every page of the app reads the same.
    The size and the weight of each caption stay in the file of its page.
@@ -15,13 +16,20 @@ body .parentpage .show-more,
 body .messagespage .child-button,
 body .messagespage .unread-badge,
 body .messagespage .date-pill,
+body .teacherpage .chip,
+body .teacherpage .tag,
+body .teacherpage .tile-label,
+body .teacherpage .kv-key,
+body .teacherpage .fact-key,
 body .volunteerpage .tab,
 body .volunteerpage .pill,
 body .volunteerpage .last-seen,
 body .volunteerpage .needs-attention,
 body .volunteerpage .soft-button,
 body .role-volunteer .childprofilepage .back-link,
-body .role-volunteer .childprofilepage .session-subject {
+body .role-volunteer .childprofilepage .session-subject,
+body .role-teacher .childprofilepage .back-link,
+body .role-teacher .childprofilepage .session-subject {
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.8px;
 }

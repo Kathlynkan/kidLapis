@@ -2,11 +2,6 @@
 import mongoose from 'mongoose'
 import { newId, jsonOptions } from './helpers.js'
 
-const slotSchema = new mongoose.Schema(
-  { volunteerId: { type: String, required: true }, day: { type: String, required: true } },
-  { _id: false },
-)
-
 const childSchema = new mongoose.Schema(
   {
     _id: { type: String, default: () => newId('c') },

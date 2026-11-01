@@ -23,8 +23,8 @@ import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import SkillProgressChart from '@/components/charts/SkillProgressChart.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
 import PeelCard from '@/components/PeelCard.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
-import '@/css/volunteer/childprofilepage.css' // the look of this page for a volunteer
 import '@/css/main/labels.css' // the capital-letter captions
 
 const route = useRoute()
@@ -40,9 +40,6 @@ const handoverLoading = ref(false)
 const loading = ref(true)
 const success = ref('')
 const error = ref('')
-
-// the first letter of the child's name, shown in the round picture next to the name
-const initial = computed(() => child.value.name.charAt(0).toUpperCase())
 
 // the homework in the order a volunteer needs it: overdue, to do, waiting to be checked, checked
 function homeworkRank(h) {
@@ -162,13 +159,17 @@ onMounted(() => {
       <div v-if="success" class="alert alert-success">{{ success }}</div>
       <StateMessage v-else-if="error" type="error" :message="error" />
 
-      <RouterLink v-if="auth.role === 'volunteer'" class="back-link" :to="{ name: 'volunteer-home' }">
-        <i class="bi bi-chevron-left"></i>My children
+      <RouterLink
+        v-if="auth.role === 'volunteer' || auth.role === 'teacher'"
+        class="back-link"
+        :to="{ name: auth.role === 'teacher' ? 'manage-children' : 'volunteer-home' }"
+      >
+        <i class="bi bi-chevron-left"></i>{{ auth.role === 'teacher' ? 'Children' : 'My children' }}
       </RouterLink>
 
       <PageHeader :title="child.name" :subtitle="`${child.level} · ${child.school}`">
         <template #lead>
-          <span v-if="auth.role === 'volunteer'" class="child-initial">{{ initial }}</span>
+          <ChildInitial :child="child" />
         </template>
         <RouterLink
           v-if="auth.role === 'volunteer'"
@@ -196,22 +197,24 @@ onMounted(() => {
         </RouterLink>
       </PageHeader>
 
-      <div class="row g-4">
-        <div class="col-lg-7">
-          <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
+      <!-- the sandy board that holds the sections -->
+      <div class="board">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
 
-            <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
-            <div class="d-flex flex-column gap-3">
-              <SessionCard
-                v-for="s in sessions"
-                :key="s.id"
-                :session="s"
-                :can-edit="s.volunteerId === auth.user?.id || auth.role === 'teacher'"
-                @edit="editSession"
-                @delete="deleteSession"
-              />
-            </div>
-        </div>
+              <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
+              <div class="d-flex flex-column gap-3">
+                <SessionCard
+                  v-for="s in sessions"
+                  :key="s.id"
+                  :session="s"
+                  :can-edit="s.volunteerId === auth.user?.id || auth.role === 'teacher'"
+                  @edit="editSession"
+                  @delete="deleteSession"
+                />
+              </div>
+          </div>
 
         <div class="col-lg-5 d-flex flex-column gap-4">
           <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
@@ -221,43 +224,461 @@ onMounted(() => {
           <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
             <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
           </PeelCard>
+          <div class="col-lg-5 d-flex flex-column gap-4">
+            <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
+              <SkillProgressChart :sessions="sessions" calm :tone="auth.role === 'teacher' ? 'lavender' : 'teal'" />
+            </PeelCard>
 
-          <PeelCard
-            :title="`Pending Homework (${activeHomework.length})`"
-            icon="bi-journal-check"
-            :initial-open="true"
-          >
-            <div class="d-flex flex-column gap-2">
-              <HomeworkQuestCard
-                v-for="h in activeHomework"
-                :key="h.id"
-                :homework="h"
-                mode="volunteer"
-                :busy="checkingQuestId !== null"
-                @verify="verifyQuest"
-                @edit="editHomework"
-                @delete="deleteHomework"
-              />
-            </div>
-          </PeelCard>
+            <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
+              <TopicSummaryChart :sessions="sessions" calm />
+            </PeelCard>
+
+            <PeelCard
+              :title="`Pending Homework (${activeHomework.length})`"
+              icon="bi-journal-check"
+              :initial-open="true"
+            >
+              <div class="d-flex flex-column gap-2">
+                <HomeworkQuestCard
+                  v-for="h in activeHomework"
+                  :key="h.id"
+                  :homework="h"
+                  mode="volunteer"
+                  :busy="checkingQuestId !== null"
+                  @verify="verifyQuest"
+                  @edit="editHomework"
+                  @delete="deleteHomework"
+                />
+              </div>
+            </PeelCard>
           
-          <PeelCard
-          v-if="completedHomework.length"
-          :title="`Completed Homework (${completedHomework.length})`"
-          icon="bi-check-circle-fill"
-          :initial-open="true"
-          >
-          <div class="d-flex flex-column gap-2">
-          <HomeworkQuestCard
-          v-for="h in completedHomework"
-          :key="h.id"
-          :homework="h"
-          mode="volunteer"
-          />
+            <PeelCard
+            v-if="completedHomework.length"
+            :title="`Completed Homework (${completedHomework.length})`"
+            icon="bi-check-circle-fill"
+            :initial-open="true"
+            >
+            <div class="d-flex flex-column gap-2">
+            <HomeworkQuestCard
+            v-for="h in completedHomework"
+            :key="h.id"
+            :homework="h"
+            mode="volunteer"
+            />
+            </div>
+            </PeelCard>
           </div>
-          </PeelCard>
         </div>
       </div>
     </template>
   </div>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* Styles for one child's page as a volunteer or a teacher sees it (ChildProfileView.vue, SessionCard.vue,
+   HomeworkQuestCard.vue, HandoverCard.vue and PeelCard.vue).
+   Every rule starts with .childprofilepage, so the other pages that use the same cards (the child's quests) are not changed.
+   The colours of each role are the variables (--cp-...) in main.css.
+   The colours of the volunteer:
+     #213C31 dark green       text
+     #446C59 green            the name, the line under it and the labels
+     #4A735F deep green       main buttons, icons and arrows
+     #9BD3B2 mint             the child's letter
+     #CDE9D8 pale mint        soft buttons
+     #E1F2E9 lightest mint    the back button
+     #B7D8D7 muted teal       the handover box, the subject and score pills, "waiting to be checked"
+                              (the same as "Being checked" on the parent page)
+     #E4F0EF pale teal        small tags on the teal box
+     #F7F4EE warm cream       the cards inside a section
+     #EEDFA6 muted yellow     "struggled with" and the topics that keep coming back
+     #EE9F96 soft red         overdue and delete (the same soft red for both)
+     #2E8B57 / #E6F4EC        checked homework (the only strong green)
+     #CFC9BC                  the edge of a card with nothing special about it
+     #F9F1E6 sand             the board that holds the sections (the same as on the parent page)
+   Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (18px to 22px, round pills)
+   and a very light shadow. */
+
+/* the text of the page: the same size and weight as a volunteer sees (volunteershared.css), in the teacher's colours */
+.role-teacher .childprofilepage {
+  color: var(--cp-text);
+}
+
+.role-teacher .childprofilepage .lapis-page-header .page-title {
+  color: #5B4B8A;
+}
+
+/* the Edit buttons on a session and on a homework: the same pale green as a volunteer sees */
+.role-teacher .childprofilepage .btn-outline-primary {
+  background: #CDE9D8;
+}
+
+.role-teacher .childprofilepage .btn-outline-primary:hover {
+  background: #9BD3B2;
+}
+
+.role-teacher .childprofilepage .lapis-page-header .page-subtitle {
+  color: #7D7690;
+}
+
+/* ---------- the whole page ---------- */
+
+/* the board: the sandy box that holds the sections */
+.childprofilepage .alert {
+  border: 0;
+  border-radius: 14px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+}
+
+/* ---------- the way back, the name and the buttons ---------- */
+
+.childprofilepage .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 14px 3px 10px;
+  border-radius: 999px;
+  background: var(--cp-lightest);
+  color: var(--cp-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.childprofilepage .back-link:hover {
+  background: var(--cp-soft);
+}
+
+.childprofilepage .back-link i {
+  color: var(--cp-deep);
+}
+
+.childprofilepage .child-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--cp-letter);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* the buttons of the page: round pills, no capital letters */
+.childprofilepage .btn {
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.childprofilepage .btn-primary {
+  background: var(--cp-main);
+  color: var(--cp-main-text);
+}
+
+.childprofilepage .btn-primary:hover {
+  background: var(--cp-main-hover);
+  color: var(--cp-main-text);
+}
+
+.childprofilepage .btn-outline-primary,
+.childprofilepage .btn-outline-secondary {
+  background: var(--cp-soft);
+  color: var(--cp-text);
+}
+
+.childprofilepage .btn-outline-primary:hover,
+.childprofilepage .btn-outline-secondary:hover {
+  background: var(--cp-letter);
+  color: var(--cp-text);
+}
+
+/* delete and overdue are the same soft red */
+.childprofilepage .btn-outline-danger,
+.childprofilepage .quest-pill-late {
+  background: #EE9F96;
+  color: var(--cp-text);
+}
+
+.childprofilepage .btn-outline-danger:hover {
+  background: #E68C81;
+  color: var(--cp-text);
+}
+
+.childprofilepage .btn-link {
+  color: var(--cp-deep);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* ---------- the sections (the handover and the PeelCard sections) ---------- */
+
+.childprofilepage .peel-card,
+.childprofilepage .handover-card {
+  border: 0;
+  border-radius: 22px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px var(--cp-shadow);
+}
+
+.childprofilepage .handover-card {
+  background: var(--cp-teal);
+  box-shadow: none;
+}
+
+.childprofilepage .peel-header,
+.childprofilepage .handover-header {
+  padding: 16px 20px;
+  background: transparent;
+}
+
+.childprofilepage .peel-header:hover,
+.childprofilepage .handover-header:hover {
+  background: transparent;
+}
+
+.childprofilepage .peel-card--open .peel-header,
+.childprofilepage .handover-card--open .handover-header {
+  border-bottom: 0;
+}
+
+.childprofilepage .peel-title,
+.childprofilepage .handover-title {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cp-text);
+}
+
+.childprofilepage .peel-title i,
+.childprofilepage .handover-title i,
+.childprofilepage .peel-arrow {
+  color: var(--cp-deep);
+}
+
+.childprofilepage .peel-body-inner {
+  padding: 0 20px 20px;
+}
+
+/* the charts sit straight on the section, and the section already has the title */
+.childprofilepage [data-test='skill-progress-chart'],
+.childprofilepage [data-test='topic-summary-chart'] {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 !important; /* the chart card has the bootstrap class p-3, which is important */
+}
+
+.childprofilepage [data-test='skill-progress-chart'] > h2,
+.childprofilepage [data-test='topic-summary-chart'] > h2 {
+  display: none;
+}
+
+/* the topic bars (TopicSummaryChart.vue with calm): the name and the percentage, then a plain teal bar */
+.childprofilepage .topic-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.childprofilepage .topic-bar-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.childprofilepage .topic-bar-track {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--cp-track);
+  overflow: hidden;
+}
+
+.childprofilepage .topic-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--cp-bar);
+}
+
+/* ---------- the handover ---------- */
+
+.childprofilepage .handover-key {
+  font-size: 14px;
+  color: var(--cp-key);
+}
+
+.childprofilepage .handover-value {
+  font-weight: 400;
+}
+
+/* the small tags (the source of the summary, the topics that keep coming back, the score, the subject, the homework state): the text sits in the middle */
+.childprofilepage .handover-badge,
+.childprofilepage .session-score,
+.childprofilepage .session-tag,
+.childprofilepage .quest-pill,
+.childprofilepage .session-subject {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.childprofilepage .handover-source-ai,
+.childprofilepage .handover-source-last {
+  background: var(--cp-teal-soft);
+  color: var(--cp-text);
+}
+
+/* the topics that keep coming back are struggles too: the same muted yellow as "struggled with" */
+.childprofilepage .handover-tag {
+  background: #EEDFA6;
+  color: var(--cp-text);
+}
+
+/* ---------- a session ---------- */
+
+.childprofilepage .session-card,
+.childprofilepage .quest-card {
+  border: 0;
+  border-radius: 18px;
+  background: #F7F4EE;
+  box-shadow: none;
+}
+
+/* a session on the sandy board is a white card (the homework inside a white section stays warm cream) */
+.childprofilepage .board .session-card {
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px var(--cp-shadow);
+}
+
+.childprofilepage .session-subject {
+  margin-right: 8px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+  font-size: 12px;
+  vertical-align: 1px;
+}
+
+.childprofilepage .session-subject::after {
+  content: none;
+}
+
+.childprofilepage .session-title {
+  font-size: 16px;
+}
+
+/* the grey line under a session and under a homework */
+.childprofilepage .session-meta,
+.childprofilepage .quest-meta {
+  font-size: 13px;
+  color: var(--cp-grey);
+}
+
+/* the date and the mood chip share one white rounded bar, centred on the same line */
+.childprofilepage .session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px; /* a gap under the subject and the topic */
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #FFFFFF;
+}
+
+.childprofilepage .session-mood {
+  gap: 5px;
+  padding: 0;
+  background: transparent; /* the white bar behind the date shows through */
+  font-size: 12px;
+  line-height: 1; /* a tight line, so the face and the word sit on the same middle line */
+}
+
+.childprofilepage .session-score {
+  padding: 4px 12px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+  font-size: 13px;
+}
+
+.childprofilepage .session-lines {
+  font-size: 14px;
+  color: var(--cp-text);
+}
+
+.childprofilepage .session-icon {
+  color: var(--cp-deep);
+}
+
+.childprofilepage .session-tag {
+  padding: 2px 10px;
+  background: #EEDFA6;
+  color: var(--cp-text);
+  font-weight: 600;
+}
+
+/* ---------- a homework: its edge and its tag show where it is ---------- */
+
+.childprofilepage .quest-card {
+  border-left: 5px solid #CFC9BC;
+}
+
+.childprofilepage .quest-late {
+  border-left-color: #EE9F96;
+}
+
+.childprofilepage .quest-waiting {
+  border-left-color: var(--cp-teal);
+}
+
+.childprofilepage .quest-done {
+  background: #E6F4EC;
+  border-left-color: #2E8B57;
+}
+
+.childprofilepage .quest-title {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.childprofilepage .quest-details {
+  font-size: 14px;
+}
+
+.childprofilepage .quest-pill {
+  padding: 3px 11px;
+}
+
+.childprofilepage .quest-pill-todo {
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 1.5px #CFC9BC;
+  color: var(--cp-text);
+}
+
+.childprofilepage .quest-pill-waiting {
+  background: var(--cp-teal);
+  color: var(--cp-waiting-text);
+}
+
+.childprofilepage .quest-pill-done {
+  background: #2E8B57;
+  color: #FFFFFF;
+  font-size: 13px;
+}
+</style>

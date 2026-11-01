@@ -1,3 +1,4 @@
+/* EXTERNAL CSS: the parent home and Messages. It is imported at the top of each of those files. */
 /* What the parent pages have in common: the parent home and Messages.
    Each of those pages also has its own file with the rules only that page needs.
    Colours:
@@ -9,9 +10,6 @@
 
 .parentpage,
 .messagespage {
-  font-family: var(--lapis-font);
-  font-size: 15px;
-  line-height: 1.55;
   color: #414F67;
 }
 

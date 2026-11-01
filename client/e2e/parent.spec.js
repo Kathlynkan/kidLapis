@@ -32,7 +32,7 @@ test.describe('Parent portal', () => {
     const handover = page.locator('[data-test="handover-card"]')
     await expect(handover).toBeVisible()
     // The parent-audience summary uses the "Working on" label, not the volunteer "Continue" label
-    await expect(handover).toContainText('Working on')
+    await expect(handover).toContainText('This week')
   })
 
   test('shows recurring struggles badge for Ethan', async ({ page }) => {

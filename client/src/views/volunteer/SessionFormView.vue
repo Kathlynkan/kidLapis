@@ -8,7 +8,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
-import LineIcon from '@/components/LineIcon.vue' // a small drawn face, instead of an emoji
 import { SUBJECTS, MOODS, PORTIONS } from '@/utils/constants'
 import api, { errorMessage } from '@/services/api'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
@@ -155,20 +154,42 @@ async function handleSubmit() {
   }
 }
 
-function uploadPhotos(event) {
-  form.value.photos = Array.from(event.target.files)
+// A photo is made smaller in the browser and kept as text (a data URL), so it can be saved inside the session
+const PHOTO_WIDTH = 800
+
+function shrinkPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, PHOTO_WIDTH / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = '#fff' // a see-through picture would turn black as a jpeg
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+      URL.revokeObjectURL(img.src)
+      resolve(canvas.toDataURL('image/jpeg', 0.7))
+    }
+    img.onerror = () => reject(new Error('That file is not a picture'))
+    img.src = URL.createObjectURL(file)
+  })
 }
 
-function getPhotoURL(photo) {
-  // if photo is a string (already a URL from database)
-  if (typeof photo === 'string') {
-    return photo
-  }
+async function uploadPhotos(event) {
+  const files = Array.from(event.target.files)
+  event.target.value = '' // so the same picture can be picked again
 
-  // else photo is newly uplaoded 
-  return URL.createObjectURL(photo)
-  // createObjectURL: convert file from computer 
-  // into temporary preview link for <img :src="...">
+  try {
+    for (const file of files) {
+      form.value.photos.push(await shrinkPhoto(file))
+    }
+  } catch (err) {
+    error.value = err.message
+  }
 }
 
 function removePhoto(index) {
@@ -246,7 +267,7 @@ onMounted(() => { // autofill form if edit form
     </button>
 
     <PageHeader
-      :title="isEdit ? 'Edit session' : 'Record a session'"
+      :title="isEdit ? 'Edit Session' : 'Record Session'"
       subtitle="Takes about a minute. The next volunteer will thank you!"
     />
 
@@ -291,7 +312,7 @@ onMounted(() => { // autofill form if edit form
                     btn-outline-secondary: gray outlined button style
                     btn-sm: small button size
                     -->
-                    <LineIcon :name="m.face" small />{{ m.label }}
+                    <i class="bi" :class="m.face"></i>{{ m.label }}
                   </label>
                 </template>
               </div>
@@ -383,7 +404,7 @@ onMounted(() => { // autofill form if edit form
               <input id="meal" v-model.trim="form.meal" class="form-control" placeholder="e.g. Chicken rice and apples">
             </div>
 
-            <div class="col-sm-7">
+            <div class="col-md-7">
               <span class="form-label d-block">Portion Eaten</span>
               <!-- d-block: display label on its own line, label takes up entire row -->
               <div class="btn-group flex-wrap" role="group">
@@ -454,7 +475,7 @@ onMounted(() => { // autofill form if edit form
               <!-- photo preview directly below uplaod input -->
               <div v-if="form.photos.length > 0" class="d-flex flex-wrap gap-2 mt-2">
                 <div v-for="(photo, index) in form.photos" :key="index" class="position-relative">
-                  <img :src="getPhotoURL(photo)"
+                  <img :src="photo"
                   class="rounded photo-thumb">
 
                   <button type="button" 

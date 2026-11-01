@@ -8,23 +8,20 @@ import { computed, ref, watch, onMounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
-import '@/css/main/stripes.css' // the colours and the size of the stripes under the bar
-import '@/css/main/navbar.css' // the bar
 
 const auth = useAuthStore()
 const route = useRoute()
 const menuOpen = ref(false) // on a small screen the menu is hidden until this is true
 
-// every time the user goes to another page: close the menu and look for new messages
+// every time the user goes to another page: close the menu, look for new messages and for the photo of a child
 watch(() => route.fullPath, () => {
   menuOpen.value = false
   fetchUnread()
+  fetchPhoto()
 })
 
 const LINKS = {
-  volunteer: [
-    { to: '/volunteer', label: 'My Children' },
-  ],
+  volunteer: [], // the Kids Lapis logo goes to the home page of the volunteer, so there is no link here
   teacher: [
     { to: '/teacher', label: 'Dashboard' },
     { to: '/teacher/children', label: 'Children' },
@@ -45,13 +42,17 @@ const LINKS = {
 
 const links = computed(() => LINKS[auth.role] || [])
 
-// the layers of the cake, in order. A role shows the layers up to its own: a parent has one stripe, a volunteer has two.
-// The other roles have one stripe in their own colour for now.
-const LAYERS = ['parent', 'volunteer']
+// the layers of the cake, from the bottom up: purple at the bottom, then green, aqua and pink on top.
+// A role shows the layers up to its own: a teacher has one stripe (purple), a volunteer has two (purple, green),
+// a parent has three (purple, green, aqua) and a child has all four (purple, green, aqua, pink).
+const LAYERS = ['teacher', 'volunteer', 'parent', 'child']
+const LAYER_COLOURS = { teacher: '#D5CBEA', volunteer: '#9BD3B2', parent: '#AED9D8', child: '#E8A0B8' }
 const stripes = computed(() => {
   const place = LAYERS.indexOf(auth.role)
-  if (place < 0) return ['var(--role-accent)']
-  return LAYERS.slice(0, place + 1).map((layer) => `var(--layer-${layer})`)
+  // a visitor who is not logged in sees all four layers
+  const shown = place < 0 ? LAYERS : LAYERS.slice(0, place + 1)
+  // the stripes are drawn from the top down, so the bottom layer (purple) comes last
+  return [...shown].reverse().map((layer) => LAYER_COLOURS[layer])
 })
 
 // true when this link is the page we are on.
@@ -71,6 +72,22 @@ const initial = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 
+// the photo of a child, shown in the round avatar instead of the letter (it is saved on the child, not on the user)
+const photo = ref('')
+
+async function fetchPhoto() {
+  if (auth.role !== 'child' || !auth.user?.childId) {
+    photo.value = ''
+    return
+  }
+  try {
+    const res = await api.get(`/children/${auth.user.childId}`)
+    photo.value = (res.data.avatar || '').startsWith('/') ? res.data.avatar : ''
+  } catch {
+    photo.value = '' // the letter is shown instead
+  }
+}
+
 // how many messages the user has not read yet (shown next to Messages)
 const unreadTotal = ref(0)
 
@@ -84,7 +101,10 @@ async function fetchUnread() {
   }
 }
 
-onMounted(fetchUnread)
+onMounted(() => {
+  fetchUnread()
+  fetchPhoto()
+})
 </script>
 
 <template>
@@ -112,7 +132,10 @@ onMounted(fetchUnread)
         <!-- the user, on the right -->
         <div v-if="auth.isLoggedIn" class="lapis-user">
           <RouterLink to="/profile" class="lapis-user-link" data-test="nav-profile">
-            <span class="lapis-avatar">{{ initial }}</span>
+            <span class="lapis-avatar">
+              <img v-if="photo" :src="photo" alt="" />
+              <template v-else>{{ initial }}</template>
+            </span>
             <span class="lapis-who">
               <b>{{ auth.user.name }}</b>
               <small>{{ auth.role }}</small>
@@ -133,3 +156,234 @@ onMounted(fetchUnread)
     </div>
   </nav>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* The stripes under the navbar (NavBar.vue). They show the layers of the cake, one stripe for each layer.
+   Purple is the bottom layer, then green, aqua and pink on top. A role shows the layers up to its own: a teacher has one
+   stripe (purple), a volunteer has two (green on purple), a parent has three (aqua on green on purple) and a child has four
+   (pink on aqua on green on purple), the whole kueh lapis.
+   Every page of a role has the same stripes, because they are part of the navbar.
+   The colours are in LAYER_COLOURS in the script above (pink, aqua, mint and purple, the palette in main.css).
+   To add a layer for another role: add its colour there and its name to LAYERS in NavBar.vue. */
+
+.role-stripes i {
+  display: block;
+  height: 5px;
+}
+
+/* The navbar (NavBar.vue): a cream bar with the links, the user and the menu button on a small screen.
+   The stripes under it are styled in the style block at the bottom of this file, and their colours are the colours of the user's role. */
+
+.lapis-nav {
+  background: #FDFAF4;
+  color: #414F67;
+  font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+}
+
+.lapis-nav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+}
+
+.lapis-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+  color: #414F67;
+  font-size: 19px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* the menu: one row on a wide screen */
+.lapis-menu {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex: 1;
+  min-width: 0;
+}
+
+.lapis-links {
+  display: flex;
+  align-self: stretch;
+  justify-content: flex-start;
+  flex: 1;
+  gap: 2px;
+}
+
+.lapis-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-bottom: 4px solid transparent;
+  color: #414F67;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lapis-nav-link:hover {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
+}
+
+.lapis-nav-link.open {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
+  border-bottom-color: transparent;
+}
+
+.lapis-badge {
+  min-width: 18px;
+  padding: 0 5px;
+  background: #F6D1AA;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 999px;
+}
+
+.lapis-user {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.lapis-user-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.lapis-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--role-accent, #AED9D8);
+  font-weight: 700;
+  overflow: hidden;
+}
+
+/* the photo of a child fills the circle */
+.lapis-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lapis-who {
+  line-height: 1.2;
+}
+
+.lapis-who b {
+  display: block;
+  font-size: 14px;
+}
+
+.lapis-who small {
+  color: #5E6C80;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.lapis-button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 2px #D5CBEA;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lapis-button-filled {
+  background: #E8A0B8;
+  box-shadow: none;
+}
+
+/* the menu button: only shown on a small screen */
+.lapis-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  margin-left: auto;
+  border: 1px solid #414F67;
+  background: transparent;
+  color: #414F67;
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* a small screen: the menu hides behind the button and opens as a list */
+@media (max-width: 1099px) {
+  .lapis-burger {
+    display: flex;
+  }
+
+  .lapis-brand {
+    margin-right: 0;
+    font-size: 17px;
+  }
+
+  .lapis-menu {
+    display: none;
+    flex: 0 0 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: 8px;
+  }
+
+  .lapis-menu.open {
+    display: flex;
+  }
+
+  .lapis-links {
+    flex: none;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .lapis-nav-link {
+    justify-content: space-between;
+    min-height: 46px;
+    padding: 0 4px;
+    border-bottom: 1px solid #CFE0DE;
+  }
+
+  .lapis-nav-link.open {
+    padding-left: 10px;
+    border-bottom-color: #CFE0DE;
+    background: var(--role-accent-soft, #DDF0EF);
+    border-radius: 0;
+  }
+
+  .lapis-user {
+    justify-content: space-between;
+    margin: 10px 0 0;
+  }
+}
+</style>

@@ -31,7 +31,7 @@ const io = new SocketServer(httpServer, {
 const PORT = process.env.PORT || 8000
 
 app.use(cors({ origin: process.env.CLIENT_URL || true }))
-app.use(express.json())
+app.use(express.json({ limit: '10mb' })) // a session carries its photos as text, so it can be big
 
 // Store io on the app so routes can emit events via req.app.get('io')
 app.set('io', io)

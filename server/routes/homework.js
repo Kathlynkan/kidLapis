@@ -18,7 +18,7 @@
 import { Router } from 'express'
 import { Homework, Child, Deck } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
-import { canAccessChild, visibleChildIds } from '../utils/access.js'
+import { visibleChildIds } from '../utils/access.js'
 
 const router = Router()
 
@@ -106,30 +106,22 @@ router.get('/leaderboard', async (req, res) => {
   )
 })
 
+// GET /homework/:id                              (Ning Xuan: loads one homework into the edit form)
+router.get('/:id', async (req, res) => {
+  const hw = await Homework.findById(req.params.id)
+  if (!hw) return res.status(404).json({ message: 'Homework not found.' })
+
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(hw.childId)) {
+    return res.status(403).json({ message: 'You do not have access to this homework.' })
+  }
+
+  res.json(req.user.role === 'child' ? hideAnswers(hw) : hw)
+})
+
 // ---------------------------------------------------------------
 // POST /homework      (Ning Xuan: assign homework, done  +  Jachin: the questions come from a deck)
 // ---------------------------------------------------------------
-// GET /homework/:id
-router.get('/:id', async (req, res) => {
-  const homework = await Homework.findById(req.params.id)
-
-  if (!homework) {
-    return res.status(404).json({
-      message: 'Homework not found'
-    })
-  }
-
-  const visible = await visibleChildIds(req.user)
-
-  if (!visible.includes(homework.childId)) {
-    return res.status(403).json({
-      message: 'No access'
-    })
-  }
-
-  res.json(homework)
-})
-
 router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
   // only volunteers and coordinators can assign homework
   try {
@@ -224,6 +216,46 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
       message: 'Failed to assign homework'
     })
   }
+})
+
+// PUT /homework/:id         (Ning Xuan) -> volunteer or teacher edits the homework
+//   body = { title, subject, details, dueDate, points }  (the child and the status cannot be changed here)
+//   Not allowed once verified: the child already earned the stars.
+router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
+  const hw = await Homework.findById(req.params.id)
+  if (!hw) return res.status(404).json({ message: 'Homework not found.' })
+
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(hw.childId)) {
+    return res.status(403).json({ message: 'You do not have access to this homework.' })
+  }
+
+  if (hw.status === 'verified') {
+    return res.status(400).json({
+      message: 'Verified homework cannot be edited — the child already earned their stars.',
+    })
+  }
+
+  const { title, subject, details, dueDate, points } = req.body
+
+  if (!dueDate) return res.status(400).json({ message: 'Due date is required' })
+  // a date that is already in the past is fine only if it is the date the homework had before
+  const today = new Date().toISOString().slice(0, 10)
+  if (dueDate !== hw.dueDate && dueDate < today) {
+    return res.status(400).json({ message: 'Due date cannot be in the past' })
+  }
+  if (!title || !title.trim()) return res.status(400).json({ message: 'Title is required' })
+  if (points < 5 || points > 20) {
+    return res.status(400).json({ message: 'Points must be between 5 and 20' })
+  }
+
+  hw.title = title.trim()
+  hw.subject = subject
+  hw.details = (details || '').trim()
+  hw.dueDate = dueDate
+  hw.points = Number(points)
+  await hw.save()
+  res.json(hw)
 })
 
 // PUT /homework/:id/submit  (Jachin) -> child marks homework as done

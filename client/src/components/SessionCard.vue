@@ -1,12 +1,11 @@
 <!-- =============================================================
   SessionCard - one past session in the history list.   Owner: Ning Xuan
-  The look for a volunteer is in css/volunteer/childprofilepage.css
+  The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
 import { formatDate, accuracy } from '@/utils/format'
 import { MOODS } from '@/utils/constants'
-import LineIcon from '@/components/LineIcon.vue'
 import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
@@ -32,7 +31,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         <div class="small session-meta">
           {{ formatDate(session.date) }} &middot; by {{ session.volunteerName }}
           <span v-if="mood" class="chip chip-social session-mood ms-1">
-            <LineIcon :name="mood.face" small />{{ mood.label }}
+            <i class="bi" :class="mood.face"></i>{{ mood.label }}
           </span>
         </div>
       </div>

@@ -6,10 +6,9 @@ import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
-import LineIcon from '@/components/LineIcon.vue' // a small drawn icon, instead of an emoji
-import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
+import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
+import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
 import '@/css/parent/parentshared.css' // what the parent pages have in common
-import '@/css/parent/parentpage.css' // the styles of this page
 import '@/css/main/labels.css' // the capital-letter captions
 
 const auth = useAuthStore()
@@ -19,7 +18,7 @@ const children = ref([]) // all the children of this parent
 const selectedId = ref(null) // the id of the child we are showing now
 const sessions = ref([]) // the sessions of that child, newest first
 const homework = ref([]) // the homework of that child
-const handover = ref(null) // the AI summary of that child
+const handover = ref(null) // the weekly AI summary of that child (Mon - Fri, learning + social)
 const handoverLoading = ref(false) // true while we wait for the summary
 const loading = ref(true) // true while the page is first loading
 const error = ref('') // the error sentence, empty if there is no error
@@ -43,10 +42,10 @@ const MOOD_WORDS = {
 
 // the face icon that goes with each mood
 const MOOD_FACES = {
-  happy: 'face-happy',
-  okay: 'face-okay',
-  tired: 'face-tired',
-  frustrated: 'face-hard',
+  happy: 'bi-emoji-smile',
+  okay: 'bi-emoji-neutral',
+  tired: 'bi-emoji-expressionless',
+  frustrated: 'bi-emoji-angry',
 }
 
 // the number of each weekday, the way JavaScript counts them (Sunday is 0)
@@ -55,9 +54,6 @@ const DAY_NUMBERS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 // ---------- values worked out from the things above ----------
 // the child we are showing now (found in the list by its id)
 const selectedChild = computed(() => children.value.find((child) => child.id === selectedId.value))
-
-// the first letter of the child's name, shown in the round picture
-const childInitial = computed(() => (selectedChild.value ? selectedChild.value.name.charAt(0).toUpperCase() : ''))
 
 // the child's first name, used in the sentences
 const childName = computed(() => (selectedChild.value ? firstName(selectedChild.value.name) : ''))
@@ -103,9 +99,7 @@ function rowTag(item, groupKey) {
 // the grey line under the title of a homework row
 function rowMeta(item, groupKey) {
   if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
-  const handedIn = item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : ''
-  if (groupKey === 'waiting') return item.subject + handedIn
-  return item.subject + handedIn
+  return item.subject + (item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : '')
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -121,6 +115,13 @@ function sessionFor(item) {
   }
   return found
 }
+
+// the session of every finished homework, found by the homework id
+const resultSessions = computed(() => {
+  const found = {}
+  for (const item of homework.value) found[item.id] = sessionFor(item)
+  return found
+})
 
 // the score of a session in words, like "4 / 5 right" (empty when nothing was attempted)
 function scoreOf(session) {
@@ -138,27 +139,16 @@ function resultNotes(session) {
   return notes
 }
 
-// the non-academic things the child did in a session (chess with friends, soccer ...), as a list
-function activitiesOf(session) {
-  const activity = session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
-  if (Array.isArray(activity)) {
-    return activity
-  }
-  if (activity) {
-    return [activity]
-  }
-  return []
-}
-
-// the lines of the AI summary, each with its label (a line is left out when it is empty)
+// the lines of the weekly AI summary, each with its label (a line is left out when it is empty)
 const summaryLines = computed(() => {
   if (!handover.value) return []
   const lines = [
-    { label: 'Working on', text: handover.value.continueTopic },
-    { label: 'Latest score', text: handover.value.lastResult },
-    { label: 'What helped', text: handover.value.whatWorked },
-    { label: 'Finding tricky', text: handover.value.struggle },
-    { label: 'Coming up next', text: handover.value.nextStep },
+    { label: 'This week', text: handover.value.headline },
+    { label: 'Learning', text: handover.value.learning },
+    { label: 'Friends', text: handover.value.friends },
+    { label: 'Worth knowing', text: handover.value.worthKnowing },
+    { label: 'Proud moment', text: handover.value.celebrate },
+    { label: 'Try at home', text: handover.value.atHome },
   ]
   return lines.filter((line) => line.text && line.text !== '-')
 })
@@ -220,14 +210,16 @@ async function showHomework() {
   document.getElementById('homework-board').scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
-// ---------- ask the server for the AI summary ----------
+// ---------- ask the server for the weekly AI summary ----------
+// Fri - Sun: this week (Mon - Fri). Mon - Thu: last week, because this week is not finished yet.
 async function loadHandover(childId) {
   handover.value = null
   handoverLoading.value = true
   let summary = null // stays empty if something goes wrong, the rest of the page still works
   try {
     // audience: 'parent' makes the AI write in simple, friendly words
-    const response = await api.post(`/handover/${childId}`, { audience: 'parent' })
+    // type: 'weekly' sums up the whole week, learning and social, from every volunteer's notes
+    const response = await api.post(`/handover/${childId}`, { audience: 'parent', type: 'weekly' })
     summary = response.data
   } catch {
     summary = null
@@ -286,10 +278,10 @@ onMounted(async () => {
       <!-- the child's name and level, and the child buttons (only when the parent has 2 or more children) -->
       <div class="child-row" data-test="child-switcher">
         <div class="child-info">
-          <span class="child-initial">{{ childInitial }}</span>
+          <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><LineIcon name="star" small />{{ selectedChild.points }} stars earned</span></div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">
@@ -323,9 +315,11 @@ onMounted(async () => {
         </component>
       </div>
 
-      <!-- today at a glance: the AI summary -->
+      <!-- parent weekly AI summary: learning, friends, anything worth knowing, what to try at home   (Yuqi) -->
       <div class="glance" data-test="handover-card">
-        <span class="small-label">How things are going</span>
+        <span class="small-label">This week at student care</span>
+        <!-- which week it covers, e.g. 2026-10-19 to 2026-10-23 -->
+        <p v-if="handover && handover.periodLabel" class="muted">{{ handover.periodLabel }}</p>
         <p v-if="handoverLoading" class="muted">Getting the update...</p>
         <template v-else-if="summaryLines.length > 0">
           <p v-for="line in summaryLines" :key="line.label" class="glance-line">
@@ -371,22 +365,22 @@ onMounted(async () => {
                     <span class="row-title">{{ item.title }}</span>
                     <span class="row-tag">{{ rowTag(item, group.key) }}</span>
                   </span>
-                  <span v-if="group.key === 'done' && scoreOf(sessionFor(item))" class="row-score">{{ scoreOf(sessionFor(item)) }}</span>
+                  <span v-if="group.key === 'done' && scoreOf(resultSessions[item.id])" class="row-score">{{ scoreOf(resultSessions[item.id]) }}</span>
                   <span class="muted">{{ rowMeta(item, group.key) }}</span>
-                  <span v-if="group.key === 'done'" class="muted with-icon"><LineIcon name="star" small />{{ item.points }} stars</span>
+                  <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
 
                 <!-- what the volunteer wrote down for it -->
                 <p v-if="group.key === 'todo' && item.details" class="row-details">{{ item.details }}</p>
                 <template v-if="group.key === 'done'">
-                  <template v-if="sessionFor(item)">
-                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <LineIcon :name="MOOD_FACES[sessionFor(item).mood]" small />{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
-                    <div v-for="note in resultNotes(sessionFor(item))" :key="note.label" class="note-box">
+                  <template v-if="resultSessions[item.id]">
+                    <p v-if="MOOD_WORDS[resultSessions[item.id].mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[resultSessions[item.id].mood]"></i>{{ MOOD_WORDS[resultSessions[item.id].mood] }}</p>
+                    <div v-for="note in resultNotes(resultSessions[item.id])" :key="note.label" class="note-box">
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
                     </div>
-                    <div v-if="sessionFor(item).photos && sessionFor(item).photos.length > 0" class="result-photos">
-                      <img v-for="(photo, number) in sessionFor(item).photos" :key="number" :src="photo" alt="Photo from the session" />
+                    <div v-if="resultSessions[item.id].photos && resultSessions[item.id].photos.length > 0" class="result-photos">
+                      <img v-for="(photo, number) in resultSessions[item.id].photos" :key="number" :src="photo" alt="Photo from the session" />
                     </div>
                   </template>
                   <p v-else class="muted" data-test="no-result">No result recorded yet.</p>
@@ -407,7 +401,7 @@ onMounted(async () => {
                   <h3 class="day-title">{{ daysSince(sessions[0].date) === 0 ? 'Today at student care' : 'Latest day at student care' }}</h3>
                   <div class="muted">{{ formatDate(sessions[0].date) }}<template v-if="sessions[0].volunteerName"> &middot; with {{ sessions[0].volunteerName }}</template></div>
                 </div>
-                <span class="mood-chip"><LineIcon v-if="MOOD_FACES[sessions[0].mood]" :name="MOOD_FACES[sessions[0].mood]" small />{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
+                <span class="mood-chip"><i v-if="MOOD_FACES[sessions[0].mood]" class="bi" :class="MOOD_FACES[sessions[0].mood]"></i>{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>
               </div>
               <ParentSocialDay :session="sessions[0]" :child-name="childName" />
             </div>
@@ -418,7 +412,7 @@ onMounted(async () => {
               <summary>
                 <span class="day-head">
                   <strong>{{ formatDate(session.date) }}</strong>
-                  <span class="mood-chip"><LineIcon v-if="MOOD_FACES[session.mood]" :name="MOOD_FACES[session.mood]" small />{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
+                  <span class="mood-chip"><i v-if="MOOD_FACES[session.mood]" class="bi" :class="MOOD_FACES[session.mood]"></i>{{ MOOD_WORDS[session.mood] || 'Mood not noted' }}</span>
                 </span>
                 <span v-if="activitiesOf(session).length > 0" class="muted">{{ activitiesOf(session).join(', ') }}</span>
               </summary>
@@ -433,3 +427,500 @@ onMounted(async () => {
     </template>
   </div>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* Styles for the parent home page (ParentHomeView.vue and ParentSocialDay.vue).
+   Every rule starts with .parentpage so it only affects that page.
+   Colours:
+     #414F67 navy       text
+     #AED9D8 aqua       the main colour (selected tab and button)
+     #DDF0EF pale aqua  tiles, tags and small areas
+     #EAF6F5 lightest   note boxes
+     #CDE8D2 green      done
+     #B7D8D7 teal       being checked
+     #F5B8B0 soft red   late
+     #FBE7A1 soft yellow still to do (due)
+     #F6D1AA peach      the star icon
+     #F9F1E6 cream      the board
+     #5E6C80 grey       small text
+     #CFE0DE            thin borders
+   Look: no dark outlines, soft corners (16px boxes, round pills) and a very light shadow. */
+
+/* ---------- the whole page ---------- */
+
+.parentpage h1,
+.parentpage h2,
+.parentpage h3 {
+  font-family: inherit;
+  color: #414F67;
+  text-shadow: none;
+}
+
+/* the sentence under the title is navy too */
+.parentpage .lapis-page-header .page-subtitle {
+  color: #414F67;
+}
+
+.parentpage .muted {
+  color: #5E6C80;
+  font-size: 13px;
+}
+
+/* the small labels (above a note, above a line of a day) */
+.parentpage .small-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------- the child and the child buttons ---------- */
+
+.parentpage .child-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.parentpage .child-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* the round picture of the child: the first letter of the name */
+.parentpage .child-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #AED9D8;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.parentpage .child-name {
+  margin: 0;
+  font-size: 18px;
+}
+
+/* ---------- the three tiles ---------- */
+
+.parentpage .summary-tiles {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.parentpage .tile {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #DDF0EF;
+}
+
+.parentpage .tile strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.parentpage .tile span {
+  font-size: 12px;
+}
+
+/* late is a soft red, still to do is a soft yellow */
+.parentpage .tile-late {
+  background: #F5B8B0;
+}
+
+.parentpage .tile-todo {
+  background: #FBE7A1;
+}
+
+.parentpage .tile-next {
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1); /* the very light shadow under the white boxes */
+}
+
+/* the tiles you can press (they take you to the homework) */
+.parentpage .tile-link {
+  border: 0;
+  color: #414F67;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* a little darker when the mouse is over it */
+.parentpage .tile-link:hover {
+  background: #C9E4E2;
+}
+
+.parentpage .tile-todo.tile-link:hover {
+  background: #F5DA84;
+}
+
+.parentpage .tile-late.tile-link:hover {
+  background: #EDA39A;
+}
+
+/* ---------- today at a glance (the AI summary) ---------- */
+
+.parentpage .glance {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #DDF0EF;
+  font-size: 14px;
+}
+
+.parentpage .glance .small-label {
+  color: #5E6C80;
+}
+
+.parentpage .glance .chip {
+  background: #FFFFFF;
+}
+
+.parentpage .glance-line {
+  margin: 4px 0 0;
+}
+
+/* ---------- the board and its tabs ---------- */
+
+.parentpage .board {
+  scroll-margin-top: 12px; /* when we scroll to the board it stops a little below the top of the screen */
+}
+
+/* the tabs: two pills in a pale track */
+.parentpage .tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #DDF0EF;
+}
+
+.parentpage .tab {
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #414F67;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.parentpage .tab.active {
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(65, 79, 103, 0.15);
+}
+
+.parentpage .tab-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #414F67;
+  color: #F9F1E6;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.parentpage .board-panel {
+  padding: 4px 0 0;
+}
+
+.parentpage .group-heading {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* the white rows: a homework, or a day of the social tab */
+.parentpage .homework-row,
+.parentpage .day-card {
+  margin-bottom: 10px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
+}
+
+.parentpage .show-more {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: #DDF0EF;
+  color: #414F67;
+  font: inherit;
+  font-weight: 700;
+}
+
+/* a closed row you can tap to open */
+.parentpage summary {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+
+.parentpage summary::-webkit-details-marker {
+  display: none;
+}
+
+.parentpage summary .muted {
+  display: block;
+}
+
+/* a line with an icon in front of it stays in one row */
+.parentpage summary .muted.with-icon {
+  display: flex;
+}
+
+/* the box with a label and a note (what helped, a note from the volunteer ...) */
+.parentpage .note-box {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #EAF6F5;
+}
+
+/* ---------- the homework rows ---------- */
+
+.parentpage .homework-row {
+  padding: 12px 16px;
+}
+
+.parentpage .row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.parentpage .row-title {
+  font-weight: 700;
+}
+
+/* the small pills: the tag of a homework, its score, the mood of a day and the topics (chip) */
+.parentpage .row-tag,
+.parentpage .row-score,
+.parentpage .mood-chip,
+.parentpage .chip {
+  border-radius: 999px;
+  background: #DDF0EF;
+}
+
+.parentpage .row-tag,
+.parentpage .row-score,
+.parentpage .mood-chip {
+  padding: 2px 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.parentpage .row-tag {
+  flex-shrink: 0;
+}
+
+.parentpage .row-score {
+  display: inline-block;
+  margin: 4px 0;
+  padding: 1px 10px;
+  font-size: 13px;
+}
+
+.parentpage .row-todo .row-tag {
+  background: #FBE7A1;
+}
+
+.parentpage .row-late .row-tag {
+  background: #F5B8B0;
+}
+
+.parentpage .row-waiting .row-tag {
+  background: #B7D8D7;
+}
+
+.parentpage .row-done .row-tag,
+.parentpage .row-done .row-score {
+  background: #CDE8D2;
+}
+
+.parentpage .row-details {
+  margin: 6px 0 0;
+}
+
+/* the hint under a finished homework */
+.parentpage .row-done summary::after {
+  content: 'Tap to open';
+  display: block;
+  font-size: 12px;
+  color: #5E6C80;
+}
+
+.parentpage .row-done[open] summary::after {
+  content: 'Tap to close';
+}
+
+.parentpage .result-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.parentpage .result-photos img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* ---------- the social tab ---------- */
+
+.parentpage .day-card {
+  padding: 14px 16px;
+}
+
+.parentpage .day-card-small {
+  padding: 11px 16px;
+}
+
+.parentpage .day-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.parentpage .day-title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.parentpage .mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* an earlier day: a short card with a hint to open it */
+.parentpage .day-card-small summary::after {
+  content: 'See the full day';
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #5E6C80;
+}
+
+.parentpage .day-card-small[open] summary::after {
+  content: 'Close';
+}
+
+/* the inside of a day (ParentSocialDay.vue) */
+.parentpage .day {
+  margin-top: 8px;
+}
+
+.parentpage .chip {
+  display: inline-block;
+  margin: 0 4px 4px 4px;
+  padding: 2px 12px;
+  font-size: 13px;
+}
+
+.parentpage .day-line {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #CFE0DE;
+}
+
+.parentpage .day-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+/* photos: a gallery of square pictures, three in a row (two on a small screen) */
+.parentpage .day-photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.parentpage .day-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* the picture is cropped to the square; the crop keeps the top, where the faces are */
+.parentpage .day-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+/* the last square while more photos are hidden: how many more there are */
+.parentpage .day-photo-more {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(65, 79, 103, 0.6);
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .parentpage .day-photos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 420px) {
+  .parentpage .summary-tiles {
+    flex-wrap: wrap;
+  }
+
+  .parentpage .tile {
+    flex-basis: 40%;
+  }
+}
+</style>

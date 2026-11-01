@@ -8,43 +8,63 @@
 
 **Kueh lapis.** The app should feel like layers of a cake, one layer for each role.
 
-- **Parent and volunteer pages (the soft look):** no dark outlines, soft corners (14 px to 22 px, round pills for tags, tabs and buttons), a very light shadow, Inter text, and small line icons (`LineIcon.vue`) instead of emoji. Every parent page shares one look and every volunteer page shares another.
-- **Child, teacher and coordinator pages (the original look):** 0 px corner radius and a solid border that is a darker shade of the card's fill colour. No drop shadows on cards — only on floating elements (tooltips, modals).
+- **Parent and volunteer pages (the soft look):** no dark outlines, soft corners (14 px to 22 px, round pills for tags, tabs and buttons), a very light shadow, Inter text, and Bootstrap icons (`bi bi-...`) instead of emoji, the same icons on every page (a star is `bi-star-fill`, the moods are `bi-emoji-*`). Every parent page shares one look and every volunteer page shares another.
+- **Child, parent, volunteer and teacher pages (the soft look):** the same, in each role's colour. A few older parts (the login and sign-up pages, the 404 page and the public home page) still have the original look: 0 px corner radius and a solid border that is a darker shade of the card's fill colour.
 
 ### Layer stripes
 
-Under the navbar there is a stack of thin stripes, one stripe for each layer. A role shows the layers up to its own, so a parent has one stripe and a volunteer has two (the parent colour first, then its own). Every page of a role shows the same stripes, because they are drawn by `NavBar.vue`. The other roles show one stripe in their own accent colour for now. To add a layer, add its `--layer-*` colour in `main/main.css` and its name to `LAYERS` in `NavBar.vue`.
+Under the navbar there is a stack of thin stripes, one stripe for each layer. Purple is the bottom layer, then green, aqua and pink on top. A role shows the layers up to its own: a teacher has one stripe (purple), a volunteer has two (green on purple), a parent has three (aqua on green on purple) and a child has all four (pink on aqua on green on purple). Every page of a role shows the same stripes, because they are drawn by `NavBar.vue`. To add a layer, add its `--layer-*` colour in `main/main.css` and its name to `LAYERS` in `NavBar.vue`.
 
 ### The kueh lapis and the kueh tin (child home)
 
-The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), parent (`--layer-parent`), volunteer (`--layer-volunteer`), child (`--lapis-pink`). Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/images/`.
+The child home shows the layers as a **kueh lapis**: every level adds a layer, from the bottom up in this order: teacher (`--layer-teacher`), volunteer (`--layer-volunteer`), parent (`--layer-parent`), child (`--lapis-pink`), the same order as the stripes under the navbar. Four layers is a finished cake. Every badge is a **kueh** in the **kueh tin**; its name, picture and fun fact are in `BADGES` in `utils/gamification.js`, and the pictures are transparent `.webp` files in `public/child_badges_images/`.
 
 ### Where the CSS lives
 
-All the CSS is in `src/css`, in one folder for each part of the app. There are no `<style>` blocks and no fixed `style=""` attributes in the `.vue` files (only values that change, such as a bar's width, stay in `:style`). Each `.vue` file imports the sheet it needs at the top of its script.
+There are two kinds of CSS in this project, and one rule decides which one to use:
 
-| Folder | File | What is in it |
-|--------|------|---------------|
-| `main/` | `main.css` | Tokens (palette, `--layer-*`, role accents), Bootstrap overrides, shared classes (loaded once in `main.js`) |
-| | `components.css` | The small parts many pages use: line icon, page header, stat card, state message, the accordion, handover, session card, homework card, charts |
-| | `navbar.css`, `stripes.css` | The navbar, and the size of the stripes under it |
-| | `labels.css` | The capital-letter captions of the restyled pages (parent, Messages, volunteer, child) |
-| | `homepage.css` | The public home page |
-| | `profilepage.css` | The profile page for every role: one look, with a block of colour variables (`--pf-*`) for each role at the top |
-| `parent/` | `parentshared.css` | What the parent home and Messages share (base text, page title, child buttons) |
-| | `parentpage.css`, `messagespage.css` | The rules only that page needs (every rule starts with the page's root class) |
-| `volunteer/` | `volunteershared.css` | What the volunteer home, one child's page and the session form share (base text, page title) |
-| | `volunteerpage.css` | The volunteer home and the child card |
-| | `childprofilepage.css` | One child's page as a volunteer sees it (every rule starts with `.role-volunteer`, so a teacher keeps the original look) |
-| | `volunteerform.css` | The two forms a volunteer fills in, Record / Edit a session and Give homework (the photo previews and mood buttons are for everyone, the rest starts with `.role-volunteer`) |
-| `child/` | `childhome.css`, `leaderboard.css` | The child home page (hero, the kueh lapis, quests, the kueh tin) and the leaderboard |
-| `teacher/` | `coordinatordashboard.css`, `schedule.css` | The teacher home page and the weekly schedule |
+> **Only one page (or component) uses it → INTERNAL CSS**: a `<style>` block at the bottom of that `.vue` file.
+> **Several pages use it → EXTERNAL CSS**: a `.css` file in `src/css/`, imported at the top of each `.vue` file that needs it.
 
-**Specificity:** a rule that used to be scoped to a component is now a plain class, which is weaker than Bootstrap rules on the same element (for example the cells of a table). If Bootstrap wins, start the selector with the page's class, as `schedule.css` does.
+Every block and file starts with a comment that says which kind it is. There are no fixed `style=""` attributes in the `.vue` files (only values that change, such as a bar's width, stay in `:style`).
+
+**External CSS** (`src/css/`, shared by several pages):
+
+| File | Used by | What is in it |
+|------|---------|---------------|
+| `main/main.css` | the whole app (loaded once in `main.js`) | The colours and fonts (`--variables`), the Bootstrap overrides, the classes every page shares (such as `.board`), the colours of the volunteer's and the teacher's pages (`--cp-...`) |
+| `main/components.css` | the small components (`PageHeader`, `PeelCard`, `SessionCard`, ...) | The look of those parts; each section says which component |
+| `main/labels.css` | parent home, Messages, volunteer home, a child's page, the teacher pages | The capital-letter captions |
+| `parent/parentshared.css` | parent home, Messages | Base text, page title, the child buttons |
+| `volunteer/volunteershared.css` | volunteer home, a child's page, the two forms | Base text and page title |
+| `volunteer/volunteerform.css` | Record / Edit a session, Give homework | The form look (volunteer and teacher) |
+| `teacher/teacherpage.css` | the five teacher pages (Dashboard, Children, Volunteers, Matchmaking, Schedule) | Everything for those pages |
+
+**Internal CSS** (the `<style>` block at the bottom of the `.vue` file):
+
+| File | What is in the block |
+|------|----------------------|
+| `components/NavBar.vue` | The navbar and the layer stripes under it |
+| `views/HomeView.vue` | The public home page |
+| `views/child/ChildHomeView.vue` | The child home (hero, kueh lapis, quests, kueh tin) |
+| `views/child/LeaderboardView.vue` | The leaderboard and the podium |
+| `views/parent/ParentHomeView.vue` | The parent home (also styles `ParentSocialDay.vue`) |
+| `views/shared/MessagesView.vue` | Messages and the chat (also styles `ChatThread.vue`), for the parent, and the same page in the teacher's colours at the bottom |
+| `views/shared/ProfileView.vue` | The profile page for every role (a block of colour variables `--pf-*` for each role at the top) |
+| `views/volunteer/VolunteerHomeView.vue` | The volunteer home (also styles `ChildCard.vue`) |
+| `views/volunteer/ChildProfileView.vue` | One child's page for a volunteer or a teacher (also styles `SessionCard`, `HandoverCard`, `HomeworkQuestCard`, `PeelCard` on that page, and the delete pop-ups) |
+
+The `<style>` blocks are not `scoped`, so every rule starts with the page's root class (for example `.parentpage`) to keep it from affecting other pages.
+
+**Keep the CSS simple.** Sizes are in `px` (and `%` and `fr`). The one `em` is the photo avatar in `components.css`, which has to grow and shrink with the text next to it. There is no `calc()`, `min()`, `max()`, `clamp()`, `:is()`, `:has()` or `color-mix()`. Pages that change a lot between phone and desktop use a `@media` rule. `:not()` is used only in `volunteerform.css` to beat a Bootstrap rule. `!important` is used only to beat Bootstrap's own `!important` classes.
+
+**Specificity:** a plain class is weaker than Bootstrap rules on the same element (for example the cells of a table). If Bootstrap wins, start the selector with the page's class, as `teacherpage.css` does.
 
 ---
 
 ## Colour layers
+
+> **Colours in the CSS are written as hex codes** (for example `#E8A0B8`), not as variables. The names in the tables below (`--lapis-pink`, `--layer-teacher` and so on) are labels for those hex codes, and the palette is listed as a comment at the top of `main/main.css`. The only variables left are the ones that change with the role (`--role-accent`, `--pf-*` on the profile page and `--cp-*` on a child's page and the forms) and Bootstrap's own `--bs-*`.
 
 There are **three distinct colour layers**. Never mix them up — a colour should always mean the same thing everywhere it appears.
 
@@ -72,8 +92,6 @@ Used in charts, subject tags, and any per-subject visual indicator. **These are 
 | Science       | `--subject-science`      | `#F5DF98` | Golden yellow — discovery, brightness |
 | Mother Tongue | `--subject-mother-tongue`| `#E8906C` | Coral — cultural warmth, heritage |
 
-Each subject also has a `-soft` variant (`--subject-*-soft`) for backgrounds.
-
 **Note for Chart.js:** CSS variables cannot be read by Chart.js at runtime. Hardcode the hex values from this table directly in `TopicSummaryChart.vue` and `SkillProgressChart.vue`. If you update a subject colour here, also update it in both charts.
 
 Both charts group sessions by **subject** (not by free-text topic), so each child gets at most 4 lines — one per PSLE subject.
@@ -84,7 +102,6 @@ Both charts group sessions by **subject** (not by free-text topic), so each chil
 |---------------|--------------------|-----------|
 | Alert / error | `--topic-alert`    | `#E8A0B8` |
 | Success / academic | `--topic-academic` | `#A8CC90` |
-| Homework / tasks | `--topic-homework` | `#F5DF98` |
 | Messages / social | `--topic-social` | `#88C0D8` |
 
 ---
@@ -99,7 +116,7 @@ Both charts group sessions by **subject** (not by free-text topic), so each chil
 | `.lapis-card-yellow`| `#FBF5DC`            | `--lapis-yellow-dark`    | Homework / tasks |
 | `.lapis-card-blue` | `#DFF0F8`             | `--lapis-blue-dark`      | Handover / AI summary |
 | `.lapis-card-orange`| `#FBF0E4`            | `--lapis-orange-dark`    | Parent-facing cards |
-| `.lapis-card-purple`| `#F0EAF8`            | `--lapis-purple-dark`    | Teacher / coordinator cards |
+| `.lapis-card-purple`| `#F0EAF8`            | `#7850B8`                | Teacher / coordinator cards |
 
 ---
 
@@ -107,7 +124,11 @@ Both charts group sessions by **subject** (not by free-text topic), so each chil
 
 - **One font for the whole app:** Inter (400, 500, 600, 700), set once as `--lapis-font` in `main/main.css`. Headings, buttons, the navbar and the chart labels all use it.
 - **Small captions** (form labels, tags, tab names, group headings): capital letters with a little space between the letters (`letter-spacing: 0.06em`). `main/main.css` does this for `.form-label`, `.badge` and `.btn`, and `main/labels.css` does it for the captions on the parent, Messages, volunteer and child pages.
-- **Base size:** 16 px
+- **Base size:** 15 px, line height 1.55 (set once on `body` in `main/main.css`, the same as the parent page). Do not set it again on a page.
+- **Page title:** 32 px, bold, `letter-spacing: -0.6px` (`.page-title` in `main/main.css`). The sentence under it is 14 px, semi-bold (`.page-subtitle`). Every page uses these, including the login pages and the 404 page. A page only sets their colour.
+- **Section headings** (the title of a card or a section): 18 px, semi-bold.
+- **Quiet colours:** a tag, note or message that needs a little attention has a pale fill, a thin line and dark words: pink (`#FBE3DF`, line `#F2B8B0`, words `#9A3F36`) for an error, not seen or overdue, and yellow (`#FAF4D8`, line `#EEDFA6`, words `#7A6420`) for struggling or a note.
+- **Messages:** loading is a ring in the role colour, an error is a quiet pink bar, and an empty list is a white card with a round icon. All three come from `StateMessage.vue`.
 - **Text colour:** `--lapis-plum` (`#4A3F3A`) everywhere. Never raw black.
 - **Muted text:** `--lapis-muted` (`#8D7F77`)
 

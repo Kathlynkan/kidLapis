@@ -1,6 +1,6 @@
 <!-- HomeworkQuestCard - homework shown as a "quest".     Owner: Jachin
      mode "child": the child's gamified view. mode "volunteer": the volunteer checks or removes it.
-     The look for a volunteer is in css/volunteer/childprofilepage.css -->
+     The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue -->
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, daysSince } from '@/utils/format'
@@ -60,21 +60,13 @@ function cancelDelete()  { showDeleteModal.value = false }
         {{ status?.label }}
       </span>
 
-      <p
-        v-if="mode === 'child' && homework.status === 'submitted'"
-        class="small mb-0 mt-1 quest-meta"
-        data-test="waiting-message"
-      >
-        <i class="bi bi-hourglass-split me-1"></i>Your volunteer will check this — then you'll earn your stars!
-      </p>
-
       <button
         v-if="mode === 'child' && homework.status === 'assigned'"
-        class="btn btn-primary btn-lg w-100 mt-1 quest-submit"
+        class="btn btn-primary btn-sm mt-1 quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-circle-fill me-1"></i>I'm done!
+        <i class="bi bi-check-lg me-1"></i>I'm done!
       </button>
 
       <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 

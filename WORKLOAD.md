@@ -21,7 +21,7 @@ Owning the whole slice end to end means:
 | 2 | **Ning Xuan** | Volunteer B: session logging & homework | Record/Edit Session form, Session history, Give Homework form | `routes/sessions.js`, `POST /homework` | The full CRUD that feeds the whole app |
 | 3 | **Kat** | Parent portal & messaging | Parent Home, Messages (shared by volunteers, parents and coordinators) | `routes/messages.js` | Parent sees "today at student care" + chats with the volunteer |
 | 4 | **Kai Sen** | Coordinator A: accounts, children & platform lead | Landing, Login, Sign up, NavBar, Manage Children | `routes/auth.js`, `routes/children.js`, `middleware/auth.js` | Role-based access (4 roles) + **deployment & integration lead** |
-| 5 | **Yu Xuan** | Coordinator B: dashboard & matchmaking | Coordinator Dashboard, Volunteers, Matchmaking | `routes/dashboard.js`, `routes/matchmaking.js`, `routes/users.js` | "Needs attention" alerts + skills-based volunteer matching |
+| 5 | **Yu Xuan** | Coordinator B: dashboard, matchmaking & schedule | Coordinator Dashboard, Volunteers, Matchmaking, Schedule | `routes/dashboard.js`, `routes/matchmaking.js`, `routes/users.js` | "Needs attention" alerts + skills-based volunteer matching |
 | 6 | **Jachin** | Data visualisation & child gamification | Charts (on 3 pages), Child Home (quests, badges, level), Leaderboard | `routes/progress.js`, `routes/decks.js`, homework submit/verify/leaderboard in `routes/homework.js` | Interactive question-answer homework quests + Chart.js progress charts + berry-based levels, badges, and leaderboard |
 
 **What changed from your first split, and why**
@@ -59,6 +59,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/NavBar.vue` | Top nav bar — role-aware links, unread message badge |
 | `client/src/components/PageHeader.vue` | Shared page title + subtitle + action-buttons slot |
 | `client/src/components/StateMessage.vue` | Shared loading / error / empty state message |
+| `client/src/components/ChildInitial.vue` | Round child picture — shows photo if available, else initial letter; used in NavBar and ProfileView |
 | `server/routes/auth.js` | POST /auth/signup, POST /auth/login, POST /auth/logout — bcryptjs, token auth |
 | `server/routes/children.js` | GET, POST, PUT, DELETE /children — coordinators manage child profiles |
 | `server/middleware/auth.js` | `requireAuth` (verifies token), `requireRole` (checks user role) |
@@ -69,9 +70,11 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/utils/access.js` | `canAccessChild`, `childFilterFor`, `visibleChildIds` — who can see which child |
 | `server/utils/db.js` | MongoDB Atlas connection (loads `config.env`) |
 | `server/utils/seed.js` | `pnpm seed` — wipes DB and loads `server/data/seed.json` |
+| `server/utils/toPlain.js` | Helper to strip Mongoose document wrappers to plain objects |
 | `server/server.js` | Express + socket.io app — CORS, JSON, socket rooms per childId, mounts all routes |
 | `server/config.env` | DB connection string + Gemini API key (not in git) |
 | `server/data/seed.json` | Demo data — children, parents, volunteers, sessions, homework, messages |
+| `client/src/stores/__tests__/auth.spec.js` | Unit tests for the auth Pinia store |
 | `client/e2e/auth.spec.js` | E2E — login per role, wrong-role redirect, sign-up flow |
 | `README.md`, `CONTRIBUTING.md`, `WORKLOAD.md` | Project docs, setup instructions, team split |
 | `pnpm-workspace.yaml`, `client/vite.config.js`, `client/vitest.config.js`, `client/playwright.config.js` | Build, test, workspace config |
@@ -87,8 +90,8 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/PeelCard.vue` | Reusable collapsible accordion (grid-template-rows animation) |
 | `server/routes/handover.js` | POST /handover/:childId — calls Gemini, parses JSON, caches result, fallback |
 | `server/models/Handover.js` | Mongoose schema — cached AI summary per child, `audience` field |
-| `server/routes/__tests__/handover.test.js` | Unit/integration tests for handover route |
-| `client/e2e/volunteer.spec.js` | E2E — handover shows, session history, recurring badge (Yuqi); session recording (Ning Xuan); homework assignment (Jachin) |
+| `server/routes/__tests__/handover.test.js` | Unit/integration tests for the handover route |
+| `client/e2e/volunteer.spec.js` | E2E — handover shows, session history, recurring struggle badge |
 
 ### Ning Xuan — Session logging & homework assignment
 
@@ -109,11 +112,11 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/views/parent/ParentHomeView.vue` | Parent home — child switcher, AI handover (parent-friendly), session timeline, homework status |
 | `client/src/views/shared/MessagesView.vue` | Chat page — child sidebar, message thread, real-time via socket.io (marks read on open) |
 | `client/src/components/ChatThread.vue` | Message list + send bar — emits `send`, auto-scrolls |
-| `client/src/components/ParentSessionCard.vue` | Simplified session card for parent view (no jargon) |
 | `client/src/components/ParentSocialDay.vue` | One day entry in the parent's social/mood timeline |
 | `server/routes/messages.js` | GET (with sender names), POST (emits socket event), PUT /read, GET /unread |
 | `server/models/Message.js` | Mongoose schema — childId, fromId, text, sentAt, readBy array |
 | `client/e2e/messages.spec.js` | E2E — child list, thread visible, switch child, send message, teacher sees thread |
+| `client/e2e/parent.spec.js` | E2E — parent greeting, child info, handover, mood timeline, child switcher |
 
 ### Yu Xuan — Coordinator dashboard & matchmaking
 
@@ -122,33 +125,35 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/views/coordinator/CoordinatorDashboardView.vue` | KPI cards, alerts table, follow-up toggle, recent activity feed |
 | `client/src/views/coordinator/ManageVolunteersView.vue` | Volunteer list — skills, availability, workload, edit |
 | `client/src/views/coordinator/MatchmakingView.vue` | Pick a child → ranked volunteer suggestions → assign with day picker |
-| `client/src/components/StatCard.vue` | KPI number card — icon, value, label, colour variant |
+| `client/src/views/coordinator/ScheduleView.vue` | Weekly schedule view — which volunteer sees which child on which day |
 | `server/routes/dashboard.js` | GET /dashboard/summary (KPIs), GET /dashboard/alerts, PUT /dashboard/follow-up/:childId |
 | `server/routes/matchmaking.js` | GET /matchmaking/:childId (scored suggestions), PUT /matchmaking/:childId/assign |
 | `server/routes/users.js` | GET /users (volunteer list), PUT /users/:id (edit skills/days) |
 | `server/utils/alerts.js` | Pure alert rules — no-session-7d, recurring struggle, overdue homework, unassigned |
 | `server/utils/matchmaking.js` | `scoreVolunteer`, `rankVolunteers` — pure scoring functions |
+| `server/utils/schedule.js` | Schedule helper utilities |
 | `server/tests/alerts.test.js` | Unit tests for each alert rule |
 | `server/tests/matchmaking.test.js` | Unit tests for the scoring function |
+| `server/tests/Schedule.test.js` | Unit tests for schedule logic |
+| `client/e2e/teacher.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
 
 ### Jachin — Data visualisation & child gamification
 
 | File | What it does |
 |---|---|
-| `client/src/views/child/ChildHomeView.vue` | "My Quests" — level bar, badge shelf, quest cards, celebration animation |
+| `client/src/views/child/ChildHomeView.vue` | "My Quests" — level bar, badge shelf, quest cards, badge-unlock animation |
 | `client/src/views/child/LeaderboardView.vue` | All-time + weekly leaderboard — podium top 3, highlights "me" |
 | `client/src/components/charts/SkillProgressChart.vue` | Chart.js line chart — topic accuracy over sessions (used on 3 pages) |
 | `client/src/components/charts/TopicSummaryChart.vue` | Chart.js horizontal bar — topics coloured needs-help/steady/strong |
 | `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), "Verify & give points" (volunteer) |
-| `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework, sessions)` — 6 badge conditions |
+| `client/src/components/ChildAvatar.vue` | Child avatar display — photo if path, emoji if text; used in leaderboard |
+| `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework)` — 6 badge conditions |
 | `client/src/utils/__tests__/gamification.spec.js` | Unit tests for all gamification rules and edge cases |
 | `server/routes/progress.js` | GET /progress/:childId (per-topic accuracy + trend), GET /progress/overview |
 | `server/routes/decks.js` | GET /decks — question banks for the homework deck picker |
 | `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards berries), GET /homework/leaderboard |
 | `server/models/Deck.js` | Mongoose schema — question bank (title, subject, questions with answers) |
 | `client/e2e/child.spec.js` | E2E — child marks quest done, verify flow (DB write), API failure state, badge shelf, leaderboard |
-| `client/e2e/parent.spec.js` | E2E — parent greeting, child info, handover, recurring badge, mood timeline, SkillProgressChart, child switcher |
-| `client/e2e/teacher.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
 
 ### Shared files — everyone can explain how it applies to their slice
 
@@ -295,7 +300,6 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 **Tests:**
 - `e2e/child.spec.js`: child marks quest done → status changes, badge shelf renders, leaderboard loads and tab switch works. ✅
-- `e2e/parent.spec.js`: parent home shows handover card, session timeline with mood, SkillProgressChart. ✅
 - `src/utils/__tests__/gamification.spec.js`: `levelFor()` and all 6 `earnedBadges()` conditions with edge cases. ✅
 - `src/utils/__tests__/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
 

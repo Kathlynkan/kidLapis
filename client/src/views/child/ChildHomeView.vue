@@ -5,8 +5,7 @@ import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
-import { BADGES, levelFor, earnedBadges, badgeProgress, currentStreak } from '@/utils/gamification'
-import '@/css/child/childhome.css'
+import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
 
 const auth = useAuthStore()
 
@@ -14,12 +13,35 @@ const me       = ref(null)
 const homework = ref([])
 const loading  = ref(true)
 const error    = ref('')
-const celebrating  = ref(false)
-const submitError  = ref('')
+const celebrating     = ref(false)
+const submitError     = ref('')
+const newBadge        = ref(null)  // badge just unlocked — shows the reveal overlay
+const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
+
+const CONFETTI = [
+  { color: '#E8A0B8', tx:  -70, ty: -150 },
+  { color: '#9BD3B2', tx:   70, ty: -150 },
+  { color: '#D5CBEA', tx: -155, ty:  -70 },
+  { color: '#AED9D8', tx:  155, ty:  -70 },
+  { color: '#F5DF98', tx: -165, ty:   25 },
+  { color: '#E8A0B8', tx:  165, ty:   25 },
+  { color: '#9BD3B2', tx: -120, ty:  135 },
+  { color: '#AED9D8', tx:  120, ty:  135 },
+  { color: '#D5CBEA', tx:  -40, ty:  165 },
+  { color: '#F5DF98', tx:   40, ty:  165 },
+  { color: '#E8A0B8', tx: -175, ty:  -20 },
+  { color: '#9BD3B2', tx:  175, ty:  -20 },
+  { color: '#AED9D8', tx:  -28, ty: -175 },
+  { color: '#D5CBEA', tx:   28, ty: -175 },
+]
 
 // ── Computed ─────────────────────────────────────────────────
-const level     = computed(() => levelFor(me.value?.points || 0))
-const streak    = computed(() => currentStreak(homework.value))
+// Add points from submitted (not yet verified) homework so the lapis and level update immediately.
+const pendingPoints = computed(() =>
+  homework.value.filter((h) => h.status === 'submitted').reduce((sum, h) => sum + h.points, 0),
+)
+const displayPoints = computed(() => (me.value?.points || 0) + pendingPoints.value)
+const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
 const todo      = computed(() => homework.value.filter((h) => h.status === 'assigned'))
@@ -56,6 +78,8 @@ const shownProgress = computed(() => badgeProgress(shown.value, me.value, homewo
 async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
+    const prevEarnedIds = new Set(earned.value.map((b) => b.id))
+
     await api.put(`/homework/${homeworkId}/submit`)
     const h = homework.value.find((hw) => hw.id === homeworkId)
     if (h) {
@@ -65,6 +89,14 @@ async function submitQuest(homeworkId) {
     showDone.value    = true
     celebrating.value = true
     setTimeout(() => (celebrating.value = false), 2200)
+
+    // Check for a newly unlocked badge and show the reveal after the quest celebration fades
+    const justUnlocked = earned.value.find((b) => !prevEarnedIds.has(b.id))
+    if (justUnlocked) {
+      justUnlockedId.value = justUnlocked.id
+      setTimeout(() => { justUnlockedId.value = null }, 1400)
+      setTimeout(() => { newBadge.value = justUnlocked }, 2400)
+    }
   } catch (err) {
     submitError.value = errorMessage(err)
   }
@@ -87,7 +119,37 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 childhomepage">
+    <!-- Badge unlock reveal -->
+    <Transition name="badge-reveal">
+      <div
+        v-if="newBadge"
+        class="badge-unlock-overlay"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="`${newBadge.kueh} badge unlocked`"
+        @click.self="newBadge = null"
+      >
+        <div class="badge-unlock-card">
+          <span
+            v-for="(c, i) in CONFETTI"
+            :key="i"
+            class="confetti-dot"
+            :style="{ background: c.color, '--tx': c.tx + 'px', '--ty': c.ty + 'px', animationDelay: (i * 0.03) + 's' }"
+            aria-hidden="true"
+          ></span>
+          <div class="badge-unlock-label">New kueh unlocked!</div>
+          <img :src="`/child_badges_images/${newBadge.image}.webp`" :alt="newBadge.kueh" class="badge-unlock-img" />
+          <div class="badge-unlock-body">
+            <div class="badge-unlock-name">{{ newBadge.kueh }}</div>
+            <div class="badge-unlock-badge">{{ newBadge.name }}</div>
+            <div class="badge-unlock-fact">{{ newBadge.fact }}</div>
+            <button class="badge-unlock-btn" @click="newBadge = null">Yay!</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <Transition name="celebrate">
       <div v-if="celebrating" class="celebrate-overlay" aria-hidden="true">
         <i class="bi bi-award-fill celebrate-main"></i>
@@ -107,13 +169,9 @@ onMounted(async () => {
       <!-- Hero card -->
       <div class="hero-card p-4 mb-4 d-flex flex-wrap align-items-center justify-content-center gap-4">
         <div class="text-center">
-          <div class="hero-avatar display-3">{{ me.avatar }}</div>
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
-            <i class="bi bi-star-fill me-1"></i>{{ me.points }} stars &middot; Level {{ level.level }}
-            <span v-if="streak > 0" class="hero-streak-badge">
-              <i class="bi bi-fire"></i> {{ streak }}-day streak
-            </span>
+            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ displayPoints }} stars</span> &middot; Level {{ level.level }}
           </div>
           <div
             class="progress mx-auto level-bar mb-1"
@@ -146,79 +204,640 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Quests to do -->
-      <h2 class="h4 mb-3"><i class="bi bi-map me-2"></i>Quests to do</h2>
+      <!-- the sandy board: the quests, the kueh tin and the finished quests, on white cards -->
+      <div class="board">
+        <!-- Quests to do -->
+        <h2 class="h4 mb-3"><i class="bi bi-map me-2"></i>Quests to do</h2>
 
-      <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
-        <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
-        <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
-      </div>
-
-      <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
-      <div class="row g-3 mb-4">
-        <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
-          <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
+        <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
+          <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
         </div>
-      </div>
 
-      <!-- My Kueh Tin: one kueh for every badge -->
-      <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
-      <section class="kueh-tin">
-        <div class="kueh-tin-label">
-          <div class="kueh-tin-stripes" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
+        <div class="row g-3 mb-4">
+          <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
+            <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
+          </div>
+        </div>
+
+        <!-- My Kueh Tin: one kueh for every badge -->
+        <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
+        <section class="kueh-tin">
           <h3 class="kueh-tin-title">
             Your Kueh Tin
             <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
           </h3>
-        </div>
 
-        <div class="kueh-tin-body">
-          <div class="kueh-grid">
-            <button
-              v-for="b in BADGES"
-              :key="b.id"
-              type="button"
-              class="kueh-tile"
-              :class="{ 'kueh-locked': !earnedIds.has(b.id) }"
-              :aria-pressed="shown.id === b.id"
-              @click="picked = b"
-            >
-              <span class="kueh-cup"><img :src="`/images/${b.image}.webp`" alt="" /></span>
-              <span class="kueh-name">{{ b.kueh }}</span>
-              <span class="kueh-badge-name">{{ b.name }}</span>
-              <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
-            </button>
-          </div>
+          <div class="kueh-tin-body">
+            <div class="kueh-grid">
+              <button
+                v-for="b in BADGES"
+                :key="b.id"
+                type="button"
+                class="kueh-tile"
+                :class="{ 'kueh-locked': !earnedIds.has(b.id), 'kueh-just-unlocked': justUnlockedId === b.id }"
+                :aria-pressed="shown.id === b.id"
+                @click="picked = b"
+              >
+                <span class="kueh-cup"><img :src="`/child_badges_images/${b.image}.webp`" alt="" /></span>
+                <span class="kueh-name">{{ b.kueh }}</span>
+                <span class="kueh-badge-name">{{ b.name }}</span>
+                <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
+              </button>
+            </div>
 
-          <!-- the label of the kueh you picked -->
-          <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
-            <img :src="`/images/${shown.image}.webp`" alt="" />
-            <div>
-              <div class="kueh-detail-badge">{{ shown.name }}</div>
-              <h3 class="kueh-detail-name">{{ shown.kueh }}</h3>
-              <div class="kueh-detail-rule">{{ shown.rule }}</div>
-              <div class="kueh-detail-fact">{{ shown.fact }}</div>
-              <span class="kueh-state" :class="{ 'kueh-todo': !earnedIds.has(shown.id) }">
-                {{ earnedIds.has(shown.id) ? 'You earned this kueh!' : `${shownProgress.current} of ${shownProgress.target} done` }}
-              </span>
+            <!-- the label of the kueh you picked -->
+            <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
+              <img :src="`/child_badges_images/${shown.image}.webp`" alt="" />
+              <div>
+                <div class="kueh-detail-badge">{{ shown.name }}</div>
+                <h3 class="kueh-detail-name">{{ shown.kueh }}</h3>
+                <div class="kueh-detail-rule">{{ shown.rule }}</div>
+                <div class="kueh-detail-fact">{{ shown.fact }}</div>
+                <span class="kueh-state" :class="{ 'kueh-todo': !earnedIds.has(shown.id) }">
+                  {{ earnedIds.has(shown.id) ? 'You earned this kueh!' : `${shownProgress.current} of ${shownProgress.target} done` }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Completed quests (collapsed by default, auto-opens after submit) -->
-      <div v-if="done.length > 0" class="mt-4">
-        <button class="quest-history-toggle" @click="showDone = !showDone">
-          <i class="bi bi-check-circle-fill me-2"></i>Completed quests
-          <span class="quest-history-count">{{ done.length }}</span>
-          <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
-        </button>
-        <div v-if="showDone" class="row g-3 mt-1">
-          <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
-            <HomeworkQuestCard :homework="h" mode="child" />
+        <!-- Completed quests (collapsed by default, auto-opens after submit) -->
+        <div v-if="done.length > 0" class="mt-4">
+          <button class="quest-history-toggle" @click="showDone = !showDone">
+            <i class="bi bi-check-lg me-2"></i>Completed quests
+            <span class="quest-history-count">{{ done.length }}</span>
+            <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
+          </button>
+          <div v-if="showDone" class="row g-3 mt-1">
+            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
+              <HomeworkQuestCard :homework="h" mode="child" />
+            </div>
           </div>
         </div>
       </div>
     </template>
   </div>
 </template>
+
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* The child home page: hero card with the kueh lapis, quests, the kueh tin (ChildHomeView.vue).
+   The soft look of the parent and volunteer pages: a cream page, a sandy board with white cards on it,
+   no dark outlines, soft corners (18px to 22px, round pills), pale fills with dark text and a very light shadow. */
+
+/* the very light shadow under the boxes */
+.hero-card,
+.childhomepage .board,
+.childhomepage .quest-card {
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.10);
+}
+
+/* ── Hero card ──────────────────────────────────────────────── */
+
+.hero-card {
+  background: var(--role-accent-soft, #FBF8F3);
+  border-radius: 22px;
+}
+
+.hero-avatar {
+  display: inline-block;
+}
+
+/* ── The board: the sandy box that holds the white cards ────── */
+
+.level-bar .progress-bar {
+  transform-origin: left;
+  animation: grow-progress 1.1s cubic-bezier(0.34, 1.1, 0.64, 1) 0.35s backwards;
+}
+
+@keyframes grow-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.level-bar { height: 14px; max-width: 260px; }
+
+/* ── Type: the sizes of the parent and volunteer pages ──────── */
+
+/* the title "Hi Ethan!" has the same size and weight as the title of every other page (32px, bold: from .page-title in main.css) */
+.childhomepage .hero-card h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+/* the headings of the sections (Quests to do, My Kueh Tin): semi-bold and not bigger than a title */
+.childhomepage h2.h4 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ── Quest cards ────────────────────────────────────────────── */
+
+/* a white card: no outline, soft corners */
+.childhomepage .quest-card {
+  background: #FFFFFF;
+  border: 0;
+  border-radius: 18px;
+}
+
+/* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */
+.childhomepage .badge {
+  padding: 3px 10px;
+  border-radius: 99px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.childhomepage .quest-points,
+.childhomepage .quest-status { background: #FBE7A1; }
+
+/* the points stay on one line: the star sits next to the number, never under it */
+.childhomepage .quest-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  white-space: nowrap;
+}
+.childhomepage .quest-overdue { background: #EE9F96; }
+.childhomepage .quest-status-done { background: #E6F4EC; color: #2E8B57; }
+
+/* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
+   in pale pink with dark text */
+.childhomepage .quest-submit {
+  --bs-btn-color: #4A3F3A;
+  --bs-btn-bg: #F3C1D3;
+  --bs-btn-hover-color: #4A3F3A;
+  --bs-btn-hover-bg: #EBAAC2;
+  --bs-btn-active-color: #4A3F3A;
+  --bs-btn-active-bg: #EBAAC2;
+  align-self: flex-end;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ── Completed quests toggle ────────────────────────────────── */
+
+/* a white pill the whole width of the board, like "Show more days" on the parent page */
+.quest-history-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  gap: 4px;
+}
+
+.quest-history-toggle:hover {
+  filter: brightness(0.96);
+}
+
+.quest-history-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--role-accent-soft, #FBF8F3);
+  color: #4A3F3A;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── The kueh lapis in the hero: flat layers stacked from the bottom ── */
+
+.kueh-cake {
+  display: flex;
+  flex-direction: column-reverse;   /* the first layer is at the bottom */
+  width: 170px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* the layers touch: only the bottom of the first layer and the top of the last one are round */
+.cake-layer {
+  height: 24px;
+  background: var(--c);
+}
+
+.cake-layer:first-child { border-radius: 0 0 8px 8px; }
+.cake-layer:last-child { border-radius: 8px 8px 0 0; }
+.cake-layer:only-child { border-radius: 8px; }
+
+/* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
+.cake-layer-1 { --c: #D5CBEA; }
+.cake-layer-2 { --c: #9BD3B2; }
+.cake-layer-3 { --c: #AED9D8; }
+.cake-layer-4 { --c: #E8A0B8; }
+
+/* the layer being built: a white bar that fills up */
+.cake-layer-next {
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+.cake-layer-next > div {
+  height: 100%;
+  background: var(--c);
+}
+
+.cake-caption {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #4A3F3A;
+}
+
+/* ── The kueh tin ───────────────────────────────────────────── */
+
+.kueh-tin {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--role-accent-soft, #FBF8F3);
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+}
+
+.kueh-tin-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 17.6px;
+  font-weight: 700;
+  color: #4A3F3A;
+}
+
+.kueh-tin-count {
+  padding: 2px 12px;
+  border-radius: 99px;
+  background: #FFFFFF;
+  font-size: 12.8px;
+}
+
+/* the kueh and the label of the one you picked */
+.kueh-tin-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.kueh-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 18px 12px;
+}
+
+@media (max-width: 860px) {
+  .kueh-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kueh-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .kueh-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kueh-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 8px;
+  border: 0;
+  background: transparent;
+  color: #4A3F3A;
+  font: inherit;
+  text-align: center;
+}
+
+/* the round white cup the kueh sits in */
+.kueh-cup {
+  display: grid;
+  place-items: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
+  transition: transform 0.2s;
+}
+
+.kueh-cup img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.kueh-tile:hover .kueh-cup { transform: translateY(-3px); }
+.kueh-tile[aria-pressed='true'] .kueh-cup { box-shadow: 0 0 0 3px #A9577A; }
+
+.kueh-name { margin-top: 2px; font-size: 14px; font-weight: 700; line-height: 1.2; }
+.kueh-badge-name { font-size: 12px; font-weight: 600; color: #8D7F77; }
+
+.kueh-state {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  background: #E6F4EC;
+  color: #2E8B57;
+  font-size: 11.2px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+/* a kueh you have not earned yet: faded grey picture */
+.kueh-locked img { filter: grayscale(1); opacity: 0.35; }
+.kueh-locked .kueh-name { color: #8D7F77; }
+.kueh-locked .kueh-state { background: #FFFFFF; color: #8D7F77; }
+
+/* in the label of the kueh you picked, "x of y done" is soft yellow */
+.kueh-detail .kueh-state.kueh-todo { background: #FBE7A1; color: #4A3F3A; }
+
+/* the label of the kueh you picked */
+.kueh-detail {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: #FFFFFF;
+}
+
+.kueh-detail img { width: 110px; max-height: 110px; object-fit: contain; }
+
+.kueh-detail-badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #A9577A;
+}
+
+.kueh-detail-name { margin: 0; font-size: 22.4px; font-weight: 700; }
+.kueh-detail-rule { margin-top: 8px; font-weight: 600; }
+.kueh-detail-fact { margin: 6px 0 10px; font-size: 14px; color: #8D7F77; }
+
+@media (max-width: 520px) {
+  .kueh-tin { padding: 16px 12px 20px; }
+  .kueh-detail { grid-template-columns: 1fr; }
+}
+
+/* ── Celebrate overlay ──────────────────────────────────────── */
+
+.celebrate-overlay {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.celebrate-enter-active { animation: celebrate-fade 2.2s ease forwards; }
+
+@keyframes celebrate-fade {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* central award icon: bounces in and out */
+.celebrate-main {
+  position: absolute;
+  left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  font-size: 64px;
+  color: #F5DF98;
+  filter: drop-shadow(0 0 18px rgba(245, 223, 152, 0.95));
+  animation: celebrate-main-pop 2.2s ease forwards;
+}
+
+@keyframes celebrate-main-pop {
+  0%   { transform: translate(-50%, -50%) scale(0.2) rotate(-15deg); }
+  30%  { transform: translate(-50%, -50%) scale(1.45) rotate(6deg); }
+  50%  { transform: translate(-50%, -50%) scale(1.0) rotate(-2deg); }
+  70%  { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(0.8); }
+}
+
+/* star sparks: shoot outward from center */
+.celebrate-spark {
+  position: absolute;
+  left: 0; top: 0;
+  margin: -11px 0 0 -11px; /* the middle of the star is where the burst starts */
+  font-size: 22.4px;
+  animation: celebrate-spark-fly 1.9s ease-out forwards;
+}
+
+.celebrate-s1 { color: #F5DF98; --dx: -88px; --dx2: -132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.10s; }
+.celebrate-s2 { color: #E8A0B8;   --dx:  88px; --dx2: 132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.15s; }
+.celebrate-s3 { color: #A8CC90;   --dx: -112px; --dx2: -168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.12s; }
+.celebrate-s4 { color: #F5B880; --dx:  112px; --dx2: 168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.18s; }
+.celebrate-s5 { color: #C0A8D8; --dx: -50px; --dx2: -75px; --dy2: -168px; --dy: -112px; animation-delay: 0.08s; }
+.celebrate-s6 { color: #88C0D8;   --dx:  50px; --dx2: 75px; --dy2: -168px; --dy: -112px; animation-delay: 0.20s; }
+
+@keyframes celebrate-spark-fly {
+  0%   { transform: translate(0, 0) scale(0)   rotate(0deg);   opacity: 0; }
+  20%  { transform: translate(0, 0) scale(1.3) rotate(45deg);  opacity: 1; }
+  65%  { transform: translate(var(--dx), var(--dy)) scale(0.9) rotate(210deg); opacity: 0.8; }
+  100% { transform: translate(var(--dx2), var(--dy2)) scale(0.2) rotate(360deg); opacity: 0; }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .level-bar .progress-bar,
+  .celebrate-main,
+  .celebrate-spark { animation: none; }
+  .level-bar .progress-bar { transform: scaleX(1); }
+  .kueh-cup { transition: none; }
+}
+
+/* ── Badge unlock overlay ────────────────────────────────── */
+
+.badge-unlock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(251, 248, 243, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.badge-unlock-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 44px 32px;
+  border-radius: 28px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 48px rgba(74, 63, 58, 0.16);
+  text-align: center;
+  max-width: 300px;
+  width: 100%;
+  overflow: visible;
+  animation: badge-card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badge-card-in {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* the kueh image is the hero */
+.badge-unlock-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation: badge-kueh-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+
+@keyframes badge-kueh-pop {
+  from { transform: scale(0) rotate(-12deg); }
+  to   { transform: scale(1) rotate(0deg);   }
+}
+
+/* text rises up after the image lands */
+.badge-unlock-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: badge-text-up 0.35s ease 0.32s both;
+}
+
+@keyframes badge-text-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+
+/* small pink label above the image */
+.badge-unlock-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #A9577A;
+  animation: badge-text-up 0.35s ease 0.28s both;
+}
+
+.badge-unlock-name {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #4A3F3A;
+  line-height: 1.2;
+}
+
+.badge-unlock-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8D7F77;
+}
+
+.badge-unlock-fact {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: #8D7F77;
+  line-height: 1.5;
+}
+
+.badge-unlock-btn {
+  padding: 8px 32px;
+  border: 0;
+  border-radius: 999px;
+  background: #E8A0B8;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.badge-unlock-btn:hover { filter: brightness(0.94); }
+
+/* confetti dots burst from the centre of the card */
+.confetti-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: confetti-burst 1.0s ease-out 0.15s both;
+}
+
+@keyframes confetti-burst {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  55%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.3); opacity: 0; }
+}
+
+/* overlay fade in / out */
+.badge-reveal-enter-active { animation: badge-overlay-in 0.2s ease both; }
+.badge-reveal-leave-active  { animation: badge-overlay-out 0.18s ease both; }
+
+@keyframes badge-overlay-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes badge-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* tile pulse when it just unlocked */
+.kueh-just-unlocked .kueh-cup {
+  animation: tile-unlock-pulse 0.75s ease-out both;
+}
+
+@keyframes tile-unlock-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(169, 87, 122, 0.65); transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  70%  { box-shadow: 0 0 0 14px rgba(169, 87, 122, 0);   }
+  100% { transform: scale(1);   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-unlock-card,
+  .badge-unlock-img,
+  .badge-unlock-body,
+  .badge-unlock-label,
+  .confetti-dot,
+  .kueh-just-unlocked .kueh-cup { animation: none; }
+}
+</style>

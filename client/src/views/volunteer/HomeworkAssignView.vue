@@ -180,7 +180,7 @@ onMounted(() => { // autofill form if edit form
             </div>
 
             <div class="col-12">
-              <label class="form-label" for="points">Reward Points</label>
+              <label class="form-label" for="points">Reward Stars</label>
 
               <div class="slider-container">
                 <span class="badge badge-light reward-badge text-dark fs-5 fw-bold" 

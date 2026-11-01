@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -8,10 +8,18 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const appClasses = computed(() => {
-  const cls = ['lapis-app', `role-${auth.role || 'guest'}`]
-  if (auth.role === 'child' && auth.user?.gender) cls.push(`gender-${auth.user.gender}`)
-  return cls
+  return ['lapis-app', `role-${auth.role || 'guest'}`]
 })
+
+// The pop-ups are moved to the end of the body, outside the app, so the body has the role class too and they get the role's colours.
+watch(
+  () => auth.role,
+  (role, oldRole) => {
+    if (oldRole) document.body.classList.remove(`role-${oldRole}`)
+    if (role) document.body.classList.add(`role-${role}`)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
