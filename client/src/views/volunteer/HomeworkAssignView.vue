@@ -150,7 +150,7 @@ onMounted(() => { // autofill form if edit form
     </button>
 
     <PageHeader
-      :title="isEdit ? 'Edit Homework' : 'Give Homework'"
+      :title="isEdit ? 'Edit Homework' : 'Assign Homework'"
       subtitle="Small tasks from the question book work best."
     />
 
