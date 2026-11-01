@@ -215,6 +215,7 @@ onMounted(() => {
                 />
               </div>
           </div>
+        </div>
 
         <div class="col-lg-5 d-flex flex-column gap-4">
           <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
