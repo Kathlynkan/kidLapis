@@ -1,5 +1,5 @@
 <!-- =============================================================
-  HandoverCard - "Today's Handover" box.             Owner: Yuqi
+  HandoverCard - "Handover Notes" box.               Owner: Yuqi
   The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
 ============================================================= -->
 <script setup>
@@ -11,12 +11,13 @@ defineProps({
   loading:  { type: Boolean, default: false },
 })
 
+// read top to bottom: what to teach -> why -> progress -> what helps -> mood
 const ROWS = [
-  { key: 'continueTopic', label: 'Continue',       icon: 'bi-arrow-right-circle' },
-  { key: 'struggle',      label: 'Last Struggle',  icon: 'bi-exclamation-circle' },
-  { key: 'whatWorked',    label: 'What worked',    icon: 'bi-lightbulb' },
-  { key: 'lastResult',    label: 'Last session',   icon: 'bi-check2-square' },
-  { key: 'nextStep',      label: 'Next step',      icon: 'bi-flag' },
+  { key: 'nextStep',   label: 'Teach next',  icon: 'bi-flag' },
+  { key: 'struggle',   label: 'Why',         icon: 'bi-question-circle' },
+  { key: 'lastResult', label: 'Progress',    icon: 'bi-graph-up-arrow' },
+  { key: 'whatWorked', label: 'What helps',  icon: 'bi-lightbulb' },
+  { key: 'watchFor',   label: 'Mood',        icon: 'bi-emoji-smile' },
 ]
 
 const open = ref(true)
@@ -27,7 +28,7 @@ const open = ref(true)
     <button type="button" class="handover-header" :aria-expanded="String(open)" @click="open = !open">
       <div class="d-flex flex-wrap align-items-center gap-2">
         <h2 class="handover-title mb-0">
-          <i class="bi bi-arrow-left-right me-2"></i>Today's Handover
+          <i class="bi bi-arrow-left-right me-2"></i>Handover Notes
         </h2>
         <span
           v-if="handover"
@@ -49,26 +50,15 @@ const open = ref(true)
 
         <dl v-else-if="handover" class="row mb-0">
           <template v-for="row in ROWS" :key="row.key">
-            <dt class="col-12 col-sm-4 small handover-key">
-              <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
-            </dt>
-            <dd class="col-12 col-sm-8 fw-semibold handover-value">
-              {{ handover[row.key] }}
-            </dd>
-          </template>
-
-          <template v-if="handover.recurring && handover.recurring.length > 0">
-            <dt class="col-12 col-sm-4 small handover-key">
-              <i class="bi bi-arrow-repeat me-1"></i>Recurring Struggles
-            </dt>
-            <dd class="col-12 col-sm-8 handover-value">
-              <span
-                v-for="item in handover.recurring"
-                :key="item"
-                class="badge handover-badge handover-tag me-1 mb-1"
-                data-test="recurring-badge"
-              >{{ item }}</span>
-            </dd>
+            <!-- skip a row with nothing to say -->
+            <template v-if="handover[row.key]">
+              <dt class="col-12 col-sm-4 small handover-key">
+                <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
+              </dt>
+              <dd class="col-12 col-sm-8 fw-semibold handover-value">
+                {{ handover[row.key] }}
+              </dd>
+            </template>
           </template>
         </dl>
 

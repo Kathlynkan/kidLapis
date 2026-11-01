@@ -15,17 +15,26 @@ import { newLinkCode } from '../models/helpers.js'
 
 const DATE_FIELDS = ['date', 'dueDate', 'sentAt', 'createdAt', 'completedAt']
 const DAY_MS = 24 * 60 * 60 * 1000
+const WEEK_MS = 7 * DAY_MS
 
+// seedAnchor in seed.json is a Friday. We move it to the most recent Friday (today, if today is a Friday).
+// 1. We shift by WHOLE weeks, so every session stays on the same weekday as the child's schedule (a Monday session is still on a Monday).
+// 2. Nothing should be in the future, so any date that would land after "now" becomes "now". Due dates are skipped (they can be in the future).
 export function shiftSeedDates(seed, today = new Date()) {
   const anchor = new Date(seed.meta.seedAnchor + 'T00:00:00Z')
   const todayUtc = new Date(today.toISOString().slice(0, 10) + 'T00:00:00Z')
-  const offset = Math.round((todayUtc - anchor) / DAY_MS) * DAY_MS
+  const weeks = Math.floor((todayUtc - anchor) / WEEK_MS)
+  const offset = weeks * WEEK_MS
   for (const key of ['users', 'children', 'sessions', 'homework', 'messages']) {
     for (const row of seed[key]) {
       for (const field of DATE_FIELDS) {
         if (!row[field]) continue
-        const shifted = new Date(new Date(row[field]).getTime() + offset).toISOString()
-        row[field] = row[field].length === 10 ? shifted.slice(0, 10) : shifted
+        let shifted = new Date(new Date(row[field]).getTime() + offset)
+        if (field !== 'dueDate' && shifted > today) {
+          shifted = today
+        }
+        const iso = shifted.toISOString()
+        row[field] = row[field].length === 10 ? iso.slice(0, 10) : iso
       }
     }
   }
