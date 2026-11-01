@@ -5,23 +5,17 @@
   Child:      avatar picker (name is managed by the teacher).
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
-import ChildAvatar from '@/components/ChildAvatar.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
 
 const auth = useAuthStore()
 const router = useRouter()
-
-const AVATARS = [
-  '🙂', '😊', '😄', '😎', '🤩', '🥳', '😸',
-  '🐻', '🐼', '🦊', '🦁', '🐯', '🐸', '🐙',
-  '🦋', '⭐', '🌟', '🚀', '🎮', '⚽',
-]
 
 const name = ref(auth.user?.name || '')
 const currentPassword = ref('')
@@ -29,7 +23,6 @@ const newPassword = ref('')
 const confirmPassword = ref('')
 const skills = ref([...(auth.user?.skills || [])])
 const availability = ref([...(auth.user?.availability || [])])
-const avatar = ref('🙂')
 
 // the first letter of the name (not of a title like Mrs), shown in a round picture
 const initial = computed(() => (auth.user?.name || '').replace(/^(mr|mrs|ms|mdm|miss|dr)\.?\s+/i, '').charAt(0).toUpperCase())
@@ -38,14 +31,6 @@ const loading = ref(false)
 const error = ref('')
 const activeCard = ref('account')
 
-onMounted(async () => {
-  if (auth.role === 'child') {
-    try {
-      const res = await api.get('/children')
-      avatar.value = res.data[0]?.avatar || '🙂'
-    } catch { /* silent */ }
-  }
-})
 
 function cancel() {
   router.back() // return user to wherever they came from
@@ -89,10 +74,6 @@ async function save() {
     body.skills = skills.value
     body.availability = availability.value
   }
-  if (auth.role === 'child') {
-    body.avatar = avatar.value
-  }
-
   loading.value = true
   try {
     const res = await api.put('/auth/profile', body)
@@ -120,8 +101,11 @@ async function save() {
           <!-- Account info -->
           <PeelCard title="Account" icon="bi-person-circle" :open="activeCard === 'account'" @toggle="activeCard = 'account'">
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span v-if="auth.role === 'child'" class="fs-1 lh-1"><ChildAvatar :avatar="avatar" /></span>
-              <span v-else class="profile-initial">{{ initial }}</span>
+              <ChildInitial v-if="auth.role === 'child'" :child="{ name: auth.user.name, avatar: auth.user.avatar || '' }" class="profile-initial" />
+              <span v-else class="profile-initial">
+                <img v-if="(auth.user?.avatar || '').startsWith('/')" :src="auth.user.avatar" alt="" />
+                <template v-else>{{ initial }}</template>
+              </span>
               <div>
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
                 <div class="small lapis-muted">{{ auth.user?.email }}</div>
@@ -139,21 +123,6 @@ async function save() {
                 autocomplete="name"
                 data-test="profile-name"
               />
-            </div>
-          </PeelCard>
-
-          <!-- Avatar picker (child only) -->
-          <PeelCard v-if="auth.role === 'child'" title="Pick your avatar" icon="bi-emoji-smile" :open="activeCard === 'avatar'" @toggle="activeCard = 'avatar'">
-            <div class="d-flex flex-wrap gap-2">
-              <button
-                v-for="emoji in AVATARS"
-                :key="emoji"
-                type="button"
-                class="btn btn-lg p-2 lh-1"
-                :class="avatar === emoji ? 'btn-primary' : 'btn-outline-secondary'"
-                data-test="avatar-option"
-                @click="avatar = emoji"
-              >{{ emoji }}</button>
             </div>
           </PeelCard>
 
@@ -196,7 +165,7 @@ async function save() {
           <!-- Skills + availability (volunteer only) -->
           <PeelCard v-if="auth.role === 'volunteer'" title="Skills &amp; schedule" icon="bi-calendar-check" :open="activeCard === 'skills'" @toggle="activeCard = 'skills'">
             <fieldset class="mb-4">
-              <legend class="form-label fs-6 mb-2">Skills I can help with</legend>
+              <legend class="form-label mb-2">Skills I can help with</legend>
               <div class="d-flex flex-wrap gap-2">
                 <template v-for="(skill, i) in SKILL_OPTIONS" :key="skill">
                   <input
@@ -213,7 +182,7 @@ async function save() {
             </fieldset>
 
             <fieldset class="mb-0">
-              <legend class="form-label fs-6 mb-2">Days I can come in</legend>
+              <legend class="form-label mb-2">Days I can come in</legend>
               <div class="d-flex flex-wrap gap-2">
                 <template v-for="day in DAYS" :key="day">
                   <input
@@ -262,17 +231,17 @@ async function save() {
 
 /* child: the accent of the role on warm brown text */
 .profilepage {
-  --pf-text: var(--lapis-plum);
+  --pf-text: #4A3F3A;
   /* text */
-  --pf-title: var(--lapis-plum);
+  --pf-title: #4A3F3A;
   /* the page title */
-  --pf-muted: var(--lapis-muted);
+  --pf-muted: #8D7F77;
   /* small text */
   --pf-card: #FFFFFF;
   /* the sections */
   --pf-shadow: rgba(74, 63, 58, 0.1);
   /* the shadow under a section */
-  --pf-line: var(--lapis-cream-dark);
+  --pf-line: #C8B8A8;
   /* the line around a box and between things */
   --pf-focus: var(--role-accent);
   /* the line of a box you are typing in */
@@ -282,9 +251,9 @@ async function save() {
   --pf-soft: var(--role-accent-soft);
   /* the role tag, Log out, Cancel */
   --pf-soft-hover: #EBDAE2;
-  --pf-ok: var(--topic-academic);
+  --pf-ok: #A8CC90;
   /* the message after you save */
-  --pf-error: var(--topic-alert);
+  --pf-error: #E8A0B8;
   color: var(--pf-text);
 }
 
@@ -357,6 +326,14 @@ async function save() {
   background: var(--role-accent, #AED9D8);
   font-size: 20px;
   font-weight: 700;
+  overflow: hidden;
+}
+
+/* a photo fills the circle */
+.profilepage .profile-initial img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profilepage .lapis-muted {
@@ -403,13 +380,6 @@ async function save() {
 
 .profilepage .form-label {
   color: var(--pf-text);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* the headings of the skills and the days have the bootstrap class fs-6, which is important */
-.profilepage legend.form-label {
-  font-size: 14px !important;
 }
 
 .profilepage .form-control {

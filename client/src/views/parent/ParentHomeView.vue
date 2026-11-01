@@ -6,8 +6,10 @@ import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
+import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // accuracy over time
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
-import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
+import HandoverCard from '@/components/HandoverCard.vue' // the weekly AI summary box (shared with the volunteer page)   (Yuqi)
+import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
 
@@ -26,10 +28,11 @@ const openTab = ref('homework') // which tab is open: 'homework' or 'social'
 const showFinished = ref(false) // true when the finished homework is shown
 const showAllDays = ref(false) // true when the social tab shows every day, not only the newest three
 
-// the two tabs
+// the three tabs
 const TABS = [
   { id: 'homework', label: 'Homework' },
   { id: 'social', label: 'Social' },
+  { id: 'progress', label: 'Progress' },
 ]
 
 // how the child felt, in simple words for a parent
@@ -99,9 +102,7 @@ function rowTag(item, groupKey) {
 // the grey line under the title of a homework row
 function rowMeta(item, groupKey) {
   if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
-  const handedIn = item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : ''
-  if (groupKey === 'waiting') return item.subject + handedIn
-  return item.subject + handedIn
+  return item.subject + (item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : '')
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -118,6 +119,13 @@ function sessionFor(item) {
   return found
 }
 
+// the session of every finished homework, found by the homework id
+const resultSessions = computed(() => {
+  const found = {}
+  for (const item of homework.value) found[item.id] = sessionFor(item)
+  return found
+})
+
 // the score of a session in words, like "4 / 5 right" (empty when nothing was attempted)
 function scoreOf(session) {
   if (!session || !session.attempted) return ''
@@ -133,32 +141,6 @@ function resultNotes(session) {
   if (session.notes) notes.push({ label: 'Note from the volunteer', text: '"' + session.notes + '"' })
   return notes
 }
-
-// the non-academic things the child did in a session (chess with friends, soccer ...), as a list
-function activitiesOf(session) {
-  const activity = session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
-  if (Array.isArray(activity)) {
-    return activity
-  }
-  if (activity) {
-    return [activity]
-  }
-  return []
-}
-
-// the lines of the weekly AI summary, each with its label (a line is left out when it is empty)
-const summaryLines = computed(() => {
-  if (!handover.value) return []
-  const lines = [
-    { label: 'This week', text: handover.value.headline },
-    { label: 'Learning', text: handover.value.learning },
-    { label: 'Friends', text: handover.value.friends },
-    { label: 'Worth knowing', text: handover.value.worthKnowing },
-    { label: 'Proud moment', text: handover.value.celebrate },
-    { label: 'Try at home', text: handover.value.atHome },
-  ]
-  return lines.filter((line) => line.text && line.text !== '-')
-})
 
 // the days shown on the social tab: the newest three, or all of them
 const socialDays = computed(() => (showAllDays.value ? sessions.value : sessions.value.slice(0, 3)))
@@ -224,9 +206,9 @@ async function loadHandover(childId) {
   handoverLoading.value = true
   let summary = null // stays empty if something goes wrong, the rest of the page still works
   try {
-    // audience: 'parent' makes the AI write in simple, friendly words
-    // type: 'weekly' sums up the whole week, learning and social, from every volunteer's notes
-    const response = await api.post(`/handover/${childId}`, { audience: 'parent', type: 'weekly' })
+    // the server sees a parent is logged in, so it sends the weekly summary
+    // (Mon - Fri, learning and social, in simple friendly words)
+    const response = await api.post(`/handover/${childId}`)
     summary = response.data
   } catch {
     summary = null
@@ -274,7 +256,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 parentpage">
-    <PageHeader :title="`Hello, ${firstName(auth.user.name)}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
+    <PageHeader :title="`Hello, ${firstName(auth.user?.name || '')}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
 
     <!-- one of these three messages shows while loading, on an error, or when there is no child -->
     <StateMessage v-if="loading" type="loading" />
@@ -322,23 +304,9 @@ onMounted(async () => {
         </component>
       </div>
 
-      <!-- parent weekly AI summary: learning, friends, anything worth knowing, what to try at home   (Yuqi) -->
-      <div class="glance" data-test="handover-card">
-        <span class="small-label">This week at student care</span>
-        <!-- which week it covers, e.g. 2026-10-19 to 2026-10-23 -->
-        <p v-if="handover && handover.periodLabel" class="muted">{{ handover.periodLabel }}</p>
-        <p v-if="handoverLoading" class="muted">Getting the update...</p>
-        <template v-else-if="summaryLines.length > 0">
-          <p v-for="line in summaryLines" :key="line.label" class="glance-line">
-            <strong>{{ line.label }}:</strong> {{ line.text }}
-          </p>
-          <p v-if="handover.recurring && handover.recurring.length > 0" class="glance-line">
-            <strong>Keep practising:</strong>
-            <span v-for="topic in handover.recurring" :key="topic" class="chip" data-test="recurring-badge">{{ topic }}</span>
-          </p>
-        </template>
-        <p v-else class="muted">No summary yet.</p>
-      </div>
+      <!-- parent weekly AI summary: the same HandoverCard as the volunteer page; it shows the parent rows because a parent is logged in   (Yuqi) -->
+      <!-- (Overview, Learning, Friends, Worth knowing, Proud moment, Try at home, Keep practising) -->
+      <HandoverCard :handover="handover" :loading="handoverLoading" />
 
       <!-- the board with two tabs -->
       <div id="homework-board" class="board" data-test="notice-board">
@@ -372,7 +340,7 @@ onMounted(async () => {
                     <span class="row-title">{{ item.title }}</span>
                     <span class="row-tag">{{ rowTag(item, group.key) }}</span>
                   </span>
-                  <span v-if="group.key === 'done' && scoreOf(sessionFor(item))" class="row-score">{{ scoreOf(sessionFor(item)) }}</span>
+                  <span v-if="group.key === 'done' && scoreOf(resultSessions[item.id])" class="row-score">{{ scoreOf(resultSessions[item.id]) }}</span>
                   <span class="muted">{{ rowMeta(item, group.key) }}</span>
                   <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
@@ -380,14 +348,14 @@ onMounted(async () => {
                 <!-- what the volunteer wrote down for it -->
                 <p v-if="group.key === 'todo' && item.details" class="row-details">{{ item.details }}</p>
                 <template v-if="group.key === 'done'">
-                  <template v-if="sessionFor(item)">
-                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[sessionFor(item).mood]"></i>{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
-                    <div v-for="note in resultNotes(sessionFor(item))" :key="note.label" class="note-box">
+                  <template v-if="resultSessions[item.id]">
+                    <p v-if="MOOD_WORDS[resultSessions[item.id].mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[resultSessions[item.id].mood]"></i>{{ MOOD_WORDS[resultSessions[item.id].mood] }}</p>
+                    <div v-for="note in resultNotes(resultSessions[item.id])" :key="note.label" class="note-box">
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
                     </div>
-                    <div v-if="sessionFor(item).photos && sessionFor(item).photos.length > 0" class="result-photos">
-                      <img v-for="(photo, number) in sessionFor(item).photos" :key="number" :src="photo" alt="Photo from the session" />
+                    <div v-if="resultSessions[item.id].photos && resultSessions[item.id].photos.length > 0" class="result-photos">
+                      <img v-for="(photo, number) in resultSessions[item.id].photos" :key="number" :src="photo" alt="Photo from the session" />
                     </div>
                   </template>
                   <p v-else class="muted" data-test="no-result">No result recorded yet.</p>
@@ -395,6 +363,11 @@ onMounted(async () => {
               </details>
             </template>
           </div>
+        </div>
+
+        <!-- tab: progress = accuracy over time, one subject at a time -->
+        <div v-else-if="openTab === 'progress'" class="board-panel" data-test="progress-tab">
+          <SkillProgressChart :sessions="sessions" />
         </div>
 
         <!-- tab: social = a diary: the newest day is open, the earlier days are short cards -->
@@ -483,21 +456,6 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-/* the very light shadow under the boxes */
-.parentpage .tile-next,
-.parentpage .homework-row,
-.parentpage .day-card {
-  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
-}
-
-/* ---------- an icon in front of a few words ---------- */
-
-.parentpage .mood-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
 /* ---------- the child and the child buttons ---------- */
 
 .parentpage .child-row {
@@ -571,6 +529,7 @@ onMounted(async () => {
 
 .parentpage .tile-next {
   background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1); /* the very light shadow under the white boxes */
 }
 
 /* the tiles you can press (they take you to the homework) */
@@ -595,26 +554,69 @@ onMounted(async () => {
   background: #EDA39A;
 }
 
-/* ---------- today at a glance (the AI summary) ---------- */
+/* ---------- the weekly AI summary (HandoverCard.vue, parent rows) ---------- */
+/* Same sizes as the volunteer's Handover Notes (ChildProfileView.vue), only the colours are the parent's */
 
-.parentpage .glance {
+.parentpage .handover-card {
   margin-bottom: 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  border: 0;
+  border-radius: 22px;
   background: #DDF0EF;
+  box-shadow: none;
+  color: #414F67;
+}
+
+/* the top line you can press to open and close it */
+.parentpage .handover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 20px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.parentpage .handover-title {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.parentpage .handover-period {
+  margin-top: 2px;
+  color: #5E6C80;
   font-size: 14px;
 }
 
-.parentpage .glance .small-label {
+/* the "AI summary" badge and the "keep practising" chips: white pills */
+.parentpage .handover-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #414F67;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.parentpage .handover-card .peel-body-inner {
+  padding: 0 20px 20px;
+}
+
+.parentpage .handover-key {
+  font-size: 14px;
   color: #5E6C80;
 }
 
-.parentpage .glance .chip {
-  background: #FFFFFF;
-}
-
-.parentpage .glance-line {
-  margin: 4px 0 0;
+.parentpage .handover-value {
+  font-size: 16px; /* bold like the volunteer card (the fw-semibold class in HandoverCard.vue) */
 }
 
 /* ---------- the board and its tabs ---------- */
@@ -678,6 +680,7 @@ onMounted(async () => {
   margin-bottom: 10px;
   border-radius: 18px;
   background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
 .parentpage .show-more {
@@ -738,11 +741,19 @@ onMounted(async () => {
   font-weight: 700;
 }
 
+/* the small pills: the tag of a homework, its score, the mood of a day and the topics (chip) */
 .parentpage .row-tag,
-.parentpage .row-score {
-  padding: 2px 11px;
+.parentpage .row-score,
+.parentpage .mood-chip,
+.parentpage .chip {
   border-radius: 999px;
   background: #DDF0EF;
+}
+
+.parentpage .row-tag,
+.parentpage .row-score,
+.parentpage .mood-chip {
+  padding: 2px 11px;
   font-size: 12px;
   font-weight: 700;
 }
@@ -828,12 +839,10 @@ onMounted(async () => {
 }
 
 .parentpage .mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
-  padding: 2px 11px;
-  border-radius: 999px;
-  background: #DDF0EF;
-  font-size: 12px;
-  font-weight: 700;
 }
 
 /* an earlier day: a short card with a hint to open it */
@@ -858,8 +867,6 @@ onMounted(async () => {
   display: inline-block;
   margin: 0 4px 4px 4px;
   padding: 2px 12px;
-  border-radius: 999px;
-  background: #DDF0EF;
   font-size: 13px;
 }
 
@@ -892,9 +899,14 @@ onMounted(async () => {
 .parentpage .day-photo {
   position: relative;
   display: block;
+  width: 100%;
   aspect-ratio: 1;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   border-radius: 12px;
+  background: none;
+  cursor: pointer;
 }
 
 /* the picture is cropped to the square; the crop keeps the top, where the faces are */
@@ -920,6 +932,42 @@ onMounted(async () => {
   color: #FFFFFF;
   font-size: 18px;
   font-weight: 700;
+}
+
+/* the pop-up with the photo big: a dark cover over the whole screen */
+.parentpage .photo-popup {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(65, 79, 103, 0.85);
+  cursor: pointer;
+}
+
+.parentpage .photo-popup img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.parentpage .photo-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #414F67;
+  font-size: 16px;
 }
 
 @media (max-width: 520px) {

@@ -3,12 +3,15 @@
   Pattern: v-model inputs -> async submit -> loading + error states -> router.push
   TODO (Kai Sen):
     [x] show/hide password toggle
+  The look: one white card on the sandy board, in the middle (css/main/authpage.css, shared with the sign up page).
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { errorMessage } from '@/services/api'
+import '@/css/main/components.css' // the look of the small parts (the error message)
+import '@/css/main/authpage.css' // the look of this page and of the sign up page
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -36,40 +39,40 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-sm-10 col-md-7 col-lg-5">
-        <div class="lapis-card p-4 p-md-5">
-          <h1 class="page-title mb-1">Welcome back</h1>
-          <p class="page-subtitle mb-4">Log in to continue to Kids Lapis.</p>
+  <div class="container py-4 authpage">
+    <div class="auth-box">
+      <div class="board">
+        <div class="auth-card">
+          <header>
+            <h1 class="page-title">Welcome back</h1>
+            <p class="page-subtitle">Log in to continue to Kids Lapis.</p>
+          </header>
 
-          <div v-if="route.query.expired" class="alert alert-warning small">
-            Your session expired. Please log in again.
-          </div>
-          <div v-if="error" class="alert alert-danger small" data-test="login-error">
-            {{ error }}
+          <div v-if="route.query.expired" class="auth-note">Your session expired. Please log in again.</div>
+          <div v-if="error" class="state-error" role="alert" data-test="login-error">
+            <i class="bi bi-exclamation-triangle"></i>{{ error }}
           </div>
 
           <form @submit.prevent="handleLogin">
-            <div class="mb-3">
-              <label for="email" class="form-label">Email</label>
+            <div class="auth-field">
+              <label for="email" class="auth-label">Email</label>
               <input
                 id="email"
                 v-model.trim="email"
                 type="email"
-                class="form-control"
+                class="auth-input"
                 required
                 autocomplete="username"
               />
             </div>
-            <div class="mb-4">
-              <label for="password" class="form-label">Password</label>
-              <div class="input-group">
+            <div class="auth-field">
+              <label for="password" class="auth-label">Password</label>
+              <div class="auth-password">
                 <input
                   id="password"
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
-                  class="form-control"
+                  class="auth-input"
                   required
                   autocomplete="current-password"
                 />
@@ -77,23 +80,22 @@ async function handleLogin() {
                      getByLabel('Password'), which would also match a "Show password" button -->
                 <button
                   type="button"
-                  class="btn btn-outline-secondary"
+                  class="auth-show"
                   :aria-pressed="showPassword"
                   data-test="toggle-password"
                   @click="showPassword = !showPassword"
                 >
-                  <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'" class="me-1"></i>
+                  <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                   {{ showPassword ? 'Hide' : 'Show' }}
                 </button>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100" :disabled="loading">
-              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-              Log in
+            <button type="submit" class="auth-submit" :disabled="loading">
+              {{ loading ? 'Logging in...' : 'Log in' }}
             </button>
           </form>
 
-          <p class="small text-center mt-3 mb-0">
+          <p class="auth-small">
             New volunteer or parent? <RouterLink to="/signup">Create an account</RouterLink>
           </p>
         </div>

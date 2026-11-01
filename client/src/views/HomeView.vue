@@ -1,232 +1,301 @@
-<!-- =============================================================
+﻿<!-- =============================================================
   Landing page (public).                              Owner: Kai Sen
-  Done: hero with an example parent update (built from lapis-cards, so it
-        matches the app and needs no image files)
-        "How it works" follows the core flow: record -> summarise -> share -> continue
-        layout checked from iPhone 6 (375px) to Bootstrap XL: cards stack on phones
+  Done: the title, "One app, four views" (a card for each role with its own log in button)
+        and "How it works" (record -> summarise -> share -> continue).
+        It is made of the same parts as the other pages: the page title, a sandy board with white cards,
+        and the four layer colours (purple, green, aqua, pink) for the four roles.
 ============================================================= -->
 <script setup>
-import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import ChildAvatar from '@/components/ChildAvatar.vue'
+/* eslint-disable */
+import { RouterLink } from "vue-router"
+import { useAuthStore } from "@/stores/auth"
 
 const auth = useAuthStore()
 
-// The core flow from WORKLOAD.md, one card per step
-const steps = [
+// One card for each role. colour: the layer colour of that role (see main.css).
+const roles = [
   {
-    icon: 'bi-pencil-square',
-    title: 'Record',
-    text: 'Volunteers log each session in a minute: topic, score, mood, struggles and what worked.',
-    color: 'lime',
+    icon: "bi-person-heart",
+    name: "Volunteers",
+    short: "Record and hand over",
+    text: "Get a briefing before each session, record it after, and set homework quests.",
+    button: "Volunteer log in",
+    colour: "green",
   },
   {
-    icon: 'bi-stars',
-    title: 'Summarise',
-    text: "AI turns the child's session history into a short, plain-language update.",
-    color: 'yellow',
+    icon: "bi-speedometer2",
+    name: "Teachers",
+    short: "Run the centre",
+    text: "Spot children who need attention and match them with the right volunteer. Teacher accounts are set up by the centre.",
+    button: "Teacher log in",
+    colour: "purple",
   },
   {
-    icon: 'bi-house-heart',
-    title: 'Share',
-    text: 'Parents see today’s update, progress charts and a mood timeline, and can message teachers.',
-    color: 'blue',
+    icon: "bi-house-heart",
+    name: "Parents",
+    short: "Follow progress",
+    text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
+    button: "Parent log in",
+    colour: "aqua",
   },
   {
-    icon: 'bi-arrow-left-right',
-    title: 'Continue',
-    text: 'The next volunteer gets a handover, so the child never starts again from zero.',
-    color: 'pink',
+    icon: "bi-trophy",
+    name: "Children",
+    short: "Earn stars",
+    text: "Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.",
+    button: "Child log in",
+    colour: "pink",
   },
 ]
 
-const roles = [
+// The core flow, one row for each step
+const steps = [
   {
-    icon: 'bi-person-heart',
-    name: 'Volunteers',
-    text: 'Get a briefing before each session, record it after, and set homework quests.',
-    color: 'lime',
+    name: "Record",
+    text: "A volunteer logs the session after it ends: what they covered, how the child felt, and what to try next time.",
+    colour: "green",
   },
   {
-    icon: 'bi-speedometer2',
-    name: 'Teachers',
-    text: 'Spot children who need attention and match them with the right volunteer. Teacher accounts are set up by the centre.',
-    color: 'purple',
+    name: "Quest",
+    text: "The child comes home to new homework quests and earns stars and kueh badges for every one they complete.",
+    colour: "pink",
   },
   {
-    icon: 'bi-house-heart',
-    name: 'Parents',
-    text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
-    color: 'orange',
+    name: "Share",
+    text: "Parents get a plain-English update on their child's session, mood and progress - without having to chase anyone.",
+    colour: "aqua",
   },
   {
-    icon: 'bi-trophy',
-    name: 'Children',
-    text: 'Answer homework quests to earn berries, level up, collect badges and climb the leaderboard.',
-    color: 'pink',
+    name: "Continue",
+    text: "The coordinator matches children with the right volunteer. Every new volunteer gets a full handover - the child never starts from zero.",
+    colour: "purple",
   },
 ]
 </script>
 
 <template>
-  <section class="hero py-5">
-    <div class="container py-md-4">
-      <div class="row align-items-center g-4 g-lg-5">
-        <div class="col-lg-7">
-          <span class="badge badge-accent mb-3">For student care centres</span>
-          <h1 class="display-5 fw-heavy mb-3">
-            When the volunteer changes, the child's progress shouldn't reset.
-          </h1>
-          <p class="lead lapis-muted mb-4">
-            Kids Lapis turns volunteer session notes into a clear, regularly updated picture for
-            parents: learning progress, mood, recurring struggles and what is helping.
-          </p>
-          <div class="d-flex flex-wrap gap-2">
-            <RouterLink v-if="auth.isLoggedIn" :to="auth.homePath" class="btn btn-primary btn-lg">
-              Go to my dashboard
-            </RouterLink>
-            <template v-else>
-              <RouterLink to="/login" class="btn btn-primary btn-lg">Log in</RouterLink>
-              <RouterLink to="/signup" class="btn btn-outline-primary btn-lg">
-                Volunteer / parent sign up
-              </RouterLink>
-            </template>
+  <div class="container py-4 homepage">
+    <header class="home-header">
+      <span class="note-tag">For student care centres</span>
+      <h1 class="page-title">Every session builds on the last. Every child stays on track.</h1>
+      <p class="page-subtitle">
+        Kids Lapis connects volunteers, teachers, parents and children — session notes become parent updates, homework becomes quests, and no child ever starts from zero.
+      </p>
+      <RouterLink v-if="auth.isLoggedIn" :to="auth.homePath" class="home-button colour-pink" data-test="go-dashboard">
+        Go to my dashboard
+      </RouterLink>
+    </header>
+
+    <!-- the sandy board with a white card for each role -->
+    <section class="board" aria-labelledby="roles-title">
+      <h2 id="roles-title">One app, four views</h2>
+      <div class="role-grid">
+        <article v-for="r in roles" :key="r.name" class="role-card" data-test="role-card">
+          <div class="role-top">
+            <span class="role-icon" :class="`colour-${r.colour}`"><i class="bi" :class="r.icon"></i></span>
+            <div>
+              <h3>{{ r.name }}</h3>
+              <div class="role-short">{{ r.short }}</div>
+            </div>
+          </div>
+          <p>{{ r.text }}</p>
+          <div v-if="!auth.isLoggedIn" class="role-foot">
+            <RouterLink to="/login" class="home-button" :class="`colour-${r.colour}`">{{ r.button }}</RouterLink>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- the four steps, as white rows -->
+    <section class="board" aria-labelledby="steps-title">
+      <h2 id="steps-title">How it works</h2>
+      <div class="step-grid">
+        <div v-for="(s, i) in steps" :key="s.name" class="step-row" data-test="how-step">
+          <span class="step-num" :class="`colour-${s.colour}`">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ s.name }}</h3>
+            <p>{{ s.text }}</p>
           </div>
         </div>
-
-        <!-- Hero picture: an example of what a parent sees (made of normal cards, not an image) -->
-        <div class="col-lg-5">
-          <figure class="hero-preview mb-0" data-test="hero-preview">
-            <figcaption class="visually-hidden">Example of a parent's daily update</figcaption>
-
-            <div class="lapis-card lapis-card-blue p-3 p-sm-4 handover-demo">
-              <div class="d-flex align-items-center gap-2 mb-3">
-                <span class="preview-avatar" aria-hidden="true"><ChildAvatar avatar="/photos/ethan.webp" /></span>
-                <div>
-                  <div class="fw-heavy">Ethan · P4</div>
-                  <div class="small lapis-muted">Today at student care</div>
-                </div>
-                <span class="badge badge-accent ms-auto">AI summary</span>
-              </div>
-
-              <dl class="row small mb-3">
-                <dt class="col-5">Worked on</dt>
-                <dd class="col-7">Fractions</dd>
-                <dt class="col-5">Mood</dt>
-                <dd class="col-7">Focused</dd>
-                <dt class="col-5">What helped</dt>
-                <dd class="col-7 mb-0">Drawing the fractions as pizza slices</dd>
-              </dl>
-
-              <div class="small mb-1 d-flex justify-content-between">
-                <span>This week's accuracy</span><strong>4 / 5</strong>
-              </div>
-              <div
-                class="progress preview-progress"
-                role="progressbar"
-                aria-label="Example accuracy"
-                aria-valuenow="80"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              >
-                <div class="progress-bar"></div>
-              </div>
-            </div>
-
-            <div class="lapis-card p-2 px-3 mt-2 ms-4 ms-sm-5 small preview-message">
-              <i class="bi bi-chat-dots me-1"></i>
-              <strong>Ms Grace:</strong> Ethan explained it to a friend today!
-            </div>
-          </figure>
-        </div>
       </div>
-    </div>
-  </section>
-
-  <section class="container py-5">
-    <h2 class="h3 text-center mb-4">How it works</h2>
-    <div class="row g-3">
-      <div v-for="(step, i) in steps" :key="step.title" class="col-sm-6 col-lg-3">
-        <div class="lapis-card p-3 h-100" :class="`lapis-card-${step.color}`" data-test="how-step">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="step-num">{{ i + 1 }}</div>
-            <h3 class="h6 mb-0"><i class="bi me-1" :class="step.icon"></i>{{ step.title }}</h3>
-          </div>
-          <p class="small lapis-muted mb-0">{{ step.text }}</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="container pb-5">
-    <h2 class="h3 text-center mb-4">One app, four views</h2>
-    <div class="row g-3">
-      <div v-for="r in roles" :key="r.name" class="col-sm-6 col-lg-3">
-        <div class="lapis-card p-3 h-100 text-center" :class="`lapis-card-${r.color}`">
-          <i class="bi fs-2 text-primary" :class="r.icon"></i>
-          <h3 class="h6 mt-2">{{ r.name }}</h3>
-          <p class="small lapis-muted mb-0">{{ r.text }}</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <style>
 /* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
 
-/* The public home page that people see before they log in (HomeView.vue). */
+/* The public home page that people see before they log in (HomeView.vue).
+   The title and the sentence under it are .page-title and .page-subtitle (main.css), the sandy box is .board (main.css).
+   The four colours are the layer colours of the roles: purple teacher, green volunteer, aqua parent, pink child. */
 
-.hero {
-  background: transparent; /* lapis bands show through from body */
-}
+/* ---------- the colours of the roles ---------- */
 
-.handover-demo {
-  border-left: 6px solid var(--lapis-orange);
-}
+.homepage .colour-green  { background: #9BD3B2; }
+.homepage .colour-purple { background: #D5CBEA; }
+.homepage .colour-aqua   { background: #AED9D8; }
+.homepage .colour-pink   { background: #E8A0B8; }
 
-/* The example update is tilted a little, so it reads as a picture rather than part of the page */
-.hero-preview {
-  max-width: 420px;
-  margin-inline: auto;
-}
-@media (min-width: 992px) {
-  .hero-preview {
-    transform: rotate(1.5deg);
-  }
-}
+/* ---------- the title ---------- */
 
-.preview-avatar {
-  font-size: 28px;
-  line-height: 1;
+.homepage .home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 0 22px;
 }
 
-.preview-progress {
-  height: 10px;
-  background: var(--lapis-cream);
-}
-.preview-progress .progress-bar {
-  width: 80%; /* the example accuracy */
-  background: var(--lapis-lime-dark);
+.homepage .page-title {
+  max-width: 520px;
+  margin: 0;
 }
 
-.preview-message {
-  background: var(--lapis-cream);
-  border-left: 4px solid var(--lapis-blue-dark);
+.homepage .page-subtitle {
+  max-width: 560px;
+  margin: 0;
 }
 
-.step-num {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--lapis-pink);
-  color: var(--lapis-cream);
+/* the small yellow tag above the title (the same quiet look as the warning tags on the teacher pages) */
+.homepage .note-tag {
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: #FAF4D8;
+  box-shadow: inset 0 0 0 1.5px #EEDFA6;
+  color: #7A6420;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* ---------- the boards ---------- */
+
+.homepage .board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.homepage .board h2 {
+  margin: 0 4px;
+  font-size: 18px;
   font-weight: 600;
+}
+
+/* ---------- a button: small, with 5px corners, in the colour of the role ---------- */
+
+.homepage .home-button {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 5px;
+  color: #4A3F3A;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.homepage .home-button:hover {
+  color: #4A3F3A;
+  filter: brightness(0.95);
+}
+
+/* ---------- the role cards ---------- */
+
+.homepage .role-grid,
+.homepage .step-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.homepage .role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
+}
+
+.homepage .role-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--lapis-pink-dark);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.1);
+  gap: 12px;
+}
+
+.homepage .role-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.homepage .role-card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.homepage .role-short {
+  color: #8D7F77;
+  font-size: 13px;
+}
+
+.homepage .role-card p,
+.homepage .step-row p {
+  margin: 0;
+  color: #8D7F77;
+  font-size: 14px;
+}
+
+.homepage .role-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+/* ---------- the steps: white rows, like the rows on the parent page ---------- */
+
+.homepage .step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
+}
+
+.homepage .step-num {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.homepage .step-row h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------- a phone ---------- */
+
+@media (max-width: 560px) {
+  .homepage .role-grid,
+  .homepage .step-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

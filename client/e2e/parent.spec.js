@@ -31,7 +31,6 @@ test.describe('Parent portal', () => {
   test('shows the handover card', async ({ page }) => {
     const handover = page.locator('[data-test="handover-card"]')
     await expect(handover).toBeVisible()
-    // The parent-audience summary uses the "Working on" label, not the volunteer "Continue" label
     await expect(handover).toContainText('This week')
   })
 

@@ -6,8 +6,8 @@
   Its styles are in the style block of views/parent/ParentHomeView.vue
 ============================================================= -->
 <script setup>
-import { computed, ref } from 'vue'
-import { firstName } from '@/utils/format' // small helper for names
+import { computed, ref, watch, onUnmounted } from 'vue'
+import { firstName, activitiesOf } from '@/utils/format' // small helpers for names and activities
 
 const props = defineProps({
   session: { type: Object, required: true },
@@ -15,16 +15,7 @@ const props = defineProps({
 })
 
 // the non-academic things the child did (chess with friends, soccer ...), as a list
-const activityList = computed(() => {
-  const activity = props.session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
-  if (Array.isArray(activity)) {
-    return activity
-  }
-  if (activity) {
-    return [activity]
-  }
-  return []
-})
+const activityList = computed(() => activitiesOf(props.session))
 
 // the short lines, each with an icon (a line is left out when the volunteer did not fill it in)
 const lines = computed(() => {
@@ -44,20 +35,30 @@ const showAllPhotos = ref(false)
 const shownPhotos = computed(() => (showAllPhotos.value ? photos.value : photos.value.slice(0, SHOWN_PHOTOS)))
 const extraPhotos = computed(() => Math.max(0, photos.value.length - SHOWN_PHOTOS))
 
-// a photo opens full size in a new tab, except the last one while more are hidden: that one shows them
-// A photo a volunteer uploaded is kept as text (data:...) and a browser does not follow a link to that,
-// so it is shown in a new tab with an image tag instead.
-function pressPhoto(index, event) {
+// the photo that is open big in the pop-up (empty = no pop-up)
+const bigPhoto = ref('')
+
+// pressing a photo opens it big in a pop-up, except the last one while more are hidden: that one shows them
+function pressPhoto(index) {
   const isMoreButton = !showAllPhotos.value && extraPhotos.value > 0 && index === SHOWN_PHOTOS - 1
   if (isMoreButton) {
-    event.preventDefault()
     showAllPhotos.value = true
-  } else if (shownPhotos.value[index].startsWith('data:')) {
-    event.preventDefault()
-    const tab = window.open('', '_blank')
-    if (tab) tab.document.body.innerHTML = `<img src="${shownPhotos.value[index]}" style="max-width:100%">`
+  } else {
+    bigPhoto.value = shownPhotos.value[index]
   }
 }
+
+// the Esc key closes the pop-up (we only listen to the keyboard while it is open)
+function closeOnEsc(event) {
+  if (event.key === 'Escape') bigPhoto.value = ''
+}
+
+watch(bigPhoto, (photo) => {
+  if (photo) window.addEventListener('keydown', closeOnEsc)
+  else window.removeEventListener('keydown', closeOnEsc)
+})
+
+onUnmounted(() => window.removeEventListener('keydown', closeOnEsc))
 
 // "Note from Aisha", or "Note from the volunteer" when we do not know the name
 const noteLabel = computed(() => {
@@ -76,18 +77,10 @@ const empty = computed(() => {
     <!-- photos -->
     <div v-if="photos.length > 0">
       <div class="day-photos">
-        <a
-          v-for="(photo, index) in shownPhotos"
-          :key="index"
-          class="day-photo"
-          :href="photo"
-          target="_blank"
-          rel="noopener"
-          @click="pressPhoto(index, $event)"
-        >
+        <button v-for="(photo, index) in shownPhotos" :key="index" type="button" class="day-photo" @click="pressPhoto(index)">
           <img :src="photo" alt="Photo from the session" />
           <span v-if="!showAllPhotos && extraPhotos > 0 && index === SHOWN_PHOTOS - 1" class="day-photo-more">+{{ extraPhotos }}</span>
-        </a>
+        </button>
       </div>
       <button v-if="showAllPhotos && extraPhotos > 0" type="button" class="show-more" @click="showAllPhotos = false">Show fewer photos</button>
     </div>
@@ -111,5 +104,11 @@ const empty = computed(() => {
     </div>
 
     <p v-if="empty" class="muted">Nothing extra was noted for this day.</p>
+
+    <!-- the photo, big, on a dark background: press anywhere (or Esc) to close -->
+    <div v-if="bigPhoto" class="photo-popup" data-test="photo-popup" @click="bigPhoto = ''">
+      <button type="button" class="photo-popup-close" aria-label="Close photo" @click="bigPhoto = ''"><i class="bi bi-x-lg"></i></button>
+      <img :src="bigPhoto" alt="Photo from the session" @click.stop />
+    </div>
   </div>
 </template>

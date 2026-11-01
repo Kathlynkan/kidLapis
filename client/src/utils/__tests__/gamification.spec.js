@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { earnedBadges, levelFor, BADGES } from '../gamification'
+import { earnedBadges, badgeProgress, levelFor, BADGES } from '../gamification'
 
 const child0 = { points: 0 }
 const child100 = { points: 100 }
@@ -14,17 +14,26 @@ const verifiedHw = (overrides = {}) => ({
   ...overrides,
 })
 
+const submittedHw = (overrides = {}) => ({
+  ...verifiedHw(overrides),
+  status: 'submitted',
+})
+
 describe('levelFor', () => {
   it('starts at level 1 with 0 points', () => {
-    expect(levelFor(0)).toEqual({ level: 1, progress: 0 })
+    expect(levelFor(0)).toMatchObject({ level: 1, progress: 0, starsToNext: 50 })
   })
 
-  it('reaches level 2 at 100 points', () => {
-    expect(levelFor(100)).toEqual({ level: 2, progress: 0 })
+  it('reaches level 2 at 50 points', () => {
+    expect(levelFor(50)).toMatchObject({ level: 2, progress: 0, starsToNext: 50 })
   })
 
-  it('tracks progress within a level', () => {
-    expect(levelFor(150)).toEqual({ level: 2, progress: 50 })
+  it('tracks progress within a level (25 of 50 = 50%)', () => {
+    expect(levelFor(75)).toMatchObject({ level: 2, progress: 50, starsToNext: 25 })
+  })
+
+  it('reaches level 5 (full cake) at 200 points', () => {
+    expect(levelFor(200)).toMatchObject({ level: 5, progress: 0 })
   })
 })
 
@@ -135,5 +144,29 @@ describe('earnedBadges', () => {
     const result = earnedBadges(child100, [verifiedHw()])
     const badgeIds = BADGES.map((b) => b.id)
     result.forEach((b) => expect(badgeIds).toContain(b.id))
+  })
+})
+
+describe('badges unlock for submitted (not yet verified) homework', () => {
+  it('awards first-quest for a submitted homework', () => {
+    const result = earnedBadges(child0, [submittedHw()])
+    expect(result.map((b) => b.id)).toContain('first-quest')
+  })
+
+  it('awards quest-champion for 5 submitted homework', () => {
+    const hw = Array.from({ length: 5 }, (_, i) => submittedHw({ id: `h${i}` }))
+    const result = earnedBadges(child0, hw)
+    expect(result.map((b) => b.id)).toContain('quest-champion')
+  })
+
+  it('century counts pending points from submitted homework', () => {
+    // child has 90 server-confirmed points; one submitted 10-pt quest tips them over
+    const { current, target } = badgeProgress(
+      { id: 'century' },
+      { points: 90 },
+      [submittedHw({ id: 'h1', points: 10 })],
+    )
+    expect(current).toBe(100)
+    expect(target).toBe(100)
   })
 })

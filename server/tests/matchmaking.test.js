@@ -41,6 +41,6 @@ test('seed: Ethan scores his two assigned volunteers with their schedule days', 
   const ranked = rankVolunteers(childNamed('Ethan'), volunteers, seed.children)
   const aisha = ranked.find((r) => r.name === 'Aisha Rahman')
   assert.equal(aisha.assigned, true)
-  assert.deepEqual(aisha.scheduledDays, ['Mon'])
-  assert.deepEqual(aisha.scheduledSlots, [{ day: 'Mon', time: '16:00' }])
+  assert.deepEqual(aisha.scheduledDays, ['Mon', 'Wed'])
+  assert.deepEqual(aisha.scheduledSlots, [{ day: 'Mon', time: '16:00' }, { day: 'Wed', time: '18:00'}])
 })

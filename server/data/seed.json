@@ -1,6 +1,6 @@
 {
   "meta": {
-    "seedAnchor": "2026-10-06",
+    "seedAnchor": "2026-10-09",
     "note": "Dates are shifted to be relative to today whenever the db is (re)created from this seed."
   },
   "users": [
@@ -10,6 +10,7 @@
       "email": "teacher@kidslapis.sg",
       "password": "password123",
       "role": "teacher",
+      "avatar": "/photos/tan-mei-ling.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -18,6 +19,7 @@
       "email": "volunteer@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/aisha.jpg",
       "skills": [
         "Math",
         "English"
@@ -34,6 +36,7 @@
       "email": "volunteer2@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/daniel.jpg",
       "skills": [
         "Math",
         "Science"
@@ -50,6 +53,7 @@
       "email": "volunteer3@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/priya.jpg",
       "skills": [
         "English",
         "Mother Tongue"
@@ -66,6 +70,7 @@
       "email": "parent@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/grace.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -74,6 +79,7 @@
       "email": "parent2@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/ravi.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -82,6 +88,7 @@
       "email": "parent3@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/linda.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -90,6 +97,7 @@
       "email": "parent4@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/marcus.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -134,13 +142,21 @@
           "volunteerId": "u_vol2",
           "day": "Tue",
           "time": "16:00"
+        },
+        {
+          "volunteerId": "u_vol1",
+          "day": "Wed"
+        },
+        {
+          "volunteerId": "u_vol2",
+          "day": "Thu"
         }
       ],
       "needs": [
         "Math"
       ],
       "points": 120,
-      "avatar": "/photos/ethan.webp",
+      "avatar": "/photos/ethan.jpg",
       "followUp": false
     },
     {
@@ -164,7 +180,7 @@
         "Science"
       ],
       "points": 210,
-      "avatar": "🐼",
+      "avatar": "/photos/meera.jpg",
       "followUp": false
     },
     {
@@ -193,7 +209,7 @@
         "English"
       ],
       "points": 60,
-      "avatar": "🐯",
+      "avatar": "/photos/arjun.jpg",
       "followUp": false
     },
     {
@@ -217,7 +233,7 @@
         "English"
       ],
       "points": 90,
-      "avatar": "🐰",
+      "avatar": "/photos/chloe.jpg",
       "followUp": false
     },
     {
@@ -240,7 +256,7 @@
         "Math"
       ],
       "points": 150,
-      "avatar": "🦁",
+      "avatar": "/photos/ryan.jpg",
       "followUp": false
     },
     {
@@ -256,7 +272,7 @@
         "Math"
       ],
       "points": 0,
-      "avatar": "🐨",
+      "avatar": "/photos/sofia.jpg",
       "followUp": false
     },
     {
@@ -280,7 +296,7 @@
         "Math"
       ],
       "points": 30,
-      "avatar": "/photos/mia.webp",
+      "avatar": "/photos/mia.jpg",
       "followUp": false
     }
   ],
@@ -579,7 +595,7 @@
       "id": "s_1",
       "childId": "c_1",
       "volunteerId": "u_vol1",
-      "date": "2026-09-17",
+      "date": "2026-09-14",
       "subject": "Math",
       "topic": "Fractions",
       "attempted": 5,
@@ -594,141 +610,10 @@
       "notes": "Got upset after 3 wrong answers; a short break helped."
     },
     {
-      "id": "s_2",
-      "childId": "c_1",
-      "volunteerId": "u_vol2",
-      "date": "2026-09-21",
-      "subject": "Math",
-      "topic": "Fractions",
-      "attempted": 5,
-      "correct": 2,
-      "struggles": [
-        "Finding common denominators"
-      ],
-      "whatWorked": "Fraction strips",
-      "nextStep": "Practice equivalent fractions with strips",
-      "mood": "okay",
-      "notes": ""
-    },
-    {
-      "id": "s_3",
-      "childId": "c_1",
-      "volunteerId": "u_vol1",
-      "date": "2026-09-24",
-      "subject": "Math",
-      "topic": "Fractions",
-      "attempted": 5,
-      "correct": 3,
-      "struggles": [
-        "Finding common denominators"
-      ],
-      "whatWorked": "Visual diagrams",
-      "nextStep": "Practice basic fraction addition",
-      "mood": "happy",
-      "notes": "",
-      "activity": "Drawing",
-      "interaction": "Good",
-      "behaviour": "Helped a classmate with colouring"
-    },
-    {
-      "id": "s_4",
-      "childId": "c_1",
-      "volunteerId": "u_vol2",
-      "date": "2026-09-28",
-      "subject": "Math",
-      "topic": "Multiplication",
-      "attempted": 10,
-      "correct": 8,
-      "struggles": [
-        "7 and 8 times tables"
-      ],
-      "whatWorked": "Skip counting songs",
-      "nextStep": "Timed times-table drill",
-      "mood": "happy",
-      "notes": "",
-      "activity": "Board games",
-      "photos": [
-        "/photos/board-games.webp"
-      ],
-      "interaction": "Excellent",
-      "behaviour": "Led a group game of Snakes and Ladders"
-    },
-    {
-      "id": "s_5",
-      "childId": "c_1",
-      "volunteerId": "u_vol1",
-      "date": "2026-10-01",
-      "subject": "English",
-      "topic": "Comprehension",
-      "attempted": 6,
-      "correct": 4,
-      "struggles": [
-        "Inference questions"
-      ],
-      "whatWorked": "Highlighting keywords",
-      "nextStep": "Try one inference passage",
-      "mood": "okay",
-      "notes": "",
-      "activity": "Reading corner",
-      "photos": [
-        "/photos/reading-corner.webp"
-      ],
-      "interaction": "Good",
-      "socialNotes": "Spent some quiet time reading with a friend after the session."
-    },
-    {
-      "id": "s_6",
-      "childId": "c_1",
-      "volunteerId": "u_vol1",
-      "date": "2026-10-04",
-      "subject": "Math",
-      "topic": "Fractions",
-      "attempted": 5,
-      "correct": 4,
-      "struggles": [
-        "Mixed numbers"
-      ],
-      "whatWorked": "Visual diagrams",
-      "nextStep": "Practice basic fraction addition",
-      "mood": "happy",
-      "notes": "Much more confident today!",
-      "activity": "Outdoor play",
-      "photos": [
-        "/photos/lunch-boys.webp",
-        "/photos/outdoor-play.webp"
-      ],
-      "interaction": "Excellent",
-      "behaviour": "Encouraged a friend who was finding it hard",
-      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session."
-    },
-    {
-      "id": "s_101",
-      "childId": "c_1",
-      "volunteerId": "u_vol1",
-      "date": "2026-09-25",
-      "subject": "English",
-      "topic": "Reading aloud",
-      "attempted": 6,
-      "correct": 5,
-      "struggles": [],
-      "whatWorked": "Taking turns to read a page each",
-      "nextStep": "Try a longer story book",
-      "mood": "happy",
-      "notes": "Read with lots of expression today.",
-      "meal": "Chicken rice",
-      "portion": "All",
-      "activity": [
-        "Chess"
-      ],
-      "interaction": "Excellent",
-      "behaviour": "Taught Chloe a new chess move",
-      "socialNotes": "Played chess with Chloe at break and was laughing the whole time."
-    },
-    {
       "id": "s_102",
       "childId": "c_1",
       "volunteerId": "u_vol2",
-      "date": "2026-09-26",
+      "date": "2026-09-17",
       "subject": "Math",
       "topic": "Multiplication",
       "attempted": 10,
@@ -743,13 +628,56 @@
       "activity": [
         "Lego"
       ],
+      "photos": [
+        "/photos/lego.jpg"
+      ],
       "interaction": "Good"
+    },
+    {
+      "id": "s_5",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-21",
+      "subject": "English",
+      "topic": "Comprehension",
+      "attempted": 6,
+      "correct": 4,
+      "struggles": [
+        "Inference questions"
+      ],
+      "whatWorked": "Highlighting keywords",
+      "nextStep": "Try one inference passage",
+      "mood": "okay",
+      "notes": "",
+      "activity": "Reading corner",
+      "photos": [
+        "/photos/reading-corner.jpg"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Spent some quiet time reading with a friend after the session."
+    },
+    {
+      "id": "s_2",
+      "childId": "c_1",
+      "volunteerId": "u_vol2",
+      "date": "2026-09-22",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 5,
+      "correct": 2,
+      "struggles": [
+        "Finding common denominators"
+      ],
+      "whatWorked": "Fraction strips",
+      "nextStep": "Practice equivalent fractions with strips",
+      "mood": "okay",
+      "notes": ""
     },
     {
       "id": "s_103",
       "childId": "c_1",
       "volunteerId": "u_vol1",
-      "date": "2026-09-29",
+      "date": "2026-09-23",
       "subject": "Science",
       "topic": "Parts of a plant",
       "attempted": 6,
@@ -764,15 +692,70 @@
       "activity": [
         "Soccer"
       ],
+      "photos": [
+        "/photos/soccer.jpg",
+        "/photos/fried-rice.jpg",
+        "/photos/sharing-snack.jpg"
+      ],
       "interaction": "Excellent",
       "behaviour": "Shared his snack with a younger child",
       "socialNotes": "Played soccer with Arjun at break and picked the teams fairly."
     },
     {
+      "id": "s_3",
+      "childId": "c_1",
+      "volunteerId": "u_vol2",
+      "date": "2026-09-24",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 5,
+      "correct": 3,
+      "struggles": [
+        "Finding common denominators"
+      ],
+      "whatWorked": "Visual diagrams",
+      "nextStep": "Practice basic fraction addition",
+      "mood": "happy",
+      "notes": "",
+      "activity": "Drawing",
+      "photos": [
+        "/photos/colouring.jpg"
+      ],
+      "interaction": "Good",
+      "behaviour": "Helped a classmate with colouring"
+    },
+    {
+      "id": "s_101",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-28",
+      "subject": "English",
+      "topic": "Reading aloud",
+      "attempted": 6,
+      "correct": 5,
+      "struggles": [],
+      "whatWorked": "Taking turns to read a page each",
+      "nextStep": "Try a longer story book",
+      "mood": "happy",
+      "notes": "Read with lots of expression today.",
+      "meal": "Chicken rice",
+      "portion": "All",
+      "activity": [
+        "Chess"
+      ],
+      "photos": [
+        "/photos/chess-chloe.jpg",
+        "/photos/chicken-rice-2.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Taught Chloe a new chess move",
+      "socialNotes": "Played chess with Chloe at break and was laughing the whole time."
+    },
+    {
       "id": "s_104",
       "childId": "c_1",
       "volunteerId": "u_vol2",
-      "date": "2026-09-30",
+      "date": "2026-09-29",
       "subject": "Math",
       "topic": "Fractions",
       "attempted": 5,
@@ -790,7 +773,7 @@
       "id": "s_105",
       "childId": "c_1",
       "volunteerId": "u_vol1",
-      "date": "2026-10-02",
+      "date": "2026-09-30",
       "subject": "Mother Tongue",
       "topic": "Pinyin",
       "attempted": 5,
@@ -805,28 +788,38 @@
       "activity": [
         "Drawing"
       ],
+      "photos": [
+        "/photos/noodles.jpg",
+        "/photos/comics.jpg"
+      ],
       "interaction": "Good",
       "socialNotes": "Drew comics with Arjun after his work."
     },
     {
-      "id": "s_106",
+      "id": "s_6",
       "childId": "c_1",
       "volunteerId": "u_vol2",
-      "date": "2026-10-03",
+      "date": "2026-10-01",
       "subject": "Math",
       "topic": "Fractions",
       "attempted": 5,
-      "correct": 3,
+      "correct": 4,
       "struggles": [
-        "Finding common denominators"
+        "Finding common denominators",
+        "Mixed numbers"
       ],
-      "whatWorked": "Pizza drawings",
-      "nextStep": "Practise common denominators",
-      "mood": "tired",
-      "notes": "",
-      "portion": "Half",
-      "interaction": "Limited",
-      "socialNotes": "Sat by himself at break, said he was sleepy."
+      "whatWorked": "Visual diagrams",
+      "nextStep": "Practice basic fraction addition",
+      "mood": "happy",
+      "notes": "Much more confident today!",
+      "activity": "Outdoor play",
+      "photos": [
+        "/photos/lunch-boys.jpg",
+        "/photos/outdoor-play.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Encouraged a friend who was finding it hard",
+      "socialNotes": "Really came out of his shell — very chatty and upbeat the whole session."
     },
     {
       "id": "s_107",
@@ -849,14 +842,68 @@
       "activity": [
         "Reading"
       ],
+      "photos": [
+        "/photos/reading-book.jpg",
+        "/photos/fish-soup.jpg"
+      ],
       "interaction": "Fair",
       "socialNotes": "Quieter than usual and read on his own at break, but perked up after his snack."
     },
     {
-      "id": "s_108",
+      "id": "s_106",
+      "childId": "c_1",
+      "volunteerId": "u_vol2",
+      "date": "2026-10-06",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 5,
+      "correct": 3,
+      "struggles": [
+        "Finding common denominators"
+      ],
+      "whatWorked": "Pizza drawings",
+      "nextStep": "Practise common denominators",
+      "mood": "tired",
+      "notes": "",
+      "portion": "Half",
+      "photos": [
+        "/photos/sleepy-lunch.jpg"
+      ],
+      "interaction": "Limited",
+      "socialNotes": "Sat by himself at break, said he was sleepy."
+    },
+    {
+      "id": "s_4",
       "childId": "c_1",
       "volunteerId": "u_vol1",
-      "date": "2026-10-06",
+      "date": "2026-10-07",
+      "subject": "Math",
+      "topic": "Multiplication",
+      "attempted": 10,
+      "correct": 8,
+      "struggles": [
+        "7 and 8 times tables"
+      ],
+      "whatWorked": "Skip counting songs",
+      "nextStep": "Timed times-table drill",
+      "mood": "happy",
+      "notes": "",
+      "activity": "Board games",
+      "photos": [
+        "/photos/snakes-ladders.jpg",
+        "/photos/nasi-lemak.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Led a group game of Snakes and Ladders",
+      "meal": "Nasi lemak",
+      "portion": "All",
+      "socialNotes": "Got Arjun and two others to join his Snakes and Ladders game after lessons."
+    },
+    {
+      "id": "s_108",
+      "childId": "c_1",
+      "volunteerId": "u_vol2",
+      "date": "2026-10-08",
       "subject": "Math",
       "topic": "Fractions",
       "attempted": 5,
@@ -874,14 +921,18 @@
         "Chess"
       ],
       "interaction": "Good",
+      "photos": [
+        "/photos/chess.jpg",
+        "/photos/chicken-rice.jpg"
+      ],
       "behaviour": "Helped tidy up the games corner",
-      "socialNotes": "Back to playing chess with Arjun after lessons."
+      "socialNotes": "Back to playing chess after lessons."
     },
     {
       "id": "s_7",
       "childId": "c_2",
       "volunteerId": "u_vol2",
-      "date": "2026-09-20",
+      "date": "2026-09-24",
       "subject": "Math",
       "topic": "Problem Sums",
       "attempted": 4,
@@ -898,7 +949,7 @@
       "id": "s_8",
       "childId": "c_2",
       "volunteerId": "u_vol2",
-      "date": "2026-09-27",
+      "date": "2026-10-01",
       "subject": "Math",
       "topic": "Problem Sums",
       "attempted": 4,
@@ -915,7 +966,7 @@
       "id": "s_9",
       "childId": "c_2",
       "volunteerId": "u_vol2",
-      "date": "2026-10-03",
+      "date": "2026-10-08",
       "subject": "Science",
       "topic": "Energy",
       "attempted": 8,
@@ -927,28 +978,10 @@
       "notes": ""
     },
     {
-      "id": "s_10",
-      "childId": "c_3",
-      "volunteerId": "u_vol3",
-      "date": "2026-09-22",
-      "subject": "English",
-      "topic": "Spelling",
-      "attempted": 10,
-      "correct": 5,
-      "struggles": [
-        "Silent letters",
-        "Double consonants"
-      ],
-      "whatWorked": "Word families",
-      "nextStep": "Spelling list 4",
-      "mood": "okay",
-      "notes": ""
-    },
-    {
       "id": "s_11",
       "childId": "c_3",
       "volunteerId": "u_vol1",
-      "date": "2026-09-26",
+      "date": "2026-09-16",
       "subject": "English",
       "topic": "Comprehension",
       "attempted": 5,
@@ -963,44 +996,28 @@
       "notes": ""
     },
     {
-      "id": "s_12",
+      "id": "s_10",
       "childId": "c_3",
       "volunteerId": "u_vol3",
-      "date": "2026-09-30",
+      "date": "2026-09-18",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 10,
-      "correct": 6,
+      "correct": 5,
       "struggles": [
-        "Silent letters"
+        "Silent letters",
+        "Double consonants"
       ],
       "whatWorked": "Word families",
-      "nextStep": "Spelling list 5",
+      "nextStep": "Spelling list 4",
       "mood": "okay",
-      "notes": ""
-    },
-    {
-      "id": "s_13",
-      "childId": "c_3",
-      "volunteerId": "u_vol3",
-      "date": "2026-10-05",
-      "subject": "English",
-      "topic": "Spelling",
-      "attempted": 10,
-      "correct": 7,
-      "struggles": [
-        "Silent letters"
-      ],
-      "whatWorked": "Mnemonics",
-      "nextStep": "Spelling list 6",
-      "mood": "happy",
       "notes": ""
     },
     {
       "id": "s_109",
       "childId": "c_3",
       "volunteerId": "u_vol1",
-      "date": "2026-09-29",
+      "date": "2026-09-23",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 10,
@@ -1021,10 +1038,27 @@
       "socialNotes": "Played soccer with Ethan at break and scored twice."
     },
     {
-      "id": "s_110",
+      "id": "s_12",
       "childId": "c_3",
       "volunteerId": "u_vol3",
-      "date": "2026-10-02",
+      "date": "2026-09-25",
+      "subject": "English",
+      "topic": "Spelling",
+      "attempted": 10,
+      "correct": 6,
+      "struggles": [
+        "Silent letters"
+      ],
+      "whatWorked": "Word families",
+      "nextStep": "Spelling list 5",
+      "mood": "okay",
+      "notes": ""
+    },
+    {
+      "id": "s_110",
+      "childId": "c_3",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-30",
       "subject": "English",
       "topic": "Reading",
       "attempted": 5,
@@ -1043,10 +1077,27 @@
       "socialNotes": "Drew comics with Ethan after his work - they made up a superhero together."
     },
     {
+      "id": "s_13",
+      "childId": "c_3",
+      "volunteerId": "u_vol3",
+      "date": "2026-10-02",
+      "subject": "English",
+      "topic": "Spelling",
+      "attempted": 10,
+      "correct": 7,
+      "struggles": [
+        "Silent letters"
+      ],
+      "whatWorked": "Mnemonics",
+      "nextStep": "Spelling list 6",
+      "mood": "happy",
+      "notes": ""
+    },
+    {
       "id": "s_111",
       "childId": "c_3",
       "volunteerId": "u_vol1",
-      "date": "2026-10-06",
+      "date": "2026-10-07",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 10,
@@ -1061,16 +1112,40 @@
       "meal": "Chicken rice",
       "portion": "Most",
       "activity": [
-        "Chess"
+        "Board games"
       ],
       "interaction": "Good",
-      "socialNotes": "Played chess with Ethan after lessons."
+      "socialNotes": "Joined Ethan's Snakes and Ladders game after lessons."
+    },
+    {
+      "id": "s_112",
+      "childId": "c_3",
+      "volunteerId": "u_vol3",
+      "date": "2026-10-09",
+      "subject": "English",
+      "topic": "Reading comprehension",
+      "attempted": 5,
+      "correct": 4,
+      "struggles": [
+        "Vocabulary"
+      ],
+      "whatWorked": "Picture clues and reading aloud together",
+      "nextStep": "Short story with 5 questions",
+      "mood": "happy",
+      "notes": "Answered most questions in full sentences.",
+      "meal": "Mee goreng",
+      "portion": "All",
+      "activity": [
+        "Drawing"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Drew a comic of the story at break and proudly showed it around."
     },
     {
       "id": "s_14",
       "childId": "c_4",
       "volunteerId": "u_vol1",
-      "date": "2026-09-11",
+      "date": "2026-09-14",
       "subject": "Math",
       "topic": "Area and Perimeter",
       "attempted": 6,
@@ -1087,7 +1162,7 @@
       "id": "s_15",
       "childId": "c_4",
       "volunteerId": "u_vol1",
-      "date": "2026-09-18",
+      "date": "2026-09-21",
       "subject": "English",
       "topic": "Composition",
       "attempted": 1,
@@ -1104,7 +1179,7 @@
       "id": "s_16",
       "childId": "c_4",
       "volunteerId": "u_vol1",
-      "date": "2026-09-25",
+      "date": "2026-09-28",
       "subject": "Math",
       "topic": "Area and Perimeter",
       "attempted": 6,
@@ -1126,7 +1201,7 @@
       "id": "s_17",
       "childId": "c_5",
       "volunteerId": "u_vol2",
-      "date": "2026-09-23",
+      "date": "2026-09-22",
       "subject": "Math",
       "topic": "Ratio",
       "attempted": 6,
@@ -1161,7 +1236,7 @@
       "id": "s_19",
       "childId": "c_5",
       "volunteerId": "u_vol2",
-      "date": "2026-10-02",
+      "date": "2026-10-06",
       "subject": "Math",
       "topic": "Percentage",
       "attempted": 8,
@@ -1178,7 +1253,7 @@
       "id": "s_20",
       "childId": "c_7",
       "volunteerId": "u_vol1",
-      "date": "2026-09-25",
+      "date": "2026-09-23",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 8,
@@ -1195,7 +1270,7 @@
       "id": "s_21",
       "childId": "c_7",
       "volunteerId": "u_vol1",
-      "date": "2026-10-02",
+      "date": "2026-09-30",
       "subject": "Math",
       "topic": "Counting and adding",
       "attempted": 10,
@@ -1212,7 +1287,7 @@
       "id": "s_22",
       "childId": "c_7",
       "volunteerId": "u_vol1",
-      "date": "2026-10-08",
+      "date": "2026-10-07",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 8,
@@ -1223,7 +1298,7 @@
       "mood": "happy",
       "notes": "",
       "photos": [
-        "/photos/lunch-girls.webp"
+        "/photos/lunch-girls.jpg"
       ]
     }
   ],
@@ -1235,7 +1310,7 @@
       "title": "Fraction addition worksheet",
       "subject": "Math",
       "details": "Question book p.42, Q1-10. Draw a diagram for each!",
-      "dueDate": "2026-10-08",
+      "dueDate": "2026-10-11",
       "points": 20,
       "status": "assigned",
       "completedAt": null,
@@ -1270,10 +1345,10 @@
       "title": "7 times table",
       "subject": "Math",
       "details": "Say the 7 times table out loud three times.",
-      "dueDate": "2026-10-02",
+      "dueDate": "2026-10-05",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-01T11:00:00.000Z",
+      "completedAt": "2026-10-04T11:00:00.000Z",
       "questions": [
         {
           "text": "7 x 3 = ?",
@@ -1305,10 +1380,10 @@
       "title": "Read one story",
       "subject": "English",
       "details": "Read any story book for 15 minutes and tell me what happened.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-08",
       "points": 10,
       "status": "submitted",
-      "completedAt": "2026-10-05T11:00:00.000Z",
+      "completedAt": "2026-10-08T11:00:00.000Z",
       "questions": []
     },
     {
@@ -1318,7 +1393,7 @@
       "title": "Before-after problem sums",
       "subject": "Math",
       "details": "Workbook Unit 6, Q1-5",
-      "dueDate": "2026-10-09",
+      "dueDate": "2026-10-12",
       "points": 20,
       "status": "assigned",
       "completedAt": null,
@@ -1345,7 +1420,7 @@
       "title": "Spelling list 6",
       "subject": "English",
       "details": "Practice list 6 with look-cover-write-check.",
-      "dueDate": "2026-10-07",
+      "dueDate": "2026-10-10",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -1372,7 +1447,7 @@
       "title": "Area worksheet",
       "subject": "Math",
       "details": "Worksheet 3B",
-      "dueDate": "2026-09-30",
+      "dueDate": "2026-10-03",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -1395,7 +1470,7 @@
       "title": "Percentage practice",
       "subject": "Math",
       "details": "Question book p.18",
-      "dueDate": "2026-10-10",
+      "dueDate": "2026-10-13",
       "points": 20,
       "status": "assigned",
       "completedAt": null,
@@ -1422,7 +1497,7 @@
       "title": "Spelling list 3",
       "subject": "English",
       "details": "Write each word 3 times, then cover the list and test yourself.",
-      "dueDate": "2026-10-09",
+      "dueDate": "2026-10-12",
       "points": 10,
       "status": "assigned",
       "completedAt": null,
@@ -1457,7 +1532,7 @@
       "title": "6 and 8 times tables",
       "subject": "Math",
       "details": "Say the 6 and 8 times tables out loud, then write them out.",
-      "dueDate": "2026-10-10",
+      "dueDate": "2026-10-13",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -1492,7 +1567,7 @@
       "title": "Parts of a plant",
       "subject": "Science",
       "details": "Draw a plant and label the roots, stem, leaves and flower.",
-      "dueDate": "2026-10-11",
+      "dueDate": "2026-10-14",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -1523,7 +1598,7 @@
       "title": "Unscramble the words: school things",
       "subject": "English",
       "details": "Put the letters in the right order to make a word.",
-      "dueDate": "2026-10-14",
+      "dueDate": "2026-10-17",
       "points": 10,
       "status": "assigned",
       "completedAt": null
@@ -1535,7 +1610,7 @@
       "title": "Words that rhyme",
       "subject": "English",
       "details": "Write a word that rhymes. Use the word in brackets to help.",
-      "dueDate": "2026-10-09",
+      "dueDate": "2026-10-12",
       "points": 10,
       "status": "submitted",
       "completedAt": "2026-10-08T15:20:00.000Z"
@@ -1547,10 +1622,10 @@
       "title": "3 and 4 times tables",
       "subject": "Math",
       "details": "Answer the questions about the 3 and 4 times tables.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-08",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-04T16:00:00.000Z"
+      "completedAt": "2026-10-07T16:00:00.000Z"
     },
     {
       "id": "h_14",
@@ -1559,7 +1634,7 @@
       "title": "Spelling list 2",
       "subject": "English",
       "details": "Write each word 3 times, then ask Mia to spell them out loud.",
-      "dueDate": "2026-10-04",
+      "dueDate": "2026-10-07",
       "points": 10,
       "status": "assigned",
       "completedAt": null
@@ -1571,10 +1646,10 @@
       "title": "Mixed numbers practice",
       "subject": "Math",
       "details": "Do the mixed numbers sheet, questions 1 to 8.",
-      "dueDate": "2026-10-02",
+      "dueDate": "2026-10-05",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-03T10:30:00.000Z"
+      "completedAt": "2026-10-06T10:30:00.000Z"
     },
     {
       "id": "h_16",
@@ -1583,10 +1658,10 @@
       "title": "Times tables 6 to 9",
       "subject": "Math",
       "details": "Fill in the times table grid and check it.",
-      "dueDate": "2026-10-04",
+      "dueDate": "2026-10-07",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-04T09:15:00.000Z"
+      "completedAt": "2026-10-07T09:15:00.000Z"
     },
     {
       "id": "h_17",
@@ -1595,10 +1670,10 @@
       "title": "Parts of a flower",
       "subject": "Science",
       "details": "Draw a flower and label five parts.",
-      "dueDate": "2026-10-06",
+      "dueDate": "2026-10-13",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-06T08:40:00.000Z"
+      "completedAt": "2026-10-12T08:40:00.000Z"
     },
     {
       "id": "h_18",
@@ -1607,10 +1682,10 @@
       "title": "Reading log",
       "subject": "English",
       "details": "Read for 15 minutes and write one sentence.",
-      "dueDate": "2026-10-03",
+      "dueDate": "2026-10-06",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-03T15:00:00.000Z"
+      "completedAt": "2026-10-06T15:00:00.000Z"
     },
     {
       "id": "h_19",
@@ -1619,10 +1694,10 @@
       "title": "Spelling list 1",
       "subject": "English",
       "details": "Write each word three times.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-08",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-05T14:20:00.000Z"
+      "completedAt": "2026-10-08T14:20:00.000Z"
     },
     {
       "id": "h_20",
@@ -1631,10 +1706,10 @@
       "title": "Number patterns",
       "subject": "Math",
       "details": "Finish the number patterns on the sheet.",
-      "dueDate": "2026-10-06",
+      "dueDate": "2026-10-13",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-06T09:00:00.000Z"
+      "completedAt": "2026-10-12T09:00:00.000Z"
     },
     {
       "id": "h_21",
@@ -1643,10 +1718,10 @@
       "title": "Area worksheet part 1",
       "subject": "Math",
       "details": "Work out the area of each shape.",
-      "dueDate": "2026-10-02",
+      "dueDate": "2026-10-05",
       "points": 20,
       "status": "verified",
-      "completedAt": "2026-10-02T13:00:00.000Z"
+      "completedAt": "2026-10-05T13:00:00.000Z"
     },
     {
       "id": "h_22",
@@ -1655,10 +1730,10 @@
       "title": "Comprehension A",
       "subject": "English",
       "details": "Read the passage and answer the questions.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-08",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-04T16:30:00.000Z"
+      "completedAt": "2026-10-07T16:30:00.000Z"
     },
     {
       "id": "h_23",
@@ -1667,10 +1742,10 @@
       "title": "Percentage basics",
       "subject": "Math",
       "details": "Change each fraction into a percentage.",
-      "dueDate": "2026-10-01",
+      "dueDate": "2026-10-04",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-01T12:00:00.000Z"
+      "completedAt": "2026-10-04T12:00:00.000Z"
     },
     {
       "id": "h_24",
@@ -1679,10 +1754,10 @@
       "title": "States of matter",
       "subject": "Science",
       "details": "Copy the table and fill in the examples.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-13",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-05T11:30:00.000Z"
+      "completedAt": "2026-10-12T11:30:00.000Z"
     },
     {
       "id": "h_25",
@@ -1691,10 +1766,10 @@
       "title": "Before-after sums set 1",
       "subject": "Math",
       "details": "Solve the first set of before-after problem sums.",
-      "dueDate": "2026-10-04",
+      "dueDate": "2026-10-07",
       "points": 20,
       "status": "verified",
-      "completedAt": "2026-10-03T14:00:00.000Z"
+      "completedAt": "2026-10-06T14:00:00.000Z"
     },
     {
       "id": "h_26",
@@ -1703,10 +1778,10 @@
       "title": "Spelling list 5",
       "subject": "English",
       "details": "Learn the words and test yourself.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-13",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-10-05T10:00:00.000Z"
+      "completedAt": "2026-10-12T10:00:00.000Z"
     },
     {
       "id": "h_27",
@@ -1715,10 +1790,10 @@
       "title": "Phonics sheet",
       "subject": "English",
       "details": "Circle the letters that make the sound.",
-      "dueDate": "2026-10-03",
+      "dueDate": "2026-10-06",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-03T09:45:00.000Z"
+      "completedAt": "2026-10-06T09:45:00.000Z"
     }
   ],
   "messages": [
@@ -1727,7 +1802,7 @@
       "childId": "c_1",
       "fromId": "u_coord",
       "text": "Hi Mrs Wong! Ethan did really well with fractions today - 4/5 correct.",
-      "sentAt": "2026-10-04T09:40:00.000Z",
+      "sentAt": "2026-10-08T09:40:00.000Z",
       "readBy": [
         "u_coord",
         "u_par1"
@@ -1738,7 +1813,7 @@
       "childId": "c_1",
       "fromId": "u_par1",
       "text": "Thank you Ms Tan! He told me about the pizza drawings haha",
-      "sentAt": "2026-10-04T12:15:00.000Z",
+      "sentAt": "2026-10-08T12:15:00.000Z",
       "readBy": [
         "u_par1",
         "u_coord"
@@ -1749,7 +1824,7 @@
       "childId": "c_1",
       "fromId": "u_coord",
       "text": "I gave him a short fraction worksheet - could you remind him to try it this weekend?",
-      "sentAt": "2026-10-05T09:35:00.000Z",
+      "sentAt": "2026-10-09T09:35:00.000Z",
       "readBy": [
         "u_coord"
       ]
@@ -1759,7 +1834,7 @@
       "childId": "c_3",
       "fromId": "u_coord",
       "text": "Arjun's spelling is improving! Silent letters are still tricky.",
-      "sentAt": "2026-10-05T10:00:00.000Z",
+      "sentAt": "2026-10-08T10:00:00.000Z",
       "readBy": [
         "u_coord"
       ]
@@ -1769,7 +1844,7 @@
       "childId": "c_7",
       "fromId": "u_coord",
       "text": "Hi Mrs Wong! Mia is getting better at her spelling - 6 out of 8 today.",
-      "sentAt": "2026-10-08T09:30:00.000Z",
+      "sentAt": "2026-10-07T09:30:00.000Z",
       "readBy": [
         "u_coord"
       ]

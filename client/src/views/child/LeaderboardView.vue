@@ -35,7 +35,9 @@ const slots = computed(() =>
     const place = entry ? entry.place : i + 1
     let note = 'Do a quest to join'
     if (entry) {
-      note = place === 1 ? 'Top of the week' : `${entry.ahead.points - entry.points} behind ${firstName(entry.ahead.name)}`
+      note = (place === 1 || !entry.ahead)
+        ? 'Top of the week'
+        : `${entry.ahead.points - entry.points} behind ${firstName(entry.ahead.name)}`
     }
     return { entry, place, note }
   }),
@@ -63,7 +65,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 leaderboardpage">
-    <PageHeader title="Leaderboard" subtitle="Stars earned this week — resets every Monday!" />
+    <PageHeader title="Leaderboard" subtitle="Verified stars this week — resets every Monday!" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -180,9 +182,9 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.leaderboardpage .lb-stars { background: #FBE7A1; color: var(--lapis-plum); }
-.leaderboardpage .lb-you   { background: #F3C1D3; color: var(--lapis-plum); }
-.leaderboardpage .lb-rank  { justify-content: center; min-width: 30px; background: var(--role-accent-soft, #FAE8F0); color: var(--lapis-plum); }
+.leaderboardpage .lb-stars { background: #FBE7A1; color: #4A3F3A; }
+.leaderboardpage .lb-you   { background: #F3C1D3; color: #4A3F3A; }
+.leaderboardpage .lb-rank  { justify-content: center; min-width: 30px; background: var(--role-accent-soft, #FAE8F0); color: #4A3F3A; }
 .leaderboardpage .lb-stars .bi { font-size: 11px; }
 
 /* ── The podium ─────────────────────────────────────────────── */
@@ -236,7 +238,7 @@ onMounted(async () => {
   width: 84px;
   height: 84px;
   font-size: 46px;
-  box-shadow: 0 0 0 3px var(--layer-child);
+  box-shadow: 0 0 0 3px #E8A0B8;
 }
 
 .leaderboardpage .crown {
@@ -276,24 +278,24 @@ onMounted(async () => {
   margin-top: 6px;
   padding-top: 8px;
   border-radius: 14px 14px 0 0;
-  background: var(--layer-teacher);
+  background: #D5CBEA;
 }
 
-.leaderboardpage .pcol[data-rank='1'] .step { height: 120px; background: var(--layer-child); }
-.leaderboardpage .pcol[data-rank='2'] .step { height: 96px;  background: var(--layer-parent); }
+.leaderboardpage .pcol[data-rank='1'] .step { height: 120px; background: #E8A0B8; }
+.leaderboardpage .pcol[data-rank='2'] .step { height: 96px;  background: #AED9D8; }
 
 .leaderboardpage .step-rank {
   font-size: 26px;
   font-weight: 700;
   line-height: 1.1;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
 }
 
 .leaderboardpage .pnote {
   min-height: 26px;
   padding-top: 6px;
   font-size: 12.5px;
-  color: var(--lapis-muted);
+  color: #8D7F77;
 }
 
 /* a free place: a faint dashed step */
@@ -304,7 +306,7 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-.leaderboardpage .pcol.free .pname { color: var(--lapis-muted); font-weight: 500; }
+.leaderboardpage .pcol.free .pname { color: #8D7F77; font-weight: 500; }
 
 .leaderboardpage .pcol.free .step {
   border: 2px dashed #E9D6DD;
@@ -331,7 +333,7 @@ onMounted(async () => {
 
 /* your own row has a pink outline */
 .leaderboardpage .lb-row.lb-me {
-  box-shadow: 0 0 0 2px var(--layer-child), 0 1px 6px rgba(74, 63, 58, 0.10);
+  box-shadow: 0 0 0 2px #E8A0B8, 0 1px 6px rgba(74, 63, 58, 0.10);
 }
 
 .leaderboardpage .row-avatar {
@@ -359,7 +361,7 @@ onMounted(async () => {
 .leaderboardpage .row-hint,
 .leaderboardpage .lb-hint {
   font-size: 13px;
-  color: var(--lapis-muted);
+  color: #8D7F77;
 }
 
 .leaderboardpage .lb-hint { margin: 0; text-align: center; }
@@ -376,13 +378,13 @@ onMounted(async () => {
   border: 0;
   border-radius: 5px;
   background: #F3C1D3;
-  color: var(--lapis-plum);
+  color: #4A3F3A;
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
 }
 
-.leaderboardpage .lb-go:hover { background: #EBAAC2; color: var(--lapis-plum); }
+.leaderboardpage .lb-go:hover { background: #EBAAC2; color: #4A3F3A; }
 
 /* ── A small phone: three narrow steps ──────────────────────── */
 

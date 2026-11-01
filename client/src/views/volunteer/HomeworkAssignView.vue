@@ -150,7 +150,7 @@ onMounted(() => { // autofill form if edit form
     </button>
 
     <PageHeader
-      :title="isEdit ? 'Edit Homework' : 'Give Homework'"
+      :title="isEdit ? 'Edit Homework' : 'Assign Homework'"
       subtitle="Small tasks from the question book work best."
     />
 
@@ -185,15 +185,15 @@ onMounted(() => { // autofill form if edit form
               <div class="slider-container">
                 <span class="badge badge-light reward-badge text-dark fs-5 fw-bold" 
                   :style="{left: badgePosition}">
-                  {{ form.points }}⭐
+                  {{ form.points }} <i class="bi bi-star-fill"></i>
                 </span>
                 <input type="range" id="points" v-model.number="form.points" 
                 min="5" max="20" step="1" class="form-range">
               </div>
 
               <div class="d-flex justify-content-between">
-                <span>5⭐</span>
-                <span>20⭐</span>
+                <span>5 <i class="bi bi-star-fill"></i></span>
+                <span>20 <i class="bi bi-star-fill"></i></span>
               </div>
             </div>
 

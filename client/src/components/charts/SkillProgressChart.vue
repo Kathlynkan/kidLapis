@@ -1,10 +1,11 @@
-<!-- SkillProgressChart - accuracy over time, one line per PSLE subject.   Owner: Jachin
+<!-- SkillProgressChart - accuracy over time, one subject at a time.   Owner: Jachin
+     Subject picker defaults to the subject with the most sessions.
      Props: sessions (Array) - from GET /sessions?childId=...
-            calm (Boolean) - the quiet look for a volunteer or teacher: one line for the score of each session
-            tone ('teal' | 'lavender') - the colour of the quiet look: teal for a volunteer, lavender for a teacher
+            calm (Boolean) - the quiet look for volunteer/teacher (teal/lavender axis ticks)
+            tone ('teal' | 'lavender') - axis tick colour in calm mode
      Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -17,10 +18,11 @@ import {
   Filler,
 } from 'chart.js'
 import { accuracy, formatDate } from '@/utils/format'
-import '@/css/main/components.css' // the look of the small parts
+import { SUBJECT_COLORS } from '@/utils/constants'
+import '@/css/main/components.css'
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler)
-ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif' // the same font as the rest of the app
+ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif'
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
@@ -28,77 +30,96 @@ const props = defineProps({
   tone: { type: String, default: 'teal' },
 })
 
-const SUBJECT_COLORS = {
-  'English':       '#88C0D8',
-  'Math':          '#D4B840',
-  'Science':       '#F5DF98',
-  'Mother Tongue': '#E8906C',
-}
 const FALLBACK_COLORS = ['#C0A8D8', '#A8CC90', '#F5B880', '#E8A0B8']
 
+const subjects = computed(() => {
+  const counts = {}
+  for (const s of props.sessions) counts[s.subject] = (counts[s.subject] || 0) + 1
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([subject]) => subject)
+})
+
+const selectedSubject = ref('')
+watch(subjects, (list) => { if (!list.includes(selectedSubject.value)) selectedSubject.value = list[0] ?? '' }, { immediate: true })
+
+// built once per subjects change so indexOf never runs inside the render loop
+const pillColors = computed(() =>
+  Object.fromEntries(subjects.value.map((subj, i) => [
+    subj,
+    SUBJECT_COLORS[subj] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length],
+  ]))
+)
+
+function pillStyle(subj) {
+  const c = pillColors.value[subj]
+  return { background: subj === selectedSubject.value ? c : c + '44', borderColor: c }
+}
+
+// shared by chartData, calmData and selectedSummary — filtered and sorted once
+const selectedSessions = computed(() =>
+  [...props.sessions]
+    .filter((s) => s.subject === selectedSubject.value)
+    .sort((a, b) => a.date.localeCompare(b.date))
+)
+
 const chartData = computed(() => {
-  const bySubject = {}
-  const sorted = [...props.sessions].sort((a, b) => a.date.localeCompare(b.date))
-  for (const s of sorted) {
-    bySubject[s.subject] ??= []
-    bySubject[s.subject].push(s)
-  }
-  const allDates = [...new Set(sorted.map((s) => s.date))]
-  const datasets = Object.entries(bySubject).map(([subject, list], i) => {
-    const color = SUBJECT_COLORS[subject] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length]
-    const byDate = Object.fromEntries(list.map((s) => [s.date, accuracy(s)]))
-    return {
-      label: subject,
-      data: allDates.map((d) => byDate[d] ?? null),
+  const color = pillColors.value[selectedSubject.value] ?? FALLBACK_COLORS[0]
+  return {
+    labels: selectedSessions.value.map((s) => formatDate(s.date)),
+    datasets: [{
+      label: selectedSubject.value,
+      data: selectedSessions.value.map((s) => accuracy(s)),
       borderColor: color,
       backgroundColor: color + '33',
       tension: 0.3,
-      spanGaps: true,
-    }
-  })
-  return { labels: allDates.map(formatDate), datasets }
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: '#FFFFFF',
+      pointBorderColor: color,
+      pointBorderWidth: 2,
+    }],
+  }
 })
 
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  layout: { padding: { top: 8, right: 8 } },
   scales: {
     y: { min: 0, max: 100, ticks: { callback: (v) => v + '%' } },
+    x: { grid: { display: false } },
   },
   plugins: {
-    tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}%` } },
-    legend: { position: 'bottom' },
+    tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+    legend: { display: false },
   },
 }
 
-// the colours of the quiet look: the line, its dots, the small text and the grid
 const TONES = {
-  teal: { line: '#B7D8D7', fill: 'rgba(183, 216, 215, 0.35)', dot: '#3E6B6A', text: '#6B8177', grid: '#E4E9E6' },
-  lavender: { line: '#B8A9DD', fill: 'rgba(184, 169, 221, 0.3)', dot: '#6B5CA5', text: '#7D7690', grid: '#ECE7F5' },
+  teal:     { text: '#6B8177', grid: '#E4E9E6' },
+  lavender: { text: '#7D7690', grid: '#ECE7F5' },
 }
 const tone = computed(() => TONES[props.tone] ?? TONES.teal)
 
-// the quiet look: one line for the score of each session, oldest to newest
 const calmData = computed(() => {
-  const sorted = [...props.sessions].sort((a, b) => a.date.localeCompare(b.date))
+  const color = pillColors.value[selectedSubject.value] ?? FALLBACK_COLORS[0]
   return {
-    labels: sorted.map((s) => formatDate(s.date)),
-    datasets: [
-      {
-        label: 'Score',
-        data: sorted.map((s) => accuracy(s)),
-        borderColor: tone.value.line,
-        backgroundColor: tone.value.fill,
-        fill: true,
-        borderWidth: 4,
-        tension: 0.3,
-        pointBackgroundColor: '#FFFFFF',
-        pointBorderColor: tone.value.dot,
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        clip: false, // a dot on the edge of the chart (100%) is drawn whole, not cut in half
-      },
-    ],
+    labels: selectedSessions.value.map((s) => formatDate(s.date)),
+    datasets: [{
+      label: selectedSubject.value,
+      data: selectedSessions.value.map((s) => accuracy(s)),
+      borderColor: color,
+      backgroundColor: color + '44',
+      fill: true,
+      borderWidth: 4,
+      tension: 0.3,
+      pointBackgroundColor: '#FFFFFF',
+      pointBorderColor: color,
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      clip: false,
+    }],
   }
 })
 
@@ -107,7 +128,7 @@ const calmOptions = computed(() => {
   return {
     responsive: true,
     maintainAspectRatio: false,
-    layout: { padding: { top: 8, right: 8 } }, // room for the dots on the edge
+    layout: { padding: { top: 8, right: 8 } },
     scales: {
       y: {
         min: 0,
@@ -125,30 +146,19 @@ const calmOptions = computed(() => {
   }
 })
 
-const summaries = computed(() => {
-  const bySubject = {}
-  for (const s of props.sessions) {
-    bySubject[s.subject] ??= []
-    bySubject[s.subject].push(s)
-  }
-  return Object.entries(bySubject).map(([subject, list]) => {
-    const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date))
-    const n = sorted.length
-    if (n === 1) {
-      return { topic: subject, text: `${accuracy(sorted[0])}% (1 session — too early to show a trend)` }
-    }
-    const first = accuracy(sorted[0])
-    const last = accuracy(sorted[n - 1])
-    const trend = trendLabel(sorted)
-    return { topic: subject, text: `${first}% → ${last}% (${n} sessions, ${trend})` }
-  })
+const selectedSummary = computed(() => {
+  const list = selectedSessions.value
+  if (list.length === 0) return null
+  if (list.length === 1) return `${accuracy(list[0])}% (1 session — too early to show a trend)`
+  const first = accuracy(list[0])
+  const last = accuracy(list[list.length - 1])
+  return `${first}% → ${last}% (${list.length} sessions, ${trendLabel(list)})`
 })
 
 function trendLabel(sorted) {
-  if (sorted.length < 2) return 'steady'
+  if (sorted.length < 4) return 'not enough data yet'
   const earlier = sorted.slice(0, -3)
   const last3 = sorted.slice(-3)
-  if (earlier.length === 0) return 'not enough data yet'
   const avg = (list) =>
     list.reduce((s, x) => s + (x.attempted ? x.correct / x.attempted : 0), 0) / list.length
   const diff = avg(last3) - avg(earlier)
@@ -163,14 +173,44 @@ function trendLabel(sorted) {
     <h2 class="h6 mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Progress over time</h2>
     <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
     <template v-else>
+      <div class="spc-picker mb-3" data-test="subject-picker">
+        <button
+          v-for="subj in subjects"
+          :key="subj"
+          type="button"
+          class="spc-pill"
+          :style="pillStyle(subj)"
+          @click="selectedSubject = subj"
+        >{{ subj }}</button>
+      </div>
       <div class="chart-box chart-box-line">
         <Line :data="calm ? calmData : chartData" :options="calm ? calmOptions : chartOptions" />
       </div>
-      <ul class="list-unstyled small mt-3 mb-0" data-test="chart-summary">
-        <li v-for="s in summaries" :key="s.topic" class="lapis-muted">
-          <strong>{{ s.topic }}:</strong> {{ s.text }}
-        </li>
-      </ul>
+      <p v-if="selectedSummary" class="small lapis-muted mt-3 mb-0" data-test="chart-summary">{{ selectedSummary }}</p>
     </template>
   </div>
 </template>
+
+<style scoped>
+.spc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spc-pill {
+  padding: 3px 12px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: #4A3F3A;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.1s;
+}
+
+.spc-pill:hover {
+  filter: brightness(0.92);
+}
+</style>

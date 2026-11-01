@@ -3,6 +3,13 @@
 
 export const SUBJECTS = ['English', 'Math', 'Science', 'Mother Tongue']
 
+export const SUBJECT_COLORS = {
+  'English':       '#88C0D8',
+  'Math':          '#D4B840',
+  'Science':       '#A8CC90',
+  'Mother Tongue': '#E8906C',
+}
+
 // Used for volunteer skills AND child needs -> powers skills-based matchmaking
 export const SKILL_OPTIONS = ['English', 'Math', 'Science', 'Mother Tongue']
 

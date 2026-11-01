@@ -46,11 +46,13 @@ const links = computed(() => LINKS[auth.role] || [])
 // A role shows the layers up to its own: a teacher has one stripe (purple), a volunteer has two (purple, green),
 // a parent has three (purple, green, aqua) and a child has all four (purple, green, aqua, pink).
 const LAYERS = ['teacher', 'volunteer', 'parent', 'child']
+const LAYER_COLOURS = { teacher: '#D5CBEA', volunteer: '#9BD3B2', parent: '#AED9D8', child: '#E8A0B8' }
 const stripes = computed(() => {
   const place = LAYERS.indexOf(auth.role)
-  if (place < 0) return ['var(--role-accent)'] // not logged in
+  // a visitor who is not logged in sees all four layers
+  const shown = place < 0 ? LAYERS : LAYERS.slice(0, place + 1)
   // the stripes are drawn from the top down, so the bottom layer (purple) comes last
-  return LAYERS.slice(0, place + 1).reverse().map((layer) => `var(--layer-${layer})`)
+  return [...shown].reverse().map((layer) => LAYER_COLOURS[layer])
 })
 
 // true when this link is the page we are on.
@@ -70,12 +72,12 @@ const initial = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 
-// the photo of a child, shown in the round avatar instead of the letter (it is saved on the child, not on the user)
+// the photo shown in the round avatar instead of the letter: a child's photo is saved on the child, everyone else's on the user
 const photo = ref('')
 
 async function fetchPhoto() {
   if (auth.role !== 'child' || !auth.user?.childId) {
-    photo.value = ''
+    photo.value = (auth.user?.avatar || '').startsWith('/') ? auth.user.avatar : ''
     return
   }
   try {
@@ -163,7 +165,7 @@ onMounted(() => {
    stripe (purple), a volunteer has two (green on purple), a parent has three (aqua on green on purple) and a child has four
    (pink on aqua on green on purple), the whole kueh lapis.
    Every page of a role has the same stripes, because they are part of the navbar.
-   The colours are --layer-child, --layer-parent, --layer-volunteer and --layer-teacher in main.css.
+   The colours are in LAYER_COLOURS in the script above (pink, aqua, mint and purple, the palette in main.css).
    To add a layer for another role: add its colour there and its name to LAYERS in NavBar.vue. */
 
 .role-stripes i {
@@ -177,7 +179,7 @@ onMounted(() => {
 .lapis-nav {
   background: #FDFAF4;
   color: #414F67;
-  font-family: var(--lapis-font);
+  font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
 }
 
 .lapis-nav-inner {
@@ -304,11 +306,12 @@ onMounted(() => {
 }
 
 .lapis-button {
-  padding: 5px 12px;
-  border: 1px solid #414F67;
-  border-radius: 6px;
-  background: transparent;
-  color: #414F67;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 2px #D5CBEA;
+  color: #4A3F3A;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -316,7 +319,8 @@ onMounted(() => {
 }
 
 .lapis-button-filled {
-  background: var(--role-accent, #AED9D8);
+  background: #E8A0B8;
+  box-shadow: none;
 }
 
 /* the menu button: only shown on a small screen */
