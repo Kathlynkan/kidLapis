@@ -5,23 +5,17 @@
   Child:      avatar picker (name is managed by the teacher).
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
-import ChildAvatar from '@/components/ChildAvatar.vue'
+import ChildInitial from '@/components/ChildInitial.vue'
 import PeelCard from '@/components/PeelCard.vue'
 import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
 
 const auth = useAuthStore()
 const router = useRouter()
-
-const AVATARS = [
-  '🙂', '😊', '😄', '😎', '🤩', '🥳', '😸',
-  '🐻', '🐼', '🦊', '🦁', '🐯', '🐸', '🐙',
-  '🦋', '⭐', '🌟', '🚀', '🎮', '⚽',
-]
 
 const name = ref(auth.user?.name || '')
 const currentPassword = ref('')
@@ -29,7 +23,6 @@ const newPassword = ref('')
 const confirmPassword = ref('')
 const skills = ref([...(auth.user?.skills || [])])
 const availability = ref([...(auth.user?.availability || [])])
-const avatar = ref('🙂')
 
 // the first letter of the name (not of a title like Mrs), shown in a round picture
 const initial = computed(() => (auth.user?.name || '').replace(/^(mr|mrs|ms|mdm|miss|dr)\.?\s+/i, '').charAt(0).toUpperCase())
@@ -38,14 +31,6 @@ const loading = ref(false)
 const error = ref('')
 const activeCard = ref('account')
 
-onMounted(async () => {
-  if (auth.role === 'child') {
-    try {
-      const res = await api.get('/children')
-      avatar.value = res.data[0]?.avatar || '🙂'
-    } catch { /* silent */ }
-  }
-})
 
 function cancel() {
   router.back() // return user to wherever they came from
@@ -89,10 +74,6 @@ async function save() {
     body.skills = skills.value
     body.availability = availability.value
   }
-  if (auth.role === 'child') {
-    body.avatar = avatar.value
-  }
-
   loading.value = true
   try {
     const res = await api.put('/auth/profile', body)
@@ -120,7 +101,7 @@ async function save() {
           <!-- Account info -->
           <PeelCard title="Account" icon="bi-person-circle" :open="activeCard === 'account'" @toggle="activeCard = 'account'">
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span v-if="auth.role === 'child'" class="fs-1 lh-1"><ChildAvatar :avatar="avatar" /></span>
+              <ChildInitial v-if="auth.role === 'child'" :child="{ name: auth.user.name, avatar: auth.user.avatar || '' }" class="profile-initial" />
               <span v-else class="profile-initial">{{ initial }}</span>
               <div>
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
@@ -139,21 +120,6 @@ async function save() {
                 autocomplete="name"
                 data-test="profile-name"
               />
-            </div>
-          </PeelCard>
-
-          <!-- Avatar picker (child only) -->
-          <PeelCard v-if="auth.role === 'child'" title="Pick your avatar" icon="bi-emoji-smile" :open="activeCard === 'avatar'" @toggle="activeCard = 'avatar'">
-            <div class="d-flex flex-wrap gap-2">
-              <button
-                v-for="emoji in AVATARS"
-                :key="emoji"
-                type="button"
-                class="btn btn-lg p-2 lh-1"
-                :class="avatar === emoji ? 'btn-primary' : 'btn-outline-secondary'"
-                data-test="avatar-option"
-                @click="avatar = emoji"
-              >{{ emoji }}</button>
             </div>
           </PeelCard>
 

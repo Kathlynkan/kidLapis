@@ -180,7 +180,7 @@ onMounted(() => {
           class="btn btn-primary"
           data-test="record-session"
         >
-          <i class="bi bi-plus-lg me-1"></i>Record session
+          <i class="bi bi-plus-lg me-1"></i>Record Session
         </RouterLink>
         <RouterLink
           v-if="auth.role === 'volunteer'"
@@ -188,7 +188,7 @@ onMounted(() => {
           class="btn btn-outline-primary"
           data-test="assign-homework"
         >
-          <i class="bi bi-journal-plus me-1"></i>Give homework
+          <i class="bi bi-journal-plus me-1"></i>Assign Homework
         </RouterLink>
         <!-- Teachers only: volunteers can't use Messages (chat is parent <-> teacher) -->
         <RouterLink
@@ -220,6 +220,14 @@ onMounted(() => {
           </div>
 
           <div class="col-lg-5 d-flex flex-column gap-4">
+            <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
+              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+            </PeelCard>
+
+            <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
+              <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+            </PeelCard>
+            
             <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
               <SkillProgressChart :sessions="sessions" calm :tone="auth.role === 'teacher' ? 'lavender' : 'teal'" />
             </PeelCard>
@@ -246,21 +254,21 @@ onMounted(() => {
                 />
               </div>
             </PeelCard>
-          
+            
             <PeelCard
             v-if="completedHomework.length"
             :title="`Completed Homework (${completedHomework.length})`"
             icon="bi-check-circle-fill"
             :initial-open="true"
             >
-            <div class="d-flex flex-column gap-2">
-            <HomeworkQuestCard
-            v-for="h in completedHomework"
-            :key="h.id"
-            :homework="h"
-            mode="volunteer"
-            />
-            </div>
+              <div class="d-flex flex-column gap-2">
+              <HomeworkQuestCard
+              v-for="h in completedHomework"
+              :key="h.id"
+              :homework="h"
+              mode="volunteer"
+              />
+              </div>
             </PeelCard>
           </div>
         </div>
