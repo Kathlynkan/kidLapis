@@ -85,7 +85,6 @@ async function loadData() {
     child.value = c.data
     sessions.value = s.data
     homework.value = h.data
-    loadHandover()
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -131,6 +130,7 @@ async function deleteSession(sessionId) {
     success.value = 'Session deleted successfully'
 
     await loadData() // reload data after successful deletion
+    loadHandover() // the summary changes when a session is deleted
   } catch (err) {
     error.value = errorMessage(err)
   }
@@ -147,7 +147,10 @@ onMounted(() => {
     })
   }
 
+  // start both at the same time: the summary only needs childId,
+  // so it does not have to wait for the child, sessions and homework
   loadData()
+  loadHandover()
 })
 </script>
 

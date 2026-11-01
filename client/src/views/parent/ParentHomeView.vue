@@ -143,7 +143,7 @@ function resultNotes(session) {
 const summaryLines = computed(() => {
   if (!handover.value) return []
   const lines = [
-    { label: 'This week', text: handover.value.headline },
+    { label: 'Overview', text: handover.value.headline },
     { label: 'Learning', text: handover.value.learning },
     { label: 'Friends', text: handover.value.friends },
     { label: 'Worth knowing', text: handover.value.worthKnowing },
@@ -267,7 +267,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 parentpage">
-    <PageHeader :title="`Hello, ${firstName(auth.user.name)}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
+    <PageHeader :title="`Hello, ${firstName(auth.user?.name || '')}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
 
     <!-- one of these three messages shows while loading, on an error, or when there is no child -->
     <StateMessage v-if="loading" type="loading" />
@@ -317,8 +317,9 @@ onMounted(async () => {
 
       <!-- parent weekly AI summary: learning, friends, anything worth knowing, what to try at home   (Yuqi) -->
       <div class="glance" data-test="handover-card">
-        <span class="small-label">This week at student care</span>
-        <!-- which week it covers, e.g. 2026-10-19 to 2026-10-23 -->
+        <!-- 'This week' (Fri - Sun), 'Last week' (Mon - Thu) or 'Latest week' (when that week had no sessions) -->
+        <span class="small-label">{{ handover && handover.weekTitle ? handover.weekTitle : 'This week' }} at student care</span>
+        <!-- which week it covers, e.g. Mon 19 Oct to Fri 23 Oct -->
         <p v-if="handover && handover.periodLabel" class="muted">{{ handover.periodLabel }}</p>
         <p v-if="handoverLoading" class="muted">Getting the update...</p>
         <template v-else-if="summaryLines.length > 0">

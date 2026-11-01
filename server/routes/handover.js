@@ -10,6 +10,7 @@
 //   'handover' - for VOLUNTEERS: note for the next session, from the last 5 sessions (default)
 //   'weekly'   - for PARENTS: Monday to Friday, learning + social.
 //                Fri-Sun shows this week, Mon-Thu shows last week.
+//                If that week has no sessions, it shows the latest week that has some.
 //                Different volunteers write brief or detailed notes, so the AI combines them into one balanced picture of the week.
 // =============================================================
 import { Router } from 'express'
@@ -20,36 +21,6 @@ import { canAccessChild } from '../utils/access.js'
 
 const router = Router()
 router.use(requireAuth) 
-
-// Which Monday to Friday should the weekly summary cover?
-// Fri, Sat, Sun -> this week (the week is finished)
-// Mon to Thu    -> last week (this week is not finished yet)
-export function getWeekRange(today = new Date()) {
-  const day = today.getDay() // get today's day 0 = Sun, 1 = Mon
-
-  // find how many days back is this wk mon
-  let daysBack = day - 1
-  if (day === 0) { // yest was sun whr 0 = Sun
-    daysBack = 6 // Sunday was 6 days ago
-  }
-
-  // Mon to Thu: go back one more week
-  if (day >= 1 && day <= 4) {
-    daysBack = daysBack + 7
-  }
-
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - daysBack)
-
-  const friday = new Date(monday)
-  friday.setDate(monday.getDate() + 4)
-
-  // 'YYYY-MM-DD' to be displayed for each summary
-  return {
-    start: monday.toISOString().slice(0, 10),
-    end: friday.toISOString().slice(0, 10),
-  }
-}
 
 // Find struggles that appear 2 or more times in the last 5 sessions
 export function findRecurring(sessions) {
@@ -76,107 +47,190 @@ export function findRecurring(sessions) {
   return recurring
 }
 
-// Backup summary: used when there is no API key or Gemini fails.
-// It just copies from the newest session.
-export function buildFallbackHandover(sessions, audience = 'volunteer') {
-  // child has no sessions yet (friendlier message for parents)
-  if (sessions.length === 0 && audience === 'parent') {
-    return {
-      continueTopic: 'No sessions yet',
-      struggle: '-',
-      whatWorked: '-',
-      lastResult: '-',
-      nextStep: 'The volunteer will meet your child soon and find out what they enjoy and need help with.',
-      recurring: [],
-      source: 'fallback',
-    }
+// Count mood in the 3 newest sessions
+// Always gives a short summary, good or bad, e.g.
+//   'Tired in 2 of the last 3 sessions. Check in at the start and keep tasks short.'
+//   'Was tired last session, so keep an eye on it.'
+//   'Had one low day recently, but has been fine since.'
+//   'Happy in the last 3 sessions.'
+//   'Settled and in a good mood in the last 3 sessions.'
+export function checkMood(sessions) {
+  const lastThree = sessions.slice(0, 3)
+  let tired = 0
+  let frustrated = 0
+  let happy = 0
+  for (const s of lastThree) {
+    if (s.mood === 'tired') tired = tired + 1
+    if (s.mood === 'frustrated') frustrated = frustrated + 1
+    if (s.mood === 'happy') happy = happy + 1
   }
-  // child has no sessions yet (for volunteer)
+  const low = tired + frustrated
+
+  // 'the last session' or 'the last 3 sessions' (a new child may have fewer than 3)
+  let period = `the last ${lastThree.length} sessions`
+  if (lastThree.length === 1) period = 'the last session'
+
+  // 2 or 3 low moods -> a pattern: tell the volunteer to pay more attention
+  if (low >= 2) {
+    let feeling = 'Tired or frustrated'
+    if (frustrated === 0) feeling = 'Tired'
+    if (tired === 0) feeling = 'Frustrated'
+    return `${feeling} in ${low} of ${period}. Check in at the start and keep tasks short.`
+  }
+
+  // only 1 low mood
+  if (low === 1) {
+    const newest = lastThree[0]
+    if (newest.mood === 'tired' || newest.mood === 'frustrated') {
+      return `Was ${newest.mood} last session, so keep an eye on it.`
+    }
+    return 'Had one low day recently, but has been fine since.'
+  }
+
+  // no low moods
+  if (happy === lastThree.length) {
+    return `Happy in ${period}.`
+  }
+  return `Settled and in a good mood in ${period}.`
+}
+
+// A date as 'YYYY-MM-DD' in OUR time zone
+// (toISOString() would use UTC, which is the day before in Singapore before 8am)
+function toDateText(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
+// The Monday to Friday of the week that a date is in
+// e.g. getWeekOf(new Date('2026-10-28')) -> { start: '2026-10-26', end: '2026-10-30' }
+export function getWeekOf(date) {
+  const day = date.getDay() // 0 = Sun, 1 = Mon ... 6 = Sat
+  let daysBack = day - 1 // how many days back to that week's Monday
+  if (day === 0) {
+    daysBack = 6 // Sunday: Monday was 6 days ago
+  }
+  const monday = new Date(date)
+  monday.setDate(date.getDate() - daysBack)
+  const friday = new Date(monday)
+  friday.setDate(monday.getDate() + 4)
+  return { start: toDateText(monday), end: toDateText(friday) }
+}
+
+// Which Monday to Friday should the weekly summary cover?
+// Fri, Sat, Sun -> this week (the week is finished)
+// Mon to Thu    -> last week (this week is not finished yet)
+export function getWeekRange(today = new Date()) {
+  const day = today.getDay()
+  if (day >= 1 && day <= 4) {
+    const lastWeek = new Date(today)
+    lastWeek.setDate(today.getDate() - 7)
+    return getWeekOf(lastWeek)
+  }
+  return getWeekOf(today)
+}
+
+// The week written for people, e.g. 'Mon 26 Oct to Fri 30 Oct'
+export function formatWeek(week) {
+  const monday = new Date(week.start + 'T00:00:00')
+  const friday = new Date(week.end + 'T00:00:00')
+  const options = { weekday: 'short', day: 'numeric', month: 'short' }
+  return `${monday.toLocaleDateString('en-GB', options)} to ${friday.toLocaleDateString('en-GB', options)}`
+}
+
+// Backup summary for VOLUNTEERS: used when there is no API key or Gemini fails.
+// (Parents get the weekly summary, so their backup is buildWeeklyFallback below.)
+// It uses the newest session, plus the mood of the last 3.
+export function buildFallbackHandover(sessions) {
+  // child has no sessions yet
   if (sessions.length === 0) {
     return {
-      continueTopic: 'No sessions yet',
-      struggle: '-',
-      whatWorked: '-',
-      lastResult: '-',
-      nextStep: 'Get to know the child and find out what they are working on.',
+      nextStep: 'No sessions yet. Get to know the child and find out what they are working on.',
       recurring: [],
       source: 'fallback',
     }
   }
   const last = sessions[0] // newest session (sessions are sorted newest first)
 
-  // parents get a simple version: "6 out of 8 right", and nothing alarming   (Kat)
-  if (audience === 'parent') {
-    let tricky = 'Nothing in particular - it went smoothly.'
-    if (last.struggles.length > 0) {
-      tricky = last.struggles.join(', ')
-    }
-    // mention mood gently if the last session was tired or frustrated
-    if (last.mood === 'tired') {
-      tricky = tricky === 'Nothing in particular - it went smoothly.'
-        ? 'Seemed a bit tired in this session.'
-        : `${tricky} (seemed a bit tired)`
-    } else if (last.mood === 'frustrated') {
-      tricky = tricky === 'Nothing in particular - it went smoothly.'
-        ? 'Found this session a bit frustrating.'
-        : `${tricky} (seemed frustrated)`
-    }
-    let helped = 'The volunteer is still finding out what works best.'
-    if (last.whatWorked) {
-      helped = last.whatWorked
-    }
-    let comingUp = 'The volunteer will decide next time.'
-    if (last.nextStep) {
-      comingUp = last.nextStep
-    }
-    return {
-      continueTopic: `${last.subject}: ${last.topic}`,
-      struggle: tricky,
-      whatWorked: helped,
-      lastResult: `Got ${last.correct} out of ${last.attempted} right`,
-      nextStep: comingUp,
-      recurring: findRecurring(sessions),
-      source: 'fallback',
-    }
-  }
-
-  let struggle = 'None noted'
-  if (last.struggles.length > 0) {
-    struggle = last.struggles.join(', ') 
-  }
-
-  let whatWorked = 'Not recorded'
-  if (last.whatWorked) {
-    whatWorked = last.whatWorked
-  }
-
-  let nextStep = 'Not recorded'
+  let nextStep = `Carry on with ${last.subject} (${last.topic}).`
   if (last.nextStep) {
-    nextStep = last.nextStep
+    nextStep = `${last.nextStep}.`
+  }
+
+  let struggle = 'Nothing stood out as tricky last session.'
+  if (last.struggles.length > 0) {
+    struggle = `Found ${last.struggles.join(' and ')} tricky last session.`
+  }
+
+  let whatWorked = 'Not recorded yet.'
+  if (last.whatWorked) {
+    whatWorked = `${last.whatWorked} helped last time.`
   }
 
   return {
-    continueTopic: `${last.subject}: ${last.topic}`,
-    struggle: struggle,
-    whatWorked: whatWorked,
-    lastResult: `${last.correct}/${last.attempted} correct`,
     nextStep: nextStep,
+    struggle: struggle,
+    lastResult: `Got ${last.correct}/${last.attempted} on ${last.topic} last session.`,
+    whatWorked: whatWorked,
+    watchFor: checkMood(sessions),
     recurring: findRecurring(sessions),
     source: 'fallback',
   }
 }
 
-// for parent 
-// Backup for the weekly summary (no API key, or Gemini fails)
+// for PARENTS: backup for the weekly summary (no API key, or Gemini fails)
+// It goes through the week's sessions, oldest first, and fills the same lines as the AI.
 export function buildWeeklyFallback(sessions) {
   if (sessions.length === 0) {
     return { headline: 'No sessions were recorded that week.', source: 'fallback' }
   }
 
+  const days = [] // e.g. ['Mon', 'Wed']
+  const learning = [] // e.g. ['Mon: Fractions, 4 out of 5 right']
+  const friends = []
+  const worth = []
+  let celebrate = ''
+
+  for (const s of [...sessions].reverse()) {
+    const day = new Date(s.date + 'T00:00:00').toDateString().slice(0, 3) // 'Mon'
+    if (!days.includes(day)) {
+      days.push(day)
+    }
+    learning.push(`${day}: ${s.topic}, ${s.correct} out of ${s.attempted} right`)
+    if (s.socialNotes) {
+      friends.push(`${day}: ${s.socialNotes}`)
+    }
+    if (s.mood === 'tired') {
+      worth.push(`seemed a bit tired on ${day}`)
+    }
+    if (s.mood === 'frustrated') {
+      worth.push(`found ${day} a bit hard`)
+    }
+    if (s.portion === 'Little' || s.portion === 'None') {
+      worth.push(`did not eat much on ${day}`)
+    }
+    if (!celebrate && s.behaviour) {
+      celebrate = `${s.behaviour}.`
+    }
+  }
+
   const last = sessions[0] // newest session
+  let worthKnowing = ''
+  if (worth.length > 0) {
+    worthKnowing = `Your child ${worth.join(', and ')}.`
+  }
+  let atHome = ''
+  if (last.nextStep) {
+    atHome = `Practise together: ${last.nextStep}.`
+  }
+
   return {
-    headline: `Came in ${sessions.length} time(s) that week.`,
-    learning: `Latest: ${last.subject} - ${last.topic}, got ${last.correct} out of ${last.attempted} right.`,
+    headline: `Came in on ${days.length} day(s) that week (${days.join(', ')}).`,
+    learning: learning.join('. ') + '.',
+    friends: friends.join(' '),
+    worthKnowing: worthKnowing,
+    celebrate: celebrate,
+    atHome: atHome,
     source: 'fallback',
   }
 }
@@ -184,7 +238,7 @@ export function buildWeeklyFallback(sessions) {
 // Turn one session into one line of text for the prompt (academic + social)
 function describeSession(s) {
   let line = ''
-  const date = new Date(s.date).toDateString() // e.g. 'Fri Sep 25 2026'
+  const date = new Date(s.date + 'T00:00:00').toDateString() // e.g. 'Fri Sep 25 2026'
 
   let struggles = 'none'
   if (s.struggles.length > 0) {
@@ -220,8 +274,9 @@ function describeSession(s) {
 }
 
 // Write the message (prompt) send to Gemini
-// lastWeek = last week's sessions (weekly only), so the AI can compare the two weeks
-function buildPrompt(child, sessions, audience, type, lastWeek = []) {
+// lastWeek = the week before (weekly only), so the AI can compare the two weeks
+// weekWords = 'this week', 'last week' or 'the week of Mon 19 Oct to Fri 23 Oct' (weekly only)
+function buildPrompt(child, sessions, audience, type, lastWeek = [], weekWords = 'this week') {
   // 1. turn the sessions into simple lines of text
   //    handover: the newest 5 sessions. weekly: every session of the week.
   let list = sessions.slice(0, 5)
@@ -260,14 +315,14 @@ Be practical and specific, like a short note from one tutor to another.`
     // which days the child came, oldest first, e.g. 'Mon, Tue, Thu'
     const days = []
     for (const sess of [...sessions].reverse()) {
-      const day = new Date(sess.date).toDateString().slice(0, 3) // e.g. 'Mon'
+      const day = new Date(sess.date + 'T00:00:00').toDateString().slice(0, 3) // e.g. 'Mon'
       if (!days.includes(day)) {
         days.push(day)
       }
     }
 
     // last week's notes, so the AI can say what changed
-    let lastWeekNotes = 'No sessions last week, so do not compare with last week.'
+    let lastWeekNotes = 'No sessions the week before, so do not compare.'
     if (lastWeek.length > 0) {
       lastWeekNotes = ''
       for (const sess of lastWeek) {
@@ -275,15 +330,16 @@ Be practical and specific, like a short note from one tutor to another.`
       }
     }
 
-    task = `Write a WEEKLY update for the child's parent, from the student care team ("we" means the team).
-This week the child came ${sessions.length} time(s), on: ${days.join(', ')}.
+    task = `Write a WEEKLY update for the child's parent about ${weekWords}, from the student care team ("we" means the team).
+Call it "${weekWords}" in your sentences (the parent may be reading it a few days later).
+In ${weekWords} the child came ${sessions.length} time(s), on: ${days.join(', ')}.
 
-LAST WEEK's notes (only to compare, do not summarise them):
+Notes from THE WEEK BEFORE (only to compare, do not summarise them):
 ${lastWeekNotes}
 
 Rules:
 - Be honest about how much happened. If the child came only once, talk about that day ("On Tuesday, ..."), not "a wonderful week".
-- Compare with last week when you can (e.g. "more settled than last week", "fractions went from 2 to 4 out of 5 right").
+- Compare with the week before when you can (e.g. "more settled than the week before", "fractions went from 2 to 4 out of 5 right").
 - Be specific: use real facts from the notes (scores, activities, what helped, what they ate).
 - Warm and reassuring, like a friendly teacher. A short word of encouragement is fine when a fact supports it (e.g. "a big improvement, well done!"). No empty praise like "great energy" or "wonderful week".
 - Use the child's first name once or twice in total, not in every line.
@@ -304,18 +360,39 @@ Fields:
 Reply ONLY with JSON in exactly this shape:
 {"headline":"","learning":"","friends":"","worthKnowing":"","celebrate":"","atHome":""}`
   } else {
-    task = `Rules:
-- Look at ALL the sessions above, not just the newest one.
-- "continueTopic": the topic to work on next session.
-- "struggle": the main difficulty. If it happened before, say so and whether it is getting better or worse.
-- "whatWorked": the teaching method that helped most. Say if it worked more than once.
-- "lastResult": the latest score. If there is an earlier score on the same topic, compare them (e.g. "4/6, up from 3/6").
-- "nextStep": one concrete thing to do next session, using what worked before.
-- Each field: one sentence, under 25 words.
+    task = `Write a handover note for a volunteer who has NEVER taught this child, as if YOU are the volunteer who taught them before.
+It is read top to bottom: WHAT to teach next -> WHY -> PROGRESS so far -> WHAT HELPS -> how to handle their MOOD.
+
+MOOD CHECK (already counted by our system and shown to the volunteer): ${checkMood(sessions)}
+
+How to write:
+- Write like a friendly fellow volunteer giving advice: full, natural sentences that flow. Use the child's first name now and then.
+- No semicolons, no lists, no labels like "Fractions:" at the start. No dates like "Oct 29" (say "last session" or "on Thursday").
+- Be insightful: explain what the scores and notes MEAN for the next volunteer, not just what happened.
+- Each field adds NEW information. Do not repeat a topic, method or score in two fields.
+- Each field: one or two sentences, under 35 words.
 - Only use facts from the notes. Do not make anything up.
 
+Fields:
+- "nextStep": what to teach next and how to run it. If the child scored 80% or more on a topic in the last two tries,
+  move on to the next harder step instead of more of the same. Mention a second subject that needs work, if there is one.
+- "struggle": why: the difficulty behind this choice, how often it came up in the sessions above, and whether it is getting better.
+  Always name the "struggles that came up more than once" listed above, because the volunteer will not see them anywhere else.
+  Mention the child's attitude if the notes show it (e.g. keeps trying, gets upset after mistakes).
+- "lastResult": progress: the latest score written like "4/5", compared with earlier scores on the same topic.
+- "whatWorked": the teaching methods that helped and why they work for this child, plus anything they enjoy that could be used as a reward.
+- "watchFor": one practical tip for handling the MOOD CHECK above, based on the notes (e.g. what helped when they were tired or upset).
+  Do not repeat the mood facts. Only give a tip if the MOOD CHECK mentions tired or frustrated, otherwise use "".
+
+STYLE EXAMPLE (a different child, only to show the tone, do NOT copy any facts from it):
+{"nextStep":"Go over the silent-letter words from her list again, then test her on five new ones. If there is time, start her on double consonants.",
+ "struggle":"Silent letters came up in 3 of the last 5 sessions, but she is getting more of them right each time and never gives up.",
+ "lastResult":"Steady progress, from 5/10 to 8/10 on spelling over the last few weeks.",
+ "whatWorked":"Making up silly sentences for each word helps her remember them. She loves drawing, so a few minutes of it works well as a reward.",
+ "watchFor":"Give her a short break between activities and she settles back in quickly."}
+
 Reply ONLY with JSON in exactly this shape:
-{"continueTopic":"","struggle":"","whatWorked":"","lastResult":"","nextStep":""}`
+{"nextStep":"","struggle":"","lastResult":"","whatWorked":"","watchFor":""}`
   }
 
   // 5. put it all together (whole prompt)
@@ -324,7 +401,7 @@ ${style}
 
 Child: ${child.name}, ${child.level}.
 
-Session notes${type === 'weekly' ? ' for THIS WEEK' : ''} (newest first):
+Session notes${type === 'weekly' ? ' for ' + weekWords.toUpperCase() : ''} (newest first):
 ${notes}
 Struggles that came up more than once: ${recurringText}.
 
@@ -406,17 +483,35 @@ router.post('/:childId', async (req, res) => {
   // pick the sessions this summary is about
   let sessions = allSessions
   let lastWeek = [] // weekly only: the week before, to compare with
-  let periodLabel = '' // shown on the card
+  let periodLabel = '' // weekly only: shown on the card, e.g. 'Mon 26 Oct to Fri 30 Oct'
+  let weekTitle = '' // weekly only: 'This week', 'Last week' or 'Latest week'
+  let weekWords = 'this week' // weekly only: how the AI should call the week
   if (type === 'weekly') {
-    // the sessions between Monday and Friday
-    const week = getWeekRange()
+    // Fri - Sun: this week. Mon - Thu: last week.
+    let week = getWeekRange()
+    weekTitle = 'This week'
+    const today = new Date().getDay()
+    if (today >= 1 && today <= 4) {
+      weekTitle = 'Last week'
+    }
     sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
-    periodLabel = `${week.start} to ${week.end}`
 
-    // the Monday to Friday before that (7 days earlier)
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const before = getWeekRange(sevenDaysAgo)
+    // nothing that week (e.g. a school holiday) -> use the latest week that has sessions
+    if (sessions.length === 0 && allSessions.length > 0) {
+      week = getWeekOf(new Date(allSessions[0].date + 'T00:00:00'))
+      weekTitle = 'Latest week'
+      sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
+    }
+    periodLabel = formatWeek(week)
+    weekWords = weekTitle.toLowerCase()
+    if (weekTitle === 'Latest week') {
+      weekWords = `the week of ${periodLabel}`
+    }
+
+    // the Monday to Friday before that week, to compare with
+    const weekBefore = new Date(week.start + 'T00:00:00')
+    weekBefore.setDate(weekBefore.getDate() - 7)
+    const before = getWeekOf(weekBefore)
     lastWeek = allSessions.filter((s) => s.date >= before.start && s.date <= before.end)
   }
 
@@ -424,10 +519,11 @@ router.post('/:childId', async (req, res) => {
   if (sessions.length === 0) {
     let empty = buildWeeklyFallback(sessions)
     if (type === 'handover') {
-      empty = buildFallbackHandover(sessions, audience)
+      empty = buildFallbackHandover(sessions)
     }
     empty.recurring = findRecurring(allSessions) // struggles from the last 5 sessions
     empty.periodLabel = periodLabel
+    empty.weekTitle = weekTitle
     return res.json(empty)
   }
 
@@ -444,19 +540,38 @@ router.post('/:childId', async (req, res) => {
   if (saved && saved.sessionsKey === sessionsKey) {
     const result = saved.summary
     result.cached = true // so we can tell it came from the database
+    // the same week can be "This week" on Friday and "Last week" on Monday, so set these again
+    result.periodLabel = periodLabel
+    result.weekTitle = weekTitle
     return res.json(result)
   }
 
   // 2. otherwise ask Gemini
   try {
-    const prompt = buildPrompt(child, sessions, audience, type, lastWeek)
+    const prompt = buildPrompt(child, sessions, audience, type, lastWeek, weekWords)
     const ai = await callLLM(prompt)
 
     if (ai) {
-      // add our own fields to the AI answer
-      ai.recurring = findRecurring(allSessions) // struggles from the last 5 sessions
+      // add own fields to the AI answer
+      ai.recurring = findRecurring(allSessions) 
       ai.source = 'ai'
       ai.periodLabel = periodLabel
+      ai.weekTitle = weekTitle
+      // volunteer handover
+      if (type === 'handover' && audience === 'volunteer') {
+        // no semicolons: turn "a; b" into "a, b" (in case the AI still uses them)
+        for (const key of ['nextStep', 'struggle', 'lastResult', 'whatWorked', 'watchFor']) {
+          if (ai[key]) {
+            ai[key] = ai[key].replaceAll(';', ',')
+          }
+        }
+        // the mood fact comes from checkMood + AI's tip
+        let tip = ''
+        if (ai.watchFor) {
+          tip = ' ' + ai.watchFor
+        }
+        ai.watchFor = checkMood(sessions) + tip
+      }
 
       // save it for next time (update the old one, or create it if there is none yet)
       await Handover.findOneAndUpdate(
@@ -473,10 +588,11 @@ router.post('/:childId', async (req, res) => {
   // 3. Gemini didn't work -> send the backup summary (not saved, so we try Gemini again next time)
   let fallback = buildWeeklyFallback(sessions)
   if (type === 'handover') {
-    fallback = buildFallbackHandover(sessions, audience)
+    fallback = buildFallbackHandover(sessions)
   }
-  fallback.recurring = findRecurring(allSessions) // struggles from the last 5 sessions
+  fallback.recurring = findRecurring(allSessions) 
   fallback.periodLabel = periodLabel
+  fallback.weekTitle = weekTitle
   res.json(fallback)
 })
 
