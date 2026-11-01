@@ -66,6 +66,7 @@
       "email": "parent@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/grace.webp",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -169,7 +170,7 @@
         "Science"
       ],
       "points": 210,
-      "avatar": "🐼",
+      "avatar": "/photos/arjun.webp",
       "followUp": false
     },
     {
@@ -196,7 +197,7 @@
         "English"
       ],
       "points": 60,
-      "avatar": "🐯",
+      "avatar": "/photos/chloe.webp",
       "followUp": false
     },
     {

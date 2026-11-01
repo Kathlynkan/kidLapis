@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     availability: [String], // volunteers - e.g. ['Mon', 'Wed']
     childId: String, // child accounts - which child profile this login belongs to
     gender: { type: String, enum: ['boy', 'girl'] }, // child accounts only — drives the colour theme
+    avatar: String, // a photo like /photos/grace.webp (a child's avatar is saved on the child, not here)
     createdAt: { type: String, default: nowIso },
   },
   { toJSON: jsonOptions },
