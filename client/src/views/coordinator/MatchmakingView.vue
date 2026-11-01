@@ -1,234 +1,446 @@
 <!-- =============================================================
   Skills-based matchmaking                            Owner: Yu Xuan
-  Route: /coordinator/matchmaking/:childId?
+  Route: matchmaking (optional :childId opens that child)
   -------------------------------------------------------------
-  Flow: pick a child -> see suggested volunteers ranked by score
-        -> pick a day -> "Assign" -> child.volunteerIds + child.schedule updated
-    [x] GET /matchmaking/:childId -> ranked suggestions with matched skills
-    [x] show WHY: "Matches: Fractions, Primary Math · Free on Mon"
-    [x] assign (with day) / unassign -> PUT /matchmaking/:childId/assign
-    [x] unassigned children listed first (Sofia in the demo data)
+  All children are listed as toggle buttons (unassigned first) with a search bar.
+  Open a child -> volunteers ranked by score (GET /matchmaking/:childId)
+  -> pick a day + time -> Assign (PUT /matchmaking/:childId/assign).
+  The server rejects days the volunteer isn't free and double-bookings.
 ============================================================= -->
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
-import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
-import { firstName } from '@/utils/format'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const route = useRoute()
 const router = useRouter()
+
+// Start times every 30 minutes from 09:00 to 19:30 (same as the Schedule page).
+const TIMES = []
+for (let h = 9; h <= 19; h++) {
+  for (const m of ['00', '30']) TIMES.push(`${String(h).padStart(2, '0')}:${m}`)
+}
 
 const children = ref([])
 const loading = ref(true)
 const error = ref('')
 
-// Start from the URL, so /coordinator/matchmaking/c_6 opens Sofia directly
-// (handy for linking from a dashboard alert).
-const selectedId = ref(route.params.childId || '')
+const search = ref('')
+const openId = ref(route.params.childId || '') // the child whose panel is open ('' = none)
 
-const suggestions = ref([])
-const loadingSuggestions = ref(false)
-const suggestionsError = ref('')
+// Kept per child, so a closing panel keeps showing its own data while it animates away.
+const suggestions = ref({}) // { childId: [ranked volunteers] }
+const loadingId = ref('')
+const panelError = ref({}) // { childId: 'message' }
 
-const dayChoice = ref({}) // { volunteerId: 'Mon' } - the day picked in each card's dropdown
-const busyId = ref(null) // volunteer currently being assigned/unassigned
-const actionError = ref('')
+// The day/time picked in each volunteer's dropdowns, keyed by 'childId|volunteerId'.
+const dayChoice = ref({})
+const timeChoice = ref({})
+const busyKey = ref('')
 
+const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
+const isPhoto = (avatar) => typeof avatar === 'string' && avatar.startsWith('/')
+const firstName = (name) => name.split(' ')[0]
 
-// Unassigned children first, then alphabetical.
+// ---------- Child list + search ----------
+
+// Children with no volunteer first, then alphabetical.
 const sortedChildren = computed(() =>
   [...children.value].sort(
     (a, b) => Number(isAssigned(a)) - Number(isAssigned(b)) || a.name.localeCompare(b.name),
   ),
 )
 
+// Matches name, level, school or any subject they need ("math" finds everyone needing Math).
+const filteredChildren = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return sortedChildren.value
+  return sortedChildren.value.filter((c) =>
+    [c.name, c.level, c.school, ...(c.needs || [])]
+      .filter(Boolean)
+      .some((text) => text.toLowerCase().includes(q)),
+  )
+})
+
 const unassignedCount = computed(() => children.value.filter((c) => !isAssigned(c)).length)
-const selectedChild = computed(() => children.value.find((c) => c.id === selectedId.value))
+
+async function loadChildren() {
+  const res = await api.get('/children')
+  children.value = res.data
+}
 
 onMounted(async () => {
   try {
-    const res = await api.get('/children')
-    children.value = res.data
+    await loadChildren()
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
     loading.value = false
   }
-  if (selectedId.value) loadSuggestions()
+  // Opened from a link like the dashboard's "No volunteer" alert: open and scroll to that child.
+  if (openId.value) {
+    loadSuggestions(openId.value)
+    await nextTick()
+    document.getElementById(`child-${openId.value}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }
 })
 
-// Picking a child: update the URL and load that child's suggestions.
-watch(selectedId, (id) => {
-  router.replace({ params: { childId: id || undefined } })
-  loadSuggestions()
-})
+// Click a child: open it (closing any other), or close it if it's already open.
+function toggle(child) {
+  openId.value = openId.value === child.id ? '' : child.id
+  router.replace({ name: 'matchmaking', params: { childId: openId.value || undefined } })
+  if (openId.value) loadSuggestions(openId.value)
+}
 
-async function loadSuggestions() {
-  suggestions.value = []
-  suggestionsError.value = ''
-  actionError.value = ''
-  dayChoice.value = {}
-  if (!selectedId.value) return
+// ---------- Suggestions ----------
 
-  loadingSuggestions.value = true
+async function loadSuggestions(childId) {
+  loadingId.value = childId
+  panelError.value[childId] = ''
   try {
-    const res = await api.get(`/matchmaking/${selectedId.value}`)
-    suggestions.value = res.data.suggestions
-    replaceChild(res.data.child) // keeps the dropdown's "unassigned" order up to date
+    const res = await api.get(`/matchmaking/${childId}`)
+    suggestions.value[childId] = res.data.suggestions
   } catch (err) {
-    suggestionsError.value = errorMessage(err)
+    panelError.value[childId] = errorMessage(err)
   } finally {
-    loadingSuggestions.value = false
+    if (loadingId.value === childId) loadingId.value = ''
   }
 }
 
-function replaceChild(updated) {
-  const i = children.value.findIndex((c) => c.id === updated.id)
-  if (i !== -1) children.value[i] = updated
+function slotsLabel(s) {
+  return s.scheduledSlots.map((slot) => (slot.time ? `${slot.day} ${slot.time}` : slot.day)).join(', ')
 }
 
-async function changeAssignment(s, body) {
-  busyId.value = s.volunteerId
-  actionError.value = ''
+async function changeAssignment(child, s, body) {
+  const key = keyOf(child.id, s.volunteerId)
+  busyKey.value = key
+  panelError.value[child.id] = ''
   try {
-    await api.put(`/matchmaking/${selectedId.value}/assign`, { volunteerId: s.volunteerId, ...body })
-    // Reload: scores, workloads and the child's assigned state all change after an assignment.
-    await loadSuggestions()
+    await api.put(`/matchmaking/${child.id}/assign`, { volunteerId: s.volunteerId, ...body })
+    delete dayChoice.value[key]
+    delete timeChoice.value[key]
+    // Scores, workloads and the child's status all change after an assignment.
+    await Promise.all([loadSuggestions(child.id), loadChildren()])
   } catch (err) {
-    actionError.value = errorMessage(err)
+    panelError.value[child.id] = errorMessage(err) // e.g. "Aisha Rahman already has Ethan Wong on Mon at 16:00."
   } finally {
-    busyId.value = null
+    busyKey.value = ''
   }
 }
 
-const assign = (s) => changeAssignment(s, { action: 'assign', day: dayChoice.value[s.volunteerId] })
-const unassign = (s) => changeAssignment(s, { action: 'unassign' })
+function assign(child, s) {
+  const key = keyOf(child.id, s.volunteerId)
+  changeAssignment(child, s, { action: 'assign', day: dayChoice.value[key], time: timeChoice.value[key] })
+}
+
+function unassign(child, s) {
+  changeAssignment(child, s, { action: 'unassign' })
+}
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
-    <PageHeader title="Matchmaking" subtitle="Match each child with volunteers who have the right skills." />
+  <div class="container py-4">
+    <PageHeader title="Matchmaking" subtitle="Match each child with volunteers who teach the subjects they need." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <!-- the sandy board: the child picker and the white cards -->
-    <div v-else class="board">
-      <div class="t-card pick">
-        <label class="fact-key" for="child">Child</label>
-        <select id="child" v-model="selectedId" class="form-select" data-test="child-select">
-          <option value="" disabled>Choose a child</option>
-          <option v-for="c in sortedChildren" :key="c.id" :value="c.id">
-            {{ isAssigned(c) ? '' : '[No volunteer] ' }}{{ c.name }} ({{ c.level }}) - needs:
-            {{ (c.needs || []).join(', ') }}
-          </option>
-        </select>
-        <div v-if="unassignedCount" class="person-sub">
-          <i class="bi bi-exclamation-circle me-1"></i>
-          {{ unassignedCount }} {{ unassignedCount === 1 ? 'child has' : 'children have' }} no volunteer yet,
-          shown first.
+    <template v-else>
+      <!-- Search -->
+      <div class="cb-card p-3 mb-3 d-flex flex-wrap align-items-center gap-3">
+        <div class="search-box flex-grow-1">
+          <i class="bi bi-search search-icon" aria-hidden="true"></i>
+          <label for="child-search" class="visually-hidden">Search children</label>
+          <input
+            id="child-search"
+            v-model="search"
+            type="search"
+            class="form-control"
+            placeholder="Search by name, level, school or subject"
+            data-test="child-search"
+          />
+        </div>
+        <div class="small text-muted-cb">
+          Showing {{ filteredChildren.length }} of {{ children.length }}
+          <template v-if="unassignedCount">
+            · {{ unassignedCount }} without a volunteer, shown first
+          </template>
         </div>
       </div>
 
-      <div v-if="!selectedId" class="t-card empty">
-        <strong>Choose a child</strong>
-        Pick a child above to see the volunteers who could work with them.
-      </div>
+      <p v-if="!filteredChildren.length" class="text-muted-cb" data-test="no-children">
+        No children match "{{ search }}".
+      </p>
 
-      <StateMessage v-else-if="loadingSuggestions && !suggestions.length" type="loading" />
-      <StateMessage v-else-if="suggestionsError" type="error" :message="suggestionsError" />
+      <!-- Children -->
+      <div class="d-flex flex-column gap-2">
+        <div
+          v-for="c in filteredChildren"
+          :id="`child-${c.id}`"
+          :key="c.id"
+          class="cb-card child-item"
+          :class="{ 'is-open': openId === c.id }"
+        >
+          <button
+            type="button"
+            class="child-toggle"
+            :aria-expanded="openId === c.id"
+            :aria-controls="`panel-${c.id}`"
+            data-test="child-toggle"
+            @click="toggle(c)"
+          >
+            <span class="avatar" aria-hidden="true">
+              <img v-if="isPhoto(c.avatar)" :src="c.avatar" alt="" />
+              <template v-else>{{ c.avatar }}</template>
+            </span>
 
-      <template v-else-if="selectedChild">
-        <h2 class="section-title">
-          Suggested volunteers for {{ firstName(selectedChild.name) }}
-          <span class="muted">(best match first)</span>
-        </h2>
+            <span class="flex-grow-1 min-w-0">
+              <span class="d-block fw-semibold">{{ c.name }} <span class="text-muted-cb fw-normal">({{ c.level }})</span></span>
+              <span class="d-flex flex-wrap gap-1 mt-1">
+                <span v-for="n in c.needs" :key="n" class="badge badge-soft">{{ n }}</span>
+              </span>
+            </span>
 
-        <div v-if="actionError" class="note note-bad" data-test="action-error">{{ actionError }}</div>
+            <span v-if="!isAssigned(c)" class="badge text-bg-warning" data-test="no-volunteer-badge">No volunteer</span>
+            <span v-else class="small text-muted-cb text-nowrap">
+              {{ c.volunteerIds.length }} {{ c.volunteerIds.length === 1 ? 'volunteer' : 'volunteers' }}
+            </span>
 
-        <div class="suggestions">
-          <article v-for="s in suggestions" :key="s.volunteerId" class="t-card person" data-test="suggestion-card">
-            <div class="suggest-top">
-              <div class="person-top">
-                <ChildInitial class="is-volunteer" :child="{ name: s.name }" />
-                <div>
-                  <div class="suggest-title">
-                    <h3 class="person-name">{{ s.name }}</h3>
-                    <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">
-                      Assigned{{ s.scheduledDays.length ? ` on ${s.scheduledDays.join(', ')}` : '' }}
-                    </span>
-                  </div>
-                  <div class="person-sub">
-                    Score {{ s.score }}: skills +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
-                    workload {{ s.breakdown.workload }}
-                  </div>
+            <i class="bi bi-chevron-down chevron" aria-hidden="true"></i>
+          </button>
+
+          <Transition name="expand">
+            <div v-if="openId === c.id" :id="`panel-${c.id}`" class="child-panel" data-test="child-panel">
+              <div class="child-panel-inner">
+                <StateMessage v-if="loadingId === c.id && !suggestions[c.id]" type="loading" />
+
+                <div v-if="panelError[c.id]" class="alert alert-danger py-2 small" data-test="action-error">
+                  {{ panelError[c.id] }}
                 </div>
-              </div>
 
-              <!-- Actions -->
-              <div class="suggest-actions">
-                <button
-                  v-if="s.assigned"
-                  type="button"
-                  class="t-btn t-btn-soft"
-                  :disabled="busyId !== null"
-                  data-test="unassign-btn"
-                  @click="unassign(s)"
-                >
-                  {{ busyId === s.volunteerId ? 'Removing…' : 'Unassign' }}
-                </button>
+                <template v-if="suggestions[c.id]">
+                  <h3 class="h6 mb-2">
+                    Suggested volunteers for {{ firstName(c.name) }}
+                    <span class="text-muted-cb fw-normal small">(best match first)</span>
+                  </h3>
 
-                <template v-else-if="s.availability.length">
-                  <label class="visually-hidden" :for="`day-${s.volunteerId}`">Session day for {{ s.name }}</label>
-                  <select
-                    :id="`day-${s.volunteerId}`"
-                    v-model="dayChoice[s.volunteerId]"
-                    class="form-select skill-select"
-                    data-test="day-select"
-                  >
-                    <option :value="undefined" disabled>Pick a day</option>
-                    <option v-for="d in s.availability" :key="d" :value="d">{{ d }}</option>
-                  </select>
-                  <button
-                    type="button"
-                    class="t-btn"
-                    :disabled="!dayChoice[s.volunteerId] || busyId !== null"
-                    data-test="assign-btn"
-                    @click="assign(s)"
-                  >
-                    {{ busyId === s.volunteerId ? 'Assigning…' : 'Assign' }}
-                  </button>
+                  <div class="d-flex flex-column gap-2">
+                    <div
+                      v-for="s in suggestions[c.id]"
+                      :key="s.volunteerId"
+                      class="suggestion"
+                      :class="{ 'is-assigned': s.assigned }"
+                      data-test="suggestion-card"
+                    >
+                      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div>
+                          <div class="fw-semibold">
+                            <i class="bi bi-person-circle me-1"></i>{{ s.name }}
+                            <span v-if="s.assigned" class="badge text-bg-success ms-1" data-test="assigned-badge">
+                              Assigned{{ s.scheduledSlots.length ? ` · ${slotsLabel(s)}` : '' }}
+                            </span>
+                          </div>
+
+                          <!-- WHY this volunteer -->
+                          <div class="small" data-test="match-reason">
+                            <template v-if="s.matchedSkills.length">Teaches {{ s.matchedSkills.join(', ') }}</template>
+                            <span v-else class="text-muted-cb">No matching subjects</span>
+                            · Free on {{ s.availability.join(', ') || 'no days set' }}
+                            · {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
+                          </div>
+                          <div class="small text-muted-cb">
+                            Score {{ s.score }}: subjects +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
+                            workload {{ s.breakdown.workload }}
+                          </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                          <button
+                            v-if="s.assigned"
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            :disabled="busyKey !== ''"
+                            data-test="unassign-btn"
+                            @click="unassign(c, s)"
+                          >
+                            {{ busyKey === keyOf(c.id, s.volunteerId) ? 'Removing…' : 'Unassign' }}
+                          </button>
+
+                          <template v-else-if="s.availability.length">
+                            <label class="visually-hidden" :for="`day-${c.id}-${s.volunteerId}`">Day for {{ s.name }}</label>
+                            <select
+                              :id="`day-${c.id}-${s.volunteerId}`"
+                              v-model="dayChoice[keyOf(c.id, s.volunteerId)]"
+                              class="form-select form-select-sm w-auto"
+                              data-test="day-select"
+                            >
+                              <option :value="undefined" disabled>Day</option>
+                              <option v-for="d in s.availability" :key="d" :value="d">{{ d }}</option>
+                            </select>
+
+                            <label class="visually-hidden" :for="`time-${c.id}-${s.volunteerId}`">Time for {{ s.name }}</label>
+                            <select
+                              :id="`time-${c.id}-${s.volunteerId}`"
+                              v-model="timeChoice[keyOf(c.id, s.volunteerId)]"
+                              class="form-select form-select-sm w-auto"
+                              data-test="time-select"
+                            >
+                              <option :value="undefined" disabled>Time</option>
+                              <option v-for="t in TIMES" :key="t" :value="t">{{ t }}</option>
+                            </select>
+
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-primary"
+                              :disabled="
+                                !dayChoice[keyOf(c.id, s.volunteerId)] ||
+                                !timeChoice[keyOf(c.id, s.volunteerId)] ||
+                                busyKey !== ''
+                              "
+                              data-test="assign-btn"
+                              @click="assign(c, s)"
+                            >
+                              {{ busyKey === keyOf(c.id, s.volunteerId) ? 'Assigning…' : 'Assign' }}
+                            </button>
+                          </template>
+
+                          <span v-else class="small text-muted-cb">Set this volunteer's days on the Volunteers page first</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </template>
-
-                <span v-else class="person-sub">Set this volunteer's days on the Volunteers page first</span>
               </div>
             </div>
-
-            <!-- WHY this volunteer -->
-            <div class="facts" data-test="match-reason">
-              <div class="fact">
-                <span class="fact-key">Matches</span>
-                <span class="fact-value">{{ s.matchedSkills.join(', ') || 'No matching skills' }}</span>
-              </div>
-              <div class="fact">
-                <span class="fact-key">Free on</span>
-                <span class="fact-value">{{ s.availability.join(', ') || 'No days set' }}</span>
-              </div>
-              <div class="fact">
-                <span class="fact-key">Works with</span>
-                <span class="fact-value">
-                  {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
-                </span>
-              </div>
-            </div>
-          </article>
+          </Transition>
         </div>
-      </template>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
+
+<style scoped>
+/* ---------- Search ---------- */
+.search-box {
+  position: relative;
+  min-width: 220px;
+}
+.search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.search-box .form-control {
+  padding-left: 2.4rem;
+}
+
+/* ---------- Child toggle buttons ---------- */
+.child-item {
+  border: 2px solid transparent;
+  overflow: hidden;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.child-item.is-open {
+  border-color: var(--cb-primary);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.child-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.child-toggle:hover {
+  background: var(--cb-primary-soft);
+}
+.child-toggle:focus-visible {
+  outline: 2px solid var(--cb-primary);
+  outline-offset: -2px;
+}
+.min-w-0 {
+  min-width: 0;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  background: var(--cb-primary-soft);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.chevron {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+.is-open .chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------- Expanding panel ---------- */
+.child-panel-inner {
+  padding: 0.25rem 1rem 1rem;
+}
+.expand-enter-active,
+.expand-leave-active {
+  overflow: hidden;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 1500px;
+  opacity: 1;
+}
+
+/* ---------- Volunteer suggestions ---------- */
+.suggestion {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+}
+.suggestion.is-assigned {
+  border-color: rgba(25, 135, 84, 0.45);
+}
+
+/* Respect people who turn animations off in their device settings */
+@media (prefers-reduced-motion: reduce) {
+  .child-item,
+  .child-toggle,
+  .chevron,
+  .expand-enter-active,
+  .expand-leave-active {
+    transition: none;
+  }
+}
+</style>

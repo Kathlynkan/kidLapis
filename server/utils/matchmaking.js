@@ -1,9 +1,13 @@
 // Matchmaking scores. PURE functions: data in, ranking out, so they're easy to unit test.
-//   +2 per skill the volunteer has that the child needs
+//   +2 per subject the volunteer teaches that the child needs
 //   +1 per shared day
 //   -1 per OTHER child the volunteer already has (workload)
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// Children's needs and volunteers' skills are both just subjects, the same words
+// sessions use, so matching is a simple "same word" check.
+export const SUBJECTS = ['Math', 'Science', 'English', 'Mother Tongue']
 
 export function scoreVolunteer(child, volunteer, allChildren) {
   const needs = child.needs || []
@@ -21,6 +25,11 @@ export function scoreVolunteer(child, volunteer, allChildren) {
     (c) => c.id !== child.id && (c.volunteerIds || []).includes(volunteer.id),
   ).length
 
+  // This volunteer's sessions with this child, in week order.
+  const mySlots = (child.schedule || [])
+    .filter((s) => s.volunteerId === volunteer.id)
+    .sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day))
+
   const breakdown = { skills: 2 * matchedSkills.length, days: sharedDays.length, workload: -workload }
 
   return {
@@ -33,7 +42,8 @@ export function scoreVolunteer(child, volunteer, allChildren) {
     sharedDays,
     workload,
     assigned: (child.volunteerIds || []).includes(volunteer.id),
-    scheduledDays: (child.schedule || []).filter((s) => s.volunteerId === volunteer.id).map((s) => s.day),
+    scheduledDays: mySlots.map((s) => s.day),
+    scheduledSlots: mySlots.map((s) => ({ day: s.day, time: s.time || '' })), // e.g. [{ day: 'Mon', time: '16:00' }]
   }
 }
 

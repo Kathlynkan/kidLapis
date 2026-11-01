@@ -127,11 +127,13 @@
       "schedule": [
         {
           "volunteerId": "u_vol1",
-          "day": "Mon"
+          "day": "Mon",
+          "time": "16:00"
         },
         {
           "volunteerId": "u_vol2",
-          "day": "Tue"
+          "day": "Tue",
+          "time": "16:00"
         }
       ],
       "needs": [
@@ -153,7 +155,8 @@
       "schedule": [
         {
           "volunteerId": "u_vol2",
-          "day": "Thu"
+          "day": "Thu",
+          "time": "16:00"
         }
       ],
       "needs": [
@@ -177,11 +180,13 @@
       "schedule": [
         {
           "volunteerId": "u_vol1",
-          "day": "Wed"
+          "day": "Wed",
+          "time": "16:00"
         },
         {
           "volunteerId": "u_vol3",
-          "day": "Fri"
+          "day": "Fri",
+          "time": "16:00"
         }
       ],
       "needs": [
@@ -203,7 +208,8 @@
       "schedule": [
         {
           "volunteerId": "u_vol1",
-          "day": "Mon"
+          "day": "Mon",
+          "time": "17:00" 
         }
       ],
       "needs": [
@@ -226,7 +232,8 @@
       "schedule": [
         {
           "volunteerId": "u_vol2",
-          "day": "Tue"
+          "day": "Tue",
+          "time": "17:00"
         }
       ],
       "needs": [
@@ -264,7 +271,8 @@
       "schedule": [
         {
           "volunteerId": "u_vol1",
-          "day": "Wed"
+          "day": "Wed",
+          "time": "17:00"
         }
       ],
       "needs": [

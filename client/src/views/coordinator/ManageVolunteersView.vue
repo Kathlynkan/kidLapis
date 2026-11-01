@@ -31,12 +31,8 @@ const filtered_Volunteers = computed(() => {
 
 
 // pulls all skills from both volunteer and child
-const allSkills = computed(() => {
-  const set = new Set()
-  volunteers.value.forEach((v) => (v.skills || []).forEach((s) => set.add(s)))
-  children.value.forEach((c) => (c.needs || []).forEach((s) => set.add(s)))
-  return [...set].sort()
-}) 
+const SUBJECTS = ['Math', 'Science', 'English', 'Mother Tongue']
+const allSkills = computed(() => SUBJECTS)
 
 const childrenByVolunteer = computed(() => {
   const map = {}
