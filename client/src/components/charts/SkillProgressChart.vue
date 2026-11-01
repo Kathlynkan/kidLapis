@@ -174,3 +174,30 @@ function trendLabel(sorted) {
     </template>
   </div>
 </template>
+<<<<<<< Updated upstream
+=======
+
+<style scoped>
+.spc-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spc-pill {
+  padding: 3px 12px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: #4A3F3A;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.1s;
+}
+
+.spc-pill:hover {
+  filter: brightness(0.92);
+}
+</style>
+>>>>>>> Stashed changes
