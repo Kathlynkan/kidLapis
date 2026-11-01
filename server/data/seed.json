@@ -10,6 +10,7 @@
       "email": "teacher@kidslapis.sg",
       "password": "password123",
       "role": "teacher",
+      "avatar": "/photos/tan-mei-ling.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -18,6 +19,7 @@
       "email": "volunteer@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/aisha.jpg",
       "skills": [
         "Math",
         "English"
@@ -34,6 +36,7 @@
       "email": "volunteer2@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/daniel.jpg",
       "skills": [
         "Math",
         "Science"
@@ -50,6 +53,7 @@
       "email": "volunteer3@kidslapis.sg",
       "password": "password123",
       "role": "volunteer",
+      "avatar": "/photos/priya.jpg",
       "skills": [
         "English",
         "Mother Tongue"
@@ -66,7 +70,7 @@
       "email": "parent@kidslapis.sg",
       "password": "password123",
       "role": "parent",
-      "avatar": "/photos/grace.webp",
+      "avatar": "/photos/grace.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -75,6 +79,7 @@
       "email": "parent2@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/ravi.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -83,6 +88,7 @@
       "email": "parent3@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/linda.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -91,6 +97,7 @@
       "email": "parent4@kidslapis.sg",
       "password": "password123",
       "role": "parent",
+      "avatar": "/photos/marcus.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },
     {
@@ -147,7 +154,7 @@
         "Math"
       ],
       "points": 120,
-      "avatar": "/photos/ethan.webp",
+      "avatar": "/photos/ethan.jpg",
       "followUp": false
     },
     {
@@ -170,7 +177,7 @@
         "Science"
       ],
       "points": 210,
-      "avatar": "/photos/arjun.webp",
+      "avatar": "/photos/meera.jpg",
       "followUp": false
     },
     {
@@ -197,7 +204,7 @@
         "English"
       ],
       "points": 60,
-      "avatar": "/photos/chloe.webp",
+      "avatar": "/photos/arjun.jpg",
       "followUp": false
     },
     {
@@ -220,7 +227,7 @@
         "English"
       ],
       "points": 90,
-      "avatar": "🐰",
+      "avatar": "/photos/chloe.jpg",
       "followUp": false
     },
     {
@@ -242,7 +249,7 @@
         "Math"
       ],
       "points": 150,
-      "avatar": "🦁",
+      "avatar": "/photos/ryan.jpg",
       "followUp": false
     },
     {
@@ -258,7 +265,7 @@
         "Math"
       ],
       "points": 0,
-      "avatar": "🐨",
+      "avatar": "/photos/sofia.jpg",
       "followUp": false
     },
     {
@@ -281,7 +288,7 @@
         "Math"
       ],
       "points": 30,
-      "avatar": "/photos/mia.webp",
+      "avatar": "/photos/mia.jpg",
       "followUp": false
     }
   ],
@@ -613,6 +620,9 @@
       "activity": [
         "Lego"
       ],
+      "photos": [
+        "/photos/lego.jpg"
+      ],
       "interaction": "Good"
     },
     {
@@ -633,7 +643,7 @@
       "notes": "",
       "activity": "Reading corner",
       "photos": [
-        "/photos/reading-corner.webp"
+        "/photos/reading-corner.jpg"
       ],
       "interaction": "Good",
       "socialNotes": "Spent some quiet time reading with a friend after the session."
@@ -674,6 +684,11 @@
       "activity": [
         "Soccer"
       ],
+      "photos": [
+        "/photos/soccer.jpg",
+        "/photos/fried-rice.jpg",
+        "/photos/sharing-snack.jpg"
+      ],
       "interaction": "Excellent",
       "behaviour": "Shared his snack with a younger child",
       "socialNotes": "Played soccer with Arjun at break and picked the teams fairly."
@@ -695,6 +710,9 @@
       "mood": "happy",
       "notes": "",
       "activity": "Drawing",
+      "photos": [
+        "/photos/colouring.jpg"
+      ],
       "interaction": "Good",
       "behaviour": "Helped a classmate with colouring"
     },
@@ -716,6 +734,10 @@
       "portion": "All",
       "activity": [
         "Chess"
+      ],
+      "photos": [
+        "/photos/chess-chloe.jpg",
+        "/photos/chicken-rice-2.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Taught Chloe a new chess move",
@@ -758,6 +780,10 @@
       "activity": [
         "Drawing"
       ],
+      "photos": [
+        "/photos/noodles.jpg",
+        "/photos/comics.jpg"
+      ],
       "interaction": "Good",
       "socialNotes": "Drew comics with Arjun after his work."
     },
@@ -780,8 +806,8 @@
       "notes": "Much more confident today!",
       "activity": "Outdoor play",
       "photos": [
-        "/photos/lunch-boys.webp",
-        "/photos/outdoor-play.webp"
+        "/photos/lunch-boys.jpg",
+        "/photos/outdoor-play.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Encouraged a friend who was finding it hard",
@@ -808,6 +834,10 @@
       "activity": [
         "Reading"
       ],
+      "photos": [
+        "/photos/reading-book.jpg",
+        "/photos/fish-soup.jpg"
+      ],
       "interaction": "Fair",
       "socialNotes": "Quieter than usual and read on his own at break, but perked up after his snack."
     },
@@ -828,6 +858,9 @@
       "mood": "tired",
       "notes": "",
       "portion": "Half",
+      "photos": [
+        "/photos/sleepy-lunch.jpg"
+      ],
       "interaction": "Limited",
       "socialNotes": "Sat by himself at break, said he was sleepy."
     },
@@ -849,7 +882,8 @@
       "notes": "",
       "activity": "Board games",
       "photos": [
-        "/photos/board-games.webp"
+        "/photos/snakes-ladders.jpg",
+        "/photos/nasi-lemak.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Led a group game of Snakes and Ladders",
@@ -879,6 +913,10 @@
         "Chess"
       ],
       "interaction": "Good",
+      "photos": [
+        "/photos/chess.jpg",
+        "/photos/chicken-rice.jpg"
+      ],
       "behaviour": "Helped tidy up the games corner",
       "socialNotes": "Back to playing chess after lessons."
     },
@@ -1252,7 +1290,7 @@
       "mood": "happy",
       "notes": "",
       "photos": [
-        "/photos/lunch-girls.webp"
+        "/photos/lunch-girls.jpg"
       ]
     }
   ],

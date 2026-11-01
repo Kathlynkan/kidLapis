@@ -1,6 +1,7 @@
 // Coordinator "Needs attention" rules.
 // Every function here is PURE: data in, alerts out. No database, no Express,
 // no "new Date()" inside the rules. That makes each rule easy to unit test.
+import { toJpg } from '../models/helpers.js' // old photo paths that say .webp are sent as .jpg
 
 export const NO_SESSION_DAYS = 7 // alert if the last session was MORE than this many days ago
 export const URGENT_NO_SESSION_DAYS = 14 // after this, the alert becomes high severity
@@ -116,7 +117,7 @@ export function buildAlerts({ children, sessions, homework, today }) {
         id: [alert.type, child.id, key].filter(Boolean).join(':'), // stable id for Vue :key
         childId: child.id,
         childName: child.name,
-        avatar: child.avatar,
+        avatar: toJpg(child.avatar),
         followUp: child.followUp ?? false,
         ...alert,
       })

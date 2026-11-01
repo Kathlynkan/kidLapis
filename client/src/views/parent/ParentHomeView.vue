@@ -899,9 +899,14 @@ onMounted(async () => {
 .parentpage .day-photo {
   position: relative;
   display: block;
+  width: 100%;
   aspect-ratio: 1;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   border-radius: 12px;
+  background: none;
+  cursor: pointer;
 }
 
 /* the picture is cropped to the square; the crop keeps the top, where the faces are */
@@ -927,6 +932,42 @@ onMounted(async () => {
   color: #FFFFFF;
   font-size: 18px;
   font-weight: 700;
+}
+
+/* the pop-up with the photo big: a dark cover over the whole screen */
+.parentpage .photo-popup {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(65, 79, 103, 0.85);
+  cursor: pointer;
+}
+
+.parentpage .photo-popup img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.parentpage .photo-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #414F67;
+  font-size: 16px;
 }
 
 @media (max-width: 520px) {

@@ -1,4 +1,4 @@
-<!-- A child's avatar: an emoji, or a photo when the avatar is a picture file like /photos/mia.webp.
+<!-- A child's avatar: an emoji, or a photo when the avatar is a picture file like /photos/mia.jpg.
      It is as big as the text round it, so it works wherever an emoji was. -->
 <script setup>
 import '@/css/main/components.css' // the look of the small parts
