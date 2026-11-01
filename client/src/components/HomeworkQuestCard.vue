@@ -4,7 +4,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, daysSince } from '@/utils/format'
-import { HOMEWORK_STATUS } from '@/utils/constants'
+import { HOMEWORK_STATUS, SUBJECT_COLORS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
@@ -28,6 +28,10 @@ const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be c
 
 const showDeleteModal = ref(false)
 
+function subjectStyle(subj) {
+  return {backgroundColor: SUBJECT_COLORS[subj]}
+}
+
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
 function cancelDelete()  { showDeleteModal.value = false }
@@ -39,18 +43,26 @@ function cancelDelete()  { showDeleteModal.value = false }
     :class="`quest-${state}`"
     data-test="homework-card"
   >
-    <div class="d-flex justify-content-between align-items-start gap-2">
-      <h3 class="h6 mb-1 quest-title">{{ homework.title }}</h3>
-      <span v-if="mode === 'child'" class="badge quest-points">+{{ homework.points }} <i class="bi bi-star-fill"></i></span>
-      <span v-else class="badge quest-pill" :class="`quest-pill-${state}`">
-        <i v-if="state === 'done'" class="bi bi-check-lg me-1"></i>{{ STATE_LABELS[state] }}
-      </span>
+
+  <div class="d-flex justify-content-between align-items-start gap-2">
+    <div>
+      <span class="session-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
+      <strong class="quest-title">{{ homework.title }}</strong>
+
+      <div class="small quest-meta">
+        due {{ formatDate(homework.dueDate) }}
+
+        <template v-if="mode === 'volunteer'">
+        · {{ homework.points }}
+        <i class="bi bi-star-fill"></i>
+        </template>
+      </div>
     </div>
 
-    <div class="small mb-2 quest-meta">
-      {{ homework.subject }} &middot; due {{ formatDate(homework.dueDate) }}
-      <template v-if="mode === 'volunteer'"> &middot; {{ homework.points }} <i class="bi bi-star-fill"></i></template>
-      <span v-if="isOverdue && mode === 'child'" class="badge quest-overdue ms-1">Overdue</span>
+      <span
+      class="badge quest-pill" :class="`quest-pill-${state}`">
+        {{ STATE_LABELS[state] }}
+      </span>
     </div>
 
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
