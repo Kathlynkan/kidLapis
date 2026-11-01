@@ -4,7 +4,6 @@ import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
-import ChildAvatar from '@/components/ChildAvatar.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
 
@@ -14,11 +13,35 @@ const me       = ref(null)
 const homework = ref([])
 const loading  = ref(true)
 const error    = ref('')
-const celebrating  = ref(false)
-const submitError  = ref('')
+const celebrating     = ref(false)
+const submitError     = ref('')
+const newBadge        = ref(null)  // badge just unlocked — shows the reveal overlay
+const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
+
+const CONFETTI = [
+  { color: '#E8A0B8', tx:  -70, ty: -150 },
+  { color: '#9BD3B2', tx:   70, ty: -150 },
+  { color: '#D5CBEA', tx: -155, ty:  -70 },
+  { color: '#AED9D8', tx:  155, ty:  -70 },
+  { color: '#F5DF98', tx: -165, ty:   25 },
+  { color: '#E8A0B8', tx:  165, ty:   25 },
+  { color: '#9BD3B2', tx: -120, ty:  135 },
+  { color: '#AED9D8', tx:  120, ty:  135 },
+  { color: '#D5CBEA', tx:  -40, ty:  165 },
+  { color: '#F5DF98', tx:   40, ty:  165 },
+  { color: '#E8A0B8', tx: -175, ty:  -20 },
+  { color: '#9BD3B2', tx:  175, ty:  -20 },
+  { color: '#AED9D8', tx:  -28, ty: -175 },
+  { color: '#D5CBEA', tx:   28, ty: -175 },
+]
 
 // ── Computed ─────────────────────────────────────────────────
-const level     = computed(() => levelFor(me.value?.points || 0))
+// Add points from submitted (not yet verified) homework so the lapis and level update immediately.
+const pendingPoints = computed(() =>
+  homework.value.filter((h) => h.status === 'submitted').reduce((sum, h) => sum + h.points, 0),
+)
+const displayPoints = computed(() => (me.value?.points || 0) + pendingPoints.value)
+const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
 const todo      = computed(() => homework.value.filter((h) => h.status === 'assigned'))
@@ -55,6 +78,8 @@ const shownProgress = computed(() => badgeProgress(shown.value, me.value, homewo
 async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
+    const prevEarnedIds = new Set(earned.value.map((b) => b.id))
+
     await api.put(`/homework/${homeworkId}/submit`)
     const h = homework.value.find((hw) => hw.id === homeworkId)
     if (h) {
@@ -64,6 +89,14 @@ async function submitQuest(homeworkId) {
     showDone.value    = true
     celebrating.value = true
     setTimeout(() => (celebrating.value = false), 2200)
+
+    // Check for a newly unlocked badge and show the reveal after the quest celebration fades
+    const justUnlocked = earned.value.find((b) => !prevEarnedIds.has(b.id))
+    if (justUnlocked) {
+      justUnlockedId.value = justUnlocked.id
+      setTimeout(() => { justUnlockedId.value = null }, 1400)
+      setTimeout(() => { newBadge.value = justUnlocked }, 2400)
+    }
   } catch (err) {
     submitError.value = errorMessage(err)
   }
@@ -87,6 +120,36 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 childhomepage">
+    <!-- Badge unlock reveal -->
+    <Transition name="badge-reveal">
+      <div
+        v-if="newBadge"
+        class="badge-unlock-overlay"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="`${newBadge.kueh} badge unlocked`"
+        @click.self="newBadge = null"
+      >
+        <div class="badge-unlock-card">
+          <span
+            v-for="(c, i) in CONFETTI"
+            :key="i"
+            class="confetti-dot"
+            :style="{ background: c.color, '--tx': c.tx + 'px', '--ty': c.ty + 'px', animationDelay: (i * 0.03) + 's' }"
+            aria-hidden="true"
+          ></span>
+          <div class="badge-unlock-label">New kueh unlocked!</div>
+          <img :src="`/child_badges_images/${newBadge.image}.webp`" :alt="newBadge.kueh" class="badge-unlock-img" />
+          <div class="badge-unlock-body">
+            <div class="badge-unlock-name">{{ newBadge.kueh }}</div>
+            <div class="badge-unlock-badge">{{ newBadge.name }}</div>
+            <div class="badge-unlock-fact">{{ newBadge.fact }}</div>
+            <button class="badge-unlock-btn" @click="newBadge = null">Yay!</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <Transition name="celebrate">
       <div v-if="celebrating" class="celebrate-overlay" aria-hidden="true">
         <i class="bi bi-award-fill celebrate-main"></i>
@@ -106,10 +169,9 @@ onMounted(async () => {
       <!-- Hero card -->
       <div class="hero-card p-4 mb-4 d-flex flex-wrap align-items-center justify-content-center gap-4">
         <div class="text-center">
-          <div class="hero-avatar display-3"><ChildAvatar :avatar="me.avatar" /></div>
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
-            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ me.points }} stars</span> &middot; Level {{ level.level }}
+            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ displayPoints }} stars</span> &middot; Level {{ level.level }}
           </div>
           <div
             class="progress mx-auto level-bar mb-1"
@@ -174,7 +236,7 @@ onMounted(async () => {
                 :key="b.id"
                 type="button"
                 class="kueh-tile"
-                :class="{ 'kueh-locked': !earnedIds.has(b.id) }"
+                :class="{ 'kueh-locked': !earnedIds.has(b.id), 'kueh-just-unlocked': justUnlockedId === b.id }"
                 :aria-pressed="shown.id === b.id"
                 @click="picked = b"
               >
@@ -623,5 +685,159 @@ onMounted(async () => {
   .celebrate-spark { animation: none; }
   .level-bar .progress-bar { transform: scaleX(1); }
   .kueh-cup { transition: none; }
+}
+
+/* ── Badge unlock overlay ────────────────────────────────── */
+
+.badge-unlock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(251, 248, 243, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.badge-unlock-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 44px 32px;
+  border-radius: 28px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 48px rgba(74, 63, 58, 0.16);
+  text-align: center;
+  max-width: 300px;
+  width: 100%;
+  overflow: visible;
+  animation: badge-card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badge-card-in {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* the kueh image is the hero */
+.badge-unlock-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation: badge-kueh-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+
+@keyframes badge-kueh-pop {
+  from { transform: scale(0) rotate(-12deg); }
+  to   { transform: scale(1) rotate(0deg);   }
+}
+
+/* text rises up after the image lands */
+.badge-unlock-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: badge-text-up 0.35s ease 0.32s both;
+}
+
+@keyframes badge-text-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+
+/* small pink label above the image */
+.badge-unlock-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #A9577A;
+  animation: badge-text-up 0.35s ease 0.28s both;
+}
+
+.badge-unlock-name {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #4A3F3A;
+  line-height: 1.2;
+}
+
+.badge-unlock-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8D7F77;
+}
+
+.badge-unlock-fact {
+  margin: 6px 0 12px;
+  font-size: 13px;
+  color: #8D7F77;
+  line-height: 1.5;
+}
+
+.badge-unlock-btn {
+  padding: 8px 32px;
+  border: 0;
+  border-radius: 999px;
+  background: #E8A0B8;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.badge-unlock-btn:hover { filter: brightness(0.94); }
+
+/* confetti dots burst from the centre of the card */
+.confetti-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: confetti-burst 1.0s ease-out 0.15s both;
+}
+
+@keyframes confetti-burst {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  55%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.3); opacity: 0; }
+}
+
+/* overlay fade in / out */
+.badge-reveal-enter-active { animation: badge-overlay-in 0.2s ease both; }
+.badge-reveal-leave-active  { animation: badge-overlay-out 0.18s ease both; }
+
+@keyframes badge-overlay-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes badge-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* tile pulse when it just unlocked */
+.kueh-just-unlocked .kueh-cup {
+  animation: tile-unlock-pulse 0.75s ease-out both;
+}
+
+@keyframes tile-unlock-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(169, 87, 122, 0.65); transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  70%  { box-shadow: 0 0 0 14px rgba(169, 87, 122, 0);   }
+  100% { transform: scale(1);   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-unlock-card,
+  .badge-unlock-img,
+  .badge-unlock-body,
+  .badge-unlock-label,
+  .confetti-dot,
+  .kueh-just-unlocked .kueh-cup { animation: none; }
 }
 </style>

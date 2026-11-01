@@ -21,14 +21,15 @@ export function earnedBadges(child, homework) {
 }
 
 // Progress toward a single badge (current / target) — used for "next badge" nudge and for earnedBadges
+// Counts both 'submitted' and 'verified' so badges unlock as soon as the child hands in the work.
 export function badgeProgress(badge, child, homework) {
-  const verified = homework.filter((h) => h.status === 'verified')
+  const completed = homework.filter((h) => h.status === 'verified' || h.status === 'submitted')
   switch (badge.id) {
     case 'first-quest':
-      return { current: Math.min(verified.length, 1), target: 1 }
+      return { current: Math.min(completed.length, 1), target: 1 }
 
     case 'streak-3': {
-      const sorted = [...verified]
+      const sorted = [...completed]
         .filter((h) => h.completedAt)
         .sort((a, b) => a.completedAt.localeCompare(b.completedAt))
       let streak = 0, best = 0
@@ -40,16 +41,20 @@ export function badgeProgress(badge, child, homework) {
     }
 
     case 'quest-champion':
-      return { current: Math.min(verified.length, 5), target: 5 }
+      return { current: Math.min(completed.length, 5), target: 5 }
 
     case 'bookworm':
-      return { current: Math.min(verified.filter((h) => h.subject === 'English').length, 2), target: 2 }
+      return { current: Math.min(completed.filter((h) => h.subject === 'English').length, 2), target: 2 }
 
-    case 'century':
-      return { current: Math.min(child.points || 0, 100), target: 100 }
+    case 'century': {
+      const pendingPoints = completed
+        .filter((h) => h.status === 'submitted')
+        .reduce((sum, h) => sum + h.points, 0)
+      return { current: Math.min((child.points || 0) + pendingPoints, 100), target: 100 }
+    }
 
     case 'rising-star': {
-      const early = verified.filter(
+      const early = completed.filter(
         (h) => h.completedAt && h.dueDate && h.completedAt.slice(0, 10) < h.dueDate,
       ).length
       return { current: Math.min(early, 3), target: 3 }

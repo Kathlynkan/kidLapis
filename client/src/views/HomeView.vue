@@ -1,4 +1,4 @@
-<!-- =============================================================
+﻿<!-- =============================================================
   Landing page (public).                              Owner: Kai Sen
   Done: the title, "One app, four views" (a card for each role with its own log in button)
         and "How it works" (record -> summarise -> share -> continue).
@@ -6,68 +6,69 @@
         and the four layer colours (purple, green, aqua, pink) for the four roles.
 ============================================================= -->
 <script setup>
-import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+/* eslint-disable */
+import { RouterLink } from "vue-router"
+import { useAuthStore } from "@/stores/auth"
 
 const auth = useAuthStore()
 
 // One card for each role. colour: the layer colour of that role (see main.css).
 const roles = [
   {
-    icon: 'bi-person-heart',
-    name: 'Volunteers',
-    short: 'Record and hand over',
-    text: 'Get a briefing before each session, record it after, and set homework quests.',
-    button: 'Volunteer log in',
-    colour: 'green',
+    icon: "bi-person-heart",
+    name: "Volunteers",
+    short: "Record and hand over",
+    text: "Get a briefing before each session, record it after, and set homework quests.",
+    button: "Volunteer log in",
+    colour: "green",
   },
   {
-    icon: 'bi-speedometer2',
-    name: 'Teachers',
-    short: 'Run the centre',
-    text: 'Spot children who need attention and match them with the right volunteer. Teacher accounts are set up by the centre.',
-    button: 'Teacher log in',
-    colour: 'purple',
+    icon: "bi-speedometer2",
+    name: "Teachers",
+    short: "Run the centre",
+    text: "Spot children who need attention and match them with the right volunteer. Teacher accounts are set up by the centre.",
+    button: "Teacher log in",
+    colour: "purple",
   },
   {
-    icon: 'bi-house-heart',
-    name: 'Parents',
-    short: 'Follow progress',
+    icon: "bi-house-heart",
+    name: "Parents",
+    short: "Follow progress",
     text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
-    button: 'Parent log in',
-    colour: 'aqua',
+    button: "Parent log in",
+    colour: "aqua",
   },
   {
-    icon: 'bi-trophy',
-    name: 'Children',
-    short: 'Earn stars',
-    text: 'Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.',
-    button: 'Child log in',
-    colour: 'pink',
+    icon: "bi-trophy",
+    name: "Children",
+    short: "Earn stars",
+    text: "Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.",
+    button: "Child log in",
+    colour: "pink",
   },
 ]
 
 // The core flow, one row for each step
 const steps = [
   {
-    name: 'Record',
-    text: 'Volunteers log each session in a minute: topic, score, mood, struggles and what worked.',
-    colour: 'green',
+    name: "Record",
+    text: "A volunteer logs the session after it ends: what they covered, how the child felt, and what to try next time.",
+    colour: "green",
   },
   {
-    name: 'Summarise',
-    text: "AI turns the child's session history into a short, plain-language update.",
-    colour: 'purple',
+    name: "Quest",
+    text: "The child comes home to new homework quests and earns stars and kueh badges for every one they complete.",
+    colour: "pink",
   },
   {
-    name: 'Share',
-    text: 'Parents see today’s update, progress charts and a mood timeline, and can message teachers.',
-    colour: 'aqua',
+    name: "Share",
+    text: "Parents get a plain-English update on their child's session, mood and progress - without having to chase anyone.",
+    colour: "aqua",
   },
   {
-    name: 'Continue',
-    text: 'The next volunteer gets a handover, so the child never starts again from zero.',
-    colour: 'pink',
+    name: "Continue",
+    text: "The coordinator matches children with the right volunteer. Every new volunteer gets a full handover - the child never starts from zero.",
+    colour: "purple",
   },
 ]
 </script>
@@ -76,9 +77,9 @@ const steps = [
   <div class="container py-4 homepage">
     <header class="home-header">
       <span class="note-tag">For student care centres</span>
-      <h1 class="page-title">When the volunteer changes, the child's progress shouldn't reset.</h1>
+      <h1 class="page-title">Every session builds on the last. Every child stays on track.</h1>
       <p class="page-subtitle">
-        Kids Lapis turns volunteer session notes into a clear picture for parents. Choose your view to start.
+        Kids Lapis connects volunteers, teachers, parents and children — session notes become parent updates, homework becomes quests, and no child ever starts from zero.
       </p>
       <RouterLink v-if="auth.isLoggedIn" :to="auth.homePath" class="home-button colour-pink" data-test="go-dashboard">
         Go to my dashboard
