@@ -6,7 +6,7 @@
 //
 // Vue (axios) --POST /handover/:childId--> Express --axios--> Gemini API
 //
-// 2 types of summary (body.type):
+// 2 types of summary, picked by the role of the logged-in user:
 //   'handover' - for VOLUNTEERS: note for the next session, from the last 5 sessions (default)
 //   'weekly'   - for PARENTS: Monday to Friday, learning + social.
 //                Fri-Sun shows this week, Mon-Thu shows last week.
@@ -180,25 +180,29 @@ export function buildFallbackHandover(sessions) {
 
 // for PARENTS: backup for the weekly summary (no API key, or Gemini fails)
 // It goes through the week's sessions, oldest first, and fills the same lines as the AI.
-export function buildWeeklyFallback(sessions) {
+// name = the child's first name, e.g. 'Ethan'
+export function buildWeeklyFallback(sessions, name = 'Your child') {
   if (sessions.length === 0) {
     return { headline: 'No sessions were recorded that week.', source: 'fallback' }
   }
 
-  const days = [] // e.g. ['Mon', 'Wed']
-  const learning = [] // e.g. ['Mon: Fractions, 4 out of 5 right']
+  const learning = [] // e.g. ['fractions (4 out of 5 right)']
   const friends = []
   const worth = []
+  let lowMood = 0 // how many sessions were tired or frustrated
   let celebrate = ''
 
   for (const s of [...sessions].reverse()) {
     const day = new Date(s.date + 'T00:00:00').toDateString().slice(0, 3) // 'Mon'
-    if (!days.includes(day)) {
-      days.push(day)
+    const topic = s.topic.toLowerCase()
+    if (!learning.includes(`${topic} (${s.correct} out of ${s.attempted} right)`)) {
+      learning.push(`${topic} (${s.correct} out of ${s.attempted} right)`)
     }
-    learning.push(`${day}: ${s.topic}, ${s.correct} out of ${s.attempted} right`)
     if (s.socialNotes) {
-      friends.push(`${day}: ${s.socialNotes}`)
+      friends.push(s.socialNotes)
+    }
+    if (s.mood === 'tired' || s.mood === 'frustrated') {
+      lowMood = lowMood + 1
     }
     if (s.mood === 'tired') {
       worth.push(`seemed a bit tired on ${day}`)
@@ -214,19 +218,29 @@ export function buildWeeklyFallback(sessions) {
     }
   }
 
-  const last = sessions[0] // newest session
+  // the big picture, from the mood of the week
+  let headline = `${name} has been happy and settled with us.`
+  if (lowMood > 0) {
+    headline = `${name} had a good week overall, with a few tired or tricky moments.`
+  }
+  if (lowMood > sessions.length / 2) {
+    headline = `${name} seemed tired for much of the week, so a bit of extra rest may help.`
+  }
+
   let worthKnowing = ''
   if (worth.length > 0) {
-    worthKnowing = `Your child ${worth.join(', and ')}.`
+    worthKnowing = `${name} ${worth.join(', and ')}.`
   }
-  let atHome = ''
-  if (last.nextStep) {
-    atHome = `Practise together: ${last.nextStep}.`
+
+  const last = sessions[0] // newest session
+  let atHome = `Ask ${name} to show you what they learned about ${last.topic.toLowerCase()}.`
+  if (last.whatWorked) {
+    atHome = `Ask ${name} to show you how ${last.whatWorked.toLowerCase()} helped with ${last.topic.toLowerCase()}.`
   }
 
   return {
-    headline: `Came in on ${days.length} day(s) that week (${days.join(', ')}).`,
-    learning: learning.join('. ') + '.',
+    headline: headline,
+    learning: `${name} worked on ${learning.join(', ')}.`,
     friends: friends.join(' '),
     worthKnowing: worthKnowing,
     celebrate: celebrate,
@@ -288,11 +302,15 @@ function buildPrompt(child, sessions, audience, type, lastWeek = [], weekWords =
     notes = notes + describeSession(s)
   }
 
-  // 2. struggles that keep coming back 
-  let recurringText = 'none'
-  const recurring = findRecurring(sessions)
-  if (recurring.length > 0) {
-    recurringText = recurring.join(', ')
+  // 2. struggles that keep coming back (volunteers only: parents get a positive picture of the week)
+  let recurringLine = ''
+  if (audience !== 'parent') {
+    let recurringText = 'none'
+    const recurring = findRecurring(sessions)
+    if (recurring.length > 0) {
+      recurringText = recurring.join(', ')
+    }
+    recurringLine = `Struggles that came up more than once: ${recurringText}.`
   }
 
   // 3. how to write prompt: volunteer (teaching notes) or parent (friendly update)
@@ -330,32 +348,41 @@ Be practical and specific, like a short note from one tutor to another.`
       }
     }
 
-    task = `Write a WEEKLY update for the child's parent about ${weekWords}, from the student care team ("we" means the team).
-Call it "${weekWords}" in your sentences (the parent may be reading it a few days later).
-In ${weekWords} the child came ${sessions.length} time(s), on: ${days.join(', ')}.
+    task = `Write a WEEKLY update about ${weekWords} for the child's PARENT, from the student care team ("we" means the team).
+Imagine you are the parent: you want to know how your child is really doing, what they are proud of,
+who their friends are, anything to keep an eye on, and something to talk about at the dinner table.
+Call the week "${weekWords}" (the parent may read it a few days later).
+The child came on: ${days.join(', ')}. Do NOT count the days or sessions in your answer, the parent does not need that.
 
 Notes from THE WEEK BEFORE (only to compare, do not summarise them):
 ${lastWeekNotes}
 
-Rules:
-- Be honest about how much happened. If the child came only once, talk about that day ("On Tuesday, ..."), not "a wonderful week".
-- Compare with the week before when you can (e.g. "more settled than the week before", "fractions went from 2 to 4 out of 5 right").
-- Be specific: use real facts from the notes (scores, activities, what helped, what they ate).
-- Warm and reassuring, like a friendly teacher. A short word of encouragement is fine when a fact supports it (e.g. "a big improvement, well done!"). No empty praise like "great energy" or "wonderful week".
-- Use the child's first name once or twice in total, not in every line.
-- Never repeat the same fact in two fields.
-- Only name a friend if their name is written in the notes.
-- Only mention food if a meal or portion is recorded.
-
-Fields:
-- "headline": how the week went in one sentence, including how many times the child came.
-- "learning": what they worked on, their scores and what helped.
-- "friends": who they played with, what they did and how they got along. Mention any change across the days.
-- "worthKnowing": anything the parent should gently know (tired, quieter, ate little, found something hard), said in a reassuring way. Use "" if there is nothing.
-- "celebrate": one specific proud moment.
-- "atHome": one simple thing to do at home linked to this week: a question to ask, or a fun way to practise.
-- Each field: one or two sentences, under 35 words. Use "" if there is no information.
+How to write:
+- Warm, natural sentences that flow, like a friendly teacher talking to a parent at pick-up. No lists, no semicolons.
+- Insightful: say what the notes MEAN for the child (growing in confidence, settling in, making friends), not just what happened.
+- Compare with the week before when it shows growth (e.g. "more settled than the week before", "fractions went from 3 to 4 out of 5 right").
+- Use real facts from the notes. Only name a friend if their name is in the notes. Only mention food if a meal or portion is recorded.
+- Honest and kind. Encouragement only when a fact supports it. No empty praise like "wonderful week".
+- Do not worry the parent about schoolwork: no lists of weak topics and no "needs more practice". Talk about difficulties as progress (e.g. "is getting more confident with fractions").
+- Use the child's first name once or twice in total, then "he" or "she" or the name again. Do not repeat a fact in two fields.
+- Each field: one or two sentences, under 40 words. Use "" if there is no information.
 - Only use facts from the notes. Do not make anything up.
+
+Fields, in this order:
+- "headline" (Overview): the big picture of how the child is doing, from their mood, learning and how they got along with others and the volunteers.
+- "learning": what they worked on, how it is improving compared with before, and what helped them understand it.
+- "friends": who they played with, what they did together, and what that shows about them (e.g. kind, a leader, more confident).
+- "worthKnowing": anything the parent should gently know (tired, quieter, ate little, found something hard), with reassurance or what we did about it. Use "" if there is nothing.
+- "celebrate" (Proud moment): one specific moment to be proud of, from learning or from how they treated others.
+- "atHome" (Try at home): one dinner-table question or a small fun activity, linked to this week's learning or friends.
+
+STYLE EXAMPLE (a different child, only to show the tone, do NOT copy any facts from it):
+{"headline":"Mei has been cheerful and settled with us, and she is opening up more with the volunteers.",
+ "learning":"Her spelling keeps getting stronger, from 5 to 8 out of 10 right, and making up silly sentences for tricky words is really helping her remember them.",
+ "friends":"She spent most breaks drawing with Aisha and is starting to invite quieter children to join in.",
+ "worthKnowing":"She was a little tired on Tuesday and only ate half her lunch, but she was back to herself by Thursday.",
+ "celebrate":"She helped a younger child find their water bottle without being asked.",
+ "atHome":"Ask Mei to teach you one of her silly spelling sentences, and see if you can make up one together."}
 
 Reply ONLY with JSON in exactly this shape:
 {"headline":"","learning":"","friends":"","worthKnowing":"","celebrate":"","atHome":""}`
@@ -403,7 +430,7 @@ Child: ${child.name}, ${child.level}.
 
 Session notes${type === 'weekly' ? ' for ' + weekWords.toUpperCase() : ''} (newest first):
 ${notes}
-Struggles that came up more than once: ${recurringText}.
+${recurringLine}
 
 ${task}`
 }
@@ -456,7 +483,7 @@ async function callLLM(prompt) {
 
 
 // POST /handover/:childId
-// body: { audience: 'volunteer' or 'parent', type: 'handover' or 'weekly' }
+// No body needed: the summary type comes from the logged-in user's role (req.user.role)
 router.post('/:childId', async (req, res) => {
   // get the child from MongoDB
   const child = await Child.findById(req.params.childId)
@@ -468,15 +495,11 @@ router.post('/:childId', async (req, res) => {
   // get the child's sessions, newest first, at most 20
   const allSessions = await Session.find({ childId: child.id }).sort({ date: -1 }).limit(20)
 
-  // who is the summary for? (default: volunteer)
+  // show summary depending on logged in user
   let audience = 'volunteer'
-  if (req.body && req.body.audience) {
-    audience = req.body.audience
-  }
-
-  // which summary? (default: handover)
   let type = 'handover'
-  if (req.body && req.body.type === 'weekly') {
+  if (req.user.role === 'parent') {
+    audience = 'parent'
     type = 'weekly'
   }
 
@@ -517,11 +540,13 @@ router.post('/:childId', async (req, res) => {
 
   // no sessions -> nothing for the AI to read, send the backup (saves API calls)
   if (sessions.length === 0) {
-    let empty = buildWeeklyFallback(sessions)
+    let empty = buildWeeklyFallback(sessions, child.name.split(' ')[0])
     if (type === 'handover') {
       empty = buildFallbackHandover(sessions)
     }
-    empty.recurring = findRecurring(allSessions) // struggles from the last 5 sessions
+    if (type === 'handover') {
+      empty.recurring = findRecurring(allSessions) // struggles from the last 5 sessions (volunteers only)
+    }
     empty.periodLabel = periodLabel
     empty.weekTitle = weekTitle
     return res.json(empty)
@@ -553,7 +578,9 @@ router.post('/:childId', async (req, res) => {
 
     if (ai) {
       // add own fields to the AI answer
-      ai.recurring = findRecurring(allSessions) 
+      if (type === 'handover') {
+        ai.recurring = findRecurring(allSessions) // volunteers only, parents do not see a list of struggles
+      }
       ai.source = 'ai'
       ai.periodLabel = periodLabel
       ai.weekTitle = weekTitle
@@ -586,11 +613,13 @@ router.post('/:childId', async (req, res) => {
   }
 
   // 3. Gemini didn't work -> send the backup summary (not saved, so we try Gemini again next time)
-  let fallback = buildWeeklyFallback(sessions)
+  let fallback = buildWeeklyFallback(sessions, child.name.split(' ')[0])
   if (type === 'handover') {
     fallback = buildFallbackHandover(sessions)
   }
-  fallback.recurring = findRecurring(allSessions) 
+  if (type === 'handover') {
+    fallback.recurring = findRecurring(allSessions) // volunteers only
+  }
   fallback.periodLabel = periodLabel
   fallback.weekTitle = weekTitle
   res.json(fallback)
