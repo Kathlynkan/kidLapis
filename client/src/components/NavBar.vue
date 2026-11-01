@@ -72,12 +72,12 @@ const initial = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 
-// the photo of a child, shown in the round avatar instead of the letter (it is saved on the child, not on the user)
+// the photo shown in the round avatar instead of the letter: a child's photo is saved on the child, everyone else's on the user
 const photo = ref('')
 
 async function fetchPhoto() {
   if (auth.role !== 'child' || !auth.user?.childId) {
-    photo.value = ''
+    photo.value = (auth.user?.avatar || '').startsWith('/') ? auth.user.avatar : ''
     return
   }
   try {

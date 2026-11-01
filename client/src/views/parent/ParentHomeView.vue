@@ -6,7 +6,9 @@ import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
+import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // accuracy over time
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
+import HandoverCard from '@/components/HandoverCard.vue' // the weekly AI summary box (shared with the volunteer page)   (Yuqi)
 import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
@@ -26,10 +28,11 @@ const openTab = ref('homework') // which tab is open: 'homework' or 'social'
 const showFinished = ref(false) // true when the finished homework is shown
 const showAllDays = ref(false) // true when the social tab shows every day, not only the newest three
 
-// the two tabs
+// the three tabs
 const TABS = [
   { id: 'homework', label: 'Homework' },
   { id: 'social', label: 'Social' },
+  { id: 'progress', label: 'Progress' },
 ]
 
 // how the child felt, in simple words for a parent
@@ -139,20 +142,6 @@ function resultNotes(session) {
   return notes
 }
 
-// the lines of the weekly AI summary, each with its label (a line is left out when it is empty)
-const summaryLines = computed(() => {
-  if (!handover.value) return []
-  const lines = [
-    { label: 'This week', text: handover.value.headline },
-    { label: 'Learning', text: handover.value.learning },
-    { label: 'Friends', text: handover.value.friends },
-    { label: 'Worth knowing', text: handover.value.worthKnowing },
-    { label: 'Proud moment', text: handover.value.celebrate },
-    { label: 'Try at home', text: handover.value.atHome },
-  ]
-  return lines.filter((line) => line.text && line.text !== '-')
-})
-
 // the days shown on the social tab: the newest three, or all of them
 const socialDays = computed(() => (showAllDays.value ? sessions.value : sessions.value.slice(0, 3)))
 
@@ -217,9 +206,9 @@ async function loadHandover(childId) {
   handoverLoading.value = true
   let summary = null // stays empty if something goes wrong, the rest of the page still works
   try {
-    // audience: 'parent' makes the AI write in simple, friendly words
-    // type: 'weekly' sums up the whole week, learning and social, from every volunteer's notes
-    const response = await api.post(`/handover/${childId}`, { audience: 'parent', type: 'weekly' })
+    // the server sees a parent is logged in, so it sends the weekly summary
+    // (Mon - Fri, learning and social, in simple friendly words)
+    const response = await api.post(`/handover/${childId}`)
     summary = response.data
   } catch {
     summary = null
@@ -267,7 +256,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 parentpage">
-    <PageHeader :title="`Hello, ${firstName(auth.user.name)}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
+    <PageHeader :title="`Hello, ${firstName(auth.user?.name || '')}`" :subtitle="`Stay up to date with how ${childName} is getting on at student care.`" />
 
     <!-- one of these three messages shows while loading, on an error, or when there is no child -->
     <StateMessage v-if="loading" type="loading" />
@@ -315,23 +304,9 @@ onMounted(async () => {
         </component>
       </div>
 
-      <!-- parent weekly AI summary: learning, friends, anything worth knowing, what to try at home   (Yuqi) -->
-      <div class="glance" data-test="handover-card">
-        <span class="small-label">This week at student care</span>
-        <!-- which week it covers, e.g. 2026-10-19 to 2026-10-23 -->
-        <p v-if="handover && handover.periodLabel" class="muted">{{ handover.periodLabel }}</p>
-        <p v-if="handoverLoading" class="muted">Getting the update...</p>
-        <template v-else-if="summaryLines.length > 0">
-          <p v-for="line in summaryLines" :key="line.label" class="glance-line">
-            <strong>{{ line.label }}:</strong> {{ line.text }}
-          </p>
-          <p v-if="handover.recurring && handover.recurring.length > 0" class="glance-line">
-            <strong>Keep practising:</strong>
-            <span v-for="topic in handover.recurring" :key="topic" class="chip" data-test="recurring-badge">{{ topic }}</span>
-          </p>
-        </template>
-        <p v-else class="muted">No summary yet.</p>
-      </div>
+      <!-- parent weekly AI summary: the same HandoverCard as the volunteer page; it shows the parent rows because a parent is logged in   (Yuqi) -->
+      <!-- (Overview, Learning, Friends, Worth knowing, Proud moment, Try at home, Keep practising) -->
+      <HandoverCard :handover="handover" :loading="handoverLoading" />
 
       <!-- the board with two tabs -->
       <div id="homework-board" class="board" data-test="notice-board">
@@ -388,6 +363,11 @@ onMounted(async () => {
               </details>
             </template>
           </div>
+        </div>
+
+        <!-- tab: progress = accuracy over time, one subject at a time -->
+        <div v-else-if="openTab === 'progress'" class="board-panel" data-test="progress-tab">
+          <SkillProgressChart :sessions="sessions" />
         </div>
 
         <!-- tab: social = a diary: the newest day is open, the earlier days are short cards -->
@@ -574,26 +554,69 @@ onMounted(async () => {
   background: #EDA39A;
 }
 
-/* ---------- today at a glance (the AI summary) ---------- */
+/* ---------- the weekly AI summary (HandoverCard.vue, parent rows) ---------- */
+/* Same sizes as the volunteer's Handover Notes (ChildProfileView.vue), only the colours are the parent's */
 
-.parentpage .glance {
+.parentpage .handover-card {
   margin-bottom: 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  border: 0;
+  border-radius: 22px;
   background: #DDF0EF;
+  box-shadow: none;
+  color: #414F67;
+}
+
+/* the top line you can press to open and close it */
+.parentpage .handover-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 20px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.parentpage .handover-title {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.parentpage .handover-period {
+  margin-top: 2px;
+  color: #5E6C80;
   font-size: 14px;
 }
 
-.parentpage .glance .small-label {
+/* the "AI summary" badge and the "keep practising" chips: white pills */
+.parentpage .handover-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #414F67;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.parentpage .handover-card .peel-body-inner {
+  padding: 0 20px 20px;
+}
+
+.parentpage .handover-key {
+  font-size: 14px;
   color: #5E6C80;
 }
 
-.parentpage .glance .chip {
-  background: #FFFFFF;
-}
-
-.parentpage .glance-line {
-  margin: 4px 0 0;
+.parentpage .handover-value {
+  font-size: 16px; /* bold like the volunteer card (the fw-semibold class in HandoverCard.vue) */
 }
 
 /* ---------- the board and its tabs ---------- */

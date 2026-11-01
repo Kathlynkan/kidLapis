@@ -11,7 +11,7 @@ const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
 })
-const emit = defineEmits(['submit', 'verify', 'edit', 'delete'])
+const emit = defineEmits(['submit', 'unsubmit', 'verify', 'edit', 'delete'])
 
 const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
@@ -69,6 +69,15 @@ function cancelDelete()  { showDeleteModal.value = false }
         <i class="bi bi-check-lg me-1"></i>I'm done!
       </button>
 
+      <button
+        v-if="mode === 'child' && homework.status === 'submitted'"
+        class="btn btn-sm mt-1 quest-undo"
+        data-test="undo-quest-btn"
+        @click="emit('unsubmit', homework.id)"
+      >
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Oops, undo!
+      </button>
+
       <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 
       class="mt-2 d-flex align-items-center">
 
@@ -122,3 +131,19 @@ function cancelDelete()  { showDeleteModal.value = false }
     <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
   </Teleport>
 </template>
+
+<style scoped>
+.quest-undo {
+  --bs-btn-color: #4A3F3A;
+  --bs-btn-bg: #EDE8E0;
+  --bs-btn-hover-color: #4A3F3A;
+  --bs-btn-hover-bg: #E0D8CE;
+  --bs-btn-active-bg: #E0D8CE;
+  align-self: flex-end;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+</style>

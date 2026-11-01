@@ -34,6 +34,7 @@ export function badgeProgress(badge, child, homework) {
         .sort((a, b) => a.completedAt.localeCompare(b.completedAt))
       let streak = 0, best = 0
       for (const h of sorted) {
+        // <= because "on time" includes the due date itself
         if (h.completedAt.slice(0, 10) <= h.dueDate) { streak++; best = Math.max(best, streak) }
         else streak = 0
       }
@@ -54,6 +55,7 @@ export function badgeProgress(badge, child, homework) {
     }
 
     case 'rising-star': {
+      // < (strictly before) because the rule is "before the due date", not "by the due date"
       const early = completed.filter(
         (h) => h.completedAt && h.dueDate && h.completedAt.slice(0, 10) < h.dueDate,
       ).length
@@ -66,5 +68,11 @@ export function badgeProgress(badge, child, homework) {
 }
 
 export function levelFor(points) {
-  return { level: Math.floor(points / 100) + 1, progress: points % 100 }
+  const STEP = 50
+  const raw = points % STEP
+  return {
+    level: Math.floor(points / STEP) + 1,
+    progress: Math.round((raw / STEP) * 100),  // 0–100 pct — used by progress bars and cake fill
+    starsToNext: STEP - raw,                   // actual stars still needed for next level
+  }
 }

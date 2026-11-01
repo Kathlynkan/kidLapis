@@ -102,7 +102,10 @@ async function save() {
           <PeelCard title="Account" icon="bi-person-circle" :open="activeCard === 'account'" @toggle="activeCard = 'account'">
             <div class="d-flex align-items-center gap-3 mb-4">
               <ChildInitial v-if="auth.role === 'child'" :child="{ name: auth.user.name, avatar: auth.user.avatar || '' }" class="profile-initial" />
-              <span v-else class="profile-initial">{{ initial }}</span>
+              <span v-else class="profile-initial">
+                <img v-if="(auth.user?.avatar || '').startsWith('/')" :src="auth.user.avatar" alt="" />
+                <template v-else>{{ initial }}</template>
+              </span>
               <div>
                 <div class="fw-semibold">{{ auth.user?.name }}</div>
                 <div class="small lapis-muted">{{ auth.user?.email }}</div>
@@ -323,6 +326,14 @@ async function save() {
   background: var(--role-accent, #AED9D8);
   font-size: 20px;
   font-weight: 700;
+  overflow: hidden;
+}
+
+/* a photo fills the circle */
+.profilepage .profile-initial img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profilepage .lapis-muted {

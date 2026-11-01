@@ -22,15 +22,6 @@ import { visibleChildIds } from '../utils/access.js'
 
 const router = Router()
 
-// A child must not see the right answers, so we take them out of the quest before we send it.
-function hideAnswers(quest) {
-  const data = quest.toJSON()
-  for (const question of data.questions || []) {
-    delete question.answer
-  }
-  return data
-}
-
 // Everything in this file needs a logged-in user.
 router.use(requireAuth)
 
@@ -50,14 +41,6 @@ router.get('/', async (req, res) => {
   const filter = { childId: childId || { $in: visible } }
   const list = await Homework.find(filter).sort({ dueDate: 1 }) // earliest due date first
 
-  // A child gets the questions without the answers. Volunteers and coordinators get everything.
-  if (req.user.role === 'child') {
-    const hidden = []
-    for (const quest of list) {
-      hidden.push(hideAnswers(quest))
-    }
-    return res.json(hidden)
-  }
   res.json(list)
 })
 
@@ -116,7 +99,7 @@ router.get('/:id', async (req, res) => {
     return res.status(403).json({ message: 'You do not have access to this homework.' })
   }
 
-  res.json(req.user.role === 'child' ? hideAnswers(hw) : hw)
+  res.json(hw)
 })
 
 // ---------------------------------------------------------------
@@ -186,14 +169,6 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
       return res.status(400).json({
         message: 'Points cannot be negative'
       })
-    }
-
-    // copy the questions of the deck into the quest, one by one
-    const questions = []
-    if (deck) {
-      for (const question of deck.questions) {
-        questions.push({ text: question.text, answer: question.answer })
-      }
     }
 
     // create homework
@@ -270,6 +245,22 @@ router.put('/:id/submit', requireRole('child'), async (req, res) => {
   }
   hw.status = 'submitted'
   hw.completedAt = new Date().toISOString().slice(0, 10)
+  await hw.save()
+  res.json(hw)
+})
+
+// PUT /homework/:id/unsubmit  (Jachin) -> child retracts a submission before it is verified
+router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
+  const hw = await Homework.findById(req.params.id)
+  if (!hw) return res.status(404).json({ message: 'Homework not found.' })
+  if (hw.childId !== req.user.childId) {
+    return res.status(403).json({ message: 'This is not your homework.' })
+  }
+  if (hw.status !== 'submitted') {
+    return res.status(400).json({ message: 'Only submitted homework can be retracted.' })
+  }
+  hw.status = 'assigned'
+  hw.completedAt = null
   await hw.save()
   res.json(hw)
 })

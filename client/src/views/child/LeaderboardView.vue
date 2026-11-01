@@ -35,7 +35,9 @@ const slots = computed(() =>
     const place = entry ? entry.place : i + 1
     let note = 'Do a quest to join'
     if (entry) {
-      note = place === 1 ? 'Top of the week' : `${entry.ahead.points - entry.points} behind ${firstName(entry.ahead.name)}`
+      note = (place === 1 || !entry.ahead)
+        ? 'Top of the week'
+        : `${entry.ahead.points - entry.points} behind ${firstName(entry.ahead.name)}`
     }
     return { entry, place, note }
   }),
@@ -63,7 +65,7 @@ onMounted(async () => {
 
 <template>
   <div class="container py-4 leaderboardpage">
-    <PageHeader title="Leaderboard" subtitle="Stars earned this week — resets every Monday!" />
+    <PageHeader title="Leaderboard" subtitle="Verified stars this week — resets every Monday!" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
