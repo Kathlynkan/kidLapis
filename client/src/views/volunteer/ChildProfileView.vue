@@ -227,14 +227,6 @@ onMounted(() => {
             <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
               <TopicSummaryChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
             </PeelCard>
-            
-            <PeelCard title="Skill progress" icon="bi-graph-up-arrow" :initial-open="true">
-              <SkillProgressChart :sessions="sessions" calm :tone="auth.role === 'teacher' ? 'lavender' : 'teal'" />
-            </PeelCard>
-
-            <PeelCard title="Topic summary" icon="bi-pie-chart" :initial-open="true">
-              <TopicSummaryChart :sessions="sessions" calm />
-            </PeelCard>
 
             <PeelCard
               :title="`Pending Homework (${activeHomework.length})`"
