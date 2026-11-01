@@ -1204,7 +1204,7 @@
       "id": "s_22",
       "childId": "c_7",
       "volunteerId": "u_vol1",
-      "date": "2026-10-08",
+      "date": "2026-10-05",
       "subject": "English",
       "topic": "Spelling",
       "attempted": 8,
@@ -1530,7 +1530,7 @@
       "dueDate": "2026-10-09",
       "points": 10,
       "status": "submitted",
-      "completedAt": "2026-10-08T15:20:00.000Z"
+      "completedAt": "2026-10-05T15:20:00.000Z"
     },
     {
       "id": "h_13",
@@ -1761,7 +1761,7 @@
       "childId": "c_7",
       "fromId": "u_coord",
       "text": "Hi Mrs Wong! Mia is getting better at her spelling - 6 out of 8 today.",
-      "sentAt": "2026-10-08T09:30:00.000Z",
+      "sentAt": "2026-10-05T09:30:00.000Z",
       "readBy": [
         "u_coord"
       ]
