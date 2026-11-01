@@ -1,6 +1,6 @@
 <!-- Child home: "My Quests" (gamified homework)         Owner: Jachin -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
@@ -17,6 +17,7 @@ const celebrating     = ref(false)
 const submitError     = ref('')
 const newBadge        = ref(null)  // badge just unlocked — shows the reveal overlay
 const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
+const verifiedGain    = ref(null)  // { points } shown as a toast when teacher verifies a quest
 
 const CONFETTI = [
   { color: '#E8A0B8', tx:  -70, ty: -150 },
@@ -54,8 +55,11 @@ const emptyQuestMessage = computed(() =>
     : 'All quests done — great work!',
 )
 
-// the kueh lapis in the hero: every level adds a layer, and 4 layers is a finished cake
-const layers = computed(() => Math.min(level.value.level - 1, 4))
+// the kueh lapis resets every 200 pts (one full cake) — each restart is a new "season"
+const SEASON_PTS = 200
+const season       = computed(() => Math.floor(displayPoints.value / SEASON_PTS) + 1)
+const cakeProgress = computed(() => levelFor(displayPoints.value % SEASON_PTS))
+const layers       = computed(() => Math.min(cakeProgress.value.level - 1, 4))
 
 // closest unearned badge (highest progress ratio)
 const nextBadge = computed(() => {
@@ -102,6 +106,42 @@ async function submitQuest(homeworkId) {
   }
 }
 
+async function unsubmitQuest(homeworkId) {
+  submitError.value = ''
+  try {
+    await api.put(`/homework/${homeworkId}/unsubmit`)
+    const h = homework.value.find((hw) => hw.id === homeworkId)
+    if (h) {
+      h.status = 'assigned'
+      h.completedAt = null
+    }
+    newBadge.value = null
+  } catch (err) {
+    submitError.value = errorMessage(err)
+  }
+}
+
+async function refreshData() {
+  try {
+    const prevPoints = me.value?.points || 0
+    const [c, h] = await Promise.all([
+      api.get(`/children/${auth.user.childId}`),
+      api.get('/homework', { params: { childId: auth.user.childId } }),
+    ])
+    const gained = c.data.points - prevPoints
+    if (gained > 0) {
+      verifiedGain.value = { points: gained }
+      setTimeout(() => { verifiedGain.value = null }, 3500)
+    }
+    me.value       = c.data
+    homework.value = h.data
+  } catch {
+    // silent — background refresh
+  }
+}
+
+function onVisible() { if (!document.hidden) refreshData() }
+
 onMounted(async () => {
   try {
     const [c, h] = await Promise.all([
@@ -115,6 +155,11 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  document.addEventListener('visibilitychange', onVisible)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisible)
 })
 </script>
 
@@ -162,6 +207,12 @@ onMounted(async () => {
       </div>
     </Transition>
 
+    <Transition name="verified-toast">
+      <div v-if="verifiedGain" class="verified-toast" role="status" aria-live="polite">
+        <i class="bi bi-patch-check-fill me-2"></i>Quest verified! +{{ verifiedGain.points }} ★
+      </div>
+    </Transition>
+
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
@@ -182,7 +233,7 @@ onMounted(async () => {
           >
             <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
           </div>
-          <div class="small lapis-muted">{{ level.progress }}/100 to Level {{ level.level + 1 }}</div>
+          <div class="small lapis-muted">{{ level.starsToNext }} ★ to Level {{ level.level + 1 }}</div>
           <div v-if="nextBadge" class="small mt-2">
             Next kueh: <strong>{{ nextBadge.badge.kueh }}</strong>. {{ nextBadge.badge.rule }}.
           </div>
@@ -190,17 +241,32 @@ onMounted(async () => {
 
         <!-- the kueh lapis: a layer for every level, the next one fills up -->
         <div class="text-center">
-          <div class="kueh-cake" role="img" :aria-label="`Your kueh lapis has ${layers} layers`">
-            <div
-              v-for="n in Math.min(layers + 1, 4)"
-              :key="n"
-              class="cake-layer"
-              :class="[`cake-layer-${n}`, { 'cake-layer-next': n > layers }]"
-            >
-              <div v-if="n > layers" :style="{ width: level.progress + '%' }"></div>
+          <div class="cake-wrap">
+            <div class="kueh-cake" role="img" :aria-label="`Your kueh lapis has ${layers} layers`">
+              <div
+                v-for="n in Math.min(layers + 1, 4)"
+                :key="n"
+                class="cake-layer"
+                :class="[`cake-layer-${n}`, { 'cake-layer-next': n > layers }]"
+              >
+                <div v-if="n > layers" :style="{ width: cakeProgress.progress + '%' }"></div>
+              </div>
+              <!-- marker sits as a sibling so ::before can escape overflow:hidden on the layer -->
+              <div
+                v-if="cakeProgress.progress > 0 && layers < 4"
+                class="cake-marker"
+                :style="{ left: cakeProgress.progress + '%' }"
+                aria-hidden="true"
+              ></div>
             </div>
+            <div class="cake-plate" :class="{ 'cake-plate-gold': season > 1 }" aria-hidden="true"></div>
           </div>
-          <div class="cake-caption">Your kueh lapis</div>
+          <div class="cake-caption">
+            Kueh Lapis
+            <span v-if="season > 1" class="cake-season-badge">Season {{ season }}</span>
+            <span v-if="layers < 4" class="cake-progress-label">{{ cakeProgress.starsToNext }} more ★ for next layer</span>
+            <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
+          </div>
         </div>
       </div>
 
@@ -272,7 +338,7 @@ onMounted(async () => {
           </button>
           <div v-if="showDone" class="row g-3 mt-1">
             <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
-              <HomeworkQuestCard :homework="h" mode="child" />
+              <HomeworkQuestCard :homework="h" mode="child" @unsubmit="unsubmitQuest" />
             </div>
           </div>
         </div>
@@ -424,23 +490,30 @@ onMounted(async () => {
 
 /* ── The kueh lapis in the hero: flat layers stacked from the bottom ── */
 
-.kueh-cake {
-  display: flex;
-  flex-direction: column-reverse;   /* the first layer is at the bottom */
-  width: 170px;
-  max-width: 100%;
-  margin: 0 auto;
+.cake-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* the layers touch: only the bottom of the first layer and the top of the last one are round */
+.kueh-cake {
+  position: relative;               /* anchors the .cake-marker */
+  display: flex;
+  flex-direction: column-reverse;   /* the first layer is at the bottom */
+  gap: 2px;                         /* thin gap so each layer reads as distinct */
+  width: 220px;
+  max-width: 100%;
+}
+
+/* the layers touch at the ends: only the bottom of the first layer and the top of the last one are round */
 .cake-layer {
-  height: 24px;
+  height: 44px;
   background: var(--c);
 }
 
-.cake-layer:first-child { border-radius: 0 0 8px 8px; }
-.cake-layer:last-child { border-radius: 8px 8px 0 0; }
-.cake-layer:only-child { border-radius: 8px; }
+.cake-layer:first-child { border-radius: 0 0 10px 10px; }
+.cake-layer:last-child  { border-radius: 10px 10px 0 0; }
+.cake-layer:only-child  { border-radius: 10px; }
 
 /* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
 .cake-layer-1 { --c: #D5CBEA; }
@@ -450,8 +523,9 @@ onMounted(async () => {
 
 /* the layer being built: a white bar that fills up */
 .cake-layer-next {
+  position: relative;
   overflow: hidden;
-  background: #FFFFFF;
+  background: #F5F0E8;
 }
 
 .cake-layer-next > div {
@@ -459,13 +533,101 @@ onMounted(async () => {
   background: var(--c);
 }
 
+/* "you are here" vertical marker — absolutely positioned sibling inside .kueh-cake */
+.cake-marker {
+  position: absolute;
+  top: 0;        /* top of kueh-cake = top of the in-progress layer (column-reverse) */
+  height: 44px;  /* same as one layer */
+  width: 3px;
+  background: #4A3F3A;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* downward triangle above the layer — escapes the layer's overflow:hidden because
+   the marker is a sibling of the layers, not a child */
+.cake-marker::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 11px solid #4A3F3A;
+}
+
+/* the oval plate the cake sits on */
+.cake-plate {
+  width: 260px;
+  max-width: 110%;
+  height: 18px;
+  margin-top: 2px;
+  background: #E8D8C4;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  box-shadow: 0 3px 6px rgba(74, 63, 58, 0.12);
+}
+
 .cake-caption {
-  margin-top: 6px;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #4A3F3A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cake-progress-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8D7F77;
+}
+
+.cake-progress-done {
+  color: #2E8B57;
+}
+
+/* gold plate for season 2+ */
+.cake-plate-gold {
+  background: linear-gradient(90deg, #F5E070 0%, #DBA82A 50%, #F5E070 100%);
+}
+
+.cake-season-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  background: #F5E070;
+  color: #8B6914;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-  color: #4A3F3A;
+}
+
+/* "Quest verified!" toast */
+.verified-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  padding: 10px 20px;
+  border-radius: 99px;
+  background: #2E8B57;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(46, 139, 87, 0.30);
+  pointer-events: none;
+}
+
+.verified-toast-enter-active { animation: toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.verified-toast-leave-active { animation: toast-in 0.25s ease-in reverse; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 /* ── The kueh tin ───────────────────────────────────────────── */

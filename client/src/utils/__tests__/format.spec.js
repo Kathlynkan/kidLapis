@@ -1,7 +1,5 @@
-// Example unit test (Vitest). Run:  pnpm test:unit
-// Copy this file to test your own helper functions.
 import { describe, it, expect } from 'vitest'
-import { accuracy, daysSince, relativeDay, firstName } from '../format'
+import { accuracy, daysSince, relativeDay, firstName, formatDate } from '../format'
 
 describe('accuracy', () => {
   it('returns the percentage of correct answers', () => {
@@ -10,6 +8,22 @@ describe('accuracy', () => {
 
   it('returns 0 when nothing was attempted', () => {
     expect(accuracy({ attempted: 0, correct: 0 })).toBe(0)
+  })
+
+  it('rounds to the nearest whole number', () => {
+    expect(accuracy({ correct: 1, attempted: 3 })).toBe(33)
+  })
+
+  it('returns 100 for a perfect session', () => {
+    expect(accuracy({ correct: 5, attempted: 5 })).toBe(100)
+  })
+
+  it('returns 0 for undefined session', () => {
+    expect(accuracy(undefined)).toBe(0)
+  })
+
+  it('returns 0 for null session', () => {
+    expect(accuracy(null)).toBe(0)
   })
 })
 
@@ -33,5 +47,19 @@ describe('firstName', () => {
 
   it('keeps a title with the first name', () => {
     expect(firstName('Ms Grace Wong')).toBe('Ms Grace')
+  })
+})
+
+describe('formatDate', () => {
+  it('returns "-" for null', () => {
+    expect(formatDate(null)).toBe('-')
+  })
+
+  it('returns "-" for empty string', () => {
+    expect(formatDate('')).toBe('-')
+  })
+
+  it('includes the month name in the output', () => {
+    expect(formatDate('2026-01-15')).toMatch(/Jan/)
   })
 })

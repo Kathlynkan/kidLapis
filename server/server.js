@@ -20,7 +20,6 @@ import deckRoutes from './routes/decks.js'
 import messageRoutes from './routes/messages.js'
 import handoverRoutes from './routes/handover.js'
 import dashboardRoutes from './routes/dashboard.js'
-import progressRoutes from './routes/progress.js'
 import matchmakingRoutes from './routes/matchmaking.js'
 
 const app = express()
@@ -87,7 +86,6 @@ app.use('/homework', homeworkRoutes) // Ning Xuan (assign) + Jachin (complete / 
 app.use('/decks', deckRoutes) // Jachin (the decks of questions)
 app.use('/handover', handoverRoutes) // Yuqi
 app.use('/messages', messageRoutes) // Kat
-app.use('/progress', progressRoutes) // Jachin
 
 // Fallback error handler so the server never crashes on a bad request
 // eslint-disable-next-line no-unused-vars

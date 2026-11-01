@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
+import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // accuracy over time
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
 import '@/css/parent/parentshared.css' // what the parent pages have in common
@@ -26,10 +27,11 @@ const openTab = ref('homework') // which tab is open: 'homework' or 'social'
 const showFinished = ref(false) // true when the finished homework is shown
 const showAllDays = ref(false) // true when the social tab shows every day, not only the newest three
 
-// the two tabs
+// the three tabs
 const TABS = [
   { id: 'homework', label: 'Homework' },
   { id: 'social', label: 'Social' },
+  { id: 'progress', label: 'Progress' },
 ]
 
 // how the child felt, in simple words for a parent
@@ -389,6 +391,11 @@ onMounted(async () => {
               </details>
             </template>
           </div>
+        </div>
+
+        <!-- tab: progress = accuracy over time, one subject at a time -->
+        <div v-else-if="openTab === 'progress'" class="board-panel" data-test="progress-tab">
+          <SkillProgressChart :sessions="sessions" />
         </div>
 
         <!-- tab: social = a diary: the newest day is open, the earlier days are short cards -->

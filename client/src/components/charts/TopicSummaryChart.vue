@@ -12,25 +12,17 @@ import {
   LinearScale,
   Tooltip,
 } from 'chart.js'
-import '@/css/main/components.css' // the look of the small parts
+import '@/css/main/components.css'
+import { SUBJECTS, SUBJECT_COLORS } from '@/utils/constants'
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip)
-ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif' // the same font as the rest of the app
+ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif'
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
   title: { type: String, default: 'Accuracy by subject' },
   calm: { type: Boolean, default: false },
 })
-
-// Fixed order matches PSLE subjects
-const SUBJECT_ORDER = ['English', 'Math', 'Science', 'Mother Tongue']
-const SUBJECT_COLOR = {
-  'English':      '#88C0D8', // English  (sky blue)
-  'Math':         '#D4B840', // Math      (amber — not lime, avoids volunteer-role clash)
-  'Science':      '#F5DF98', // Science   (yellow)
-  'Mother Tongue':'#E8906C', // Mother Tongue (coral — not pink, avoids child-role clash)
-}
 
 const bySubject = computed(() => {
   const groups = {}
@@ -40,7 +32,7 @@ const bySubject = computed(() => {
     groups[key].attempted += s.attempted
     groups[key].correct += s.correct
   }
-  return SUBJECT_ORDER
+  return SUBJECTS
     .filter((k) => groups[k])
     .map((k) => ({
       ...groups[k],
@@ -54,8 +46,8 @@ const chartData = computed(() => ({
     {
       label: 'Accuracy %',
       data: bySubject.value.map((t) => t.accuracy),
-      backgroundColor: bySubject.value.map((t) => SUBJECT_COLOR[t.subject] ?? '#C8B8A8'),
-      borderColor: bySubject.value.map((t) => SUBJECT_COLOR[t.subject] ?? '#C8B8A8'),
+      backgroundColor: bySubject.value.map((t) => SUBJECT_COLORS[t.subject] ?? '#C8B8A8'),
+      borderColor: bySubject.value.map((t) => SUBJECT_COLORS[t.subject] ?? '#C8B8A8'),
       borderWidth: 1,
       borderRadius: 0,
     },
