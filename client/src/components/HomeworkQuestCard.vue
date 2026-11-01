@@ -49,7 +49,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
     <div class="small mb-2 quest-meta">
       {{ homework.subject }} &middot; due {{ formatDate(homework.dueDate) }}
-      <template v-if="mode === 'volunteer'"> &middot; {{ homework.points }} stars</template>
+      <template v-if="mode === 'volunteer'"> &middot; {{ homework.points }} <i class="bi bi-star-fill"></i></template>
       <span v-if="isOverdue && mode === 'child'" class="badge quest-overdue ms-1">Overdue</span>
     </div>
 
