@@ -80,17 +80,22 @@ describe('getWeekRange (weekly summary switches on Friday)', () => {
 
 describe('buildWeeklyFallback (parents)', () => {
   const week = [
-    { date: '2026-10-30', topic: 'Reading', correct: 4, attempted: 5, mood: 'happy', socialNotes: 'Drew a comic.', nextStep: 'Short story' },
+    { date: '2026-10-30', topic: 'Reading', correct: 4, attempted: 5, mood: 'happy', socialNotes: 'Drew a comic.', whatWorked: 'Picture clues' },
     { date: '2026-10-28', topic: 'Spelling', correct: 8, attempted: 10, mood: 'tired', behaviour: 'Helped tidy up' },
   ]
 
-  it('goes through the whole week, oldest first', () => {
-    const result = buildWeeklyFallback(week)
-    expect(result.headline).toBe('Came in on 2 day(s) that week (Wed, Fri).')
-    expect(result.learning).toBe('Wed: Spelling, 8 out of 10 right. Fri: Reading, 4 out of 5 right.')
+  it('sums up the week for a parent, oldest first', () => {
+    const result = buildWeeklyFallback(week, 'Arjun')
+    expect(result.headline).toBe('Arjun had a good week overall, with a few tired or tricky moments.')
+    expect(result.learning).toBe('Arjun worked on spelling (8 out of 10 right), reading (4 out of 5 right).')
     expect(result.worthKnowing).toContain('tired on Wed')
     expect(result.celebrate).toBe('Helped tidy up.')
-    expect(result.atHome).toBe('Practise together: Short story.')
+    expect(result.atHome).toBe('Ask Arjun to show you how picture clues helped with reading.')
+  })
+
+  it('says when the child was happy all week', () => {
+    const result = buildWeeklyFallback([week[0]], 'Arjun')
+    expect(result.headline).toBe('Arjun has been happy and settled with us.')
   })
 
   it('handles a week with no sessions', () => {
