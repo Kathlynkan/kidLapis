@@ -7,7 +7,7 @@
 ============================================================= -->
 <script setup>
 import { computed, ref } from 'vue'
-import { firstName } from '@/utils/format' // small helper for names
+import { firstName, activitiesOf } from '@/utils/format' // small helpers for names and activities
 
 const props = defineProps({
   session: { type: Object, required: true },
@@ -15,16 +15,7 @@ const props = defineProps({
 })
 
 // the non-academic things the child did (chess with friends, soccer ...), as a list
-const activityList = computed(() => {
-  const activity = props.session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
-  if (Array.isArray(activity)) {
-    return activity
-  }
-  if (activity) {
-    return [activity]
-  }
-  return []
-})
+const activityList = computed(() => activitiesOf(props.session))
 
 // the short lines, each with an icon (a line is left out when the volunteer did not fill it in)
 const lines = computed(() => {

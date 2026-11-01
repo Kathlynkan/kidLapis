@@ -42,3 +42,10 @@ export function firstName(fullName = '') {
   }
   return words[0]
 }
+
+// What the child did in a session (chess, soccer ...) as a list. Older sessions have one word, newer ones a list.
+export function activitiesOf(session) {
+  const activity = session.activity
+  if (Array.isArray(activity)) return activity
+  return activity ? [activity] : []
+}

@@ -196,7 +196,7 @@ async function save() {
           <!-- Skills + availability (volunteer only) -->
           <PeelCard v-if="auth.role === 'volunteer'" title="Skills &amp; schedule" icon="bi-calendar-check" :open="activeCard === 'skills'" @toggle="activeCard = 'skills'">
             <fieldset class="mb-4">
-              <legend class="form-label fs-6 mb-2">Skills I can help with</legend>
+              <legend class="form-label mb-2">Skills I can help with</legend>
               <div class="d-flex flex-wrap gap-2">
                 <template v-for="(skill, i) in SKILL_OPTIONS" :key="skill">
                   <input
@@ -213,7 +213,7 @@ async function save() {
             </fieldset>
 
             <fieldset class="mb-0">
-              <legend class="form-label fs-6 mb-2">Days I can come in</legend>
+              <legend class="form-label mb-2">Days I can come in</legend>
               <div class="d-flex flex-wrap gap-2">
                 <template v-for="day in DAYS" :key="day">
                   <input
@@ -262,17 +262,17 @@ async function save() {
 
 /* child: the accent of the role on warm brown text */
 .profilepage {
-  --pf-text: var(--lapis-plum);
+  --pf-text: #4A3F3A;
   /* text */
-  --pf-title: var(--lapis-plum);
+  --pf-title: #4A3F3A;
   /* the page title */
-  --pf-muted: var(--lapis-muted);
+  --pf-muted: #8D7F77;
   /* small text */
   --pf-card: #FFFFFF;
   /* the sections */
   --pf-shadow: rgba(74, 63, 58, 0.1);
   /* the shadow under a section */
-  --pf-line: var(--lapis-cream-dark);
+  --pf-line: #C8B8A8;
   /* the line around a box and between things */
   --pf-focus: var(--role-accent);
   /* the line of a box you are typing in */
@@ -282,9 +282,9 @@ async function save() {
   --pf-soft: var(--role-accent-soft);
   /* the role tag, Log out, Cancel */
   --pf-soft-hover: #EBDAE2;
-  --pf-ok: var(--topic-academic);
+  --pf-ok: #A8CC90;
   /* the message after you save */
-  --pf-error: var(--topic-alert);
+  --pf-error: #E8A0B8;
   color: var(--pf-text);
 }
 
@@ -403,13 +403,6 @@ async function save() {
 
 .profilepage .form-label {
   color: var(--pf-text);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* the headings of the skills and the days have the bootstrap class fs-6, which is important */
-.profilepage legend.form-label {
-  font-size: 14px !important;
 }
 
 .profilepage .form-control {

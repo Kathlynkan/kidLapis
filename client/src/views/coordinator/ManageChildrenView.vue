@@ -417,7 +417,7 @@ async function confirmDelete() {
               </div>
 
               <fieldset class="mb-3">
-                <legend class="form-label fs-6">Needs help with</legend>
+                <legend class="form-label">Needs help with</legend>
                 <div class="d-flex flex-wrap gap-2">
                   <template v-for="(skill, i) in SKILL_OPTIONS" :key="skill">
                     <input

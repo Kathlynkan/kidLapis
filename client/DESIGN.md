@@ -64,6 +64,8 @@ The `<style>` blocks are not `scoped`, so every rule starts with the page's root
 
 ## Colour layers
 
+> **Colours in the CSS are written as hex codes** (for example `#E8A0B8`), not as variables. The names in the tables below (`--lapis-pink`, `--layer-teacher` and so on) are labels for those hex codes, and the palette is listed as a comment at the top of `main/main.css`. The only variables left are the ones that change with the role (`--role-accent`, `--pf-*` on the profile page and `--cp-*` on a child's page and the forms) and Bootstrap's own `--bs-*`.
+
 There are **three distinct colour layers**. Never mix them up — a colour should always mean the same thing everywhere it appears.
 
 ### Layer 1 — Role accents (UI chrome)
@@ -125,6 +127,7 @@ Both charts group sessions by **subject** (not by free-text topic), so each chil
 - **Base size:** 15 px, line height 1.55 (set once on `body` in `main/main.css`, the same as the parent page). Do not set it again on a page.
 - **Page title:** 32 px, bold, `letter-spacing: -0.6px` (`.page-title` in `main/main.css`). The sentence under it is 14 px, semi-bold (`.page-subtitle`). Every page uses these, including the login pages and the 404 page. A page only sets their colour.
 - **Section headings** (the title of a card or a section): 18 px, semi-bold.
+- **Quiet colours:** a tag, note or message that needs a little attention has a pale fill, a thin line and dark words: pink (`#FBE3DF`, line `#F2B8B0`, words `#9A3F36`) for an error, not seen or overdue, and yellow (`#FAF4D8`, line `#EEDFA6`, words `#7A6420`) for struggling or a note.
 - **Messages:** loading is a ring in the role colour, an error is a quiet pink bar, and an empty list is a white card with a round icon. All three come from `StateMessage.vue`.
 - **Text colour:** `--lapis-plum` (`#4A3F3A`) everywhere. Never raw black.
 - **Muted text:** `--lapis-muted` (`#8D7F77`)

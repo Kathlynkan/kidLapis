@@ -26,10 +26,10 @@ const props = defineProps({
 // Fixed order matches PSLE subjects
 const SUBJECT_ORDER = ['English', 'Math', 'Science', 'Mother Tongue']
 const SUBJECT_COLOR = {
-  'English':      '#88C0D8', // --subject-english  (sky blue)
-  'Math':         '#D4B840', // --subject-math      (amber — not lime, avoids volunteer-role clash)
-  'Science':      '#F5DF98', // --subject-science   (yellow)
-  'Mother Tongue':'#E8906C', // --subject-mother-tongue (coral — not pink, avoids child-role clash)
+  'English':      '#88C0D8', // English  (sky blue)
+  'Math':         '#D4B840', // Math      (amber — not lime, avoids volunteer-role clash)
+  'Science':      '#F5DF98', // Science   (yellow)
+  'Mother Tongue':'#E8906C', // Mother Tongue (coral — not pink, avoids child-role clash)
 }
 
 const bySubject = computed(() => {

@@ -1,0 +1,175 @@
+/* EXTERNAL CSS: the log in page and the sign up page. It is imported at the top of each of those files. */
+
+/* The two pages where you type your details (LoginView.vue and SignupView.vue): a white card on the sandy board
+   (.board is in main.css), in the middle of the page. The title is .page-title and the sentence under it is
+   .page-subtitle (main.css), the error is .state-error (components.css). Every rule starts with .authpage. */
+
+.authpage {
+  display: flex;
+  justify-content: center;
+  padding-top: 48px;
+}
+
+.authpage .auth-box {
+  width: 100%;
+  max-width: 560px;
+}
+
+.authpage .auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px 36px 30px;
+  border-radius: 22px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
+}
+
+.authpage header {
+  text-align: center;
+}
+
+.authpage .page-title {
+  margin: 0;
+}
+
+.authpage .page-subtitle {
+  margin: 6px 0 0;
+}
+
+/* the error is inside the card, so it has no space under it */
+.authpage .state-error {
+  margin-bottom: 0;
+}
+
+/* a note above the form (your session expired): the quiet yellow of the tags */
+.authpage .auth-note {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #FAF4D8;
+  box-shadow: inset 0 0 0 1.5px #EEDFA6;
+  color: #7A6420;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- the form: soft boxes with a lavender ring when you type ---------- */
+
+.authpage form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.authpage .auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.authpage .auth-label {
+  color: #8D7F77;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.authpage .auth-input {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 1px solid #E3DBF0;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 16px;
+}
+
+.authpage .auth-input:focus {
+  border-color: #6B5CA5;
+  box-shadow: 0 0 0 3px #D5CBEA;
+  outline: none;
+}
+
+/* a box with a problem: the quiet pink of the error, and the words under it */
+.authpage .auth-input.is-invalid {
+  border-color: #F2B8B0;
+  background: #FFF8F7;
+}
+
+.authpage .auth-problem {
+  color: #9A3F36;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.authpage .auth-hint {
+  color: #8D7F77;
+  font-size: 13px;
+}
+
+.authpage .auth-password {
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------- the buttons: small corners, in the colours of the app ---------- */
+
+.authpage .auth-show {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 2px #D5CBEA;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.authpage .auth-submit {
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #E8A0B8;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.authpage .auth-submit:hover {
+  filter: brightness(0.95);
+}
+
+.authpage .auth-submit:disabled {
+  opacity: 0.6;
+}
+
+.authpage .auth-small {
+  margin: 0;
+  color: #8D7F77;
+  font-size: 15px;
+  text-align: center;
+}
+
+.authpage .auth-small a {
+  color: #6B5CA5;
+  font-weight: 700;
+}
+
+/* ---------- a small screen ---------- */
+
+@media (max-width: 560px) {
+  .authpage {
+    padding-top: 24px;
+  }
+
+  .authpage .auth-card {
+    padding: 26px 20px 22px;
+  }
+}

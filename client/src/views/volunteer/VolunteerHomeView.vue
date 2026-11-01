@@ -308,7 +308,7 @@ onMounted(loadData)
      #213C31 dark green       text
      #446C59 green            the title and the line under it
      #4A735F deep green       counts, icons and the arrow
-     #9BD3B2 mint             the selected day, the child's letter (the volunteer layer, as in --layer-volunteer)
+     #9BD3B2 mint             the selected day, the child's letter (the volunteer layer, the mint in main.css)
      #CDE9D8 pale mint        small numbers and buttons
      #E1F2E9 lightest mint    the tabs track, the days, the search box
      #B7D8D7 muted teal       the last session tag (the same as "Being checked" on the parent page)

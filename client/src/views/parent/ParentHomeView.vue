@@ -7,7 +7,7 @@ import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}
 import StateMessage from '@/components/StateMessage.vue' // to show loading etc
 import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the social tab
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
-import { firstName, formatDate, daysSince } from '@/utils/format' // small helpers for names, dates and scores
+import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
 
@@ -99,9 +99,7 @@ function rowTag(item, groupKey) {
 // the grey line under the title of a homework row
 function rowMeta(item, groupKey) {
   if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
-  const handedIn = item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : ''
-  if (groupKey === 'waiting') return item.subject + handedIn
-  return item.subject + handedIn
+  return item.subject + (item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : '')
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -118,6 +116,13 @@ function sessionFor(item) {
   return found
 }
 
+// the session of every finished homework, found by the homework id
+const resultSessions = computed(() => {
+  const found = {}
+  for (const item of homework.value) found[item.id] = sessionFor(item)
+  return found
+})
+
 // the score of a session in words, like "4 / 5 right" (empty when nothing was attempted)
 function scoreOf(session) {
   if (!session || !session.attempted) return ''
@@ -132,18 +137,6 @@ function resultNotes(session) {
   if (session.nextStep) notes.push({ label: 'Coming up next', text: session.nextStep })
   if (session.notes) notes.push({ label: 'Note from the volunteer', text: '"' + session.notes + '"' })
   return notes
-}
-
-// the non-academic things the child did in a session (chess with friends, soccer ...), as a list
-function activitiesOf(session) {
-  const activity = session.activity // a list like ['Chess', 'Drawing'] (older sessions have one word)
-  if (Array.isArray(activity)) {
-    return activity
-  }
-  if (activity) {
-    return [activity]
-  }
-  return []
 }
 
 // the lines of the weekly AI summary, each with its label (a line is left out when it is empty)
@@ -372,7 +365,7 @@ onMounted(async () => {
                     <span class="row-title">{{ item.title }}</span>
                     <span class="row-tag">{{ rowTag(item, group.key) }}</span>
                   </span>
-                  <span v-if="group.key === 'done' && scoreOf(sessionFor(item))" class="row-score">{{ scoreOf(sessionFor(item)) }}</span>
+                  <span v-if="group.key === 'done' && scoreOf(resultSessions[item.id])" class="row-score">{{ scoreOf(resultSessions[item.id]) }}</span>
                   <span class="muted">{{ rowMeta(item, group.key) }}</span>
                   <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
@@ -380,14 +373,14 @@ onMounted(async () => {
                 <!-- what the volunteer wrote down for it -->
                 <p v-if="group.key === 'todo' && item.details" class="row-details">{{ item.details }}</p>
                 <template v-if="group.key === 'done'">
-                  <template v-if="sessionFor(item)">
-                    <p v-if="MOOD_WORDS[sessionFor(item).mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[sessionFor(item).mood]"></i>{{ MOOD_WORDS[sessionFor(item).mood] }}</p>
-                    <div v-for="note in resultNotes(sessionFor(item))" :key="note.label" class="note-box">
+                  <template v-if="resultSessions[item.id]">
+                    <p v-if="MOOD_WORDS[resultSessions[item.id].mood]" class="row-details with-icon">How {{ childName }} felt: <i class="bi" :class="MOOD_FACES[resultSessions[item.id].mood]"></i>{{ MOOD_WORDS[resultSessions[item.id].mood] }}</p>
+                    <div v-for="note in resultNotes(resultSessions[item.id])" :key="note.label" class="note-box">
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
                     </div>
-                    <div v-if="sessionFor(item).photos && sessionFor(item).photos.length > 0" class="result-photos">
-                      <img v-for="(photo, number) in sessionFor(item).photos" :key="number" :src="photo" alt="Photo from the session" />
+                    <div v-if="resultSessions[item.id].photos && resultSessions[item.id].photos.length > 0" class="result-photos">
+                      <img v-for="(photo, number) in resultSessions[item.id].photos" :key="number" :src="photo" alt="Photo from the session" />
                     </div>
                   </template>
                   <p v-else class="muted" data-test="no-result">No result recorded yet.</p>
@@ -483,21 +476,6 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-/* the very light shadow under the boxes */
-.parentpage .tile-next,
-.parentpage .homework-row,
-.parentpage .day-card {
-  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
-}
-
-/* ---------- an icon in front of a few words ---------- */
-
-.parentpage .mood-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
 /* ---------- the child and the child buttons ---------- */
 
 .parentpage .child-row {
@@ -571,6 +549,7 @@ onMounted(async () => {
 
 .parentpage .tile-next {
   background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1); /* the very light shadow under the white boxes */
 }
 
 /* the tiles you can press (they take you to the homework) */
@@ -678,6 +657,7 @@ onMounted(async () => {
   margin-bottom: 10px;
   border-radius: 18px;
   background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
 .parentpage .show-more {
@@ -738,11 +718,19 @@ onMounted(async () => {
   font-weight: 700;
 }
 
+/* the small pills: the tag of a homework, its score, the mood of a day and the topics (chip) */
 .parentpage .row-tag,
-.parentpage .row-score {
-  padding: 2px 11px;
+.parentpage .row-score,
+.parentpage .mood-chip,
+.parentpage .chip {
   border-radius: 999px;
   background: #DDF0EF;
+}
+
+.parentpage .row-tag,
+.parentpage .row-score,
+.parentpage .mood-chip {
+  padding: 2px 11px;
   font-size: 12px;
   font-weight: 700;
 }
@@ -828,12 +816,10 @@ onMounted(async () => {
 }
 
 .parentpage .mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
-  padding: 2px 11px;
-  border-radius: 999px;
-  background: #DDF0EF;
-  font-size: 12px;
-  font-weight: 700;
 }
 
 /* an earlier day: a short card with a hint to open it */
@@ -858,8 +844,6 @@ onMounted(async () => {
   display: inline-block;
   margin: 0 4px 4px 4px;
   padding: 2px 12px;
-  border-radius: 999px;
-  background: #DDF0EF;
   font-size: 13px;
 }
 
