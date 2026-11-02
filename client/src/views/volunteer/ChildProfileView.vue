@@ -196,7 +196,7 @@ onMounted(() => {
           :to="{ name: 'messages', params: { childId: child.id } }"
           class="btn btn-outline-secondary"
         >
-          <i class="bi bi-chat-dots me-1"></i>Message parent
+          <i class="bi bi-chat-dots me-1"></i>Message Parent
         </RouterLink>
       </PageHeader>
 

@@ -224,6 +224,15 @@ async function loadChild(childId) {
   loadHandover(childId) // no "await": the page does not wait for the AI
   const sessionResponse = await api.get('/sessions', { params: { childId } })
   sessions.value = sessionResponse.data
+
+  await Promise.all(
+    sessions.value
+      .filter(session => !session.parentViewed)
+      .map(session =>
+          api.put(`/sessions/${session.id}/viewed`)
+      )
+  )
+  
   const homeworkResponse = await api.get('/homework', { params: { childId } })
   homework.value = homeworkResponse.data
 }

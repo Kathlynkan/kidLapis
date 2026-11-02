@@ -49,7 +49,7 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span class="session-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
       <strong class="quest-title">{{ homework.title }}</strong>
 
-      <div class="small quest-meta">
+      <div class="small quest-meta mt-1">
         due {{ formatDate(homework.dueDate) }}
 
         <template v-if="mode === 'volunteer'">

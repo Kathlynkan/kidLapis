@@ -23,7 +23,8 @@ const sessionSchema = new mongoose.Schema(
     interaction: String,
     behaviour: String,
     socialNotes: String,
-    photos: [{type: String}]
+    photos: [{type: String}],
+    parentViewed: {type: Date, default: null}
   },
   { toJSON: jsonOptions },
 )
