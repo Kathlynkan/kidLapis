@@ -85,14 +85,14 @@ function cancelDelete()  { showDeleteModal.value = false }
         </button>
       </div>
 
-      <div v-else class="session-locked mt-3">
+      <div v-else class="session-locked">
         <div class="session-locked-title">
           <i class="bi bi-eye me-2"></i>
-          Seen by the parent
+          Seen by parent · {{ formatDate(session.parentViewed) }}
         </div>
 
         <div class="session-locked-text">
-          This session has already been read and can no longer be edited or deleted.
+          The parent has read this session, so it can no longer be edited or deleted.
         </div>
       </div>
     </template>
