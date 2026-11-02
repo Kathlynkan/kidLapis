@@ -6,6 +6,7 @@ import { ref, computed } from 'vue'
 import { formatDate, daysSince } from '@/utils/format'
 import { HOMEWORK_STATUS, SUBJECT_COLORS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
+import '@/css/main/labels.css' // the capital-letter captions
 
 const props = defineProps({
   homework: { type: Object, required: true },
@@ -29,7 +30,7 @@ const state = computed(() => {
   if (props.homework.status === 'submitted') return 'waiting'
   return isOverdue.value ? 'late' : 'todo'
 })
-const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be checked', done: 'Checked' }
+const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
 const showDeleteModal = ref(false)
 
@@ -90,7 +91,8 @@ function cancelDelete()  { showDeleteModal.value = false }
         Submitted late — you'll earn half stars
       </span>
 
-      <span v-if="mode === 'child'" class="badge quest-status" :class="{ 'quest-status-done': homework.status === 'verified' }">
+      <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
+      <span v-if="mode === 'child' && homework.status !== 'assigned'" class="badge quest-status" :class="`quest-pill-${state}`">
         {{ status?.label }}
       </span>
 
@@ -123,7 +125,7 @@ function cancelDelete()  { showDeleteModal.value = false }
             <i class="bi bi-check-circle"></i> Mark as Checked
           </button>
           <button
-            class="btn btn-sm btn-outline-danger"
+            class="btn btn-sm btn-outline-danger quest-return"
             data-test="reject-homework-btn"
             @click="emit('reject', homework.id)">
             <i class="bi bi-arrow-return-left"></i> Return
@@ -188,23 +190,9 @@ function cancelDelete()  { showDeleteModal.value = false }
   font-weight: 600;
 }
 
-.quest-returned {
-  background: #FFE0B2;
-  color: #7B4F2A;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  align-self: flex-start;
-}
-
+/* the two notes sit on the left, as wide as their words */
+.quest-returned,
 .quest-late-warn {
-  background: #FDECEA;
-  color: #C62828;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
   align-self: flex-start;
 }
 

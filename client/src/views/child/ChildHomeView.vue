@@ -411,29 +411,6 @@ onUnmounted(() => {
   border: 2px dashed #B7D8D7;
 }
 
-/* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */
-.childhomepage .badge {
-  padding: 3px 10px;
-  border-radius: 99px;
-  box-shadow: none;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.childhomepage .quest-points,
-.childhomepage .quest-status { background: #FBE7A1; }
-
-/* the points stay on one line: the star sits next to the number, never under it */
-.childhomepage .quest-points {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  white-space: nowrap;
-}
-.childhomepage .quest-overdue { background: #EE9F96; }
-.childhomepage .quest-status-done { background: #E6F4EC; color: #2E8B57; }
-
 /* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
    in pale pink with dark text */
 .childhomepage .quest-submit {
@@ -597,8 +574,8 @@ onUnmounted(() => {
 
 .cake-season-badge {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #F5E070;
   color: #8B6914;
   font-size: 12px;
@@ -731,14 +708,12 @@ onUnmounted(() => {
 
 .kueh-state {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #E6F4EC;
   color: #2E8B57;
-  font-size: 11.2px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
 }
 
 /* a kueh you have not earned yet: faded grey picture */
@@ -765,8 +740,6 @@ onUnmounted(() => {
 .kueh-detail-badge {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
   color: #A9577A;
 }
 

@@ -415,8 +415,7 @@ onMounted(() => {
 }
 
 /* delete and overdue are the same soft red */
-.childprofilepage .btn-outline-danger,
-.childprofilepage .quest-pill-late {
+.childprofilepage .btn-outline-danger {
   background: #EE9F96;
   color: var(--cp-text);
 }
@@ -424,6 +423,17 @@ onMounted(() => {
 .childprofilepage .btn-outline-danger:hover {
   background: #E68C81;
   color: var(--cp-text);
+}
+
+/* Return: white words on a deeper soft red, like the white words of Mark as Checked */
+.childprofilepage .btn-outline-danger.quest-return {
+  background: #D9776B;
+  color: #FFFFFF;
+}
+
+.childprofilepage .btn-outline-danger.quest-return:hover {
+  background: #CC6659;
+  color: #FFFFFF;
 }
 
 .childprofilepage .btn-link {
@@ -536,9 +546,7 @@ onMounted(() => {
 /* the small tags (the source of the summary, the topics that keep coming back, the score, the subject, the homework state): the text sits in the middle */
 .childprofilepage .handover-badge,
 .childprofilepage .session-score,
-.childprofilepage .session-tag,
-.childprofilepage .quest-pill,
-.childprofilepage .session-subject {
+.childprofilepage .session-tag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -575,20 +583,6 @@ onMounted(() => {
 .childprofilepage .board .session-card {
   background: #FFFFFF;
   box-shadow: 0 1px 6px var(--cp-shadow);
-}
-
-.childprofilepage .session-subject {
-  margin-right: 8px;
-  padding: 1px 10px;
-  border-radius: 999px;
-  background: var(--cp-teal);
-  color: var(--cp-text);
-  font-size: 12px;
-  vertical-align: 1px;
-}
-
-.childprofilepage .session-subject::after {
-  content: none;
 }
 
 .childprofilepage .session-title {
@@ -683,24 +677,4 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.childprofilepage .quest-pill {
-  padding: 3px 11px;
-}
-
-.childprofilepage .quest-pill-todo {
-  background: #FFFFFF;
-  box-shadow: inset 0 0 0 1.5px #CFC9BC;
-  color: var(--cp-text);
-}
-
-.childprofilepage .quest-pill-waiting {
-  background: var(--cp-teal);
-  color: var(--cp-waiting-text);
-}
-
-.childprofilepage .quest-pill-done {
-  background: #2E8B57;
-  color: #FFFFFF;
-  font-size: 13px;
-}
 </style>

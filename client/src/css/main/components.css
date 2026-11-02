@@ -257,14 +257,21 @@
 
 /* ---------- SessionCard.vue ---------- */
 
-/* "Math - Fractions": the subject and the topic read as one bold title */
+/* "MATH": the subject is a small round tag in front of the title (SessionCard.vue and HomeworkQuestCard.vue).
+   Its colour comes from the subject and is set in the template. */
 .session-subject {
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  padding: 2px 11px;
+  border-radius: 999px;
+  background: var(--cp-teal);
   color: #4A3F3A;
-}
-
-.session-subject::after {
-  content: ' - ';
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: 1px;
 }
 
 .session-title {
@@ -325,26 +332,67 @@
   border-color: #E8A0B8;
 }
 
-.quest-points {
-  background: #F5DF98;
+/* the small round tags of a homework: the state (top right), the status line (child page) and the two notes.
+   The same shape as the tags of the parent, volunteer and teacher pages. A word is never broken in two. */
+.badge.quest-pill,
+.badge.quest-status,
+.badge.quest-returned,
+.badge.quest-late-warn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 11px;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: normal;
+  text-align: center;
+}
+
+.badge.quest-status {
+  align-self: flex-start;
+}
+
+/* the state is short (Overdue, To do, Being checked, Checked), so it stays on one line */
+.badge.quest-pill,
+.badge.quest-status {
+  white-space: nowrap;
+}
+
+/* the state: overdue is soft red, to do is white with a thin line, being checked is teal, checked is green */
+.badge.quest-pill-late {
+  background: #EE9F96;
   color: #4A3F3A;
 }
 
-.quest-overdue {
-  background: #E8A0B8;
+.badge.quest-pill-todo {
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 1.5px #CFC9BC;
   color: #4A3F3A;
 }
 
-/* the state of the homework: orange, or lime when it is checked */
-.quest-status,
-.quest-pill {
-  background: #F5B880;
-  color: #4A3F3A;
+.badge.quest-pill-waiting {
+  background: var(--cp-teal);
+  color: var(--cp-waiting-text);
 }
 
-.quest-status-done,
-.quest-pill-done {
-  background: #A8CC90;
+.badge.quest-pill-done {
+  background: #2E8B57;
+  color: #FFFFFF;
+}
+
+/* the two notes on the child's card: late is the quiet pink, returned is the quiet yellow */
+.badge.quest-late-warn {
+  background: #FBE3DF;
+  box-shadow: inset 0 0 0 1.5px #F2B8B0;
+  color: #9A3F36;
+}
+
+.badge.quest-returned {
+  background: #FAF4D8;
+  box-shadow: inset 0 0 0 1.5px #EEDFA6;
+  color: #7A6420;
 }
 
 /* ---------- the charts (SkillProgressChart.vue and TopicSummaryChart.vue) ---------- */
