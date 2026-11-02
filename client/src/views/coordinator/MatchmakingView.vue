@@ -13,6 +13,8 @@ import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
+import ChildInitial from '@/components/ChildInitial.vue' // the round picture
+import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const route = useRoute()
 const router = useRouter()
@@ -42,7 +44,6 @@ const busyKey = ref('')
 
 const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
-const isPhoto = (avatar) => typeof avatar === 'string' && avatar.startsWith('/')
 const firstName = (name) => name.split(' ')[0]
 
 // ---------- Child list + search ----------
@@ -142,46 +143,42 @@ function unassign(child, s) {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 teacherpage matchpage">
     <PageHeader title="Matchmaking" subtitle="Match each child with volunteers who teach the subjects they need." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <template v-else>
-      <!-- Search -->
-      <div class="cb-card p-3 mb-3 d-flex flex-wrap align-items-center gap-3">
-        <div class="search-box flex-grow-1">
-          <i class="bi bi-search search-icon" aria-hidden="true"></i>
-          <label for="child-search" class="visually-hidden">Search children</label>
-          <input
-            id="child-search"
-            v-model="search"
-            type="search"
-            class="form-control"
-            placeholder="Search by name, level, school or subject"
-            data-test="child-search"
-          />
-        </div>
-        <div class="small text-muted-cb">
+    <!-- the sandy board: the search and a white card for each child -->
+    <div v-else class="board">
+      <div class="toolbar">
+        <label for="child-search" class="visually-hidden">Search children</label>
+        <input
+          id="child-search"
+          v-model="search"
+          type="search"
+          class="search"
+          placeholder="Search by name, level, school or subject"
+          data-test="child-search"
+        />
+        <span class="tag">
           Showing {{ filteredChildren.length }} of {{ children.length }}
-          <template v-if="unassignedCount">
-            · {{ unassignedCount }} without a volunteer, shown first
-          </template>
-        </div>
+          <template v-if="unassignedCount"> · {{ unassignedCount }} without a volunteer, shown first</template>
+        </span>
       </div>
 
-      <p v-if="!filteredChildren.length" class="text-muted-cb" data-test="no-children">
+      <div v-if="!filteredChildren.length" class="t-card empty" data-test="no-children">
+        <strong>No match</strong>
         No children match "{{ search }}".
-      </p>
+      </div>
 
       <!-- Children -->
-      <div class="d-flex flex-column gap-2">
+      <div class="children">
         <div
           v-for="c in filteredChildren"
           :id="`child-${c.id}`"
           :key="c.id"
-          class="cb-card child-item"
+          class="t-card child-item"
           :class="{ 'is-open': openId === c.id }"
         >
           <button
@@ -192,20 +189,17 @@ function unassign(child, s) {
             data-test="child-toggle"
             @click="toggle(c)"
           >
-            <span class="avatar" aria-hidden="true">
-              <img v-if="isPhoto(c.avatar)" :src="c.avatar" alt="" />
-              <template v-else>{{ c.avatar }}</template>
-            </span>
+            <ChildInitial :child="c" />
 
-            <span class="flex-grow-1 min-w-0">
-              <span class="d-block fw-semibold">{{ c.name }} <span class="text-muted-cb fw-normal">({{ c.level }})</span></span>
-              <span class="d-flex flex-wrap gap-1 mt-1">
-                <span v-for="n in c.needs" :key="n" class="badge badge-soft">{{ n }}</span>
+            <span class="child-main">
+              <span class="person-name">{{ c.name }} <span class="muted">({{ c.level }})</span></span>
+              <span class="tags">
+                <span v-for="n in c.needs" :key="n" class="tag">{{ n }}</span>
               </span>
             </span>
 
-            <span v-if="!isAssigned(c)" class="badge text-bg-warning" data-test="no-volunteer-badge">No volunteer</span>
-            <span v-else class="small text-muted-cb text-nowrap">
+            <span v-if="!isAssigned(c)" class="tag tag-red" data-test="no-volunteer-badge">No volunteer</span>
+            <span v-else class="person-sub count">
               {{ c.volunteerIds.length }} {{ c.volunteerIds.length === 1 ? 'volunteer' : 'volunteers' }}
             </span>
 
@@ -217,17 +211,17 @@ function unassign(child, s) {
               <div class="child-panel-inner">
                 <StateMessage v-if="loadingId === c.id && !suggestions[c.id]" type="loading" />
 
-                <div v-if="panelError[c.id]" class="alert alert-danger py-2 small" data-test="action-error">
+                <div v-if="panelError[c.id]" class="note note-bad" data-test="action-error">
                   {{ panelError[c.id] }}
                 </div>
 
                 <template v-if="suggestions[c.id]">
-                  <h3 class="h6 mb-2">
+                  <h3 class="section-title">
                     Suggested volunteers for {{ firstName(c.name) }}
-                    <span class="text-muted-cb fw-normal small">(best match first)</span>
+                    <span class="muted">(best match first)</span>
                   </h3>
 
-                  <div class="d-flex flex-column gap-2">
+                  <div class="suggestions">
                     <div
                       v-for="s in suggestions[c.id]"
                       :key="s.volunteerId"
@@ -235,34 +229,29 @@ function unassign(child, s) {
                       :class="{ 'is-assigned': s.assigned }"
                       data-test="suggestion-card"
                     >
-                      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-                        <div>
-                          <div class="fw-semibold">
-                            <i class="bi bi-person-circle me-1"></i>{{ s.name }}
-                            <span v-if="s.assigned" class="badge text-bg-success ms-1" data-test="assigned-badge">
-                              Assigned{{ s.scheduledSlots.length ? ` · ${slotsLabel(s)}` : '' }}
-                            </span>
-                          </div>
-
-                          <!-- WHY this volunteer -->
-                          <div class="small" data-test="match-reason">
-                            <template v-if="s.matchedSkills.length">Teaches {{ s.matchedSkills.join(', ') }}</template>
-                            <span v-else class="text-muted-cb">No matching subjects</span>
-                            · Free on {{ s.availability.join(', ') || 'no days set' }}
-                            · {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
-                          </div>
-                          <div class="small text-muted-cb">
-                            Score {{ s.score }}: subjects +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
-                            workload {{ s.breakdown.workload }}
+                      <div class="suggest-top">
+                        <div class="person-top">
+                          <ChildInitial class="is-volunteer" :child="{ name: s.name }" />
+                          <div>
+                            <div class="suggest-title">
+                              <h4 class="person-name">{{ s.name }}</h4>
+                              <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">
+                                Assigned{{ s.scheduledSlots.length ? ` · ${slotsLabel(s)}` : '' }}
+                              </span>
+                            </div>
+                            <div class="person-sub">
+                              Score {{ s.score }}: subjects +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
+                              workload {{ s.breakdown.workload }}
+                            </div>
                           </div>
                         </div>
 
                         <!-- Actions -->
-                        <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="suggest-actions">
                           <button
                             v-if="s.assigned"
                             type="button"
-                            class="btn btn-sm btn-outline-danger"
+                            class="t-btn t-btn-soft"
                             :disabled="busyKey !== ''"
                             data-test="unassign-btn"
                             @click="unassign(c, s)"
@@ -275,7 +264,7 @@ function unassign(child, s) {
                             <select
                               :id="`day-${c.id}-${s.volunteerId}`"
                               v-model="dayChoice[keyOf(c.id, s.volunteerId)]"
-                              class="form-select form-select-sm w-auto"
+                              class="form-select skill-select"
                               data-test="day-select"
                             >
                               <option :value="undefined" disabled>Day</option>
@@ -286,7 +275,7 @@ function unassign(child, s) {
                             <select
                               :id="`time-${c.id}-${s.volunteerId}`"
                               v-model="timeChoice[keyOf(c.id, s.volunteerId)]"
-                              class="form-select form-select-sm w-auto"
+                              class="form-select skill-select"
                               data-test="time-select"
                             >
                               <option :value="undefined" disabled>Time</option>
@@ -295,7 +284,7 @@ function unassign(child, s) {
 
                             <button
                               type="button"
-                              class="btn btn-sm btn-primary"
+                              class="t-btn"
                               :disabled="
                                 !dayChoice[keyOf(c.id, s.volunteerId)] ||
                                 !timeChoice[keyOf(c.id, s.volunteerId)] ||
@@ -308,7 +297,25 @@ function unassign(child, s) {
                             </button>
                           </template>
 
-                          <span v-else class="small text-muted-cb">Set this volunteer's days on the Volunteers page first</span>
+                          <span v-else class="person-sub">Set this volunteer's days on the Volunteers page first</span>
+                        </div>
+                      </div>
+
+                      <!-- WHY this volunteer -->
+                      <div class="facts" data-test="match-reason">
+                        <div class="fact">
+                          <span class="fact-key">Teaches</span>
+                          <span class="fact-value">{{ s.matchedSkills.join(', ') || 'No matching subjects' }}</span>
+                        </div>
+                        <div class="fact">
+                          <span class="fact-key">Free on</span>
+                          <span class="fact-value">{{ s.availability.join(', ') || 'No days set' }}</span>
+                        </div>
+                        <div class="fact">
+                          <span class="fact-key">Works with</span>
+                          <span class="fact-value">
+                            {{ s.workload === 0 ? 'No other children' : `${s.workload} other ${s.workload === 1 ? 'child' : 'children'}` }}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -319,127 +326,147 @@ function unassign(child, s) {
           </Transition>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
-<style scoped>
-/* ---------- Search ---------- */
-.search-box {
-  position: relative;
-  min-width: 220px;
-}
-.search-icon {
-  position: absolute;
-  left: 0.9rem;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.55;
-  pointer-events: none;
-}
-.search-box .form-control {
-  padding-left: 2.4rem;
+<style>
+/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+/* The matchmaking page (MatchmakingView.vue). The board, the white cards, the tags, the buttons and the facts
+   come from css/teacher/teacherpage.css. Here are only the list of children and the panel that opens under a child. */
+
+.matchpage .children {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-/* ---------- Child toggle buttons ---------- */
-.child-item {
-  border: 2px solid transparent;
+/* a child: the white card is the button, and the panel opens under it */
+.matchpage .child-item {
   overflow: hidden;
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
 }
-.child-item.is-open {
-  border-color: var(--cb-primary);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+.matchpage .child-item.is-open {
+  box-shadow: 0 0 0 2px #D5CBEA, 0 1px 6px rgba(61, 52, 84, 0.1);
 }
-.child-toggle {
+
+.matchpage .child-toggle {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: transparent;
+  padding: 12px 16px;
   border: 0;
+  background: transparent;
   color: inherit;
+  font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-.child-toggle:hover {
-  background: var(--cb-primary-soft);
+
+.matchpage .child-toggle:hover {
+  background: #F0EAF8;
 }
-.child-toggle:focus-visible {
-  outline: 2px solid var(--cb-primary);
+
+.matchpage .child-toggle:focus-visible {
+  outline: 2px solid #6B5CA5;
   outline-offset: -2px;
 }
-.min-w-0 {
+
+.matchpage .child-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 1.4rem;
-  background: var(--cb-primary-soft);
-  overflow: hidden;
+
+.matchpage .child-main .person-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* the line under the search can be long: it wraps on a small screen */
+.matchpage .toolbar .tag {
+  border-radius: 14px;
+  white-space: normal;
+}
+
+.matchpage .count {
+  white-space: nowrap;
+}
+
+.matchpage .chevron {
   flex-shrink: 0;
-}
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.chevron {
+  color: #7D7690;
   transition: transform 0.3s ease;
-  flex-shrink: 0;
 }
-.is-open .chevron {
+
+.matchpage .is-open .chevron {
   transform: rotate(180deg);
 }
 
-/* ---------- Expanding panel ---------- */
-.child-panel-inner {
-  padding: 0.25rem 1rem 1rem;
+/* the panel under a child */
+.matchpage .child-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 16px 16px;
 }
-.expand-enter-active,
-.expand-leave-active {
+
+.matchpage .expand-enter-active,
+.matchpage .expand-leave-active {
   overflow: hidden;
-  transition:
-    max-height 0.35s ease,
-    opacity 0.25s ease;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
 }
-.expand-enter-from,
-.expand-leave-to {
+
+.matchpage .expand-enter-from,
+.matchpage .expand-leave-to {
   max-height: 0;
   opacity: 0;
 }
-.expand-enter-to,
-.expand-leave-from {
+
+.matchpage .expand-enter-to,
+.matchpage .expand-leave-from {
   max-height: 1500px;
   opacity: 1;
 }
 
-/* ---------- Volunteer suggestions ---------- */
-.suggestion {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-  padding: 0.75rem;
-  background: #fff;
-}
-.suggestion.is-assigned {
-  border-color: rgba(25, 135, 84, 0.45);
+/* a suggested volunteer: a pale lavender box inside the white card */
+.matchpage .suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #F7F4FB;
 }
 
-/* Respect people who turn animations off in their device settings */
+.matchpage .suggestion.is-assigned {
+  box-shadow: inset 0 0 0 1.5px #A9D9BC;
+}
+
+.matchpage .suggestion .fact {
+  background: #FFFFFF;
+}
+
+/* the day and time boxes sit next to the button, and wrap on a small screen */
+.matchpage .suggest-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .matchpage .child-toggle .count {
+    display: none;
+  }
+}
+
+/* people who turn animations off in their device settings */
 @media (prefers-reduced-motion: reduce) {
-  .child-item,
-  .child-toggle,
-  .chevron,
-  .expand-enter-active,
-  .expand-leave-active {
+  .matchpage .chevron,
+  .matchpage .expand-enter-active,
+  .matchpage .expand-leave-active {
     transition: none;
   }
 }
