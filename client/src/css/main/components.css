@@ -303,6 +303,24 @@
   color: #4A3F3A;
 }
 
+.session-locked {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #E8F5DC;
+  border: 1px solid #CFE5BF;
+}
+
+.session-locked-title {
+  color: #4A6B53;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.session-locked-text {
+  color: #5F7567;
+  font-size: 14px;
+}
+
 .icon-struggle { color: #E8A0B8; }
 .icon-worked { color: #F5DF98; }
 .icon-next { color: #C0A8D8; }

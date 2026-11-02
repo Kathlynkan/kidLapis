@@ -74,14 +74,28 @@ function cancelDelete()  { showDeleteModal.value = false }
       </div>
     </div>
 
-    <div v-if="canEdit" class="mt-2 d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary" @click="emit('edit', session.id)">
-        <i class="bi bi-pencil"></i> Edit
-      </button>
-      <button class="btn btn-sm btn-outline-danger" @click="handleDelete">
-        <i class="bi bi-trash"></i> Delete
-      </button>
-    </div>
+    <template v-if="canEdit">
+      <div v-if="!session.parentViewed" class="mt-2 d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary" @click="emit('edit', session.id)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+
+        <button class="btn btn-sm btn-outline-danger" @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
+
+      <div v-else class="session-locked mt-3">
+        <div class="session-locked-title">
+          <i class="bi bi-eye me-2"></i>
+          Seen by the parent
+        </div>
+
+        <div class="session-locked-text">
+          This session has already been read and can no longer be edited or deleted.
+        </div>
+      </div>
+    </template>
   </div>
 
   <Teleport to="body">
