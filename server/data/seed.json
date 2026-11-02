@@ -107,6 +107,7 @@
       "password": "password123",
       "role": "child",
       "childId": "c_1",
+      "avatar": "/photos/ethan.jpg",
       "gender": "boy",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },

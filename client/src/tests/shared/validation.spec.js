@@ -1,7 +1,7 @@
 // Unit tests for the sign-up checks.   Owner: Kai Sen
 // Run:  pnpm test:unit
 import { describe, it, expect } from 'vitest'
-import { isValidEmail, isValidChildCode, validateSignup } from '../validation'
+import { isValidEmail, isValidChildCode, validateSignup } from '@/utils/validation'
 
 // A form that passes every check; each test changes one thing
 const goodForm = () => ({

@@ -3,8 +3,8 @@
      The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue -->
 <script setup>
 import { ref, computed } from 'vue'
-import { formatDate, daysSince } from '@/utils/format'
-import { HOMEWORK_STATUS, SUBJECT_COLORS } from '@/utils/constants'
+import { formatDate, daysSince, subjectStyle } from '@/utils/format'
+import { HOMEWORK_STATUS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 import '@/css/main/labels.css' // the capital-letter captions
 
@@ -33,10 +33,6 @@ const state = computed(() => {
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
 const showDeleteModal = ref(false)
-
-function subjectStyle(subj) {
-  return {backgroundColor: SUBJECT_COLORS[subj]}
-}
 
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
@@ -119,7 +115,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
         <template v-if="homework.status === 'submitted'">
           <button
-            class="btn btn-sm btn-primary"
+            class="btn btn-sm btn-primary quest-check"
             data-test="verify-homework-btn"
             @click="emit('verify', homework.id)">
             <i class="bi bi-check-circle"></i> Mark as Checked
@@ -134,14 +130,14 @@ function cancelDelete()  { showDeleteModal.value = false }
 
         <div v-else>
           <button
-            class="btn btn-sm btn-outline-primary"
+            class="btn btn-sm btn-outline-primary quest-edit"
             data-test="edit-homework-btn"
             @click="emit('edit', homework.id)">
             <i class="bi bi-pencil"></i> Edit
           </button>
 
           <button
-            class="btn btn-sm btn-outline-danger ms-2"
+            class="btn btn-sm btn-outline-danger ms-2 quest-delete"
             data-test="delete-homework-btn"
             @click="handleDelete">
             <i class="bi bi-trash"></i> Delete

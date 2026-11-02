@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { accuracy, daysSince, relativeDay, firstName, formatDate } from '../format'
+import { accuracy, daysSince, relativeDay, firstName, formatDate } from '@/utils/format'
 
 describe('accuracy', () => {
   it('returns the percentage of correct answers', () => {

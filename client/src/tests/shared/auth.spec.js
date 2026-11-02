@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import api from '@/services/api'
-import { useAuthStore } from '../auth'
+import { useAuthStore } from '@/stores/auth'
 
 vi.mock('@/services/api', () => ({
   default: { post: vi.fn() },

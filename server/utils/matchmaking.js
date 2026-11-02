@@ -35,6 +35,7 @@ export function scoreVolunteer(child, volunteer, allChildren) {
   return {
     volunteerId: volunteer.id,
     name: volunteer.name,
+    avatar: volunteer.avatar, // the photo, shown next to the name
     availability: volunteerDays,
     score: breakdown.skills + breakdown.days + breakdown.workload,
     breakdown,

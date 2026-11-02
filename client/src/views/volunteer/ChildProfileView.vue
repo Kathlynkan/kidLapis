@@ -414,6 +414,30 @@ onMounted(() => {
   color: var(--cp-text);
 }
 
+/* Edit and Mark as Checked are the same pale green for a volunteer, so they are told apart by size and icon:
+   the action that matters (Mark as Checked, Return) is bigger, the everyday ones (Edit, Delete) are smaller */
+.childprofilepage .quest-check,
+.childprofilepage .quest-return {
+  padding: 7px 14px;
+  font-size: 15px;
+}
+
+.childprofilepage .quest-edit,
+.childprofilepage .quest-delete {
+  padding: 3px 9px;
+  font-size: 13px;
+}
+
+.role-volunteer .childprofilepage .quest-check {
+  background: var(--cp-soft);
+  color: #000000;
+}
+
+.role-volunteer .childprofilepage .quest-check:hover {
+  background: var(--cp-letter);
+  color: #000000;
+}
+
 /* delete and overdue are the same soft red */
 .childprofilepage .btn-outline-danger {
   background: #EE9F96;
@@ -425,15 +449,15 @@ onMounted(() => {
   color: var(--cp-text);
 }
 
-/* Return: white words on a deeper soft red, like the white words of Mark as Checked */
+/* Return: black words on a deeper soft red, like the black words of Mark as Checked */
 .childprofilepage .btn-outline-danger.quest-return {
   background: #D9776B;
-  color: #FFFFFF;
+  color: #000000;
 }
 
 .childprofilepage .btn-outline-danger.quest-return:hover {
   background: #CC6659;
-  color: #FFFFFF;
+  color: #000000;
 }
 
 .childprofilepage .btn-link {

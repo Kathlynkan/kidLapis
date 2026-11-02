@@ -53,7 +53,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/stores/auth.js` | Pinia store — token + user in sessionStorage, login/logout/patchUser |
 | `client/src/services/api.js` | Axios instance — base URL, auth header, 401 handler |
 | `client/src/utils/validation.js` | `isValidEmail`, `isStrongPassword` — same rules as server |
-| `client/src/utils/__tests__/validation.spec.js` | Unit tests for validation rules |
+| `client/src/tests/shared/validation.spec.js` | Unit tests for validation rules |
 | `client/src/main.js` | App bootstrap — Vue, Pinia, Router, 401 handler wired up |
 | `client/src/App.vue` | Root shell — NavBar, `<RouterView>`, page-peel transition |
 | `client/src/components/NavBar.vue` | Top nav bar — role-aware links, unread message badge |
@@ -74,7 +74,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/server.js` | Express + socket.io app — CORS, JSON, socket rooms per childId, mounts all routes |
 | `server/config.env` | DB connection string + Gemini API key (not in git) |
 | `server/data/seed.json` | Demo data — children, parents, volunteers, sessions, homework, messages |
-| `client/src/stores/__tests__/auth.spec.js` | Unit tests for the auth Pinia store |
+| `client/src/tests/shared/auth.spec.js` | Unit tests for the auth Pinia store |
 | `client/e2e/auth.spec.js` | E2E — login per role, wrong-role redirect, sign-up flow |
 | `README.md`, `CONTRIBUTING.md`, `WORKLOAD.md` | Project docs, setup instructions, team split |
 | `pnpm-workspace.yaml`, `client/vite.config.js`, `client/vitest.config.js`, `client/playwright.config.js` | Build, test, workspace config |
@@ -148,7 +148,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), "Verify & give points" (volunteer) |
 | `client/src/components/ChildAvatar.vue` | Child avatar display — photo if path, emoji if text; used in leaderboard |
 | `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework)` — 6 badge conditions |
-| `client/src/utils/__tests__/gamification.spec.js` | Unit tests for all gamification rules and edge cases |
+| `client/src/tests/child/gamification.spec.js` | Unit tests for all gamification rules and edge cases |
 | `server/routes/progress.js` | GET /progress/:childId (per-topic accuracy + trend), GET /progress/overview |
 | `server/routes/decks.js` | GET /decks — question banks for the homework deck picker |
 | `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards berries), GET /homework/leaderboard |
@@ -161,7 +161,7 @@ The homework route is split — see the callout at the bottom of this section.
 |---|---|
 | `client/src/utils/constants.js` | SUBJECTS, SKILL_OPTIONS, LEVELS, DAYS, MOODS, HOMEWORK_STATUS |
 | `client/src/utils/format.js` | `formatDate`, `accuracy`, `relativeDay`, `firstName`, `daysSince` |
-| `client/src/utils/__tests__/format.spec.js` | Unit tests for format helpers |
+| `client/src/tests/shared/format.spec.js` | Unit tests for format helpers |
 
 ### The `homework.js` route split
 
@@ -300,8 +300,8 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 **Tests:**
 - `e2e/child.spec.js`: child marks quest done → status changes, badge shelf renders, leaderboard loads and tab switch works. ✅
-- `src/utils/__tests__/gamification.spec.js`: `levelFor()` and all 6 `earnedBadges()` conditions with edge cases. ✅
-- `src/utils/__tests__/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
+- `src/tests/child/gamification.spec.js`: `levelFor()` and all 6 `earnedBadges()` conditions with edge cases. ✅
+- `src/tests/shared/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
 
 **Q&A angle:** computed properties to reshape data for charts, component props contract (`sessions` array in → chart rendered), deck quiz data flow (deck → questions copied to homework → child sees interactive quest), motivation design for kids (berries, levels, badges), responsive charts.
 

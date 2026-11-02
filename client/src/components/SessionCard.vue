@@ -4,8 +4,8 @@
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
-import { formatDate, accuracy } from '@/utils/format'
-import { MOODS, SUBJECT_COLORS } from '@/utils/constants'
+import { formatDate, accuracy, subjectStyle } from '@/utils/format'
+import { MOODS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
@@ -17,10 +17,6 @@ const emit = defineEmits(['edit', 'delete'])
 const mood = MOODS.find((m) => m.value === props.session.mood)
 const showDeleteModal = ref(false)
 const showFullNotes = ref(false)
-
-function subjectStyle(subj) {
-  return {backgroundColor: SUBJECT_COLORS[subj]}
-}
 
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.session.id); showDeleteModal.value = false }
@@ -76,11 +72,11 @@ function cancelDelete()  { showDeleteModal.value = false }
 
     <template v-if="canEdit">
       <div v-if="!session.parentViewed" class="mt-2 d-flex gap-2">
-        <button class="btn btn-sm btn-outline-primary" @click="emit('edit', session.id)">
+        <button class="btn btn-sm btn-outline-primary quest-edit" @click="emit('edit', session.id)">
           <i class="bi bi-pencil"></i> Edit
         </button>
 
-        <button class="btn btn-sm btn-outline-danger" @click="handleDelete">
+        <button class="btn btn-sm btn-outline-danger quest-delete" @click="handleDelete">
           <i class="bi bi-trash"></i> Delete
         </button>
       </div>

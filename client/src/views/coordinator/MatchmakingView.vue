@@ -14,6 +14,7 @@ import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture
+import { subjectStyle } from '@/utils/format'
 import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const route = useRoute()
@@ -194,7 +195,7 @@ function unassign(child, s) {
             <span class="child-main">
               <span class="person-name">{{ c.name }} <span class="muted">({{ c.level }})</span></span>
               <span class="tags">
-                <span v-for="n in c.needs" :key="n" class="tag">{{ n }}</span>
+                <span v-for="n in c.needs" :key="n" class="tag" :style="subjectStyle(n)">{{ n }}</span>
               </span>
             </span>
 
@@ -231,7 +232,7 @@ function unassign(child, s) {
                     >
                       <div class="suggest-top">
                         <div class="person-top">
-                          <ChildInitial class="is-volunteer" :child="{ name: s.name }" />
+                          <ChildInitial class="is-volunteer" :child="{ name: s.name, avatar: s.avatar }" />
                           <div>
                             <div class="suggest-title">
                               <h4 class="person-name">{{ s.name }}</h4>
@@ -305,7 +306,10 @@ function unassign(child, s) {
                       <div class="facts" data-test="match-reason">
                         <div class="fact">
                           <span class="fact-key">Teaches</span>
-                          <span class="fact-value">{{ s.matchedSkills.join(', ') || 'No matching subjects' }}</span>
+                          <span v-if="s.matchedSkills.length" class="tags">
+                            <span v-for="skill in s.matchedSkills" :key="skill" class="tag" :style="subjectStyle(skill)">{{ skill }}</span>
+                          </span>
+                          <span v-else class="fact-value">No matching subjects</span>
                         </div>
                         <div class="fact">
                           <span class="fact-key">Free on</span>

@@ -303,23 +303,30 @@
   color: #4A3F3A;
 }
 
+/* a session the parent has seen is locked: this note takes the place of the Edit and Delete buttons.
+   A pale box with a thin line (the colour of the role), soft corners, and the same small sizes as the lines of the card */
 .session-locked {
-  margin-top: 12px;
-  padding: 14px 16px;
-  border-radius: 6px;
-
-  background: var(--cp-fill);
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--cp-teal-soft);
+  box-shadow: inset 0 0 0 1.5px var(--cp-teal);
   color: var(--cp-text);
 }
 
 .session-locked-title {
+  margin-bottom: 2px;
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 4px;
+}
+
+.session-locked-title i {
+  color: var(--cp-deep);
 }
 
 .session-locked-text {
-  opacity: 0.9;
-  font-size: 14px;
+  font-size: 13px;
+  color: var(--cp-grey);
 }
 
 .icon-struggle { color: #E8A0B8; }

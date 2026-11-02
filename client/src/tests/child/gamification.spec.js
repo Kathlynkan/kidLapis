@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { earnedBadges, badgeProgress, levelFor, BADGES } from '../gamification'
+import { earnedBadges, badgeProgress, levelFor, BADGES } from '@/utils/gamification'
 
 const child0 = { points: 0 }
 const child100 = { points: 100 }

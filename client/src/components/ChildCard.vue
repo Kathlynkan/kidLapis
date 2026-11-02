@@ -4,7 +4,8 @@
 ============================================================= -->
 <script setup>
 import { computed } from 'vue'
-import { relativeDay, accuracy } from '@/utils/format'
+import { relativeDay, accuracy, subjectStyle } from '@/utils/format'
+import '@/css/main/components.css' // the subject tag
 import ChildInitial from '@/components/ChildInitial.vue'
 
 const props = defineProps({
@@ -35,7 +36,8 @@ const lastSeen = computed(() =>
     <div v-if="lastSession" class="child-facts">
       <div>
         <i class="bi bi-bookmark"></i>Last topic:
-        <strong>{{ lastSession.subject }} - {{ lastSession.topic }}</strong>
+        <span class="session-subject" :style="subjectStyle(lastSession.subject)">{{ lastSession.subject }}</span>
+        <strong>{{ lastSession.topic }}</strong>
       </div>
       <div>
         <i class="bi bi-check2-circle"></i>Last result:

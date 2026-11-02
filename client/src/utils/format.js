@@ -1,5 +1,12 @@
 // Small helper functions shared by everyone (Week 4: utils/ folder)
 
+import { SUBJECT_COLORS } from '@/utils/constants'
+
+// the background of a subject tag: <span :style="subjectStyle('Math')">Math</span>
+export function subjectStyle(subject) {
+  return { backgroundColor: SUBJECT_COLORS[subject] }
+}
+
 // "2026-10-04" -> "Sat, 4 Oct"
 export function formatDate(isoDate) {
   if (!isoDate) return '-'

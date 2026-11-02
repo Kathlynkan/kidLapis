@@ -16,7 +16,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
-import { firstName } from '@/utils/format'
+import { firstName, subjectStyle } from '@/utils/format'
 import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const router = useRouter()
@@ -123,6 +123,7 @@ async function toggleFollowUp(alert) {
 const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
 const childNames = computed(() => nameById(children.value))
 const volunteerNames = computed(() => nameById(volunteers.value))
+const volunteerPhotos = computed(() => Object.fromEntries(volunteers.value.map((v) => [v.id, v.avatar])))
 
 const recentSessions = computed(() =>
   [...sessions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6),
@@ -270,12 +271,12 @@ function daysAgo(dateStr) {
               <p v-if="!recentSessions.length" class="empty">No sessions logged yet.</p>
               <ul v-else class="recent">
                 <li v-for="s in recentSessions" :key="s.id">
-                  <ChildInitial class="small" :child="{ name: volunteerNames[s.volunteerId] || 'Someone' }" />
+                  <ChildInitial class="small" :child="{ name: volunteerNames[s.volunteerId] || 'Someone', avatar: volunteerPhotos[s.volunteerId] }" />
                   <span>
                     <strong>{{ firstName(volunteerNames[s.volunteerId] || 'Someone') }}</strong> worked with
                     <strong>{{ firstName(childNames[s.childId] || 'Someone') }}</strong> on {{ s.topic }}
                     <span v-if="s.attempted">({{ s.correct }}/{{ s.attempted }} correct)</span>
-                    <span class="when">{{ s.subject }}, {{ daysAgo(s.date) }}</span>
+                    <span class="when"><span class="tag" :style="subjectStyle(s.subject)">{{ s.subject }}</span> {{ daysAgo(s.date) }}</span>
                   </span>
                 </li>
               </ul>
