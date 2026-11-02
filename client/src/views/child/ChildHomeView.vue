@@ -37,11 +37,7 @@ const CONFETTI = [
 ]
 
 // ── Computed ─────────────────────────────────────────────────
-// Add points from submitted (not yet verified) homework so the lapis and level update immediately.
-const pendingPoints = computed(() =>
-  homework.value.filter((h) => h.status === 'submitted').reduce((sum, h) => sum + h.points, 0),
-)
-const displayPoints = computed(() => (me.value?.points || 0) + pendingPoints.value)
+const displayPoints = computed(() => me.value?.points || 0)
 const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
@@ -408,6 +404,11 @@ onUnmounted(() => {
   background: #FFFFFF;
   border: 0;
   border-radius: 18px;
+}
+
+/* pending (submitted, waiting for volunteer check): dotted border */
+.childhomepage .quest-card.quest-waiting {
+  border: 2px dashed #B7D8D7;
 }
 
 /* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */

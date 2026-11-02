@@ -14,6 +14,8 @@ const homeworkSchema = new mongoose.Schema(
     points: { type: Number, default: 10 },
     status: { type: String, enum: ['assigned', 'submitted', 'verified'], default: 'assigned' },
     completedAt: { type: String, default: null },
+    pointsAwarded: { type: Number, default: null }, // actual stars given (may be less due to late penalty)
+    rejectedAt: { type: String, default: null },    // set when volunteer returns submission to child
   },
   { toJSON: jsonOptions },
 )

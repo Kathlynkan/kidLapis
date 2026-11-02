@@ -54,6 +54,8 @@ const activeHomework = computed(() =>
     .sort((a, b) => homeworkRank(a) - homeworkRank(b))
 )
 
+const submittedCount = computed(() => homework.value.filter(h => h.status === 'submitted').length)
+
 const completedHomework = computed(() =>
   [...homework.value]
     .filter(h => h.status === 'verified')
@@ -118,6 +120,16 @@ async function deleteHomework(homeworkId) {
   try {
     await api.delete(`/homework/${homeworkId}`)
     homework.value = homework.value.filter((h) => h.id !== homeworkId)
+  } catch (err) {
+    error.value = errorMessage(err)
+  }
+}
+
+async function rejectQuest(homeworkId) {
+  try {
+    await api.put(`/homework/${homeworkId}/reject`)
+    const h = await api.get('/homework', { params: { childId } })
+    homework.value = h.data
   } catch (err) {
     error.value = errorMessage(err)
   }
@@ -233,6 +245,10 @@ onMounted(() => {
               icon="bi-journal-check"
               :initial-open="true"
             >
+              <div v-if="submittedCount > 0" class="quest-check-alert mb-3">
+                <i class="bi bi-bell-fill me-2"></i>
+                {{ submittedCount }} quest{{ submittedCount > 1 ? 's' : '' }} waiting for your review
+              </div>
               <div class="d-flex flex-column gap-2">
                 <HomeworkQuestCard
                   v-for="h in activeHomework"
@@ -241,6 +257,7 @@ onMounted(() => {
                   mode="volunteer"
                   :busy="checkingQuestId !== null"
                   @verify="verifyQuest"
+                  @reject="rejectQuest"
                   @edit="editHomework"
                   @delete="deleteHomework"
                 />
@@ -639,6 +656,16 @@ onMounted(() => {
 
 .childprofilepage .quest-waiting {
   border-left-color: var(--cp-teal);
+  border-left-style: dashed;
+}
+
+.childprofilepage .quest-check-alert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .childprofilepage .quest-done {

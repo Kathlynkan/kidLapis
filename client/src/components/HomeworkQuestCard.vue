@@ -11,11 +11,16 @@ const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
 })
-const emit = defineEmits(['submit', 'unsubmit', 'verify', 'edit', 'delete'])
+const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
 const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
+)
+const isLateSubmission = computed(
+  () => props.homework.completedAt &&
+        props.homework.dueDate &&
+        props.homework.completedAt > props.homework.dueDate,
 )
 
 // where the homework is now, for the volunteer's view: late, todo, waiting (to be checked) or done
@@ -53,8 +58,11 @@ function cancelDelete()  { showDeleteModal.value = false }
         due {{ formatDate(homework.dueDate) }}
 
         <template v-if="mode === 'volunteer'">
-        · {{ homework.points }}
+        · {{ homework.pointsAwarded ?? homework.points }}
         <i class="bi bi-star-fill"></i>
+        <template v-if="isLateSubmission && homework.status !== 'verified'">
+          <span class="quest-late-penalty"> ({{ Math.floor(homework.points / 2) }}★ — submitted late)</span>
+        </template>
         </template>
       </div>
     </div>
@@ -68,6 +76,20 @@ function cancelDelete()  { showDeleteModal.value = false }
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
 
     <div class="mt-auto d-flex flex-column gap-2">
+      <span
+        v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
+        class="badge quest-returned">
+        <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
+      </span>
+
+      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-warn">
+        <i class="bi bi-exclamation-triangle me-1"></i>Late! Half stars if submitted now
+      </span>
+
+      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-warn">
+        Submitted late — you'll earn half stars
+      </span>
+
       <span v-if="mode === 'child'" class="badge quest-status" :class="{ 'quest-status-done': homework.status === 'verified' }">
         {{ status?.label }}
       </span>
@@ -90,16 +112,23 @@ function cancelDelete()  { showDeleteModal.value = false }
         <i class="bi bi-arrow-counterclockwise me-1"></i>Oops, undo!
       </button>
 
-      <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 
-      class="mt-2 d-flex align-items-center">
+      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+      class="mt-2 d-flex align-items-center gap-2">
 
-        <button
-          v-if="homework.status === 'submitted'"
-          class="btn btn-sm btn-primary"
-          data-test="verify-homework-btn"
-          @click="emit('verify', homework.id)">
-          <i class="bi bi-check-circle"></i> Mark as Checked
-        </button>
+        <template v-if="homework.status === 'submitted'">
+          <button
+            class="btn btn-sm btn-primary"
+            data-test="verify-homework-btn"
+            @click="emit('verify', homework.id)">
+            <i class="bi bi-check-circle"></i> Mark as Checked
+          </button>
+          <button
+            class="btn btn-sm btn-outline-danger"
+            data-test="reject-homework-btn"
+            @click="emit('reject', homework.id)">
+            <i class="bi bi-arrow-return-left"></i> Return
+          </button>
+        </template>
 
         <div v-else>
           <button
@@ -156,6 +185,31 @@ function cancelDelete()  { showDeleteModal.value = false }
   border-radius: 5px;
   box-shadow: none;
   font-size: 13px;
+  font-weight: 600;
+}
+
+.quest-returned {
+  background: #FFE0B2;
+  color: #7B4F2A;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+
+.quest-late-warn {
+  background: #FDECEA;
+  color: #C62828;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+
+.quest-late-penalty {
+  color: #EE9F96;
   font-weight: 600;
 }
 </style>
