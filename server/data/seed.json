@@ -146,11 +146,13 @@
         },
         {
           "volunteerId": "u_vol1",
-          "day": "Wed"
+          "day": "Wed",
+          "time": "12:00"
         },
         {
           "volunteerId": "u_vol2",
-          "day": "Thu"
+          "day": "Thu",
+          "time": "11:00"
         }
       ],
       "needs": [
