@@ -176,6 +176,101 @@ router.put('/:id', requireRole('coordinator'), async (req, res) => {
   }
 })
 
+// PUT /children/:id/interests   body: { interests: ['Minecraft', 'drawing', ...] }
+// The child themselves (or a coordinator) can update the interest list.
+router.put('/:id/interests', async (req, res) => {
+  const child = await Child.findById(req.params.id)
+  if (!child) return res.status(404).json({ message: 'Child not found' })
+  if (!canAccessChild(req.user, child)) return res.status(403).json({ message: 'You do not have access to this child.' })
+  if (req.user.role !== 'child' && req.user.role !== 'coordinator') {
+    return res.status(403).json({ message: 'Only the child can update their interests.' })
+  }
+  const { interests } = req.body
+  if (!Array.isArray(interests)) return res.status(400).json({ message: 'Interests must be a list.' })
+  child.interests = interests.map((s) => String(s).trim()).filter(Boolean).slice(0, 20)
+  await child.save()
+  await Handover.deleteMany({ childId: child.id }) // interests change the AI summary
+  res.json(forViewer(child, req.user))
+})
+
+// POST /children/:id/journal   body: { text }
+// The child adds a journal entry (max 500 chars, newest first, capped at 20 entries).
+router.post('/:id/journal', async (req, res) => {
+  const child = await Child.findById(req.params.id)
+  if (!child) return res.status(404).json({ message: 'Child not found' })
+  if (!canAccessChild(req.user, child)) return res.status(403).json({ message: 'You do not have access to this child.' })
+  if (req.user.role !== 'child' && req.user.role !== 'coordinator') {
+    return res.status(403).json({ message: 'Only the child can add journal entries.' })
+  }
+  const text = String(req.body.text || '').trim()
+  if (!text) return res.status(400).json({ message: 'Entry text is required.' })
+  if (text.length > 500) return res.status(400).json({ message: 'Entry must be 500 characters or less.' })
+  const today = new Date()
+  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  // 5 stars for the first journal entry of the day (anti-spam: one reward per day)
+  const JOURNAL_POINTS = 5
+  const alreadyWroteToday = child.journalEntries.some((e) => e.date === date)
+  const pointsAwarded = alreadyWroteToday ? 0 : JOURNAL_POINTS
+  if (pointsAwarded > 0) child.points = (child.points || 0) + pointsAwarded
+  child.journalEntries.unshift({ date, text })
+  if (child.journalEntries.length > 20) child.journalEntries = child.journalEntries.slice(0, 20)
+  await child.save()
+  await Handover.deleteMany({ childId: child.id }) // journal entries change the AI summary
+  const result = forViewer(child, req.user)
+  result.pointsAwarded = pointsAwarded
+  res.json(result)
+})
+
+// DELETE /children/:id/journal/:entryId
+// The child (or coordinator) deletes one of their journal entries.
+router.delete('/:id/journal/:entryId', async (req, res) => {
+  const child = await Child.findById(req.params.id)
+  if (!child) return res.status(404).json({ message: 'Child not found' })
+  if (!canAccessChild(req.user, child)) return res.status(403).json({ message: 'You do not have access to this child.' })
+  if (req.user.role !== 'child' && req.user.role !== 'coordinator') {
+    return res.status(403).json({ message: 'Only the child can delete journal entries.' })
+  }
+  const before = child.journalEntries.length
+  child.journalEntries = child.journalEntries.filter((e) => e.id !== req.params.entryId)
+  if (child.journalEntries.length === before) return res.status(404).json({ message: 'Entry not found.' })
+  await child.save()
+  res.json(forViewer(child, req.user))
+})
+
+// POST /children/:id/cheer   body: {}
+// A child gives a 👏 to a classmate once per calendar day. Recipient gets +2 ★.
+// Old cheer records (> 30 days) are pruned to keep the array small.
+router.post('/:id/cheer', async (req, res) => {
+  if (req.user.role !== 'child') {
+    return res.status(403).json({ message: 'Only children can send cheers.' })
+  }
+  const fromChildId = req.user.childId
+  if (!fromChildId) return res.status(400).json({ message: 'No child profile linked to this account.' })
+  if (req.params.id === fromChildId) return res.status(400).json({ message: 'You cannot cheer yourself.' })
+
+  const child = await Child.findById(req.params.id)
+  if (!child) return res.status(404).json({ message: 'Child not found' })
+
+  const today = new Date()
+  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  const alreadyCheered = child.cheersReceived.some(
+    (c) => c.fromChildId === fromChildId && c.date === date,
+  )
+  if (alreadyCheered) return res.status(409).json({ message: 'You already cheered this person today.' })
+
+  // Prune entries older than 30 days
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 30)
+  const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
+  child.cheersReceived = child.cheersReceived.filter((c) => c.date >= cutoffStr)
+
+  child.cheersReceived.push({ fromChildId, date })
+  child.points = (child.points || 0) + 2
+  await child.save()
+  res.json({ success: true, points: child.points })
+})
+
 // DELETE /children/:id
 // Decision (Kai Sen): deleting a child also deletes everything that belongs to them,
 // so no session, homework, message or login is left pointing to a child that no longer

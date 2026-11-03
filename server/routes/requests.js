@@ -19,11 +19,17 @@ router.use(requireAuth, requireRole('volunteer')) // only the volunteer the requ
 // GET /requests -> [{ childId, childName, level, avatar, needs, day, time }]
 // Only MY pending slots, from every child.
 router.get('/', async (req, res) => {
-  const children = await Child.find({ schedule: { $elemMatch: { volunteerId: req.user.id, status: 'pending' } } })
+  const children = await Child.find({
+    schedule: {
+      $elemMatch: {
+        volunteerId: req.user.id
+      }
+    }
+  })
   const requests = []
   for (const child of children) {
     for (const slot of child.schedule) {
-      if (slot.volunteerId === req.user.id && slot.status === 'pending') {
+      if (slot.volunteerId === req.user.id) {
         requests.push({
           childId: child.id,
           childName: child.name,
@@ -32,6 +38,8 @@ router.get('/', async (req, res) => {
           needs: child.needs,
           day: slot.day,
           time: slot.time || '',
+          status: slot.status,
+          requestedAt: slot.requestedAt
         })
       }
     }
@@ -59,7 +67,7 @@ router.put('/:childId', async (req, res) => {
     slot.status = 'accepted'
     if (!child.volunteerIds.includes(req.user.id)) child.volunteerIds.push(req.user.id)
   } else {
-    child.schedule = child.schedule.filter((s) => s !== slot)
+    slot.status = 'declined'
     // No accepted days left together -> the volunteer is not assigned to this child
     if (!child.schedule.some((s) => s.volunteerId === req.user.id && s.status !== 'pending')) {
       child.volunteerIds = child.volunteerIds.filter((id) => id !== req.user.id)

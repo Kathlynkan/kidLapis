@@ -13,7 +13,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
-import { daysSince } from '@/utils/format'
+import { daysSince, firstName } from '@/utils/format'
+import { levelFor, earnedBadges } from '@/utils/gamification'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -40,6 +41,7 @@ const handoverLoading = ref(false)
 const loading = ref(true)
 const success = ref('')
 const error = ref('')
+const verifyImpact = ref('')  // brief message shown to the volunteer after checking a quest
 
 // the homework in the order a volunteer needs it: overdue, to do, waiting to be checked, checked
 function homeworkRank(h) {
@@ -103,12 +105,30 @@ function editHomework(homeworkId) {
 }
 // The child handed a quest in; the volunteer checks it and the child is paid the berries (PUT /homework/:id/verify)
 const checkingQuestId = ref(null)
+const showAllJournal = ref(false)
 async function verifyQuest(homeworkId) {
   checkingQuestId.value = homeworkId
+  const prevPoints     = child.value?.points || 0
+  const prevBadgeCount = earnedBadges(child.value || {}, homework.value).length
   try {
-    await api.put(`/homework/${homeworkId}/verify`)
-    const h = await api.get('/homework', { params: { childId } })
+    const res = await api.put(`/homework/${homeworkId}/verify`)
+    const h   = await api.get('/homework', { params: { childId } })
     homework.value = h.data
+    if (child.value) child.value.points = res.data.points
+
+    const name        = firstName(child.value?.name || 'The child')
+    const newLevel    = levelFor(res.data.points).level
+    const prevLevel   = levelFor(prevPoints).level
+    const newBadgeCount = earnedBadges(child.value, homework.value).length
+
+    if (newLevel > prevLevel) {
+      verifyImpact.value = `${name} levelled up to Level ${newLevel}!`
+    } else if (newBadgeCount > prevBadgeCount) {
+      verifyImpact.value = `${name} just earned a new kueh badge!`
+    } else {
+      verifyImpact.value = `+${res.data.pointsAwarded} ★ awarded to ${name}`
+    }
+    setTimeout(() => { verifyImpact.value = '' }, 5000)
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -174,6 +194,12 @@ onMounted(() => {
       <div v-if="success" class="alert alert-success">{{ success }}</div>
       <StateMessage v-else-if="error" type="error" :message="error" />
 
+      <Transition name="verify-impact">
+        <div v-if="verifyImpact" class="verify-impact-toast" role="status">
+          <i class="bi bi-patch-check-fill me-2"></i>{{ verifyImpact }}
+        </div>
+      </Transition>
+
       <RouterLink
         v-if="auth.role === 'volunteer' || auth.role === 'coordinator'"
         class="back-link"
@@ -232,6 +258,41 @@ onMounted(() => {
           </div>
 
           <div class="col-lg-5 d-flex flex-column gap-4">
+            <!-- Interests & journal: the child's own words, for context before the session -->
+            <PeelCard
+              v-if="child.interests?.length || child.journalEntries?.length"
+              :title="`About ${firstName(child.name)}`"
+              icon="bi-person-heart"
+              :initial-open="true"
+            >
+              <div v-if="child.interests?.length" class="mb-3">
+                <p class="handover-key mb-2">Interests</p>
+                <div class="child-interest-tags">
+                  <span v-for="tag in child.interests" :key="tag" class="child-interest-tag">{{ tag }}</span>
+                </div>
+              </div>
+              <div v-if="child.journalEntries?.length">
+                <p class="handover-key mb-2">From the journal</p>
+                <div class="child-journal-entries">
+                  <div
+                    v-for="entry in (showAllJournal ? child.journalEntries : child.journalEntries.slice(0, 3))"
+                    :key="entry.id"
+                    class="child-journal-entry"
+                  >
+                    <span class="child-journal-date">{{ entry.date }}</span>
+                    <span class="child-journal-text">"{{ entry.text }}"</span>
+                  </div>
+                </div>
+                <button
+                  v-if="child.journalEntries.length > 3"
+                  class="journal-show-more"
+                  @click="showAllJournal = !showAllJournal"
+                >
+                  {{ showAllJournal ? 'Show less' : `Show all ${child.journalEntries.length} entries` }}
+                </button>
+              </div>
+            </PeelCard>
+
             <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
               <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
             </PeelCard>
@@ -699,6 +760,94 @@ onMounted(() => {
 
 .childprofilepage .quest-details {
   font-size: 14px;
+}
+
+/* ---------- interests & journal (child's own words) ---------- */
+
+.child-interest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.child-interest-tag {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.child-journal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.child-journal-entry {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #F7F4EE;
+}
+
+.child-journal-date {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cp-grey);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.child-journal-text {
+  font-size: 14px;
+  color: var(--cp-text);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.journal-show-more {
+  margin-top: 8px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--cp-soft, #EFF6F5);
+  color: var(--cp-text, #3A4A47);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.journal-show-more:hover { filter: brightness(0.94); }
+
+/* toast shown after a quest is checked: fixed at the bottom so it never shifts the layout */
+.verify-impact-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  padding: 10px 22px;
+  border-radius: 99px;
+  background: #2E8B57;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.verify-impact-enter-active { animation: verify-toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.verify-impact-leave-active { animation: verify-toast-in 0.25s ease-in reverse; }
+
+@keyframes verify-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 </style>

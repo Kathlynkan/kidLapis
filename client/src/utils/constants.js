@@ -24,6 +24,16 @@ export const SKILL_OPTIONS = ['English', 'Math', 'Science', 'Mother Tongue']
 
 export const LEVELS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 
+export const INTEREST_OPTIONS = [
+  'Football', 'Basketball', 'Swimming', 'Badminton', 'Running',
+  'Drawing', 'Painting', 'Music', 'Dance', 'Crafts',
+  'Video Games', 'Board Games', 'Puzzles', 'Lego',
+  'Reading', 'Comics', 'Storytelling',
+  'Cooking', 'Baking',
+  'Science', 'Animals', 'Dinosaurs', 'Nature', 'Space',
+  'Robots', 'Coding', 'Origami', 'Photography',
+]
+
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 
 // face: the Bootstrap icon that goes with the mood

@@ -6,6 +6,8 @@ import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
+import { formatDate } from '@/utils/format'
+import { INTEREST_OPTIONS } from '@/utils/constants'
 
 const auth = useAuthStore()
 
@@ -21,8 +23,28 @@ const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
 const toastQueue      = ref([])    // notification toasts: [{ id, icon, message, color }]
 let   toastCounter    = 0
 
-function dismissBadge() { badgeQueue.value.shift() }
+// Track which badge popups this child has already dismissed (per device, per child)
+const SEEN_KEY    = `seen-badges-${auth.user.childId}`
+const seenBadgeIds = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'))
+
+function dismissBadge() {
+  const badge = badgeQueue.value[0]
+  if (badge) {
+    seenBadgeIds.add(badge.id)
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...seenBadgeIds]))
+  }
+  badgeQueue.value.shift()
+}
 function showNextBadge(badge) { badgeQueue.value.push(badge) }
+
+// Queue popups for every earned badge the child has not yet dismissed.
+// Skips badges already sitting in the queue to avoid duplicates across poll cycles.
+function queueUnseen(delay) {
+  const inQueue = new Set(badgeQueue.value.map((b) => b.id))
+  const toShow  = earned.value.filter((b) => !seenBadgeIds.has(b.id) && !inQueue.has(b.id))
+  if (!toShow.length) return
+  setTimeout(() => { toShow.forEach(showNextBadge) }, delay)
+}
 
 function showToast(icon, message, color) {
   const id = ++toastCounter
@@ -96,6 +118,59 @@ const nextBadge = computed(() => {
     .reduce((best, curr) =>
       curr.current / curr.target > best.current / best.target ? curr : best,
     )
+})
+
+// ── Tabs ──────────────────────────────────────────────────────
+const activeTab = ref('quests') // 'quests' | 'journal' | 'tin'
+
+// ── Journal ───────────────────────────────────────────────────
+const journalInput  = ref('')
+const addingJournal = ref(false)
+
+async function addJournalEntry() {
+  const text = journalInput.value.trim()
+  if (!text) return
+  try {
+    addingJournal.value = true
+    const res = await api.post(`/children/${auth.user.childId}/journal`, { text })
+    me.value = res.data
+    journalInput.value = ''
+    if (res.data.pointsAwarded > 0) {
+      showToast('bi-journal-text', `+${res.data.pointsAwarded} ★ for your reflection!`, '#A9577A')
+    }
+    queueUnseen(600) // check for newly unlocked reflection badges
+  } catch { /* silent */ } finally {
+    addingJournal.value = false
+  }
+}
+
+async function deleteJournalEntry(entryId) {
+  try {
+    const res = await api.delete(`/children/${auth.user.childId}/journal/${entryId}`)
+    me.value = res.data
+  } catch { /* silent */ }
+}
+
+// consecutive days with at least one journal entry, counting back from today
+const journalStreak = computed(() => {
+  const dates = new Set((me.value?.journalEntries || []).map((e) => e.date))
+  let streak = 0
+  const d = new Date()
+  while (true) {
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    if (!dates.has(key)) break
+    streak++
+    d.setDate(d.getDate() - 1)
+  }
+  return streak
+})
+
+// cheers received in the last 7 days
+const weeklyCheerCount = computed(() => {
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 7)
+  const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
+  return (me.value?.cheersReceived || []).filter((c) => c.date >= cutoffStr).length
 })
 
 // the label under the tin shows the kueh you tapped, or else the next one to earn
@@ -175,13 +250,14 @@ async function refreshData() {
       showToast('bi-trophy-fill', `Level up! You're now Level ${level.value.level}!`, '#9B7820')
     }
 
-    // Badge unlocks
+    // Badge unlocks: pulse the kueh tin tile for badges earned in this cycle
     const justUnlocked = earned.value.filter((b) => !prevEarnedIds.has(b.id))
     if (justUnlocked.length) {
       justUnlockedId.value = justUnlocked[0].id
       setTimeout(() => { justUnlockedId.value = null }, 1400)
-      setTimeout(() => { justUnlocked.forEach(showNextBadge) }, gained > 0 ? 4000 : 2400)
     }
+    // Show popup for any earned badge not yet dismissed (new this cycle, or missed on a previous load)
+    queueUnseen(gained > 0 ? 4000 : 2400)
   } catch {
     // silent — background refresh
   }
@@ -198,6 +274,7 @@ onMounted(async () => {
     ])
     me.value       = c.data
     homework.value = h.data
+    queueUnseen(1200) // show popups for any earned badges not yet dismissed
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -290,6 +367,9 @@ onUnmounted(() => {
             <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
           </div>
           <div class="small lapis-muted">{{ level.starsToNext }} ★ to Level {{ level.level + 1 }}</div>
+          <div v-if="weeklyCheerCount > 0" class="small mt-2 hero-cheer-line">
+            👏 {{ weeklyCheerCount }} {{ weeklyCheerCount === 1 ? 'classmate' : 'classmates' }} cheered for you this week!
+          </div>
           <div v-if="nextBadge" class="small mt-2">
             Next kueh: <strong>{{ nextBadge.badge.kueh }}</strong>. {{ nextBadge.badge.rule }}.
           </div>
@@ -334,25 +414,112 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- the sandy board: the quests, the kueh tin and the finished quests, on white cards -->
-      <div class="board">
-        <!-- Quests to do -->
-        <h2 class="h4 mb-3"><i class="bi bi-map me-2"></i>Quests to do</h2>
+      <!-- tab navigation -->
+      <div class="child-tabs" role="tablist">
+        <button
+          role="tab"
+          :aria-selected="activeTab === 'quests'"
+          class="child-tab"
+          :class="{ 'child-tab-active': activeTab === 'quests' }"
+          @click="activeTab = 'quests'"
+        >
+          <i class="bi bi-map"></i> Quests
+          <span v-if="todo.length > 0" class="child-tab-count">{{ todo.length }}</span>
+        </button>
+        <button
+          role="tab"
+          :aria-selected="activeTab === 'journal'"
+          class="child-tab"
+          :class="{ 'child-tab-active': activeTab === 'journal' }"
+          @click="activeTab = 'journal'"
+        >
+          <i class="bi bi-journal-text"></i> Journal
+          <span v-if="journalStreak > 0" class="child-tab-streak">🔥{{ journalStreak }}</span>
+        </button>
+        <button
+          role="tab"
+          :aria-selected="activeTab === 'tin'"
+          class="child-tab"
+          :class="{ 'child-tab-active': activeTab === 'tin' }"
+          @click="activeTab = 'tin'"
+        >
+          <i class="bi bi-award"></i> Kueh Tin
+          <span v-if="earned.length" class="child-tab-count">{{ earned.length }}</span>
+        </button>
+      </div>
 
+      <!-- ── Quests tab ──────────────────────────────────────── -->
+      <div v-if="activeTab === 'quests'" class="board">
         <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
           <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
           <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
         </div>
 
         <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-2">
           <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
             <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
           </div>
         </div>
 
-        <!-- My Kueh Tin: one kueh for every badge -->
-        <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
+        <div v-if="done.length > 0" class="mt-3">
+          <button class="quest-history-toggle" @click="showDone = !showDone">
+            <i class="bi bi-check-lg me-2"></i>Completed quests
+            <span class="quest-history-count">{{ done.length }}</span>
+            <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
+          </button>
+          <div v-if="showDone" class="row g-3 mt-1">
+            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
+              <HomeworkQuestCard :homework="h" mode="child" @unsubmit="unsubmitQuest" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Journal tab ────────────────────────────────────── -->
+      <div v-else-if="activeTab === 'journal'" class="board">
+        <div class="journal-header mb-3">
+          <h2 class="h4 mb-0">My Journal</h2>
+          <div v-if="journalStreak > 0" class="journal-streak-badge">
+            🔥 {{ journalStreak }}-day streak!
+          </div>
+          <div v-else class="journal-streak-hint">Write today to start a streak!</div>
+        </div>
+
+        <section class="journal-card mb-3">
+          <form @submit.prevent="addJournalEntry" class="journal-form">
+            <textarea
+              v-model="journalInput"
+              class="journal-textarea"
+              placeholder="How are you feeling today? What made you smile? Anything on your mind? ✏️"
+              maxlength="500"
+              rows="3"
+            ></textarea>
+            <div class="journal-form-foot">
+              <span class="journal-char-count">{{ journalInput.length }}/500</span>
+              <button type="submit" class="journal-add-btn" :disabled="addingJournal || !journalInput.trim()">
+                <i class="bi bi-send-fill me-1"></i>Add entry
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <div v-if="me?.journalEntries?.length" class="journal-entries">
+          <div v-for="entry in me.journalEntries.slice(0, 10)" :key="entry.id" class="journal-entry">
+            <div class="journal-entry-head">
+              <span class="journal-entry-date">{{ formatDate(entry.date) }}</span>
+              <button class="journal-entry-delete" @click="deleteJournalEntry(entry.id)" aria-label="Delete entry">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            <div class="journal-entry-text">{{ entry.text }}</div>
+          </div>
+        </div>
+        <p v-else class="journal-empty">No entries yet — write your first one above! ✏️</p>
+      </div>
+
+      <!-- ── Kueh Tin tab ───────────────────────────────────── -->
+      <div v-else class="board">
         <section class="kueh-tin">
           <h3 class="kueh-tin-title">
             Your Kueh Tin
@@ -377,7 +544,6 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <!-- the label of the kueh you picked -->
             <div class="kueh-detail" :class="{ 'kueh-locked': !earnedIds.has(shown.id) }">
               <img :src="`/child_badges_images/${shown.image}.webp`" alt="" />
               <div>
@@ -392,20 +558,6 @@ onUnmounted(() => {
             </div>
           </div>
         </section>
-
-        <!-- Completed quests (collapsed by default, auto-opens after submit) -->
-        <div v-if="done.length > 0" class="mt-4">
-          <button class="quest-history-toggle" @click="showDone = !showDone">
-            <i class="bi bi-check-lg me-2"></i>Completed quests
-            <span class="quest-history-count">{{ done.length }}</span>
-            <i :class="showDone ? 'bi-chevron-up' : 'bi-chevron-down'" class="bi ms-auto"></i>
-          </button>
-          <div v-if="showDone" class="row g-3 mt-1">
-            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
-              <HomeworkQuestCard :homework="h" mode="child" @unsubmit="unsubmitQuest" />
-            </div>
-          </div>
-        </div>
       </div>
     </template>
   </div>
@@ -1067,5 +1219,198 @@ onUnmounted(() => {
   .badge-unlock-label,
   .confetti-dot,
   .kueh-just-unlocked .kueh-cup { animation: none; }
+}
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+
+.child-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 4px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.08);
+}
+
+.child-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #8D7F77;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.child-tab-active {
+  background: var(--role-accent-soft, #FBF8F3);
+  color: #4A3F3A;
+}
+
+.child-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #E8A0B8;
+  color: #4A3F3A;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.child-tab-streak {
+  font-size: 12px;
+  font-weight: 700;
+  color: #C47A35;
+}
+
+/* ── Journal header ──────────────────────────────────────── */
+
+.journal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.journal-streak-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #FFF0DC;
+  color: #C47A35;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.journal-streak-hint {
+  font-size: 13px;
+  color: #8D7F77;
+}
+
+/* ── My Journal ───────────────────────────────────────────── */
+
+.journal-card {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: var(--role-accent-soft, #FBF8F3);
+  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.10);
+}
+
+.journal-form { display: flex; flex-direction: column; gap: 8px; }
+
+.journal-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(74, 63, 58, 0.10);
+  font: inherit;
+  font-size: 14px;
+  color: #4A3F3A;
+  resize: vertical;
+  outline: none;
+}
+
+.journal-textarea:focus { box-shadow: 0 0 0 2px #D5CBEA; }
+
+.journal-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.journal-char-count {
+  font-size: 12px;
+  color: #8D7F77;
+}
+
+.journal-add-btn {
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #D5CBEA;
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.journal-add-btn:hover:not(:disabled) { background: #C0A8D8; }
+.journal-add-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.journal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.journal-entry {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(74, 63, 58, 0.08);
+}
+
+.journal-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.journal-entry-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: #A9577A;
+}
+
+.journal-entry-delete {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #C0A8A8;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.journal-entry-delete:hover { color: #9A3F36; }
+
+.journal-entry-text {
+  font-size: 14px;
+  color: #4A3F3A;
+  line-height: 1.5;
+}
+
+.journal-empty {
+  font-size: 14px;
+  color: #8D7F77;
+  margin: 0;
+}
+
+/* ── Hero cheer line ──────────────────────────────────────── */
+
+.hero-cheer-line {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 99px;
+  background: #FBE7A1;
+  color: #4A3F3A;
+  font-weight: 700;
 }
 </style>
