@@ -195,8 +195,8 @@ const summaryTiles = computed(() => {
   const next = nextSession.value
   const nextValue = next ? formatDate(next.date) : 'Not set yet' // always a date, like Mon, 26 Oct
   return [
-    { value: late > 0 ? late + ' late' : 'On time', label: late > 0 ? 'Needs a catch-up' : 'No late homework', late: late > 0, goToHomework: true },
-    { value: todoHomework.value.length - late + ' to do', label: 'To do at home', todo: todoHomework.value.length - late > 0, goToHomework: true },
+    { value: late > 0 ? late + ' Overdue' : 'On time', label: late > 0 ? 'Needs a catch-up' : 'No late homework', late: late > 0, goToHomework: true },
+    { value: todoHomework.value.length - late + ' Pending', label: 'To do at home', todo: todoHomework.value.length - late > 0, goToHomework: true },
     { value: nextValue, label: next && next.volunteer ? 'Next session with ' + firstName(next.volunteer) : 'Next session', next: true },
   ]
 })
@@ -407,7 +407,7 @@ watch(
             <div class="day-card">
               <div class="day-head">
                 <div>
-                  <h3 class="day-title">{{ daysSince(sessions[0].date) === 0 ? 'Today at student care' : 'Latest day at student care' }}</h3>
+                  <h3 class="day-title">{{ daysSince(sessions[0].date) === 0 ? 'Today at Student Care' : 'Latest Day at Student Care' }}</h3>
                   <div class="muted">{{ formatDate(sessions[0].date) }}<template v-if="sessions[0].volunteerName"> &middot; with {{ sessions[0].volunteerName }}</template></div>
                 </div>
                 <span class="mood-chip"><i v-if="MOOD_FACES[sessions[0].mood]" class="bi" :class="MOOD_FACES[sessions[0].mood]"></i>{{ MOOD_WORDS[sessions[0].mood] || 'Mood not noted' }}</span>

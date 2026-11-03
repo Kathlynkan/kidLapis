@@ -35,7 +35,7 @@ const form = ref({
   date: date,
   subject: 'English',
   topic: '',
-  attempted: 0,
+  attempted: 10,
   correct: 0,
   struggles: [],
   whatWorked: '',

@@ -82,7 +82,7 @@ function cancelDelete()  { showDeleteModal.value = false }
       </span>
 
       <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
-        Submit now and earn half ★!
+        Late • Half ★
       </span>
 
       <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
@@ -209,7 +209,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 }
 
 .quest-late-penalty {
-  color: #EE9F96;
+  color: #e87a6e;
   font-weight: 600;
 }
 </style>

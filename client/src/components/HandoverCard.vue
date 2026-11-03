@@ -17,10 +17,10 @@ const props = defineProps({
 const auth = useAuthStore()
 
 const VOLUNTEER_ROWS = [
-  { key: 'nextStep',   label: 'Teach next', icon: 'bi-flag' },
+  { key: 'nextStep',   label: 'Teach Next', icon: 'bi-flag' },
   { key: 'struggle',   label: 'Why',        icon: 'bi-question-circle' },
   { key: 'lastResult', label: 'Progress',   icon: 'bi-graph-up-arrow' },
-  { key: 'whatWorked', label: 'What helps', icon: 'bi-lightbulb' },
+  { key: 'whatWorked', label: 'What Helps', icon: 'bi-lightbulb' },
   { key: 'watchFor',   label: 'Mood',       icon: 'bi-emoji-smile' },
 ]
 
@@ -29,9 +29,9 @@ const PARENT_ROWS = [
   { key: 'headline',     label: 'Overview',      icon: 'bi-calendar-week' },
   { key: 'learning',     label: 'Learning',      icon: 'bi-book' },
   { key: 'friends',      label: 'Friends',       icon: 'bi-people' },
-  { key: 'worthKnowing', label: 'Worth knowing', icon: 'bi-info-circle' },
-  { key: 'celebrate',    label: 'Proud moment',  icon: 'bi-trophy' },
-  { key: 'atHome',       label: 'Try at home',   icon: 'bi-house-heart' },
+  { key: 'worthKnowing', label: 'Worth Knowing', icon: 'bi-info-circle' },
+  { key: 'celebrate',    label: 'Proud Moment',  icon: 'bi-trophy' },
+  { key: 'atHome',       label: 'Try at Home',   icon: 'bi-house-heart' },
 ]
 
 // a parent sees the weekly summary, everyone else sees the handover note
@@ -43,11 +43,11 @@ const rows = computed(() => (isParent.value ? PARENT_ROWS : VOLUNTEER_ROWS))
 // the title: 'Handover Notes', or e.g. 'Last week at student care'
 const title = computed(() => {
   if (!isParent.value) return 'Handover Notes'
-  let week = 'This week'
+  let week = 'This Week'
   if (props.handover && props.handover.weekTitle) {
     week = props.handover.weekTitle // 'This week', 'Last week' or 'Latest week'
   }
-  return `${week} at student care`
+  return `${week} at Student Care`
 })
 
 // the small badge next to the title

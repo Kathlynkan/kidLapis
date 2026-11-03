@@ -47,7 +47,7 @@ const lastSeen = computed(() =>
     <div v-else class="child-facts muted">No sessions recorded yet.</div>
 
     <div class="child-bottom">
-      <span class="last-seen">Last session: {{ lastSeen }}</span>
+      <span class="last-seen">Last Session: {{ lastSeen }}</span>
       <i class="bi bi-arrow-right-circle child-arrow"></i>
     </div>
   </div>

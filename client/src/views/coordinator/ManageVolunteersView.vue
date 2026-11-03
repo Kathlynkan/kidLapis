@@ -215,7 +215,7 @@ onMounted(async () => {
 
             <div class="d-flex gap-2">
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-volunteer">
-                {{ saving ? 'Saving...' : 'Save changes' }}
+                {{ saving ? 'Saving...' : 'Save Changes' }}
               </button>
               <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="cancelEdit">Cancel</button>
             </div>

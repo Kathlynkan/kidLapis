@@ -169,12 +169,12 @@ onMounted(loadData)
         <div class="tabs">
           <!-- schedule tab -->
           <button type="button" class="tab" :class="{ active: activeTab === 'today' }" data-test="tab-today" @click="activeTab = 'today'">
-            My Schedule
+            This Week
             <span class="tab-count">{{ selectedDayChildren.length }}</span>
           </button>
           <!-- all children -->
           <button type="button" class="tab" :class="{ active: activeTab === 'all' }" data-test="tab-all" @click="activeTab = 'all'">
-            All my children
+            All Children
             <span class="tab-count">{{ children.length }}</span>
           </button>
         </div>

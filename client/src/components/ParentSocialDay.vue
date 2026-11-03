@@ -21,8 +21,8 @@ const activityList = computed(() => activitiesOf(props.session))
 const lines = computed(() => {
   const all = [
     { icon: 'bi-egg-fried', label: 'Meal', text: props.session.meal },
-    { icon: 'bi-people', label: 'Getting along with others', text: props.session.interaction },
-    { icon: 'bi-star-fill', label: 'Something positive', text: props.session.behaviour },
+    { icon: 'bi-people', label: 'Getting Along with Others', text: props.session.interaction },
+    { icon: 'bi-star-fill', label: 'Proud Moment', text: props.session.behaviour },
   ]
   return all.filter((line) => line.text)
 })
@@ -87,7 +87,7 @@ const empty = computed(() => {
 
     <!-- what the child did -->
     <div v-if="activityList.length > 0">
-      <span class="small-label">What {{ childName }} did</span>
+      <span class="small-label">What {{ childName }} Did</span>
       <span v-for="activity in activityList" :key="activity" class="chip">{{ activity }}</span>
     </div>
 

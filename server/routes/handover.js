@@ -512,22 +512,22 @@ router.post('/:childId', async (req, res) => {
   if (type === 'weekly') {
     // Fri - Sun: this week. Mon - Thu: last week.
     let week = getWeekRange()
-    weekTitle = 'This week'
+    weekTitle = 'This Week'
     const today = new Date().getDay()
     if (today >= 1 && today <= 4) {
-      weekTitle = 'Last week'
+      weekTitle = 'Last Week'
     }
     sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
 
     // nothing that week (e.g. a school holiday) -> use the latest week that has sessions
     if (sessions.length === 0 && allSessions.length > 0) {
       week = getWeekOf(new Date(allSessions[0].date + 'T00:00:00'))
-      weekTitle = 'Latest week'
+      weekTitle = 'Latest Week'
       sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
     }
     periodLabel = formatWeek(week)
     weekWords = weekTitle.toLowerCase()
-    if (weekTitle === 'Latest week') {
+    if (weekTitle === 'Latest Week') {
       weekWords = `the week of ${periodLabel}`
     }
 

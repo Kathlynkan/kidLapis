@@ -278,7 +278,7 @@ onUnmounted(() => {
         <div class="text-center">
           <h1 class="h2 mb-1">Hi {{ auth.user.name }}!</h1>
           <div class="fs-4 fw-heavy mb-1">
-            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ displayPoints }} stars</span> &middot; Level {{ level.level }}
+            <span class="with-icon"><i class="bi bi-star-fill"></i>{{ displayPoints }}</span> &middot; Level {{ level.level }}
           </div>
           <div
             class="progress mx-auto level-bar mb-1"
@@ -329,7 +329,7 @@ onUnmounted(() => {
             <span v-if="season > 1" class="cake-season-badge">Season {{ season }}</span>
             <span v-if="layers < 4" class="cake-progress-label">{{ cakeProgress.starsToNext }} more ★ for next layer</span>
             <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
-            <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ waiting to be checked</span>
+            <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ being checked</span>
           </div>
         </div>
       </div>
@@ -352,12 +352,12 @@ onUnmounted(() => {
         </div>
 
         <!-- My Kueh Tin: one kueh for every badge -->
-        <h2 class="h4 mb-3 mt-2">My Kueh Tin</h2>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <h2 class="h4 mt-2">My Kueh Tin</h2>
+          <span class="kueh-tin-count kueh-tin-title">{{ earned.length }} of {{ BADGES.length }} kueh</span>
+        </div>
+
         <section class="kueh-tin">
-          <h3 class="kueh-tin-title">
-            Your Kueh Tin
-            <span class="kueh-tin-count">{{ earned.length }} of {{ BADGES.length }} kueh</span>
-          </h3>
 
           <div class="kueh-tin-body">
             <div class="kueh-grid">

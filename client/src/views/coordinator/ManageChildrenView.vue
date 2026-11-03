@@ -474,7 +474,7 @@ async function confirmDelete() {
               </button>
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-child">
                 <span v-if="saving" class="spinner-border spinner-border-sm"></span>
-                {{ editingId ? 'Save changes' : 'Save child' }}
+                {{ editingId ? 'Save Changes' : 'Save child' }}
               </button>
             </div>
           </form>
