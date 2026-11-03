@@ -2,7 +2,7 @@
      A podium for the first three places, then a white row for everyone else, on the sandy board.
      Children with the same stars share a place (1, 2, 2, 4). -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
@@ -51,7 +51,7 @@ function passNote(entry) {
   return entry.ahead ? `${entry.ahead.points - entry.points + 1} more stars to pass ${firstName(entry.ahead.name)}` : ''
 }
 
-onMounted(async () => {
+async function fetchLeaderboard() {
   try {
     const res = await api.get('/homework/leaderboard', { params: { period: 'week' } })
     entries.value = res.data
@@ -60,12 +60,23 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+function onVisible() { if (!document.hidden) fetchLeaderboard() }
+
+onMounted(() => {
+  fetchLeaderboard()
+  document.addEventListener('visibilitychange', onVisible)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisible)
 })
 </script>
 
 <template>
   <div class="container py-4 leaderboardpage">
-    <PageHeader title="Leaderboard" subtitle="Verified stars this week — resets every Monday!" />
+    <PageHeader title="Leaderboard" subtitle="Verified stars in the last 7 days" />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />

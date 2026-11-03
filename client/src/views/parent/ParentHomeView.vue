@@ -11,6 +11,7 @@ import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // a
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import HandoverCard from '@/components/HandoverCard.vue' // the weekly AI summary box (shared with the volunteer page)   (Yuqi)
 import { firstName, formatDate, daysSince, activitiesOf, subjectStyle } from '@/utils/format' // small helpers for names, dates, activities and subject colours
+import { BADGES, earnedBadges } from '@/utils/gamification'
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
 import '@/css/main/components.css' // the subject tag
@@ -101,6 +102,11 @@ function rowTag(item, groupKey) {
   if (groupKey === 'waiting') return 'Being checked'
   return 'Done'
 }
+
+// how many badges the selected child has earned (for parent display)
+const earnedBadgeCount = computed(() =>
+  selectedChild.value ? earnedBadges(selectedChild.value, homework.value).length : 0,
+)
 
 // the grey line under the title of a homework row (the subject is the tag in front of it)
 function rowMeta(item, groupKey) {
@@ -293,7 +299,7 @@ watch(
           <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span></div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span> &middot; <span class="with-icon"><i class="bi bi-award-fill"></i>{{ earnedBadgeCount }}/{{ BADGES.length }} kueh earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">

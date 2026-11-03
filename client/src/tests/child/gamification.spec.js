@@ -147,18 +147,25 @@ describe('earnedBadges', () => {
   })
 })
 
-describe('badges unlock for submitted (not yet verified) homework', () => {
-  it('awards first-quest for a submitted homework', () => {
+describe('earnedBadges requires verified status — submitted homework does not count', () => {
+  it('does not award first-quest for a submitted (unverified) homework', () => {
     const result = earnedBadges(child0, [submittedHw()])
-    expect(result.map((b) => b.id)).toContain('first-quest')
+    expect(result.map((b) => b.id)).not.toContain('first-quest')
   })
 
-  it('awards quest-champion for 5 submitted homework', () => {
+  it('does not award quest-champion for 5 submitted (unverified) homework', () => {
     const hw = Array.from({ length: 5 }, (_, i) => submittedHw({ id: `h${i}` }))
     const result = earnedBadges(child0, hw)
-    expect(result.map((b) => b.id)).toContain('quest-champion')
+    expect(result.map((b) => b.id)).not.toContain('quest-champion')
   })
 
+  it('awards first-quest once the homework is verified', () => {
+    const result = earnedBadges(child0, [verifiedHw()])
+    expect(result.map((b) => b.id)).toContain('first-quest')
+  })
+})
+
+describe('badgeProgress counts submitted homework for live display', () => {
   it('century counts pending points from submitted homework', () => {
     // child has 90 server-confirmed points; one submitted 10-pt quest tips them over
     const { current, target } = badgeProgress(
