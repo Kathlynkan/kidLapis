@@ -10,7 +10,7 @@
 import { readFile } from 'node:fs/promises'
 import bcrypt from 'bcryptjs'
 import { connectDb, disconnectDb } from './db.js'
-import { User, Child, Session, Homework, Message, Handover, Deck } from '../models/index.js'
+import { User, Child, Session, Homework, Message, Handover, Deck, Notification } from '../models/index.js'
 import { newLinkCode } from '../models/helpers.js'
 
 const DATE_FIELDS = ['date', 'dueDate', 'sentAt', 'createdAt', 'completedAt']
@@ -74,6 +74,10 @@ for (const [Model, rows] of collections) {
 // clear saved AI summaries so they are made again from the fresh demo sessions
 await Handover.deleteMany({})
 console.log('  Handover: cleared')
+
+// clear the bell's saved updates ("Aisha accepted Sofia" ...): they belong to the old demo data
+await Notification.deleteMany({})
+console.log('  Notification: cleared')
 
 await disconnectDb()
 console.log('Database reset with demo data ✅')

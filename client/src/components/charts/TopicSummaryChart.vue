@@ -1,5 +1,5 @@
 <!-- TopicSummaryChart - average accuracy per subject (bar chart)  Owner: Jachin
-     Used on: Child profile (Yuqi), Teacher dashboard (Yu Xuan)
+     Used on: Child profile (Yuqi), Coordinator dashboard (Yu Xuan)
      Props: sessions (Array), title (String),
             calm (Boolean) - the quiet look for a volunteer: plain teal bars with the percentage -->
 <script setup>

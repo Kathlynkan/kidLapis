@@ -1,6 +1,7 @@
 <!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
@@ -15,6 +16,7 @@ import '@/css/main/labels.css' // the capital-letter captions
 import '@/css/main/components.css' // the subject tag
 
 const auth = useAuthStore()
+const route = useRoute() // /parent?child=c_5 opens that child (the NavBar bell links here, Kai Sen)
 
 // ---------- the things this page remembers ----------
 const children = ref([]) // all the children of this parent
@@ -233,7 +235,8 @@ async function loadChild(childId) {
           api.put(`/sessions/${session.id}/viewed`)
       )
   )
-  
+  window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell drops these "new updates" (Kai Sen)
+
   const homeworkResponse = await api.get('/homework', { params: { childId } })
   homework.value = homeworkResponse.data
 }
@@ -250,18 +253,28 @@ async function switchChild(childId) {
 }
 
 // ---------- when the page opens: get the children, then show the first one ----------
+// (or the one in the address, /parent?child=c_5, when the parent came from the NavBar bell)
 onMounted(async () => {
   try {
     const response = await api.get('/children')
     children.value = response.data
     if (children.value.length > 0) {
-      await loadChild(children.value[0].id)
+      const asked = children.value.find((child) => child.id === route.query.child)
+      await loadChild(asked ? asked.id : children.value[0].id)
     }
   } catch (err) {
     error.value = errorMessage(err)
   }
   loading.value = false
 })
+
+// already on this page and the bell opens another child: switch to it
+watch(
+  () => route.query.child,
+  (childId) => {
+    if (childId && children.value.some((child) => child.id === childId)) switchChild(childId)
+  },
+)
 </script>
 
 <template>

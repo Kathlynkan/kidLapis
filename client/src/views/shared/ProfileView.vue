@@ -2,7 +2,7 @@
   Profile - every logged-in user can view and edit their own profile.
   All roles: name + password change.
   Volunteer:  + skills and available days (used by matchmaking).
-  Child:      avatar picker (name is managed by the teacher).
+  Child:      avatar picker (name is managed by the coordinator).
 ============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
@@ -36,11 +36,7 @@ function cancel() {
   router.back() // return user to wherever they came from
 }
 
-// log out and go to the login page
-async function logout() {
-  await auth.logout()
-  router.push('/login')
-}
+// (Log out is in the NavBar, next to the user's name, on every page.)
 
 async function save() {
   error.value = ''
@@ -126,7 +122,7 @@ async function save() {
             </div>
           </PeelCard>
 
-          <!-- Change password (not for child — teacher manages child accounts) -->
+          <!-- Change password (not for child — coordinator manages child accounts) -->
           <PeelCard v-if="auth.role !== 'child'" title="Change password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
             <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
@@ -208,11 +204,6 @@ async function save() {
           </div>
 
         </form>
-
-        <!-- log out: at the bottom of the page -->
-        <div class="mt-4 pt-3 border-top">
-          <button type="button" class="btn btn-outline-secondary" data-test="logout" @click="logout">Log out</button>
-        </div>
       </div>
     </div>
   </div>
@@ -223,8 +214,8 @@ async function save() {
 
 /* Styles for the profile page (ProfileView.vue). Every role has the same look, only the colours change.
    The colours of each role are the variables just below (the names start with --pf).
-   The child uses the accent colour of the role (--role-accent in main.css); the parent, volunteer and teacher have their own blocks.
-   Look: no dark outlines, soft corners, bold small captions, and buttons with small corners (Cancel and Log out are the light colour, Save is the main colour).
+   The child uses the accent colour of the role (--role-accent in main.css); the parent, volunteer and coordinator have their own blocks.
+   Look: no dark outlines, soft corners, bold small captions, and buttons with small corners (Cancel is the light colour, Save is the main colour).
    To change a colour for one role, change it in that role's block. To change the look, change the rules after the blocks. */
 
 /* ---------- the colours of each role ---------- */
@@ -249,7 +240,7 @@ async function save() {
   /* Save, the chosen skills and days, the ring of a box you are typing in */
   --pf-main-hover: #CC8DA2;
   --pf-soft: var(--role-accent-soft);
-  /* the role tag, Log out, Cancel */
+  /* the role tag, Cancel */
   --pf-soft-hover: #EBDAE2;
   --pf-ok: #A8CC90;
   /* the message after you save */
@@ -289,8 +280,8 @@ async function save() {
   --pf-error: #EE9F96;
 }
 
-/* the teacher: lavender, the same as the other teacher pages (teacherpage.css) */
-.role-teacher .profilepage {
+/* the coordinator: lavender, the same as the other coordinator pages (coordinatorpage.css) */
+.role-coordinator .profilepage {
   --pf-text: #3D3454;
   --pf-title: #5B4B8A;
   --pf-muted: #7D7690;
@@ -424,7 +415,7 @@ async function save() {
   color: #000000;
 }
 
-/* ---------- the buttons: Save, Cancel and Log out ---------- */
+/* ---------- the buttons: Save and Cancel ---------- */
 
 .profilepage .btn {
   border: 0;
@@ -455,10 +446,6 @@ async function save() {
   background: var(--pf-main-hover);
 }
 
-/* the line above the Log out button (border-top is important in bootstrap, so this is too) */
-.profilepage .border-top {
-  border-top-color: var(--pf-line) !important;
-}
 
 /* ---------- the messages after you save ---------- */
 

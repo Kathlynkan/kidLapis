@@ -9,16 +9,18 @@
   edited in place (pencil: change day/time) or removed (x), or all at once ("Unassign all").
   Time dropdowns grey out times that would double-book the volunteer or the child.
   The server re-checks everything: days the volunteer isn't free, and double-bookings.
+  A new day is a REQUEST: it stays "waiting" until the volunteer accepts it from their
+  bell (Kai Sen, routes/requests.js). Until then the child still counts as unassigned.
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture
 import { subjectStyle } from '@/utils/format'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
 const route = useRoute()
 const router = useRouter()
@@ -54,6 +56,17 @@ const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
 const firstName = (name) => name.split(' ')[0]
 
+// ---------- Waiting for a volunteer to accept ----------
+const volunteerNames = ref({}) // { volunteerId: 'Aisha Rahman' }, for "Waiting for Aisha"
+
+// First names of the volunteers who still have to accept a day with this child
+function waitingFor(c) {
+  const ids = [...new Set((c.schedule || []).filter((s) => s.status === 'pending').map((s) => s.volunteerId))]
+  return ids.map((id) => firstName(volunteerNames.value[id] || 'a volunteer'))
+}
+
+const isPendingDay = (s, day) => (s.pendingDays || []).includes(day)
+
 // ---------- Child list + search ----------
 
 // Children with no volunteer first, then alphabetical.
@@ -77,11 +90,24 @@ const filteredChildren = computed(() => {
 const unassignedCount = computed(() => children.value.filter((c) => !isAssigned(c)).length)
 
 async function loadChildren() {
-  const res = await api.get('/children')
-  children.value = res.data
+  const [childRes, volunteerRes] = await Promise.all([
+    api.get('/children'),
+    api.get('/users', { params: { role: 'volunteer' } }),
+  ])
+  children.value = childRes.data
+  volunteerNames.value = Object.fromEntries(volunteerRes.data.map((v) => [v.id, v.name]))
 }
 
+// A volunteer accepted/declined a request (live, via the NavBar): "waiting" changes to the
+// answer without a refresh. The open child's suggestions reload too. (Kai Sen)
+function onScheduleChanged() {
+  loadChildren().catch(() => {})
+  if (openId.value) loadSuggestions(openId.value)
+}
+onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
+
 onMounted(async () => {
+  window.addEventListener('schedule-changed', onScheduleChanged)
   try {
     await loadChildren()
   } catch (err) {
@@ -247,7 +273,7 @@ async function saveEdit(child, s) {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage matchpage">
+  <div class="container py-4 coordinatorpage matchpage">
     <PageHeader title="Matchmaking" subtitle="Match each child with volunteers who teach the subjects they need." />
 
     <StateMessage v-if="loading" type="loading" />
@@ -302,6 +328,9 @@ async function saveEdit(child, s) {
               </span>
             </span>
 
+            <span v-if="waitingFor(c).length" class="tag tag-wait" data-test="waiting-badge">
+              <i class="bi bi-hourglass-split"></i> Waiting for {{ waitingFor(c).join(', ') }} to accept
+            </span>
             <span v-if="!isAssigned(c)" class="tag tag-red" data-test="no-volunteer-badge">No volunteer</span>
             <span v-else class="person-sub count">
               {{ c.volunteerIds.length }} {{ c.volunteerIds.length === 1 ? 'volunteer' : 'volunteers' }}
@@ -340,6 +369,9 @@ async function saveEdit(child, s) {
                             <div class="suggest-title">
                               <h4 class="person-name">{{ s.name }}</h4>
                               <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">Assigned</span>
+                              <span v-if="s.pendingDays.length" class="tag tag-wait" data-test="waiting-badge">
+                                Waiting to accept
+                              </span>
                             </div>
                             <div class="person-sub">
                               Score {{ s.score }}: subjects +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
@@ -393,7 +425,7 @@ async function saveEdit(child, s) {
                               @click="assign(c, s)"
                             >
                               <template v-if="busyKey === keyOf(c.id, s.volunteerId)">Saving…</template>
-                              <template v-else-if="s.assigned"><i class="bi bi-plus-lg"></i> Add day</template>
+                              <template v-else-if="s.assigned || s.pendingDays.length"><i class="bi bi-plus-lg"></i> Add day</template>
                               <template v-else>Assign</template>
                             </button>
                           </template>
@@ -404,14 +436,14 @@ async function saveEdit(child, s) {
                           <span v-else class="person-sub">Booked on all of {{ firstName(s.name) }}'s free days</span>
 
                           <button
-                            v-if="s.assigned"
+                            v-if="s.assigned || s.pendingDays.length"
                             type="button"
                             class="t-btn t-btn-soft"
                             :disabled="busyKey !== ''"
                             data-test="unassign-btn"
                             @click="unassign(c, s)"
                           >
-                            Unassign all days
+                            {{ s.assigned ? 'Unassign all days' : 'Cancel request' }}
                           </button>
                         </div>
                       </div>
@@ -475,8 +507,14 @@ async function saveEdit(child, s) {
                           </form>
 
                           <!-- normal chip -->
-                          <span v-else class="slot-chip" data-test="slot-chip">
+                          <span
+                            v-else
+                            class="slot-chip"
+                            :class="{ 'is-pending': isPendingDay(s, slot.day) }"
+                            data-test="slot-chip"
+                          >
                             {{ slot.day }} {{ slot.time || '--:--' }}
+                            <span v-if="isPendingDay(s, slot.day)" class="slot-waiting">· waiting</span>
                             <button
                               type="button"
                               class="chip-btn chip-edit"
@@ -539,7 +577,7 @@ async function saveEdit(child, s) {
 /* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
 
 /* The matchmaking page (MatchmakingView.vue). The board, the white cards, the tags, the buttons and the facts
-   come from css/teacher/teacherpage.css. Here are only the list of children and the panel that opens under a child. */
+   come from css/coordinator/coordinatorpage.css. Here are only the list of children and the panel that opens under a child. */
 
 .matchpage .children {
   display: flex;
@@ -680,6 +718,27 @@ async function saveEdit(child, s) {
   font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+/* a day the volunteer hasn't accepted yet: dashed, with "· waiting" */
+.matchpage .slot-chip.is-pending {
+  box-shadow: none;
+  border: 1.5px dashed #C8A028;
+  background: #FBF5DC;
+}
+
+.matchpage .slot-waiting {
+  margin: 0 4px 0 2px;
+  color: #8A6D12;
+  font-weight: 500;
+}
+
+/* "Waiting for Aisha to accept" / "Waiting to accept" */
+.matchpage .tag-wait {
+  background: #FBF5DC;
+  color: #6E5410;
+  box-shadow: inset 0 0 0 1px #E3C76A;
+  white-space: nowrap;
 }
 
 .matchpage .chip-btn {

@@ -7,9 +7,9 @@
     {
       "id": "u_coord",
       "name": "Tan Mei Ling",
-      "email": "teacher@kidslapis.sg",
+      "email": "coordinator@kidslapis.sg",
       "password": "password123",
-      "role": "teacher",
+      "role": "coordinator",
       "avatar": "/photos/tan-mei-ling.jpg",
       "createdAt": "2026-08-07T01:00:00.000Z"
     },

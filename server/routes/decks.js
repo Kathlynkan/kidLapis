@@ -9,7 +9,7 @@ const router = Router()
 
 // Everything in this file needs a logged-in volunteer or coordinator (a child must never see the answers).
 router.use(requireAuth)
-router.use(requireRole('volunteer', 'teacher'))
+router.use(requireRole('volunteer', 'coordinator'))
 
 // ---------------------------------------------------------------
 // GET /decks

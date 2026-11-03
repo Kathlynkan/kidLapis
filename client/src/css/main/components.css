@@ -67,7 +67,7 @@
   }
 }
 
-/* the error message: the quiet bar, a pale pink fill with a thin red line (the same as the warning tags on the teacher pages) */
+/* the error message: the quiet bar, a pale pink fill with a thin red line (the same as the warning tags on the coordinator pages) */
 .state-error {
   display: flex;
   align-items: center;
@@ -359,7 +359,7 @@
 }
 
 /* the small round tags of a homework: the state (top right), the status line (child page) and the two notes.
-   The same shape as the tags of the parent, volunteer and teacher pages. A word is never broken in two. */
+   The same shape as the tags of the parent, volunteer and coordinator pages. A word is never broken in two. */
 .badge.quest-pill,
 .badge.quest-status,
 .badge.quest-returned,

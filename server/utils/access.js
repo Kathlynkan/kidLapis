@@ -1,5 +1,5 @@
 // Who is allowed to see which child? (shared helper - owner: Kai Sen)
-//   teacher     -> every child
+//   coordinator -> every child
 //   volunteer   -> children assigned to them (child.volunteerIds)
 //   parent      -> their own children (child.parentId)
 //   child       -> only themselves (user.childId)
@@ -9,7 +9,7 @@ import { Child } from '../models/index.js'
 export function canAccessChild(user, child) {
   if (!child) return false
   switch (user.role) {
-    case 'teacher':
+    case 'coordinator':
       return true
     case 'volunteer':
       return child.volunteerIds.includes(user.id)
@@ -25,7 +25,7 @@ export function canAccessChild(user, child) {
 // The same rule written as a MongoDB filter, for Child.find(...)
 export function childFilterFor(user) {
   switch (user.role) {
-    case 'teacher':
+    case 'coordinator':
       return {}
     case 'volunteer':
       return { volunteerIds: user.id } // matches if the array contains user.id

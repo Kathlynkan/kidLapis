@@ -1,7 +1,7 @@
 <!-- SkillProgressChart - accuracy over time, one subject at a time.   Owner: Jachin
      Subject picker defaults to the subject with the most sessions.
      Props: sessions (Array) - from GET /sessions?childId=...
-            calm (Boolean) - the quiet look for volunteer/teacher (teal/lavender axis ticks)
+            calm (Boolean) - the quiet look for volunteer/coordinator (teal/lavender axis ticks)
             tone ('teal' | 'lavender') - axis tick colour in calm mode
      Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>

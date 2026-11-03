@@ -14,10 +14,10 @@ import { describe, it, expect } from 'vitest'
 import ChatThread from '@/components/ChatThread.vue'
 
 // pretend messages so we dont need the real server. same fields as the real ones
-// (one from the parent u_par1, one from the teacher)
+// (one from the parent u_par1, one from the coordinator)
 const messages = [
     { id: 'm1', fromId: 'u_par1', fromName: 'Ms Grace', text: 'Hello', sentAt: '2026-10-21T12:00:00.000Z' },
-    { id: 'm2', fromId: 'u_coord', fromName: 'Teacher', text: 'Hi there', sentAt: '2026-10-21T12:30:00.000Z' },
+    { id: 'm2', fromId: 'u_coord', fromName: 'Coordinator', text: 'Hi there', sentAt: '2026-10-21T12:30:00.000Z' },
 ]
 
 // every test does the same 3 things: build the chat box with mount, do something to it if needed, then check it

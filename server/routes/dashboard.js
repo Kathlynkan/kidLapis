@@ -15,7 +15,7 @@ import { buildAlerts, todayKey } from '../utils/alerts.js'
 import { toPlain } from '../utils/toPlain.js'
 
 const router = Router()
-router.use(requireAuth, requireRole('teacher'))
+router.use(requireAuth, requireRole('coordinator'))
 
 // GET /dashboard/summary  -> numbers for the KPI cards (basic version DONE)
 router.get('/summary', async (req, res) => {
@@ -39,7 +39,7 @@ router.get('/summary', async (req, res) => {
 })
 
 // GET /dashboard/alerts -> [{ id, type, severity, childId, childName, avatar, followUp, message }]
-router.get('/alerts', requireAuth, requireRole('teacher'), async (req, res) => {
+router.get('/alerts', requireAuth, requireRole('coordinator'), async (req, res) => {
   const [children, sessions, homework] = await Promise.all([Child.find(), Session.find(), Homework.find()])
   res.json(
     buildAlerts({
@@ -52,7 +52,7 @@ router.get('/alerts', requireAuth, requireRole('teacher'), async (req, res) => {
 })
 
 // PUT /dashboard/follow-up/:childId   body: { followUp: true | false }
-router.put('/follow-up/:childId', requireAuth, requireRole('teacher'), async (req, res) => {
+router.put('/follow-up/:childId', requireAuth, requireRole('coordinator'), async (req, res) => {
   const { followUp } = req.body
   if (typeof followUp !== 'boolean') {
     return res.status(400).json({ message: 'followUp must be true or false.' })

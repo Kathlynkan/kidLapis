@@ -17,7 +17,7 @@ const celebrating     = ref(false)
 const submitError     = ref('')
 const newBadge        = ref(null)  // badge just unlocked — shows the reveal overlay
 const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
-const verifiedGain    = ref(null)  // { points } shown as a toast when teacher verifies a quest
+const verifiedGain    = ref(null)  // { points } shown as a toast when coordinator verifies a quest
 
 const CONFETTI = [
   { color: '#E8A0B8', tx:  -70, ty: -150 },
@@ -47,7 +47,7 @@ const showDone  = ref(false)
 
 const emptyQuestMessage = computed(() =>
   homework.value.length === 0
-    ? 'No quests yet — your teacher will add some soon!'
+    ? 'No quests yet — your coordinator will add some soon!'
     : 'All quests done — great work!',
 )
 
@@ -493,7 +493,7 @@ onUnmounted(() => {
 .cake-layer:last-child  { border-radius: 10px 10px 0 0; }
 .cake-layer:only-child  { border-radius: 10px; }
 
-/* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
+/* the colours of the layers, bottom to top: coordinator, volunteer, parent, child (the same order as the stripes under the navbar) */
 .cake-layer-1 { --c: #D5CBEA; }
 .cake-layer-2 { --c: #9BD3B2; }
 .cake-layer-3 { --c: #AED9D8; }

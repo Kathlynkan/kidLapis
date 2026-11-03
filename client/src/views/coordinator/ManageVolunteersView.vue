@@ -6,7 +6,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import { subjectStyle } from '@/utils/format'
 import StateMessage from '@/components/StateMessage.vue'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 const Days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const volunteers = ref([])
@@ -119,7 +119,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Volunteers" subtitle="Skills and availability power the matchmaking." />
 
     <StateMessage v-if="loading" type="loading" />

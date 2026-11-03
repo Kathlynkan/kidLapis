@@ -14,7 +14,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -58,8 +58,18 @@ onMounted(async () => {
     loading.value = false
   }
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('schedule-changed', onScheduleChanged)
+})
+
+// A volunteer accepted/declined a session (live, via the NavBar): the timetable updates
+// from "waiting" without a refresh (Kai Sen)
+function onScheduleChanged() {
+  loadData().catch(() => {})
+}
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()
@@ -72,7 +82,8 @@ const slotsByCell = computed(() => {
   const map = {}
   for (const child of children.value) {
     for (const s of child.schedule || []) {
-      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '' })
+      // pending = the volunteer hasn't accepted this day yet (shown dashed, "waiting")
+      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '', pending: s.status === 'pending' })
     }
   }
   for (const list of Object.values(map)) {
@@ -182,7 +193,7 @@ async function removeSlot(volunteer, day, slot) {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Weekly schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
@@ -230,8 +241,16 @@ async function removeSlot(volunteer, day, slot) {
                 data-test="schedule-cell"
               >
                 <template v-if="isFree(v, d)">
-                  <div v-for="slot in slotsFor(v, d)" :key="slot.child.id" class="slot" data-test="schedule-slot">
+                  <div
+                    v-for="slot in slotsFor(v, d)"
+                    :key="slot.child.id"
+                    class="slot"
+                    :class="{ 'is-pending': slot.pending }"
+                    :title="slot.pending ? `Waiting for ${firstName(v.name)} to accept` : undefined"
+                    data-test="schedule-slot"
+                  >
                     <span class="slot-time">{{ slot.time || '--:--' }}</span>
+                    <span v-if="slot.pending" class="slot-waiting" data-test="slot-waiting">waiting</span>
                     <RouterLink
                       :to="{ name: 'child-profile', params: { id: slot.child.id } }"
                       class="slot-name"
@@ -338,3 +357,18 @@ async function removeSlot(volunteer, day, slot) {
     </template>
   </div>
 </template>
+
+<style>
+/* A session the volunteer hasn't accepted yet (their bell: Accept / Decline): dashed, "waiting".
+   The other slot styles are in css/coordinator/coordinatorpage.css. */
+.coordinatorpage .slot.is-pending {
+  border: 1.5px dashed #C8A028;
+  background: #FBF5DC;
+}
+
+.coordinatorpage .slot-waiting {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A6D12;
+}
+</style>

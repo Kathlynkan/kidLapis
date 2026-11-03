@@ -78,7 +78,7 @@ async function handleSignup() {
         <div class="auth-card">
           <header>
             <h1 class="page-title">Create an account</h1>
-            <p class="page-subtitle">Teachers create child accounts for the centre.</p>
+            <p class="page-subtitle">Coordinators create child accounts for the centre.</p>
           </header>
 
           <div v-if="error" class="state-error" role="alert" data-test="signup-error">

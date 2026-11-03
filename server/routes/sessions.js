@@ -7,6 +7,7 @@ import { Router } from 'express'
 import { Child, Session, User, Handover } from '../models/index.js' // import mongoDB collections
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild, visibleChildIds } from '../utils/access.js'
+import { notifyBell } from '../utils/notify.js'
 
 const router = Router()
 router.use(requireAuth) // apply requireAuth to all routes (every route requires login)
@@ -36,7 +37,7 @@ router.get('/', async (req, res) => { // get list of all sessions
       }
 
       filter.childId = childId
-    } else if (req.user.role !== 'teacher') {
+    } else if (req.user.role !== 'coordinator') {
       // non-coordinators can only see sessions belonging to children they can access
       // coordinators can see all sessions of all the children
       const allowedChildren = await visibleChildIds(req.user)
@@ -121,7 +122,7 @@ router.get('/:id', async (req, res) => { // get one specific session
 })
 
 // POST /sessions
-router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => { 
+router.post('/', requireRole('volunteer', 'coordinator'), async (req, res) => { 
   // only volunteers and coordinators can create brand new session
   try {
     const child = await Child.findById(req.body.childId)
@@ -194,7 +195,10 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
     })
 
     // return new session
-    return res.status(201).json(session) 
+    // the parent's NavBar bell shows "summary updated" straight away (Kai Sen, utils/notify.js)
+    notifyBell(req, [child.parentId])
+
+    return res.status(201).json(session)
     // status 201: request succeeded and created new session
     // default status 200: request succeeded
   } catch (error) {
@@ -230,7 +234,7 @@ router.put('/:id/viewed', requireRole('parent'), async (req, res) => {
 })
 
 // PUT /sessions/:id
-router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => { 
+router.put('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => { 
   // only volunteers and coordinators can edit session
   try {
     const session = await Session.findById(req.params.id)
@@ -249,7 +253,7 @@ router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
     }
 
     // check if user is coordinator or owner of session
-    if (req.user.role !== 'teacher' && session.volunteerId !== req.user.id) {
+    if (req.user.role !== 'coordinator' && session.volunteerId !== req.user.id) {
       // coordinators can edit all sessions
       // volunteers can only edit their own sessions
       return res.status(403).json({
@@ -319,7 +323,7 @@ router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
 })
 
 // DELETE /sessions/:id
-router.delete('/:id', requireRole('volunteer', 'teacher'), async (req, res) => { 
+router.delete('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => { 
   // only volunteers and coordinators can delete session
     try {
     const session = await Session.findById(req.params.id)
@@ -338,7 +342,7 @@ router.delete('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
     }
 
     // check if user is coordinator or owner of session
-    if (req.user.role !== 'teacher' && session.volunteerId !== req.user.id) {
+    if (req.user.role !== 'coordinator' && session.volunteerId !== req.user.id) {
       // coordinators can delete all sessions
       // volunteers can only delete their own sessions
       return res.status(403).json({

@@ -1,6 +1,6 @@
 <!-- =============================================================
   HandoverCard - the AI summary box.                  Owner: Yuqi
-    volunteer / teacher (ChildProfileView) -> "Handover Notes" for the next session
+    volunteer / coordinator (ChildProfileView) -> "Handover Notes" for the next session
     parent (ParentHomeView)                -> the weekly summary 
   (the server also picks the summary by role, so both always match)
 ============================================================= -->

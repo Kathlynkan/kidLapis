@@ -1,13 +1,13 @@
-/* EXTERNAL CSS: the five teacher pages (Dashboard, Children, Volunteers, Matchmaking, Schedule). It is imported at the top of each of those files. */
-/* Styles for the teacher pages: Dashboard (CoordinatorDashboardView.vue), Children (ManageChildrenView.vue),
+/* EXTERNAL CSS: the five coordinator pages (Dashboard, Children, Volunteers, Matchmaking, Schedule). It is imported at the top of each of those files. */
+/* Styles for the coordinator pages: Dashboard (CoordinatorDashboardView.vue), Children (ManageChildrenView.vue),
    Volunteers (ManageVolunteersView.vue), Matchmaking (MatchmakingView.vue) and Schedule (ScheduleView.vue).
-   The teacher's Messages page and one child's page are styled in their own .vue files (MessagesView.vue, ChildProfileView.vue).
-   Every rule starts with .teacherpage so it only affects those pages.
-   Colours (lavender is the teacher layer, the purple layer in main.css):
+   The coordinator's Messages page and one child's page are styled in their own .vue files (MessagesView.vue, ChildProfileView.vue).
+   Every rule starts with .coordinatorpage so it only affects those pages.
+   Colours (lavender is the coordinator layer, the purple layer in main.css):
      #3D3454 deep plum        text
      #5B4B8A plum             the page title and the card titles
      #7D7690 grey plum        small text
-     #D5CBEA lavender         the chosen filter, the buttons, the teacher's letter
+     #D5CBEA lavender         the chosen filter, the buttons, the coordinator's letter
      #F0EAF8 pale lavender    the count tiles, the tags, the Teaches / Free on boxes, the empty bar
      #B8A9DD mid lavender     the bars of the chart
      #6B5CA5 deep lavender    the small icons and the pressed flag
@@ -23,51 +23,51 @@
 
 @import '../main/labels.css'; /* the capital-letter captions */
 
-.teacherpage {
+.coordinatorpage {
   color: #3D3454;
 }
 
 /* ---------- the title ---------- */
 
 /* the title and the sentence under it keep the size and weight of the other pages (PageHeader.vue is shared) */
-.teacherpage .lapis-page-header .page-title {
+.coordinatorpage .lapis-page-header .page-title {
   font-family: inherit;
   color: #5B4B8A;
 }
 
-.teacherpage .lapis-page-header .page-subtitle {
+.coordinatorpage .lapis-page-header .page-subtitle {
   color: #7D7690;
 }
 
-.teacherpage .muted {
+.coordinatorpage .muted {
   color: #7D7690;
   font-size: 13px;
 }
 
 /* ---------- the board and the white cards ---------- */
 
-.teacherpage .board,
-.teacherpage .side {
+.coordinatorpage .board,
+.coordinatorpage .side {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.teacherpage .t-card {
+.coordinatorpage .t-card {
   min-width: 0;
   border-radius: 18px;
   background: #FFFFFF;
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
 }
 
-.teacherpage .t-card h2 {
+.coordinatorpage .t-card h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #3D3454;
 }
 
-.teacherpage .card-head {
+.coordinatorpage .card-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -78,14 +78,14 @@
 
 /* ---------- the count tiles above the board ---------- */
 
-.teacherpage .tiles {
+.coordinatorpage .tiles {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 18px;
 }
 
-.teacherpage .tile {
+.coordinatorpage .tile {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -95,8 +95,8 @@
 }
 
 /* each tile is a link (or a button): a little darker when the mouse is on it */
-.teacherpage a.tile,
-.teacherpage button.tile {
+.coordinatorpage a.tile,
+.coordinatorpage button.tile {
   border: 0;
   color: inherit;
   font: inherit;
@@ -105,24 +105,24 @@
   cursor: pointer;
 }
 
-.teacherpage a.tile:hover,
-.teacherpage button.tile:hover {
+.coordinatorpage a.tile:hover,
+.coordinatorpage button.tile:hover {
   background: #E6DDF4;
 }
 
-.teacherpage .tile:focus {
+.coordinatorpage .tile:focus {
   outline: 2px solid #6B5CA5;
   outline-offset: 2px;
 }
 
-.teacherpage .tile-value {
+.coordinatorpage .tile-value {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.6px;
 }
 
-.teacherpage .tile-label {
+.coordinatorpage .tile-label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -131,20 +131,20 @@
   color: #7D7690;
 }
 
-.teacherpage .tile-label i {
+.coordinatorpage .tile-label i {
   color: #6B5CA5;
 }
 
 /* ---------- the filters: round chips with a count, and the search box ---------- */
 
-.teacherpage .filters {
+.coordinatorpage .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
 
-.teacherpage .chip {
+.coordinatorpage .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -159,11 +159,11 @@
   font-weight: 700;
 }
 
-.teacherpage .chip[aria-pressed='true'] {
+.coordinatorpage .chip[aria-pressed='true'] {
   background: #D5CBEA;
 }
 
-.teacherpage .chip-count {
+.coordinatorpage .chip-count {
   display: inline-grid;
   place-items: center;
   min-width: 20px;
@@ -174,14 +174,14 @@
   font-size: 12px;
 }
 
-.teacherpage .toolbar {
+.coordinatorpage .toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
 
-.teacherpage .search {
+.coordinatorpage .search {
   flex: 1 1 220px;
   min-width: 0;
   padding: 9px 16px;
@@ -193,17 +193,17 @@
   font: inherit;
 }
 
-.teacherpage .search::placeholder {
+.coordinatorpage .search::placeholder {
   color: #7D7690;
 }
 
-.teacherpage .search:focus,
-.teacherpage .skill-select:focus {
+.coordinatorpage .search:focus,
+.coordinatorpage .skill-select:focus {
   outline: 2px solid #6B5CA5;
   outline-offset: 1px;
 }
 
-.teacherpage .skill-select {
+.coordinatorpage .skill-select {
   width: auto;
   padding: 7px 34px 7px 16px;
   border: 0;
@@ -218,7 +218,7 @@
 
 /* ---------- tags ---------- */
 
-.teacherpage .tag {
+.coordinatorpage .tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -233,13 +233,13 @@
 /* the warnings are quiet: a pale fill, dark words and a thin line in the same colour family.
    Pink for the three that need action (not seen, no volunteer, overdue), so the solid red is left to the Delete button,
    and pale yellow for struggling. */
-.teacherpage .tag-red {
+.coordinatorpage .tag-red {
   background: #FBE3DF;
   box-shadow: inset 0 0 0 1.5px #F2B8B0;
   color: #9A3F36;
 }
 
-.teacherpage .tag-struggle {
+.coordinatorpage .tag-struggle {
   background: #FAF4D8;
   box-shadow: inset 0 0 0 1.5px #EEDFA6;
   color: #7A6420;
@@ -247,7 +247,7 @@
 
 /* ---------- the round picture: a letter, or the photo ---------- */
 
-.teacherpage .child-initial {
+.coordinatorpage .child-initial {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,20 +261,20 @@
   line-height: 1;
 }
 
-.teacherpage .child-initial.small {
+.coordinatorpage .child-initial.small {
   width: 32px;
   height: 32px;
   font-size: 16px;
 }
 
 /* the volunteers have the lavender letter */
-.teacherpage .child-initial.is-volunteer {
+.coordinatorpage .child-initial.is-volunteer {
   background: #D5CBEA;
 }
 
 /* ---------- the buttons: small, 5px corners, lavender ---------- */
 
-.teacherpage .t-btn {
+.coordinatorpage .t-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -289,57 +289,57 @@
   text-decoration: none;
 }
 
-.teacherpage .t-btn:hover {
+.coordinatorpage .t-btn:hover {
   background: #C7BBE0;
   color: #3D3454;
 }
 
 /* the quiet one: white with a lavender outline inside */
-.teacherpage .t-btn-soft {
+.coordinatorpage .t-btn-soft {
   background: #FFFFFF;
   box-shadow: inset 0 0 0 2px #D5CBEA;
 }
 
-.teacherpage .t-btn-soft:hover {
+.coordinatorpage .t-btn-soft:hover {
   background: #F0EAF8;
 }
 
 /* Edit: the same pale green as the Edit a volunteer sees; Delete is the same soft red (t-btn-red) */
-.teacherpage .t-btn-edit {
+.coordinatorpage .t-btn-edit {
   background: #CDE9D8;
 }
 
-.teacherpage .t-btn-edit:hover {
+.coordinatorpage .t-btn-edit:hover {
   background: #9BD3B2;
 }
 
-.teacherpage .t-btn-red {
+.coordinatorpage .t-btn-red {
   background: #EE9F96;
 }
 
-.teacherpage .t-btn-red:hover {
+.coordinatorpage .t-btn-red:hover {
   background: #E58A80;
 }
 
-.teacherpage .t-btn:disabled {
+.coordinatorpage .t-btn:disabled {
   opacity: 0.55;
   pointer-events: none;
 }
 
 /* ---------- the dashboard: Needs attention, accuracy and recent sessions ---------- */
 
-.teacherpage .cols {
+.coordinatorpage .cols {
   display: grid;
   grid-template-columns: 7fr 5fr;
   gap: 14px;
   align-items: start;
 }
 
-.teacherpage .list {
+.coordinatorpage .list {
   padding: 6px 16px 10px;
 }
 
-.teacherpage .alert-row {
+.coordinatorpage .alert-row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -348,11 +348,11 @@
   cursor: pointer;
 }
 
-.teacherpage .alert-row:first-child {
+.coordinatorpage .alert-row:first-child {
   border-top: 0;
 }
 
-.teacherpage .alert-body {
+.coordinatorpage .alert-body {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -360,7 +360,7 @@
   min-width: 0;
 }
 
-.teacherpage .alert-who {
+.coordinatorpage .alert-who {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -368,29 +368,29 @@
   font-weight: 600;
 }
 
-.teacherpage .alert-who a {
+.coordinatorpage .alert-who a {
   color: #3D3454;
   text-decoration: none;
 }
 
-.teacherpage .alert-who a:hover {
+.coordinatorpage .alert-who a:hover {
   text-decoration: underline;
 }
 
-.teacherpage .alert-msg {
+.coordinatorpage .alert-msg {
   font-size: 14px;
   color: #7D7690;
 }
 
-.teacherpage .alert-actions,
-.teacherpage .suggest-actions {
+.coordinatorpage .alert-actions,
+.coordinatorpage .suggest-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 /* the follow-up flag: a round button, dark lavender when it is on */
-.teacherpage .flag-btn {
+.coordinatorpage .flag-btn {
   display: grid;
   place-items: center;
   width: 34px;
@@ -402,76 +402,76 @@
   color: #6B5CA5;
 }
 
-.teacherpage .flag-btn[aria-pressed='true'] {
+.coordinatorpage .flag-btn[aria-pressed='true'] {
   background: #6B5CA5;
   color: #FFFFFF;
 }
 
-.teacherpage .flag-btn:disabled {
+.coordinatorpage .flag-btn:disabled {
   opacity: 0.55;
 }
 
-.teacherpage .empty {
+.coordinatorpage .empty {
   padding: 28px 16px;
   text-align: center;
   color: #7D7690;
 }
 
-.teacherpage .empty strong {
+.coordinatorpage .empty strong {
   display: block;
   font-size: 16px;
   color: #5B4B8A;
 }
 
 /* the accuracy chart (TopicSummaryChart.vue with calm): the name and the percentage, then a lavender bar */
-.teacherpage [data-test='topic-summary-chart'] {
+.coordinatorpage [data-test='topic-summary-chart'] {
   border: 0;
   border-radius: 18px;
   background: #FFFFFF;
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
 }
 
-.teacherpage [data-test='topic-summary-chart'] > h2 {
+.coordinatorpage [data-test='topic-summary-chart'] > h2 {
   font-size: 17px;
   font-weight: 700;
   color: #3D3454;
 }
 
-.teacherpage [data-test='topic-summary-chart'] > h2 i {
+.coordinatorpage [data-test='topic-summary-chart'] > h2 i {
   display: none;
 }
 
-.teacherpage .topic-bars {
+.coordinatorpage .topic-bars {
   display: grid;
   gap: 12px;
 }
 
-.teacherpage .topic-bar-top {
+.coordinatorpage .topic-bar-top {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
 }
 
-.teacherpage .topic-bar-track {
+.coordinatorpage .topic-bar-track {
   height: 12px;
   border-radius: 999px;
   background: #F0EAF8;
   overflow: hidden;
 }
 
-.teacherpage .topic-bar-fill {
+.coordinatorpage .topic-bar-fill {
   height: 100%;
   border-radius: 999px;
   background: #B8A9DD;
 }
 
-.teacherpage .recent {
+.coordinatorpage .recent {
   margin: 0;
   padding: 4px 16px 12px;
   list-style: none;
 }
 
-.teacherpage .recent li {
+.coordinatorpage .recent li {
   display: flex;
   gap: 10px;
   padding: 10px 0;
@@ -479,11 +479,11 @@
   font-size: 14px;
 }
 
-.teacherpage .recent li:first-child {
+.coordinatorpage .recent li:first-child {
   border-top: 0;
 }
 
-.teacherpage .recent .when {
+.coordinatorpage .recent .when {
   display: block;
   font-size: 13px;
   color: #7D7690;
@@ -491,75 +491,75 @@
 
 /* ---------- the children and the volunteers: one white card each ---------- */
 
-.teacherpage .grid {
+.coordinatorpage .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
-.teacherpage .person {
+.coordinatorpage .person {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 16px;
 }
 
-.teacherpage .person-top {
+.coordinatorpage .person-top {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.teacherpage .person-top > div {
+.coordinatorpage .person-top > div {
   min-width: 0;
 }
 
-.teacherpage .t-card .person-name {
+.coordinatorpage .t-card .person-name {
   font-size: 16px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-.teacherpage .person-sub {
+.coordinatorpage .person-sub {
   font-size: 13px;
   color: #7D7690;
   overflow-wrap: anywhere;
 }
 
-.teacherpage .tags {
+.coordinatorpage .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
 /* a caption and its words, in one line */
-.teacherpage .kv {
+.coordinatorpage .kv {
   display: flex;
   align-items: baseline;
   gap: 10px;
   font-size: 14px;
 }
 
-.teacherpage .kv-key,
-.teacherpage .fact-key {
+.coordinatorpage .kv-key,
+.coordinatorpage .fact-key {
   font-size: 13px;
   font-weight: 700;
   color: #7D7690;
 }
 
-.teacherpage .kv-key {
+.coordinatorpage .kv-key {
   flex: none;
   width: 104px;
 }
 
 /* what a volunteer teaches and when they are free: two pale lavender boxes, so they stand out from the white card */
-.teacherpage .facts {
+.coordinatorpage .facts {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.teacherpage .fact {
+.coordinatorpage .fact {
   flex: 1;
   min-width: 120px;
   display: flex;
@@ -570,21 +570,21 @@
   background: #F0EAF8;
 }
 
-.teacherpage .fact-value {
+.coordinatorpage .fact-value {
   font-size: 14px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
 /* a subject tag inside a fact box can wrap onto two lines instead of sticking out of the box */
-.teacherpage .fact .tag {
+.coordinatorpage .fact .tag {
   white-space: normal;
   border-radius: 14px;
   text-align: center;
 }
 
 /* the code a parent types to link their child */
-.teacherpage .child-code {
+.coordinatorpage .child-code {
   padding: 1px 8px;
   border-radius: 8px;
   background: #F0EAF8;
@@ -592,7 +592,7 @@
   font-weight: 700;
 }
 
-.teacherpage .person-foot {
+.coordinatorpage .person-foot {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -602,15 +602,15 @@
 
 /* ---------- the forms and the messages inside the pages ---------- */
 
-.teacherpage .confirm-box {
+.coordinatorpage .confirm-box {
   padding: 10px 12px;
   border-radius: 12px;
   background: #F0EAF8;
   font-size: 14px;
 }
 
-.teacherpage .form-control,
-.teacherpage .form-select {
+.coordinatorpage .form-control,
+.coordinatorpage .form-select {
   border: 1px solid #E3DBF0;
   border-radius: 12px;
   background-color: #FFFFFF;
@@ -619,24 +619,24 @@
   box-shadow: none;
 }
 
-.teacherpage .form-control:focus,
-.teacherpage .form-select:focus {
+.coordinatorpage .form-control:focus,
+.coordinatorpage .form-select:focus {
   border-color: #6B5CA5;
   box-shadow: 0 0 0 3px #D5CBEA;
 }
 
-.teacherpage .form-check-input:checked {
+.coordinatorpage .form-check-input:checked {
   border-color: #6B5CA5;
   background-color: #6B5CA5;
 }
 
-.teacherpage .form-check-input:focus {
+.coordinatorpage .form-check-input:focus {
   border-color: #6B5CA5;
   box-shadow: 0 0 0 3px #D5CBEA;
 }
 
 /* the "Needs help with" choices: a round chip that turns lavender when it is ticked */
-.teacherpage .need-chip {
+.coordinatorpage .need-chip {
   padding: 4px 12px;
   border: 0;
   border-radius: 999px;
@@ -646,76 +646,76 @@
   font-weight: 600;
 }
 
-.teacherpage .btn-check:checked + .need-chip {
+.coordinatorpage .btn-check:checked + .need-chip {
   background: #D5CBEA;
   color: #3D3454;
 }
 
-.teacherpage .btn-check:focus + .need-chip {
+.coordinatorpage .btn-check:focus + .need-chip {
   outline: 2px solid #6B5CA5;
   outline-offset: 2px;
 }
 
-.teacherpage .modal-content {
+.coordinatorpage .modal-content {
   border: 0;
   border-radius: 22px;
   background: #FFFFFF;
   box-shadow: 0 8px 30px rgba(61, 52, 84, 0.2);
 }
 
-.teacherpage .modal-header,
-.teacherpage .modal-footer {
+.coordinatorpage .modal-header,
+.coordinatorpage .modal-footer {
   border-color: #EFE9F7;
   background: transparent;
 }
 
-.teacherpage .modal-title {
+.coordinatorpage .modal-title {
   color: #5B4B8A;
   font-weight: 600;
 }
 
-.teacherpage .note {
+.coordinatorpage .note {
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 14px;
 }
 
-.teacherpage .note-ok {
+.coordinatorpage .note-ok {
   background: #E6F4EC;
   color: #2E6B4A;
 }
 
-.teacherpage .note-bad {
+.coordinatorpage .note-bad {
   background: #FBE0DC;
   color: #8A3A32;
 }
 
 /* ---------- matchmaking ---------- */
 
-.teacherpage .pick {
+.coordinatorpage .pick {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 14px 16px;
 }
 
-.teacherpage .section-title {
+.coordinatorpage .section-title {
   margin: 4px 2px 0;
   font-size: 18px;
   font-weight: 600;
 }
 
-.teacherpage .section-title .muted {
+.coordinatorpage .section-title .muted {
   font-weight: 400;
 }
 
-.teacherpage .suggestions {
+.coordinatorpage .suggestions {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.teacherpage .suggest-top {
+.coordinatorpage .suggest-top {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -723,7 +723,7 @@
   gap: 10px 16px;
 }
 
-.teacherpage .suggest-title {
+.coordinatorpage .suggest-title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -731,26 +731,26 @@
 }
 
 /* a tag for something that is fine: green, like the "done" ticks on the other pages */
-.teacherpage .tag-ok {
+.coordinatorpage .tag-ok {
   background: #E6F4EC;
   color: #2E6B4A;
 }
 
 /* ---------- the weekly schedule: one row for each volunteer, one column for each day ---------- */
 
-.teacherpage .schedule-wrap {
+.coordinatorpage .schedule-wrap {
   overflow-x: auto; /* scrolls sideways on a small screen instead of squashing */
 }
 
-.teacherpage .schedule-table {
+.coordinatorpage .schedule-table {
   width: 100%;
   min-width: 980px;
   table-layout: fixed;
   border-collapse: collapse;
 }
 
-.teacherpage .schedule-table th,
-.teacherpage .schedule-table td {
+.coordinatorpage .schedule-table th,
+.coordinatorpage .schedule-table td {
   padding: 10px 8px;
   border-top: 1px solid #EFE9F7;
   vertical-align: top;
@@ -759,7 +759,7 @@
   font-weight: 400;
 }
 
-.teacherpage .schedule-table thead th {
+.coordinatorpage .schedule-table thead th {
   border-top: 0;
   font-size: 13px;
   font-weight: 700;
@@ -768,30 +768,30 @@
   color: #7D7690;
 }
 
-.teacherpage .schedule-table .day-head {
+.coordinatorpage .schedule-table .day-head {
   text-align: center;
 }
 
-.teacherpage .schedule-table .volunteer-col {
+.coordinatorpage .schedule-table .volunteer-col {
   width: 150px;
   text-align: left;
   font-weight: 400;
 }
 
 /* today is pale lavender; a day the volunteer is not free is a soft sand colour (it comes after, so it wins) */
-.teacherpage .schedule-table td.is-today {
+.coordinatorpage .schedule-table td.is-today {
   background: #F0EAF8;
 }
 
-.teacherpage .schedule-table td.is-off {
+.coordinatorpage .schedule-table td.is-off {
   background: #F6EFE4;
 }
 
-.teacherpage .schedule-table th.is-today {
+.coordinatorpage .schedule-table th.is-today {
   color: #6B5CA5;
 }
 
-.teacherpage .slot {
+.coordinatorpage .slot {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
@@ -804,17 +804,17 @@
   font-size: 13px;
 }
 
-.teacherpage .schedule-table td.is-today .slot {
+.coordinatorpage .schedule-table td.is-today .slot {
   box-shadow: inset 0 0 0 1px #D5CBEA;
 }
 
-.teacherpage .slot-time {
+.coordinatorpage .slot-time {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.teacherpage .slot-name {
+.coordinatorpage .slot-name {
   grid-column: 1 / -1;
   min-width: 0;
   overflow: hidden;
@@ -824,11 +824,11 @@
   white-space: nowrap;
 }
 
-.teacherpage .slot-name:hover {
+.coordinatorpage .slot-name:hover {
   text-decoration: underline;
 }
 
-.teacherpage .slot-remove {
+.coordinatorpage .slot-remove {
   grid-column: 2;
   grid-row: 1;
   padding: 2px 6px;
@@ -838,64 +838,64 @@
   font-size: 11px;
 }
 
-.teacherpage .slot-remove:hover {
+.coordinatorpage .slot-remove:hover {
   color: #8A3A32;
 }
 
-.teacherpage .add-btn {
+.coordinatorpage .add-btn {
   justify-content: center;
   width: 100%;
   font-size: 12.5px;
 }
 
-.teacherpage .legend {
+.coordinatorpage .legend {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
 }
 
-.teacherpage .swatch {
+.coordinatorpage .swatch {
   width: 14px;
   height: 14px;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px rgba(61, 52, 84, 0.12);
 }
 
-.teacherpage .swatch-off {
+.coordinatorpage .swatch-off {
   background: #F6EFE4;
 }
 
-.teacherpage .swatch-today {
+.coordinatorpage .swatch-today {
   background: #F0EAF8;
 }
 
 /* ---------- a narrow screen ---------- */
 
 @media (max-width: 860px) {
-  .teacherpage .cols {
+  .coordinatorpage .cols {
     grid-template-columns: 1fr;
   }
 
-  .teacherpage .tiles {
+  .coordinatorpage .tiles {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .teacherpage .grid {
+  .coordinatorpage .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 560px) {
-  .teacherpage .grid {
+  .coordinatorpage .grid {
     grid-template-columns: 1fr;
   }
 
-  .teacherpage .alert-row {
+  .coordinatorpage .alert-row {
     flex-wrap: wrap;
   }
 
-  .teacherpage .alert-actions {
+  .coordinatorpage .alert-actions {
     justify-content: flex-end;
     width: 100%;
   }

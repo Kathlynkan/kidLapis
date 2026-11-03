@@ -30,7 +30,8 @@ const slotsByCell = computed(() => {
   const map = {}
   for (const child of props.children) {
     for (const s of child.schedule || []) {
-      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '' })
+      // pending = the volunteer hasn't accepted this day yet (shown dashed, "waiting")
+      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '', pending: s.status === 'pending' })
     }
   }
   for (const list of Object.values(map)) {
@@ -42,7 +43,13 @@ const slotsByCell = computed(() => {
 const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
 const isFree = (v, day) => (v.availability || []).includes(day)
 
-const sessionCount = computed(() => props.children.reduce((n, c) => n + (c.schedule || []).length, 0))
+// Accepted sessions, and the ones still waiting for a volunteer to accept
+const sessionCount = computed(() =>
+  props.children.reduce((n, c) => n + (c.schedule || []).filter((s) => s.status !== 'pending').length, 0),
+)
+const waitingCount = computed(() =>
+  props.children.reduce((n, c) => n + (c.schedule || []).filter((s) => s.status === 'pending').length, 0),
+)
 </script>
 
 <template>
@@ -51,6 +58,7 @@ const sessionCount = computed(() => props.children.reduce((n, c) => n + (c.sched
       <h2>Weekly schedule</h2>
       <span class="d-flex align-items-center gap-2">
         <span class="tag">{{ sessionCount }} sessions</span>
+        <span v-if="waitingCount" class="tag tag-wait" data-test="week-waiting">{{ waitingCount }} waiting to accept</span>
         <RouterLink :to="{ name: 'schedule' }" class="edit-link" data-test="edit-schedule">
           Edit schedule <i class="bi bi-arrow-right"></i>
         </RouterLink>
@@ -83,9 +91,11 @@ const sessionCount = computed(() => props.children.reduce((n, c) => n + (c.sched
                   :key="slot.child.id"
                   :to="{ name: 'child-profile', params: { id: slot.child.id } }"
                   class="pill"
-                  :title="`${slot.child.name} at ${slot.time || 'no time set'}`"
+                  :class="{ 'is-pending': slot.pending }"
+                  :title="`${slot.child.name} at ${slot.time || 'no time set'}${slot.pending ? ' (waiting for the volunteer to accept)' : ''}`"
                 >
                   <span class="pill-time">{{ slot.time || '--:--' }}</span> {{ firstName(slot.child.name) }}
+                  <span v-if="slot.pending" class="pill-waiting">waiting</span>
                 </RouterLink>
                 <span v-if="!slotsFor(v, d).length" class="free">Free</span>
               </template>
@@ -164,6 +174,20 @@ th.is-today {
 }
 .pill:hover {
   border-color: var(--cb-primary);
+}
+/* a session the volunteer hasn't accepted yet */
+.pill.is-pending {
+  border: 1.5px dashed #C8A028;
+  background: #FBF5DC;
+}
+.pill-waiting {
+  font-size: 0.7rem;
+  color: #8A6D12;
+}
+.tag-wait {
+  background: #FBF5DC;
+  color: #6E5410;
+  box-shadow: inset 0 0 0 1px #E3C76A;
 }
 .pill-time {
   font-weight: 700;

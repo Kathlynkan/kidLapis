@@ -16,7 +16,7 @@ import { firstName, subjectStyle } from '@/utils/format'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
 // ---------- The children ----------
 const children = ref([])
@@ -213,9 +213,11 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Children" subtitle="Everyone enrolled at the centre.">
-      <button class="t-btn" data-test="add-child" @click="openAdd">
+      <!-- disabled until the list has loaded: otherwise the slow first load could finish AFTER
+           a quick "add" and overwrite the list, so the new child would vanish from the page -->
+      <button class="t-btn" :disabled="loading" data-test="add-child" @click="openAdd">
         <i class="bi bi-plus-lg"></i>Add child
       </button>
     </PageHeader>

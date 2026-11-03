@@ -14,22 +14,33 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const router = Router()
 router.use(requireAuth)
 
+// Only coordinators see schedule days that are still waiting for a volunteer to accept
+// (they show as "waiting" on the coordinator pages). Everyone else - e.g. a volunteer's
+// calendar - only sees days that were accepted. See routes/requests.js.
+function forViewer(child, user) {
+  const data = child.toJSON()
+  if (user.role !== 'coordinator') {
+    data.schedule = (data.schedule || []).filter((s) => s.status !== 'pending')
+  }
+  return data
+}
+
 // GET /children  -> only the children this user is allowed to see
-// Teachers also get each child's linkCode (the code parents use at sign up).
+// Coordinators also get each child's linkCode (the code parents use at sign up).
 router.get('/', async (req, res) => {
-  const isTeacher = req.user.role === 'teacher'
+  const isCoordinator = req.user.role === 'coordinator'
   let query = Child.find(childFilterFor(req.user)).sort({ name: 1 })
-  if (isTeacher) query = query.select('+linkCode')
+  if (isCoordinator) query = query.select('+linkCode')
   const children = await query
 
   // Children added before child codes existed don't have one yet: give them one now
-  if (isTeacher) {
+  if (isCoordinator) {
     for (const child of children.filter((c) => !c.linkCode)) {
       child.linkCode = newLinkCode()
       await child.save()
     }
   }
-  res.json(children)
+  res.json(children.map((child) => forViewer(child, req.user)))
 })
 
 // GET /children/:id
@@ -39,7 +50,7 @@ router.get('/:id', async (req, res) => {
   if (!canAccessChild(req.user, child)) {
     return res.status(403).json({ message: 'You do not have access to this child.' })
   }
-  res.json(child)
+  res.json(forViewer(child, req.user))
 })
 
 const LEVELS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
@@ -68,9 +79,9 @@ async function checkChildForm({ name, level, needs, parentId }) {
 }
 
 // POST /children   body: { name, level, school, parentId, needs, avatar, childEmail?, childPassword? }
-// Only teachers get past requireRole('teacher'); everyone else gets 403.
+// Only coordinators get past requireRole('coordinator'); everyone else gets 403.
 // childEmail + childPassword are optional: if both are supplied, a child User login is also created.
-router.post('/', requireRole('teacher'), async (req, res) => {
+router.post('/', requireRole('coordinator'), async (req, res) => {
   const { name, level, school, parentId, needs, avatar, childEmail, childPassword } = req.body
 
   // 1. Validate profile fields
@@ -106,7 +117,7 @@ router.post('/', requireRole('teacher'), async (req, res) => {
       needs: needs || [],
       volunteerIds: [],
       avatar: avatar || undefined,
-      linkCode: newLinkCode(), // the teacher gives this to the parent for sign up
+      linkCode: newLinkCode(), // the coordinator gives this to the parent for sign up
     })
 
     // 4. Optionally create the child User account
@@ -133,7 +144,7 @@ router.post('/', requireRole('teacher'), async (req, res) => {
 // PUT /children/:id   body: { name, level, school, parentId, needs }
 // Edits the child's profile only. Volunteers (Yu Xuan), points (Jachin) and
 // follow-up flags are changed by their own features, so they are not touched here.
-router.put('/:id', requireRole('teacher'), async (req, res) => {
+router.put('/:id', requireRole('coordinator'), async (req, res) => {
   // 1. Does this child exist? (+linkCode so the reply still has the child code for the table)
   const child = await Child.findById(req.params.id).select('+linkCode')
   if (!child) {
@@ -169,7 +180,7 @@ router.put('/:id', requireRole('teacher'), async (req, res) => {
 // Decision (Kai Sen): deleting a child also deletes everything that belongs to them,
 // so no session, homework, message or login is left pointing to a child that no longer
 // exists. The page warns the coordinator before sending this request.
-router.delete('/:id', requireRole('teacher'), async (req, res) => {
+router.delete('/:id', requireRole('coordinator'), async (req, res) => {
   // 1. Does this child exist?
   const child = await Child.findById(req.params.id)
   if (!child) {

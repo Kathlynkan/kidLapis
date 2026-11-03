@@ -115,7 +115,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/ParentSocialDay.vue` | One day entry in the parent's social/mood timeline |
 | `server/routes/messages.js` | GET (with sender names), POST (emits socket event), PUT /read, GET /unread |
 | `server/models/Message.js` | Mongoose schema — childId, fromId, text, sentAt, readBy array |
-| `client/e2e/messages.spec.js` | E2E — child list, thread visible, switch child, send message, teacher sees thread |
+| `client/e2e/messages.spec.js` | E2E — child list, thread visible, switch child, send message, coordinator sees thread |
 | `client/e2e/parent.spec.js` | E2E — parent greeting, child info, handover, mood timeline, child switcher |
 
 ### Yu Xuan — Coordinator dashboard & matchmaking
@@ -135,7 +135,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/tests/alerts.test.js` | Unit tests for each alert rule |
 | `server/tests/matchmaking.test.js` | Unit tests for the scoring function |
 | `server/tests/Schedule.test.js` | Unit tests for schedule logic |
-| `client/e2e/teacher.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
+| `client/e2e/coordinator.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
 
 ### Jachin — Data visualisation & child gamification
 

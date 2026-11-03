@@ -45,6 +45,8 @@ export function scoreVolunteer(child, volunteer, allChildren) {
     assigned: (child.volunteerIds || []).includes(volunteer.id),
     scheduledDays: mySlots.map((s) => s.day),
     scheduledSlots: mySlots.map((s) => ({ day: s.day, time: s.time || '' })), // e.g. [{ day: 'Mon', time: '16:00' }]
+    // Days the coordinator assigned that the volunteer hasn't accepted yet (routes/requests.js)
+    pendingDays: mySlots.filter((s) => s.status === 'pending').map((s) => s.day),
   }
 }
 

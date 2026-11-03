@@ -1,6 +1,6 @@
-// Teacher portal journey.                              Owner: Jachin
+// Coordinator portal journey.                              Owner: Jachin
 // Seed data used:
-//   teacher@kidslapis.sg = centre teacher
+//   coordinator@kidslapis.sg = centre coordinator
 //   Seed includes children with unassigned volunteers, recurring struggles,
 //   overdue homework, and 7-day gaps — all of which trigger dashboard alerts.
 //
@@ -10,10 +10,10 @@
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
-test.describe('Teacher dashboard', () => {
+test.describe('Coordinator dashboard', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'coordinator')
-    await expect(page).toHaveURL(/\/teacher$/)
+    await expect(page).toHaveURL(/\/coordinator$/)
   })
 
   test('shows the count tiles', async ({ page }) => {
@@ -50,7 +50,7 @@ test.describe('Teacher dashboard', () => {
     await page.locator('[data-test="alert-filter-unassigned"]').click()
     await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
     await page.locator('[data-test="alert-row"]').first().click()
-    await expect(page).toHaveURL(/\/teacher\/matchmaking/)
+    await expect(page).toHaveURL(/\/coordinator\/matchmaking/)
   })
 
   test('can toggle a follow-up flag', async ({ page }) => {
@@ -67,10 +67,10 @@ test.describe('Teacher dashboard', () => {
   })
 })
 
-test.describe('Teacher: matchmaking', () => {
+test.describe('Coordinator: matchmaking', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'coordinator')
-    await page.goto('/teacher/matchmaking')
+    await page.goto('/coordinator/matchmaking')
   })
 
   test('every child is in the list', async ({ page }) => {
@@ -81,7 +81,11 @@ test.describe('Teacher: matchmaking', () => {
     await page.locator('[data-test="child-toggle"]').first().click()
     await expect(page.locator('[data-test="suggestion-card"]').first()).toBeVisible()
   })
-  test('assigning a volunteer to Sofia removes her "No volunteer" alert', async ({ page, isMobile }) => {
+  test('assigning a volunteer to Sofia removes her "No volunteer" alert once they accept', async ({
+    page,
+    request,
+    isMobile,
+  }) => {
     // This test changes data, so it runs once (desktop only) to stop the two runs clashing.
     test.skip(isMobile, 'Changes data: runs on desktop only')
 
@@ -96,16 +100,35 @@ test.describe('Teacher: matchmaking', () => {
     await priya.locator('[data-test="assign-btn"]').click()
 
     try {
+      // Assigning only sends Priya a REQUEST (Kai Sen's accept flow): Sofia is still unassigned, and waiting.
       await expect(priya.locator('[data-test="slot-chip"]')).toContainText('Wed 18:00')
+      await expect(sofia.locator('[data-test="waiting-badge"]')).toContainText('Waiting for Priya')
+      await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toBeVisible()
+
+      // Priya accepts the request (from her own account, through the API)
+      const API = 'http://localhost:8000'
+      const login = await request.post(`${API}/auth/login`, {
+        data: { email: 'volunteer3@kidslapis.sg', password: 'password123' },
+      })
+      const { token } = await login.json()
+      const accepted = await request.put(`${API}/requests/c_6`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { day: 'Wed', action: 'accept' },
+      })
+      expect(accepted.ok()).toBeTruthy()
+
+      // Now Sofia has a volunteer (the page updates live; reload to be sure)
+      await page.reload()
+      await expect(sofia.locator('[data-test="waiting-badge"]')).toHaveCount(0)
       await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toHaveCount(0)
 
       // On the dashboard, the "No volunteer" filter no longer lists Sofia.
-      await page.goto('/teacher')
+      await page.goto('/coordinator')
       await page.locator('[data-test="alert-filter-unassigned"]').click()
       await expect(page.locator('[data-test="alert-row"]', { hasText: 'Sofia Ong' })).toHaveCount(0)
     } finally {
       // Undo the change, so the other tests (and the next run) still see Sofia unassigned.
-      await page.goto('/teacher/matchmaking/c_6')
+      await page.goto('/coordinator/matchmaking/c_6')
       await page
         .locator('[data-test="suggestion-card"]', { hasText: 'Priya Nair' })
         .locator('[data-test="unassign-btn"]')
@@ -115,10 +138,10 @@ test.describe('Teacher: matchmaking', () => {
   })
 })
 
-test.describe('Teacher: manage children', () => {
+test.describe('Coordinator: manage children', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'coordinator')
-    await page.goto('/teacher/children')
+    await page.goto('/coordinator/children')
   })
 
   test('children page loads with a card per child', async ({ page }) => {
@@ -130,10 +153,10 @@ test.describe('Teacher: manage children', () => {
   })
 })
 
-test.describe('Teacher: manage volunteers', () => {
+test.describe('Coordinator: manage volunteers', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'coordinator')
-    await page.goto('/teacher/volunteers')
+    await page.goto('/coordinator/volunteers')
   })
 
   test('volunteer cards load', async ({ page }) => {

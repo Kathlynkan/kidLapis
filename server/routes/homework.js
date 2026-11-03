@@ -16,11 +16,24 @@
 // The ranks and badges are worked out in the browser: client/src/utils/gamification.js
 // =============================================================
 import { Router } from 'express'
-import { Homework, Child, Deck } from '../models/index.js'
+import { Homework, Child, Deck, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { visibleChildIds } from '../utils/access.js'
+import { notifyBell, addUpdate } from '../utils/notify.js'
 
 const router = Router()
+
+// The child's volunteers see "quests to check" on their NavBar bell: update it straight away (Kai Sen)
+async function notifyVolunteersOf(req, childId) {
+  const child = await Child.findById(childId).select('volunteerIds')
+  if (child) notifyBell(req, child.volunteerIds)
+}
+
+// The child's own login gets an update in their bell, e.g. "'Read one story' was approved! +10 stars" (Kai Sen)
+async function tellChild(req, childId, update) {
+  const logins = await User.find({ role: 'child', childId }).select('_id')
+  await addUpdate(req, logins.map((u) => u.id), update)
+}
 
 // Everything in this file needs a logged-in user.
 router.use(requireAuth)
@@ -105,7 +118,7 @@ router.get('/:id', async (req, res) => {
 // ---------------------------------------------------------------
 // POST /homework      (Ning Xuan: assign homework, done  +  Jachin: the questions come from a deck)
 // ---------------------------------------------------------------
-router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
+router.post('/', requireRole('volunteer', 'coordinator'), async (req, res) => {
   // only volunteers and coordinators can assign homework
   try {
     const child = await Child.findById(req.body.childId)
@@ -193,10 +206,10 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
   }
 })
 
-// PUT /homework/:id         (Ning Xuan) -> volunteer or teacher edits the homework
+// PUT /homework/:id         (Ning Xuan) -> volunteer or coordinator edits the homework
 //   body = { title, subject, details, dueDate, points }  (the child and the status cannot be changed here)
 //   Not allowed once verified: the child already earned the stars.
-router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
+router.put('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
 
@@ -247,6 +260,7 @@ router.put('/:id/submit', requireRole('child'), async (req, res) => {
   hw.completedAt = new Date().toISOString().slice(0, 10)
   hw.rejectedAt = null
   await hw.save()
+  await notifyVolunteersOf(req, hw.childId) // "Ethan handed in ..." appears on their bell
   res.json(hw)
 })
 
@@ -263,6 +277,7 @@ router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
   hw.status = 'assigned'
   hw.completedAt = null
   await hw.save()
+  await notifyVolunteersOf(req, hw.childId) // taken back: gone from their bell
   res.json(hw)
 })
 
@@ -270,7 +285,7 @@ router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
 // findOneAndUpdate with status condition makes the submitted→verified transition atomic,
 // preventing double-award if two requests race on the same homework.
 // Late penalty: if the child submitted after the due date, they earn half the points.
-router.put('/:id/verify', requireRole('volunteer', 'teacher'), async (req, res) => {
+router.put('/:id/verify', requireRole('volunteer', 'coordinator'), async (req, res) => {
   const hw = await Homework.findOneAndUpdate(
     { _id: req.params.id, status: 'submitted' },
     { $set: { status: 'verified' } },
@@ -289,11 +304,17 @@ router.put('/:id/verify', requireRole('volunteer', 'teacher'), async (req, res) 
     { $inc: { points: pointsAwarded } },
     { new: true },
   )
+  notifyBell(req, child.volunteerIds) // checked: gone from every volunteer's bell
+  await tellChild(req, hw.childId, {
+    text: `"${hw.title}" was approved! +${pointsAwarded} stars${isLate ? ' (half, because it was handed in late)' : ''}`,
+    icon: 'bi-star-fill',
+    link: '/child',
+  })
   res.json({ homework: { ...hw.toJSON(), pointsAwarded }, points: child.points, pointsAwarded })
 })
 
 // PUT /homework/:id/reject  (Jachin) -> volunteer returns a submitted quest back to the child
-router.put('/:id/reject', requireRole('volunteer', 'teacher'), async (req, res) => {
+router.put('/:id/reject', requireRole('volunteer', 'coordinator'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
   const visible = await visibleChildIds(req.user)
@@ -305,11 +326,17 @@ router.put('/:id/reject', requireRole('volunteer', 'teacher'), async (req, res) 
   hw.completedAt = null
   hw.rejectedAt = new Date().toISOString().slice(0, 10)
   await hw.save()
+  await notifyVolunteersOf(req, hw.childId) // returned: gone from every volunteer's bell
+  await tellChild(req, hw.childId, {
+    text: `"${hw.title}" was returned. Have another go!`,
+    icon: 'bi-arrow-counterclockwise',
+    link: '/child',
+  })
   res.json(hw)
 })
 
-// DELETE /homework/:id  — volunteer or teacher; not allowed once verified (stars already awarded)
-router.delete('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
+// DELETE /homework/:id  — volunteer or coordinator; not allowed once verified (stars already awarded)
+router.delete('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
 

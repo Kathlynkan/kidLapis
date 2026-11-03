@@ -34,7 +34,7 @@ const isPickedFrom = (list, allowed) =>
 // POST /auth/signup   body: { name, email, password, role, skills?, availability?, childCode? }
 // skills and availability are only for volunteers.
 // childCode is optional, for parents: the code the centre gave them, which links
-// the new account to their child. Without it, a teacher can link them later.
+// the new account to their child. Without it, a coordinator can link them later.
 router.post('/signup', async (req, res) => {
   const { password, role } = req.body
   const name = String(req.body.name ?? '').trim()
@@ -143,7 +143,7 @@ router.put('/profile', requireAuth, async (req, res) => {
   const user = await User.findById(req.user.id)
   if (!user) return res.status(404).json({ message: 'User not found.' })
 
-  // Name (child accounts are named by the teacher, not themselves)
+  // Name (child accounts are named by the coordinator, not themselves)
   if (user.role !== 'child' && req.body.name !== undefined) {
     const name = String(req.body.name).trim()
     if (!name) return res.status(400).json({ message: 'Name is required.' })

@@ -1,4 +1,4 @@
-// Chat messages between parents and teachers about one child.   Owner: Kat
+// Chat messages between parents and coordinators about one child.   Owner: Kat
 import mongoose from 'mongoose'
 import { newId, jsonOptions, nowIso } from './helpers.js'
 

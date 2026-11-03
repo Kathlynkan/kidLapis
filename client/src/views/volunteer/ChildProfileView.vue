@@ -175,11 +175,11 @@ onMounted(() => {
       <StateMessage v-else-if="error" type="error" :message="error" />
 
       <RouterLink
-        v-if="auth.role === 'volunteer' || auth.role === 'teacher'"
+        v-if="auth.role === 'volunteer' || auth.role === 'coordinator'"
         class="back-link"
-        :to="{ name: auth.role === 'teacher' ? 'manage-children' : 'volunteer-home' }"
+        :to="{ name: auth.role === 'coordinator' ? 'manage-children' : 'volunteer-home' }"
       >
-        <i class="bi bi-chevron-left"></i>{{ auth.role === 'teacher' ? 'Children' : 'My children' }}
+        <i class="bi bi-chevron-left"></i>{{ auth.role === 'coordinator' ? 'Children' : 'My children' }}
       </RouterLink>
 
       <PageHeader :title="child.name" :subtitle="`${child.level} · ${child.school}`">
@@ -202,9 +202,9 @@ onMounted(() => {
         >
           <i class="bi bi-journal-plus me-1"></i>Assign Homework
         </RouterLink>
-        <!-- Teachers only: volunteers can't use Messages (chat is parent <-> teacher) -->
+        <!-- Coordinators only: volunteers can't use Messages (chat is parent <-> coordinator) -->
         <RouterLink
-          v-if="auth.role === 'teacher'"
+          v-if="auth.role === 'coordinator'"
           :to="{ name: 'messages', params: { childId: child.id } }"
           class="btn btn-outline-secondary"
         >
@@ -224,7 +224,7 @@ onMounted(() => {
                   v-for="s in sessions"
                   :key="s.id"
                   :session="s"
-                  :can-edit="s.volunteerId === auth.user?.id || auth.role === 'teacher'"
+                  :can-edit="s.volunteerId === auth.user?.id || auth.role === 'coordinator'"
                   @edit="editSession"
                   @delete="deleteSession"
                 />
@@ -289,7 +289,7 @@ onMounted(() => {
 <style>
 /* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
 
-/* Styles for one child's page as a volunteer or a teacher sees it (ChildProfileView.vue, SessionCard.vue,
+/* Styles for one child's page as a volunteer or a coordinator sees it (ChildProfileView.vue, SessionCard.vue,
    HomeworkQuestCard.vue, HandoverCard.vue and PeelCard.vue).
    Every rule starts with .childprofilepage, so the other pages that use the same cards (the child's quests) are not changed.
    The colours of each role are the variables (--cp-...) in main.css.
@@ -312,25 +312,25 @@ onMounted(() => {
    Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (18px to 22px, round pills)
    and a very light shadow. */
 
-/* the text of the page: the same size and weight as a volunteer sees (volunteershared.css), in the teacher's colours */
-.role-teacher .childprofilepage {
+/* the text of the page: the same size and weight as a volunteer sees (volunteershared.css), in the coordinator's colours */
+.role-coordinator .childprofilepage {
   color: var(--cp-text);
 }
 
-.role-teacher .childprofilepage .lapis-page-header .page-title {
+.role-coordinator .childprofilepage .lapis-page-header .page-title {
   color: #5B4B8A;
 }
 
 /* the Edit buttons on a session and on a homework: the same pale green as a volunteer sees */
-.role-teacher .childprofilepage .btn-outline-primary {
+.role-coordinator .childprofilepage .btn-outline-primary {
   background: #CDE9D8;
 }
 
-.role-teacher .childprofilepage .btn-outline-primary:hover {
+.role-coordinator .childprofilepage .btn-outline-primary:hover {
   background: #9BD3B2;
 }
 
-.role-teacher .childprofilepage .lapis-page-header .page-subtitle {
+.role-coordinator .childprofilepage .lapis-page-header .page-subtitle {
   color: #7D7690;
 }
 

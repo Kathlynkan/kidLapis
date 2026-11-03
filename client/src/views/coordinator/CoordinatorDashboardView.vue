@@ -11,7 +11,7 @@
     [x] weekday coverage next to each child's name (WeekdayDots: green = volunteer that day)
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
@@ -21,7 +21,7 @@ import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
 import WeekScheduleCard from '@/components/WeekScheduleCard.vue'
 import WeekdayDots from '@/components/WeekdayDots.vue'
 import { firstName } from '@/utils/format'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
 const router = useRouter()
 
@@ -52,26 +52,37 @@ const TAG_CLASS = {
   'repeated-struggle': 'tag-struggle',
 }
 
+async function loadDashboard() {
+  const [sum, s, a, c, v] = await Promise.all([
+    api.get('/dashboard/summary'),
+    api.get('/sessions'),
+    api.get('/dashboard/alerts'),
+    api.get('/children'),
+    api.get('/users', { params: { role: 'volunteer' } }),
+  ])
+  summary.value = sum.data
+  sessions.value = s.data
+  alerts.value = a.data
+  children.value = c.data
+  volunteers.value = v.data
+}
+
+// A volunteer accepted/declined a session (live, via the NavBar): reload quietly (Kai Sen)
+function onScheduleChanged() {
+  loadDashboard().catch(() => {}) // keep showing the old numbers if this fails
+}
+
 onMounted(async () => {
   try {
-    const [sum, s, a, c, v] = await Promise.all([
-      api.get('/dashboard/summary'),
-      api.get('/sessions'),
-      api.get('/dashboard/alerts'),
-      api.get('/children'),
-      api.get('/users', { params: { role: 'volunteer' } }),
-    ])
-    summary.value = sum.data
-    sessions.value = s.data
-    alerts.value = a.data
-    children.value = c.data
-    volunteers.value = v.data
+    await loadDashboard()
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
     loading.value = false
   }
+  window.addEventListener('schedule-changed', onScheduleChanged)
 })
+onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
 
 // ---------- Needs attention ----------
 
@@ -145,7 +156,7 @@ function daysAgo(dateStr) {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Centre dashboard" subtitle="See who needs follow-up at a glance." />
 
     <StateMessage v-if="loading" type="loading" />
@@ -154,19 +165,19 @@ function daysAgo(dateStr) {
     <template v-else>
       <!-- the counts -->
       <div class="tiles">
-        <RouterLink to="/teacher/children" class="tile" data-test="tile-children">
+        <RouterLink to="/coordinator/children" class="tile" data-test="tile-children">
           <span class="tile-value">{{ summary.totalChildren }}</span>
           <span class="tile-label"><i class="bi bi-people"></i>Children</span>
         </RouterLink>
-        <RouterLink to="/teacher/volunteers" class="tile" data-test="tile-volunteers">
+        <RouterLink to="/coordinator/volunteers" class="tile" data-test="tile-volunteers">
           <span class="tile-value">{{ summary.totalVolunteers }}</span>
           <span class="tile-label"><i class="bi bi-person-heart"></i>Volunteers</span>
         </RouterLink>
-        <RouterLink to="/teacher/schedule" class="tile" data-test="tile-sessions">
+        <RouterLink to="/coordinator/schedule" class="tile" data-test="tile-sessions">
           <span class="tile-value">{{ summary.sessionsThisWeek }}</span>
           <span class="tile-label"><i class="bi bi-journal-check"></i>Sessions this week</span>
         </RouterLink>
-        <!-- there is no homework page for the teacher, so this one shows the overdue homework in the list below -->
+        <!-- there is no homework page for the coordinator, so this one shows the overdue homework in the list below -->
         <button type="button" class="tile" data-test="tile-homework" @click="showOverdue">
           <span class="tile-value">{{ summary.homeworkPending }}</span>
           <span class="tile-label"><i class="bi bi-hourglass-split"></i>Homework pending</span>

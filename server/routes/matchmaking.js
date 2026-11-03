@@ -7,9 +7,10 @@ import { Child, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { rankVolunteers } from '../utils/matchmaking.js'
 import { findClash, TIME_PATTERN } from '../utils/schedule.js'
+import { notifyBell, addUpdate } from '../utils/notify.js'
 
 const router = Router()
-router.use(requireAuth, requireRole('teacher')) // every matchmaking route is for the teacher (coordinator)
+router.use(requireAuth, requireRole('coordinator')) // every matchmaking route is for the coordinator only
 
 // Mongoose keeps the id in _id. This gives the same { id, ... } shape the client and
 // seed.json use, which is what the pure functions in utils/ expect.
@@ -47,16 +48,34 @@ router.put('/:childId/assign', async (req, res) => {
   if (!child.schedule) child.schedule = [] // safe even before the schema has the field
 
   if (action === 'unassign') {
-    if (day) {
-      child.schedule = child.schedule.filter((s) => !(s.volunteerId === volunteerId && s.day === day))
-    } else {
-      child.schedule = child.schedule.filter((s) => s.volunteerId !== volunteerId)
-    }
-    // Only drop the volunteer from the child once they have no days left together.
-    if (!child.schedule.some((s) => s.volunteerId === volunteerId)) {
+    const isRemoved = (s) => s.volunteerId === volunteerId && (!day || s.day === day)
+    const removed = child.schedule.filter(isRemoved) // remembered for the volunteer's update below
+    child.schedule = child.schedule.filter((s) => !isRemoved(s))
+    // Only drop the volunteer from the child once they have no ACCEPTED days left together
+    // (a day still waiting for them to accept doesn't make them assigned).
+    if (!child.schedule.some((s) => s.volunteerId === volunteerId && s.status !== 'pending')) {
       child.volunteerIds = child.volunteerIds.filter((id) => id !== volunteerId)
     }
     await child.save()
+    notifyBell(req, [volunteerId]) // a cancelled request disappears from their bell straight away
+
+    // Tell the volunteer in their bell's "Updates" (Kai Sen, utils/notify.js)
+    const confirmedDays = removed.filter((s) => s.status !== 'pending').map((s) => s.day)
+    const requestDays = removed.filter((s) => s.status === 'pending').map((s) => s.day)
+    if (confirmedDays.length) {
+      await addUpdate(req, [volunteerId], {
+        text: `You no longer see ${child.name} on ${confirmedDays.join(', ')}`,
+        icon: 'bi-calendar-x',
+        link: '/volunteer',
+      })
+    }
+    if (requestDays.length) {
+      await addUpdate(req, [volunteerId], {
+        text: `The request for ${child.name} on ${requestDays.join(', ')} was cancelled`,
+        icon: 'bi-calendar-x',
+        link: '/volunteer/requests',
+      })
+    }
     return res.json(child)
   }
 
@@ -94,20 +113,40 @@ router.put('/:childId/assign', async (req, res) => {
   })
   if (clash) return res.status(409).json({ message: clash }) // 409 Conflict
 
+  let changedSession = null // a CONFIRMED session whose day/time changed -> the volunteer is told below
   if (action === 'move') {
+    const before = `${slotToMove.day} ${slotToMove.time || ''}`.trim()
     slotToMove.day = day
     slotToMove.time = time
+    if (slotToMove.status !== 'pending') changedSession = { before, after: `${day} ${time}` }
   } else {
-    if (!child.volunteerIds.includes(volunteerId)) child.volunteerIds.push(volunteerId)
+    // The volunteer is NOT added to child.volunteerIds here: that happens when they accept
+    // (routes/requests.js). Until then the child still counts as needing a volunteer, and
+    // the child doesn't appear on the volunteer's page.
     const existing = child.schedule.find((s) => s.volunteerId === volunteerId && s.day === day)
     if (existing) {
-      if (time) existing.time = time // same volunteer + day again = change the time
+      // same volunteer + day again = change the time
+      if (time && time !== existing.time && existing.status !== 'pending') {
+        changedSession = { before: `${day} ${existing.time || ''}`.trim(), after: `${day} ${time}` }
+      }
+      if (time) existing.time = time
     } else {
-      child.schedule.push(time ? { volunteerId, day, time } : { volunteerId, day })
+      // A new day starts as a request: the volunteer accepts it from their bell (routes/requests.js)
+      const slot = { volunteerId, day, status: 'pending' }
+      if (time) slot.time = time
+      child.schedule.push(slot)
     }
   }
 
   await child.save()
+  notifyBell(req, [volunteerId]) // a new or changed request shows on the volunteer's bell straight away
+  if (changedSession) {
+    await addUpdate(req, [volunteerId], {
+      text: `${child.name}'s session moved from ${changedSession.before} to ${changedSession.after}`,
+      icon: 'bi-calendar-event',
+      link: '/volunteer',
+    })
+  }
   res.json(child)
 })
 
