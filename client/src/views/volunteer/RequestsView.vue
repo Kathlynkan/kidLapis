@@ -29,9 +29,16 @@ const keyOf = (r) => `${r.childId}|${r.day}`
 async function loadRequests() {
   const res = await api.get('/requests')
   requests.value = res.data.sort((a, b) => {
-    if (a.status === 'pending' && b.status !== 'pending') return -1
-    if (a.status !== 'pending' && b.status === 'pending') return 1
-    return 0
+    const aPending = a.status === 'pending'
+    const bPending = b.status === 'pending'
+
+    if (aPending && !bPending) return -1
+    if (!aPending && bPending) return 1
+
+    const aTime = a.requestedAt ? new Date(a.requestedAt).getTime() : 0
+    const bTime = b.requestedAt ? new Date(b.requestedAt).getTime() : 0
+
+    return bTime - aTime
   })
 }
 

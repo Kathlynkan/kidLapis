@@ -24,6 +24,7 @@ const childSchema = new mongoose.Schema(
         day: String,
         time: String,
         status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'accepted' },
+        requestedAt: {type: Date, default: Date.now}
       },
     ],
     needs: [String], // skills the child needs help with (matchmaking)
