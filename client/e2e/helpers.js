@@ -3,7 +3,7 @@ import { expect } from '@playwright/test'
 
 export const ACCOUNTS = {
   volunteer: 'volunteer@kidslapis.sg',
-  coordinator: 'teacher@kidslapis.sg',
+  coordinator: 'coordinator@kidslapis.sg',
   parent: 'parent@kidslapis.sg',
   child: 'child@kidslapis.sg',
 }

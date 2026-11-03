@@ -184,7 +184,7 @@ onMounted(loadData)
           <!-- no children at all -->
           <div v-if="children.length === 0" class="empty-box">
             <i class="bi bi-person-plus"></i>
-            <p>No children assigned to you yet. Your teacher will assign them.</p>
+            <p>No children assigned to you yet. Your coordinator will assign them.</p>
           </div>
 
           <template v-else>
@@ -247,7 +247,7 @@ onMounted(loadData)
         <div v-else>
           <StateMessage
             v-if="children.length === 0"
-            message="No children assigned to you yet. Your teacher will assign them."
+            message="No children assigned to you yet. Your coordinator will assign them."
           />
 
           <template v-else>

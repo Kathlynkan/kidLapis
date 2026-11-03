@@ -1,9 +1,9 @@
-// Messages journey: parent and teacher exchange messages about a child.
+// Messages journey: parent and coordinator exchange messages about a child.
 // Owner: Kat
 //
 // Seed data used:
 //   parent@kidslapis.sg = Ms Grace, parent of Ethan (c_1) and Mia (c_7)
-//   teacher@kidslapis.sg = centre teacher, can see all children
+//   coordinator@kidslapis.sg = centre coordinator, can see all children
 //
 // The send test is chromium-only (state-mutating). The read-only structure
 // tests run on both desktop and mobile.
@@ -51,11 +51,11 @@ test.describe('Messages — parent', () => {
   })
 })
 
-test.describe('Messages — teacher', () => {
-  test('teacher sees the same thread as the parent', async ({ page }, testInfo) => {
+test.describe('Messages — coordinator', () => {
+  test('coordinator sees the same thread as the parent', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'state-mutating — runs on chromium only')
 
-    // The parent send test ran first; the teacher should now see that message
+    // The parent send test ran first; the coordinator should now see that message
     await loginAs(page, 'coordinator')
     await page.goto('/messages')
     await expect(page).toHaveURL(/\/messages\/c_/)

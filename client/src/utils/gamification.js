@@ -12,10 +12,12 @@ export const BADGES = [
   { id: 'rising-star',    kueh: 'Kueh Talam',   image: 'kueh-talam',   name: 'Rising Star',    rule: 'Submit 3 quests before the due date', fact: 'Pandan and coconut layers, stacked up neat and early.' },
 ]
 
-// A badge is earned when its progress has reached its target (the rules are written once, in badgeProgress)
+// A badge is earned when its progress has reached its target.
+// Only verified homework counts — badges unlock when the volunteer checks the quest.
 export function earnedBadges(child, homework) {
+  const verifiedOnly = homework.filter((h) => h.status === 'verified')
   return BADGES.filter((badge) => {
-    const { current, target } = badgeProgress(badge, child, homework)
+    const { current, target } = badgeProgress(badge, child, verifiedOnly)
     return current >= target
   })
 }

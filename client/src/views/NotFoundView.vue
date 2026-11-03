@@ -33,7 +33,7 @@ import '@/css/main/authpage.css' // the card on the board, the title and the sen
   text-align: center;
 }
 
-/* the round compass, in the pale colour of the teacher layer */
+/* the round compass, in the pale colour of the coordinator layer */
 .notfoundpage .notfound-icon {
   display: grid;
   place-items: center;

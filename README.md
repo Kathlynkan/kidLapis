@@ -86,7 +86,7 @@ Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
 | Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe |
 | Volunteer | `volunteer2@kidslapis.sg` | Daniel — Ethan, Meera, Ryan |
 | Volunteer | `volunteer3@kidslapis.sg` | Priya — Arjun |
-| Teacher | `teacher@kidslapis.sg` | Sees the whole centre |
+| Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
 | Parent | `parent@kidslapis.sg` | Ms Grace — parent of Ethan **and** Mia |
 | Parent | `parent2@kidslapis.sg` | Ravi — parent of Meera **and** Arjun |
 | Child | `child@kidslapis.sg` | Ethan |
@@ -106,7 +106,7 @@ The demo data is built to trigger interesting cases:
 
 ```bash
 cd client
-pnpm test:unit                         # Vitest unit tests (src/**/__tests__)
+pnpm test:unit                         # Vitest unit + component tests (src/tests/<parent|child|volunteer|coordinator|shared>)
 pnpm exec playwright install chromium  # first time only
 pnpm test:e2e                          # Playwright E2E - starts API + Vue for you, re-seeds YOUR database
 pnpm exec playwright show-report       # open the HTML report
@@ -120,8 +120,8 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 | `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
 | `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
 | `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, recurring badge, session timeline with mood labels, SkillProgressChart, child switcher, switching children | Jachin |
-| `e2e/teacher.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
-| `e2e/messages.spec.js` | Parent child list, chat thread visible, switch child, send message + real-time delivery, teacher sees same thread | Kat |
+| `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
+| `e2e/messages.spec.js` | Parent child list, chat thread visible, switch child, send message + real-time delivery, coordinator sees same thread | Kat |
 
 ---
 

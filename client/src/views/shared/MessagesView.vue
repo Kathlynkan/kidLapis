@@ -1,6 +1,6 @@
 <!-- =============================================================
-  Messages: parent <-> teacher, one conversation per child.   Owner: Kat
-  Route: /messages/:childId?   (used by parents and teachers)
+  Messages: parent <-> coordinator, one conversation per child.   Owner: Kat
+  Route: /messages/:childId?   (used by parents and coordinators)
   Its styles are in the style block at the bottom of this file
 ============================================================= -->
 <script setup>
@@ -21,7 +21,7 @@ const auth = useAuthStore()
 
 // the sentence under the title, for each kind of user
 const subtitle = computed(() => {
-  if (auth.role === 'parent') return "Chat with your child's teachers."
+  if (auth.role === 'parent') return "Chat with your child's coordinators."
   return 'Chat with parents about their child.'
 })
 
@@ -328,9 +328,9 @@ onUnmounted(() => {
   color: #5E6C80;
 }
 
-/* ===== The same page for a teacher: the messages page and the chat in the teacher's colours.
-   The page is shared with the parent, so these rules only apply under .role-teacher and win over messagespage.css.
-   Colours (the same as teacherpage.css):
+/* ===== The same page for a coordinator: the messages page and the chat in the coordinator's colours.
+   The page is shared with the parent, so these rules only apply under .role-coordinator and win over messagespage.css.
+   Colours (the same as coordinatorpage.css):
      #3D3454 deep plum        text
      #5B4B8A plum             the page title
      #7D7690 grey plum        small text
@@ -340,93 +340,93 @@ onUnmounted(() => {
      #FBE7A1 yellow           unread messages (the same yellow as the dot in the menu)
      #F9F1E6 sand             the chat (the same as on the other pages)
      #E3DBF0                  thin borders
-   Look: the same as the other teacher pages: a sandy board, white cards, round pills, a very light shadow. */
+   Look: the same as the other coordinator pages: a sandy board, white cards, round pills, a very light shadow. */
 
 /* ---------- the whole page ---------- */
 
-.role-teacher .messagespage {
+.role-coordinator .messagespage {
   color: #3D3454;
 }
 
-.role-teacher .messagespage .lapis-page-header .page-title {
+.role-coordinator .messagespage .lapis-page-header .page-title {
   color: #5B4B8A;
 }
 
-.role-teacher .messagespage .lapis-page-header .page-subtitle {
+.role-coordinator .messagespage .lapis-page-header .page-subtitle {
   color: #7D7690;
 }
 
-/* ---------- the child buttons: white chips, lavender when chosen (like the filters on the other teacher pages) ---------- */
+/* ---------- the child buttons: white chips, lavender when chosen (like the filters on the other coordinator pages) ---------- */
 
-body .role-teacher .messagespage .child-button {
+body .role-coordinator .messagespage .child-button {
   background: #FFFFFF;
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
   color: #3D3454;
 }
 
-body .role-teacher .messagespage .child-button.selected {
+body .role-coordinator .messagespage .child-button.selected {
   background: #D5CBEA;
 }
 
-body .role-teacher .messagespage .unread-badge {
+body .role-coordinator .messagespage .unread-badge {
   background: #FBE7A1;
 }
 
 /* ---------- the chat ---------- */
 
-.role-teacher .messagespage .chat {
+.role-coordinator .messagespage .chat {
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
 }
 
-.role-teacher .messagespage .empty-chat,
-.role-teacher .messagespage .bubble-name,
-.role-teacher .messagespage .bubble-time {
+.role-coordinator .messagespage .empty-chat,
+.role-coordinator .messagespage .bubble-name,
+.role-coordinator .messagespage .bubble-time {
   color: #7D7690;
 }
 
-body .role-teacher .messagespage .date-pill {
+body .role-coordinator .messagespage .date-pill {
   background: #5B4B8A;
 }
 
-.role-teacher .messagespage .bubble {
+.role-coordinator .messagespage .bubble {
   box-shadow: 0 1px 3px rgba(61, 52, 84, 0.08);
 }
 
-.role-teacher .messagespage .from-me .bubble {
+.role-coordinator .messagespage .from-me .bubble {
   background: #DED5F0;
 }
 
-.role-teacher .messagespage .from-me .bubble-name,
-.role-teacher .messagespage .from-me .bubble-time {
+.role-coordinator .messagespage .from-me .bubble-name,
+.role-coordinator .messagespage .from-me .bubble-time {
   color: #3D3454;
 }
 
 /* ---------- the typing box ---------- */
 
-.role-teacher .messagespage .chat-input {
+.role-coordinator .messagespage .chat-input {
   border-color: #E3DBF0;
   color: #3D3454;
 }
 
-.role-teacher .messagespage .chat-input:focus {
+.role-coordinator .messagespage .chat-input:focus {
   border-color: #6B5CA5;
   box-shadow: 0 0 0 3px #D5CBEA;
 }
 
-.role-teacher .messagespage .chat-input::placeholder {
+.role-coordinator .messagespage .chat-input::placeholder {
   color: #7D7690;
 }
 
-.role-teacher .messagespage .send-button {
+.role-coordinator .messagespage .send-button {
   background: #D5CBEA;
   color: #3D3454;
 }
 
-.role-teacher .messagespage .send-button:hover {
+.role-coordinator .messagespage .send-button:hover {
   background: #C7BBE0;
 }
 
-.role-teacher .messagespage .send-button:disabled {
+.role-coordinator .messagespage .send-button:disabled {
   background: #F0EAF8;
   color: #7D7690;
 }

@@ -24,10 +24,10 @@ const roles = [
   },
   {
     icon: "bi-speedometer2",
-    name: "Teachers",
+    name: "Coordinators",
     short: "Run the centre",
-    text: "Spot children who need attention and match them with the right volunteer. Teacher accounts are set up by the centre.",
-    button: "Teacher log in",
+    text: "Spot children who need attention and match them with the right volunteer. Coordinator accounts are set up by the centre.",
+    button: "Coordinator log in",
     colour: "purple",
   },
   {
@@ -79,7 +79,7 @@ const steps = [
       <span class="note-tag">For student care centres</span>
       <h1 class="page-title">Every session builds on the last. Every child stays on track.</h1>
       <p class="page-subtitle">
-        Kids Lapis connects volunteers, teachers, parents and children — session notes become parent updates, homework becomes quests, and no child ever starts from zero.
+        Kids Lapis connects volunteers, coordinators, parents and children — session notes become parent updates, homework becomes quests, and no child ever starts from zero.
       </p>
       <RouterLink v-if="auth.isLoggedIn" :to="auth.homePath" class="home-button colour-pink" data-test="go-dashboard">
         Go to my dashboard
@@ -127,7 +127,7 @@ const steps = [
 
 /* The public home page that people see before they log in (HomeView.vue).
    The title and the sentence under it are .page-title and .page-subtitle (main.css), the sandy box is .board (main.css).
-   The four colours are the layer colours of the roles: purple teacher, green volunteer, aqua parent, pink child. */
+   The four colours are the layer colours of the roles: purple coordinator, green volunteer, aqua parent, pink child. */
 
 /* ---------- the colours of the roles ---------- */
 
@@ -156,7 +156,7 @@ const steps = [
   margin: 0;
 }
 
-/* the small yellow tag above the title (the same quiet look as the warning tags on the teacher pages) */
+/* the small yellow tag above the title (the same quiet look as the warning tags on the coordinator pages) */
 .homepage .note-tag {
   padding: 3px 11px;
   border-radius: 999px;

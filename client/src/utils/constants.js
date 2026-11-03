@@ -3,11 +3,20 @@
 
 export const SUBJECTS = ['English', 'Math', 'Science', 'Mother Tongue']
 
+// The colour of each subject (Kueh warm): the pills and the bars of the charts
 export const SUBJECT_COLORS = {
-  'English':       '#88C0D8',
-  'Math':          '#D4B840',
-  'Science':       '#A8CC90',
-  'Mother Tongue': '#E8906C',
+  'English':       '#A3CDE6', // sky
+  'Math':          '#F4D08A', // custard
+  'Science':       '#B2D8A6', // pandan
+  'Mother Tongue': '#F3B397', // peach
+}
+
+// A deeper tone of each, for the lines of the skill progress chart, so a line is easy to see on white
+export const SUBJECT_LINE_COLORS = {
+  'English':       '#5E9FC9',
+  'Math':          '#DBA645',
+  'Science':       '#6BAE63',
+  'Mother Tongue': '#E0805D',
 }
 
 // Used for volunteer skills AND child needs -> powers skills-based matchmaking

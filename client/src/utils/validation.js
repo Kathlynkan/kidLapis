@@ -1,5 +1,5 @@
 // Form checks for sign up.   Owner: Kai Sen
-// Kept as plain functions (no Vue) so they are easy to unit test (see __tests__/validation.spec.js).
+// Kept as plain functions (no Vue) so they are easy to unit test (see tests/shared/validation.spec.js).
 // The server checks the same rules again in server/routes/auth.js.
 
 export const MIN_PASSWORD_LENGTH = 8

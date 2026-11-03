@@ -1,6 +1,7 @@
 <!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
 import PageHeader from '@/components/PageHeader.vue' // for the 'Hello {{parent}}'
@@ -9,11 +10,14 @@ import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the
 import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // accuracy over time
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import HandoverCard from '@/components/HandoverCard.vue' // the weekly AI summary box (shared with the volunteer page)   (Yuqi)
-import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
+import { firstName, formatDate, daysSince, activitiesOf, subjectStyle } from '@/utils/format' // small helpers for names, dates, activities and subject colours
+import { BADGES, earnedBadges } from '@/utils/gamification'
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
+import '@/css/main/components.css' // the subject tag
 
 const auth = useAuthStore()
+const route = useRoute() // /parent?child=c_5 opens that child (the NavBar bell links here, Kai Sen)
 
 // ---------- the things this page remembers ----------
 const children = ref([]) // all the children of this parent
@@ -99,10 +103,15 @@ function rowTag(item, groupKey) {
   return 'Done'
 }
 
-// the grey line under the title of a homework row
+// how many badges the selected child has earned (for parent display)
+const earnedBadgeCount = computed(() =>
+  selectedChild.value ? earnedBadges(selectedChild.value, homework.value).length : 0,
+)
+
+// the grey line under the title of a homework row (the subject is the tag in front of it)
 function rowMeta(item, groupKey) {
-  if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
-  return item.subject + (item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : '')
+  if (groupKey === 'todo') return 'due ' + formatDate(item.dueDate)
+  return item.completedAt ? 'handed in ' + formatDate(item.completedAt) : ''
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -232,7 +241,8 @@ async function loadChild(childId) {
           api.put(`/sessions/${session.id}/viewed`)
       )
   )
-  
+  window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell drops these "new updates" (Kai Sen)
+
   const homeworkResponse = await api.get('/homework', { params: { childId } })
   homework.value = homeworkResponse.data
 }
@@ -249,18 +259,28 @@ async function switchChild(childId) {
 }
 
 // ---------- when the page opens: get the children, then show the first one ----------
+// (or the one in the address, /parent?child=c_5, when the parent came from the NavBar bell)
 onMounted(async () => {
   try {
     const response = await api.get('/children')
     children.value = response.data
     if (children.value.length > 0) {
-      await loadChild(children.value[0].id)
+      const asked = children.value.find((child) => child.id === route.query.child)
+      await loadChild(asked ? asked.id : children.value[0].id)
     }
   } catch (err) {
     error.value = errorMessage(err)
   }
   loading.value = false
 })
+
+// already on this page and the bell opens another child: switch to it
+watch(
+  () => route.query.child,
+  (childId) => {
+    if (childId && children.value.some((child) => child.id === childId)) switchChild(childId)
+  },
+)
 </script>
 
 <template>
@@ -279,7 +299,7 @@ onMounted(async () => {
           <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span></div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span> &middot; <span class="with-icon"><i class="bi bi-award-fill"></i>{{ earnedBadgeCount }}/{{ BADGES.length }} kueh earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">
@@ -350,7 +370,7 @@ onMounted(async () => {
                     <span class="row-tag">{{ rowTag(item, group.key) }}</span>
                   </span>
                   <span v-if="group.key === 'done' && scoreOf(resultSessions[item.id])" class="row-score">{{ scoreOf(resultSessions[item.id]) }}</span>
-                  <span class="muted">{{ rowMeta(item, group.key) }}</span>
+                  <span class="muted"><span class="session-subject" :style="subjectStyle(item.subject)">{{ item.subject }}</span>{{ rowMeta(item, group.key) }}</span>
                   <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
 
@@ -908,9 +928,14 @@ onMounted(async () => {
 .parentpage .day-photo {
   position: relative;
   display: block;
+  width: 100%;
   aspect-ratio: 1;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   border-radius: 12px;
+  background: none;
+  cursor: pointer;
 }
 
 /* the picture is cropped to the square; the crop keeps the top, where the faces are */
@@ -936,6 +961,42 @@ onMounted(async () => {
   color: #FFFFFF;
   font-size: 18px;
   font-weight: 700;
+}
+
+/* the pop-up with the photo big: a dark cover over the whole screen */
+.parentpage .photo-popup {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(65, 79, 103, 0.85);
+  cursor: pointer;
+}
+
+.parentpage .photo-popup img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.parentpage .photo-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #414F67;
+  font-size: 16px;
 }
 
 @media (max-width: 520px) {

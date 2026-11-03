@@ -1,4 +1,4 @@
-import { test } from 'vitest'
+import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { scoreVolunteer, rankVolunteers } from '../utils/matchmaking.js'
@@ -7,9 +7,9 @@ const seed = JSON.parse(readFileSync(new URL('../data/seed.json', import.meta.ur
 const volunteers = seed.users.filter((u) => u.role === 'volunteer')
 const childNamed = (name) => seed.children.find((c) => c.name.startsWith(name))
 
-test('score = +2 per skill, +1 per day, -1 per other child', () => {
-  const child = { id: 'c_x', needs: ['Fractions', 'Science'], volunteerIds: [] }
-  const volunteer = { id: 'v', name: 'V', skills: ['Fractions', 'Science', 'Art'], availability: ['Mon', 'Wed'] }
+test('score = +2 per subject, +1 per day, -1 per other child', () => {
+  const child = { id: 'c_x', needs: ['Math', 'Science'], volunteerIds: [] }
+  const volunteer = { id: 'v', name: 'V', skills: ['Math', 'Science', 'English'], availability: ['Mon', 'Wed'] }
   const others = [
     { id: 'c_a', volunteerIds: ['v'] },
     { id: 'c_b', volunteerIds: ['v'] },
@@ -18,7 +18,7 @@ test('score = +2 per skill, +1 per day, -1 per other child', () => {
   const result = scoreVolunteer(child, volunteer, [child, ...others])
   assert.deepEqual(result.breakdown, { skills: 4, days: 2, workload: -2 })
   assert.equal(result.score, 4)
-  assert.deepEqual(result.matchedSkills, ['Fractions', 'Science'])
+  assert.deepEqual(result.matchedSkills, ['Math', 'Science'])
 })
 
 test('the child being matched does not count towards workload', () => {
@@ -29,10 +29,12 @@ test('the child being matched does not count towards workload', () => {
   assert.equal(result.assigned, true)
 })
 
-test('seed: Priya is the top match for Sofia', () => {
+test('seed: Priya is the top match for Sofia (Aisha matches more but is busier)', () => {
   const ranked = rankVolunteers(childNamed('Sofia'), volunteers, seed.children)
   assert.equal(ranked[0].name, 'Priya Nair')
-  assert.deepEqual(ranked[0].matchedSkills, ['English'])
+  assert.equal(ranked[0].score, 3) // +2 English, +2 days, -1 other child
+  assert.equal(ranked[1].name, 'Aisha Rahman')
+  assert.equal(ranked[1].score, 2) // +4 Math & English, +2 days, -4 other children
 })
 
 test('seed: Ethan scores his two assigned volunteers with their schedule days', () => {
@@ -40,4 +42,5 @@ test('seed: Ethan scores his two assigned volunteers with their schedule days', 
   const aisha = ranked.find((r) => r.name === 'Aisha Rahman')
   assert.equal(aisha.assigned, true)
   assert.deepEqual(aisha.scheduledDays, ['Mon', 'Wed'])
+  assert.deepEqual(aisha.scheduledSlots, [{ day: 'Mon', time: '16:00' }, { day: 'Wed', time: '18:00'}])
 })

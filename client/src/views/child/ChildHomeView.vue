@@ -15,9 +15,20 @@ const loading  = ref(true)
 const error    = ref('')
 const celebrating     = ref(false)
 const submitError     = ref('')
-const newBadge        = ref(null)  // badge just unlocked — shows the reveal overlay
+const badgeQueue      = ref([])    // badges waiting to be shown one by one
+const newBadge        = computed(() => badgeQueue.value[0] || null)
 const justUnlockedId  = ref(null)  // id of the tile to pulse in the grid
-const verifiedGain    = ref(null)  // { points } shown as a toast when teacher verifies a quest
+const toastQueue      = ref([])    // notification toasts: [{ id, icon, message, color }]
+let   toastCounter    = 0
+
+function dismissBadge() { badgeQueue.value.shift() }
+function showNextBadge(badge) { badgeQueue.value.push(badge) }
+
+function showToast(icon, message, color) {
+  const id = ++toastCounter
+  toastQueue.value.push({ id, icon, message, color })
+  setTimeout(() => { toastQueue.value = toastQueue.value.filter((t) => t.id !== id) }, 4500)
+}
 
 const CONFETTI = [
   { color: '#E8A0B8', tx:  -70, ty: -150 },
@@ -37,11 +48,7 @@ const CONFETTI = [
 ]
 
 // ── Computed ─────────────────────────────────────────────────
-// Add points from submitted (not yet verified) homework so the lapis and level update immediately.
-const pendingPoints = computed(() =>
-  homework.value.filter((h) => h.status === 'submitted').reduce((sum, h) => sum + h.points, 0),
-)
-const displayPoints = computed(() => (me.value?.points || 0) + pendingPoints.value)
+const displayPoints = computed(() => me.value?.points || 0)
 const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
@@ -51,15 +58,33 @@ const showDone  = ref(false)
 
 const emptyQuestMessage = computed(() =>
   homework.value.length === 0
-    ? 'No quests yet — your teacher will add some soon!'
+    ? 'No quests yet — your coordinator will add some soon!'
     : 'All quests done — great work!',
 )
 
 // the kueh lapis resets every 200 pts (one full cake) — each restart is a new "season"
 const SEASON_PTS = 200
+const STEP       = 50
 const season       = computed(() => Math.floor(displayPoints.value / SEASON_PTS) + 1)
 const cakeProgress = computed(() => levelFor(displayPoints.value % SEASON_PTS))
 const layers       = computed(() => Math.min(cakeProgress.value.level - 1, 4))
+
+// pending points: submitted but not yet verified (uses half-points if late, same as backend)
+const pendingPoints = computed(() =>
+  homework.value
+    .filter((h) => h.status === 'submitted')
+    .reduce((sum, h) => {
+      const late = h.completedAt && h.dueDate && h.completedAt > h.dueDate
+      return sum + (late ? Math.floor(h.points / 2) : h.points)
+    }, 0),
+)
+// how much of the current layer those pending points would fill (capped at remaining space)
+const pendingProgress = computed(() => {
+  if (pendingPoints.value === 0) return 0
+  const verifiedInLayer = (displayPoints.value % SEASON_PTS) % STEP
+  const spaceLeft = STEP - verifiedInLayer
+  return Math.round((Math.min(pendingPoints.value, spaceLeft) / STEP) * 100)
+})
 
 // closest unearned badge (highest progress ratio)
 const nextBadge = computed(() => {
@@ -82,25 +107,16 @@ const shownProgress = computed(() => badgeProgress(shown.value, me.value, homewo
 async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
-    const prevEarnedIds = new Set(earned.value.map((b) => b.id))
-
     await api.put(`/homework/${homeworkId}/submit`)
     const h = homework.value.find((hw) => hw.id === homeworkId)
     if (h) {
       h.status      = 'submitted'
       h.completedAt = new Date().toISOString().slice(0, 10)
+      h.rejectedAt  = null
     }
     showDone.value    = true
     celebrating.value = true
     setTimeout(() => (celebrating.value = false), 2200)
-
-    // Check for a newly unlocked badge and show the reveal after the quest celebration fades
-    const justUnlocked = earned.value.find((b) => !prevEarnedIds.has(b.id))
-    if (justUnlocked) {
-      justUnlockedId.value = justUnlocked.id
-      setTimeout(() => { justUnlockedId.value = null }, 1400)
-      setTimeout(() => { newBadge.value = justUnlocked }, 2400)
-    }
   } catch (err) {
     submitError.value = errorMessage(err)
   }
@@ -115,7 +131,6 @@ async function unsubmitQuest(homeworkId) {
       h.status = 'assigned'
       h.completedAt = null
     }
-    newBadge.value = null
   } catch (err) {
     submitError.value = errorMessage(err)
   }
@@ -123,23 +138,56 @@ async function unsubmitQuest(homeworkId) {
 
 async function refreshData() {
   try {
-    const prevPoints = me.value?.points || 0
+    const prevPoints      = me.value?.points || 0
+    const prevLevel       = level.value.level
+    const prevEarnedIds   = new Set(earned.value.map((b) => b.id))
+    const prevHwIds       = new Set(homework.value.map((h) => h.id))
+    const prevRejectedIds = new Set(homework.value.filter((h) => h.rejectedAt).map((h) => h.id))
+
     const [c, h] = await Promise.all([
       api.get(`/children/${auth.user.childId}`),
       api.get('/homework', { params: { childId: auth.user.childId } }),
     ])
     const gained = c.data.points - prevPoints
-    if (gained > 0) {
-      verifiedGain.value = { points: gained }
-      setTimeout(() => { verifiedGain.value = null }, 3500)
-    }
     me.value       = c.data
     homework.value = h.data
+
+    // Quest verified → points gained
+    if (gained > 0) {
+      showToast('bi-patch-check-fill', `Quest checked! +${gained} ★`, '#2E8B57')
+    }
+
+    // Quest returned by volunteer
+    const newlyRejected = h.data.filter((hw) => hw.rejectedAt && !prevRejectedIds.has(hw.id))
+    if (newlyRejected.length) {
+      showToast('bi-arrow-return-left', 'A quest was returned — check your quests!', '#B05030')
+    }
+
+    // New homework allocated
+    const newHw = h.data.filter((hw) => !prevHwIds.has(hw.id))
+    if (newHw.length) {
+      const msg = newHw.length === 1 ? 'New quest added!' : `${newHw.length} new quests added!`
+      showToast('bi-map', msg, '#3A7FAE')
+    }
+
+    // Level up
+    if (level.value.level > prevLevel) {
+      showToast('bi-trophy-fill', `Level up! You're now Level ${level.value.level}!`, '#9B7820')
+    }
+
+    // Badge unlocks
+    const justUnlocked = earned.value.filter((b) => !prevEarnedIds.has(b.id))
+    if (justUnlocked.length) {
+      justUnlockedId.value = justUnlocked[0].id
+      setTimeout(() => { justUnlockedId.value = null }, 1400)
+      setTimeout(() => { justUnlocked.forEach(showNextBadge) }, gained > 0 ? 4000 : 2400)
+    }
   } catch {
     // silent — background refresh
   }
 }
 
+let pollTimer = null
 function onVisible() { if (!document.hidden) refreshData() }
 
 onMounted(async () => {
@@ -156,10 +204,12 @@ onMounted(async () => {
     loading.value = false
   }
   document.addEventListener('visibilitychange', onVisible)
+  pollTimer = setInterval(() => { if (!document.hidden) refreshData() }, 30_000)
 })
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisible)
+  clearInterval(pollTimer)
 })
 </script>
 
@@ -173,7 +223,7 @@ onUnmounted(() => {
         role="dialog"
         aria-modal="true"
         :aria-label="`${newBadge.kueh} badge unlocked`"
-        @click.self="newBadge = null"
+        @click.self="dismissBadge"
       >
         <div class="badge-unlock-card">
           <span
@@ -189,7 +239,7 @@ onUnmounted(() => {
             <div class="badge-unlock-name">{{ newBadge.kueh }}</div>
             <div class="badge-unlock-badge">{{ newBadge.name }}</div>
             <div class="badge-unlock-fact">{{ newBadge.fact }}</div>
-            <button class="badge-unlock-btn" @click="newBadge = null">Yay!</button>
+            <button class="badge-unlock-btn" @click="dismissBadge">Yay!</button>
           </div>
         </div>
       </div>
@@ -207,11 +257,17 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <Transition name="verified-toast">
-      <div v-if="verifiedGain" class="verified-toast" role="status" aria-live="polite">
-        <i class="bi bi-patch-check-fill me-2"></i>Quest verified! +{{ verifiedGain.points }} ★
+    <TransitionGroup name="child-toast" tag="div" class="child-toast-stack" aria-live="polite">
+      <div
+        v-for="t in toastQueue"
+        :key="t.id"
+        class="child-toast"
+        :style="{ background: t.color }"
+        role="status"
+      >
+        <i :class="`bi ${t.icon} me-2`"></i>{{ t.message }}
       </div>
-    </Transition>
+    </TransitionGroup>
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -249,7 +305,14 @@ onUnmounted(() => {
                 class="cake-layer"
                 :class="[`cake-layer-${n}`, { 'cake-layer-next': n > layers }]"
               >
-                <div v-if="n > layers" :style="{ width: cakeProgress.progress + '%' }"></div>
+                <template v-if="n > layers">
+                  <div class="cake-fill-verified" :style="{ width: cakeProgress.progress + '%' }"></div>
+                  <div
+                    v-if="pendingProgress > 0"
+                    class="cake-fill-pending"
+                    :style="{ left: cakeProgress.progress + '%', width: pendingProgress + '%' }"
+                  ></div>
+                </template>
               </div>
               <!-- marker sits as a sibling so ::before can escape overflow:hidden on the layer -->
               <div
@@ -266,6 +329,7 @@ onUnmounted(() => {
             <span v-if="season > 1" class="cake-season-badge">Season {{ season }}</span>
             <span v-if="layers < 4" class="cake-progress-label">{{ cakeProgress.starsToNext }} more ★ for next layer</span>
             <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
+            <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ waiting to be checked</span>
           </div>
         </div>
       </div>
@@ -410,28 +474,10 @@ onUnmounted(() => {
   border-radius: 18px;
 }
 
-/* the small tags are round pills: points and "to do" are soft yellow, overdue is soft red, checked is green */
-.childhomepage .badge {
-  padding: 3px 10px;
-  border-radius: 99px;
-  box-shadow: none;
-  font-size: 12px;
-  font-weight: 700;
+/* pending (submitted, waiting for volunteer check): dotted border */
+.childhomepage .quest-card.quest-waiting {
+  border: 2px dashed #B7D8D7;
 }
-
-.childhomepage .quest-points,
-.childhomepage .quest-status { background: #FBE7A1; }
-
-/* the points stay on one line: the star sits next to the number, never under it */
-.childhomepage .quest-points {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  white-space: nowrap;
-}
-.childhomepage .quest-overdue { background: #EE9F96; }
-.childhomepage .quest-status-done { background: #E6F4EC; color: #2E8B57; }
 
 /* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
    in pale pink with dark text */
@@ -515,7 +561,7 @@ onUnmounted(() => {
 .cake-layer:last-child  { border-radius: 10px 10px 0 0; }
 .cake-layer:only-child  { border-radius: 10px; }
 
-/* the colours of the layers, bottom to top: teacher, volunteer, parent, child (the same order as the stripes under the navbar) */
+/* the colours of the layers, bottom to top: coordinator, volunteer, parent, child (the same order as the stripes under the navbar) */
 .cake-layer-1 { --c: #D5CBEA; }
 .cake-layer-2 { --c: #9BD3B2; }
 .cake-layer-3 { --c: #AED9D8; }
@@ -524,13 +570,24 @@ onUnmounted(() => {
 /* the layer being built: a white bar that fills up */
 .cake-layer-next {
   position: relative;
-  overflow: hidden;
   background: #F5F0E8;
 }
 
-.cake-layer-next > div {
+/* verified fill: solid colour */
+.cake-fill-verified {
   height: 100%;
   background: var(--c);
+}
+
+/* pending fill: pale with dotted outline, full height of the layer */
+.cake-fill-pending {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--c);
+  opacity: 0.45;
+  border: 2px dotted rgba(74, 63, 58, 0.35);
+  box-sizing: border-box;
 }
 
 /* "you are here" vertical marker — absolutely positioned sibling inside .kueh-cake */
@@ -589,6 +646,13 @@ onUnmounted(() => {
   color: #2E8B57;
 }
 
+.cake-pending-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #A9577A;
+  opacity: 0.85;
+}
+
 /* gold plate for season 2+ */
 .cake-plate-gold {
   background: linear-gradient(90deg, #F5E070 0%, #DBA82A 50%, #F5E070 100%);
@@ -596,38 +660,44 @@ onUnmounted(() => {
 
 .cake-season-badge {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #F5E070;
   color: #8B6914;
   font-size: 12px;
   font-weight: 700;
 }
 
-/* "Quest verified!" toast */
-.verified-toast {
+/* notification toasts: stacked above the bottom of the screen */
+.child-toast-stack {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1050;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.child-toast {
   padding: 10px 20px;
   border-radius: 99px;
-  background: #2E8B57;
   color: #FFFFFF;
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(46, 139, 87, 0.30);
-  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.20);
 }
 
-.verified-toast-enter-active { animation: toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.verified-toast-leave-active { animation: toast-in 0.25s ease-in reverse; }
+.child-toast-enter-active { animation: child-toast-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.child-toast-leave-active { animation: child-toast-in 0.25s ease-in reverse; }
 
-@keyframes toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+@keyframes child-toast-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── The kueh tin ───────────────────────────────────────────── */
@@ -730,14 +800,12 @@ onUnmounted(() => {
 
 .kueh-state {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
+  padding: 2px 11px;
+  border-radius: 999px;
   background: #E6F4EC;
   color: #2E8B57;
-  font-size: 11.2px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
 }
 
 /* a kueh you have not earned yet: faded grey picture */
@@ -764,8 +832,6 @@ onUnmounted(() => {
 .kueh-detail-badge {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
   color: #A9577A;
 }
 

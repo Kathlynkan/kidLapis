@@ -17,15 +17,24 @@ export function newLinkCode() {
   return code
 }
 
+// The photos in public/photos are .jpg files. Older rows in the database may still say .webp,
+// so they are sent as .jpg (a path that is not a /photos/ file, like an emoji or a data: photo, stays as it is).
+export function toJpg(path) {
+  return typeof path === 'string' ? path.replace(/^(\/photos\/[\w-]+)\.webp$/, '$1.jpg') : path
+}
+
 // What the client receives when a document is sent with res.json(doc):
 //   _id  -> id        (the Vue code uses `.id` everywhere)
 //   __v and password are removed
+//   avatar and photos: see toJpg above
 export const jsonOptions = {
   versionKey: false,
   transform(doc, ret) {
     ret.id = ret._id
     delete ret._id
     delete ret.password
+    if (ret.avatar) ret.avatar = toJpg(ret.avatar)
+    if (Array.isArray(ret.photos)) ret.photos = ret.photos.map(toJpg)
     return ret
   },
 }

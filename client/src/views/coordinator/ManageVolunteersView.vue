@@ -4,8 +4,9 @@ import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
+import { subjectStyle } from '@/utils/format'
 import StateMessage from '@/components/StateMessage.vue'
-import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 const Days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const volunteers = ref([])
@@ -31,12 +32,8 @@ const filtered_Volunteers = computed(() => {
 
 
 // pulls all skills from both volunteer and child
-const allSkills = computed(() => {
-  const set = new Set()
-  volunteers.value.forEach((v) => (v.skills || []).forEach((s) => set.add(s)))
-  children.value.forEach((c) => (c.needs || []).forEach((s) => set.add(s)))
-  return [...set].sort()
-}) 
+const SUBJECTS = ['Math', 'Science', 'English', 'Mother Tongue']
+const allSkills = computed(() => SUBJECTS)
 
 const childrenByVolunteer = computed(() => {
   const map = {}
@@ -122,7 +119,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container py-4 teacherpage">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Volunteers" subtitle="Skills and availability power the matchmaking." />
 
     <StateMessage v-if="loading" type="loading" />
@@ -185,7 +182,10 @@ onMounted(async () => {
           <div v-if="editing_ID !== v.id" class="facts">
             <div class="fact">
               <span class="fact-key">Teaches</span>
-              <span class="fact-value">{{ (v.skills || []).join(', ') || 'No skills to display' }}</span>
+              <span v-if="(v.skills || []).length" class="tags">
+                <span v-for="skill in v.skills" :key="skill" class="tag" :style="subjectStyle(skill)">{{ skill }}</span>
+              </span>
+              <span v-else class="fact-value">No skills to display</span>
             </div>
             <div class="fact">
               <span class="fact-key">Free on</span>

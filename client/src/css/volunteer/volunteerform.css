@@ -2,7 +2,7 @@
 /* Styles for the forms a volunteer fills in: the Record / Edit a session form (SessionFormView.vue) and the Give homework form
    (HomeworkAssignView.vue). Both pages have the class volunteerformpage.
    The photo previews and the mood buttons just below are for everyone. Every other rule starts with .volunteerformpage
-   or .role-teacher .volunteerformpage (a teacher can edit a session). The colours are the variables (--cp-...) in volunteershared.css.
+   or .role-coordinator .volunteerformpage (a coordinator can edit a session). The colours are the variables (--cp-...) in volunteershared.css.
    Only the look changes here: the fields, the layout and the buttons work as before.
    Colours of the volunteer:
      #213C31 dark green       text

@@ -2,7 +2,7 @@
    Kids Lapis — Kueh Lapis design system.
    EXTERNAL CSS: the whole app uses it (loaded once in main.js).
    What is in it: the palette (as a comment), the Bootstrap overrides, the classes every page shares,
-   and the colours of the volunteer's and the teacher's pages (--cp-...).
+   and the colours of the volunteer's and the coordinator's pages (--cp-...).
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -11,17 +11,18 @@
    Every colour is written as a hex code in the css. These are the names, so you can talk about them.
 
    The layers of the cake (the stripes under the navbar, and the colour of each role):
-     child #E8A0B8 rose pink (the top layer)   parent #AED9D8 aqua   volunteer #9BD3B2 mint   teacher #D5CBEA purple (the bottom layer)
+     child #E8A0B8 rose pink (the top layer)   parent #AED9D8 aqua   volunteer #9BD3B2 mint   coordinator #D5CBEA purple (the bottom layer)
    Text and background:
      plum #4A3F3A (text, never black)   muted #8D7F77 (small text)   cream #FBF8F3 (the page)   shadow #B9A99B (drop shadows only)
    The colours of the old cards, and their darker border tones:
      pink #E8A0B8 / #C07090    lime #A8CC90 / #68A048    yellow #F5DF98 / #C8A028
      blue #88C0D8 / #4890B8    orange #F5B880 / #C07838  purple #C0A8D8   cream border #C8B8A8
-   The four subjects (the charts):  English #88C0D8   Math #D4B840   Science #F5DF98   Mother Tongue #E8906C
+   The four subjects (pills and charts; the colours are in utils/constants.js):
+     English #A3CDE6   Math #F4D08A   Science #B2D8A6   Mother Tongue #F3B397   (deeper tones for chart lines: #5E9FC9 #DBA645 #6BAE63 #E0805D)
    Success #A8CC90 (pale #E8F5DC)   Messages #88C0D8   Alert #E8A0B8
    The quiet colours (a pale fill, a thin line, dark words):
      pink #FBE3DF / #F2B8B0 / #9A3F36 (an error, not seen, overdue)     yellow #FAF4D8 / #EEDFA6 / #7A6420 (struggling, a note)
-   The teacher pages (teacher/teacherpage.css):  text #3D3454   title #5B4B8A   small text #7D7690   purple #D5CBEA   pale purple #F0EAF8
+   The coordinator pages (coordinator/coordinatorpage.css):  text #3D3454   title #5B4B8A   small text #7D7690   purple #D5CBEA   pale purple #F0EAF8
      mid purple #B8A9DD   deep purple #6B5CA5   button hover #C7BBE0   line #EFE9F7
    The font is Inter. The corners of a card are 12px. */
 
@@ -78,7 +79,7 @@ html, body {
 }
 
 /* ── The board ─────────────────────────────────────────────────
-   The sandy box that holds the white cards on every restyled page (child, parent, volunteer and teacher).
+   The sandy box that holds the white cards on every restyled page (child, parent, volunteer and coordinator).
    A page only adds what is its own, for example the gap between the cards inside it. */
 .board {
   padding: 14px;
@@ -93,12 +94,12 @@ html, body {
 
 .role-parent    { --role-accent: #AED9D8;    --role-accent-soft: #DDF0EF; --role-accent-dark: #414F67; }
 .role-volunteer { --role-accent: #9BD3B2; --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
-.role-teacher   { --role-accent: #D5CBEA;   --role-accent-soft: #F0EAF8; --role-accent-dark: #5B4B8A; }
+.role-coordinator   { --role-accent: #D5CBEA;   --role-accent-soft: #F0EAF8; --role-accent-dark: #5B4B8A; }
 
-/* ── Colours of the volunteer's and the teacher's pages ─────────
-   Used by one child's page, its pop-ups and the forms (volunteer and teacher).
-   The volunteer is the default. The teacher has the lavender of the other teacher pages (teacherpage.css).
-   The teacher's are set on the body, so the pop-ups (which are moved to the end of the body) have them too. */
+/* ── Colours of the volunteer's and the coordinator's pages ─────────
+   Used by one child's page, its pop-ups and the forms (volunteer and coordinator).
+   The volunteer is the default. The coordinator has the lavender of the other coordinator pages (coordinatorpage.css).
+   The coordinator's are set on the body, so the pop-ups (which are moved to the end of the body) have them too. */
 
 :root {
   --cp-text: #213C31;
@@ -125,7 +126,7 @@ html, body {
   --cp-waiting-text: #414F67;
 }
 
-body.role-teacher {
+body.role-coordinator {
   --cp-text: #3D3454;
   --cp-title: #5B4B8A;
   --cp-deep: #6B5CA5;

@@ -9,6 +9,7 @@
 ============================================================= -->
 <script setup>
 import { ref, onMounted } from 'vue'
+
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -22,6 +23,7 @@ const requests = ref([]) // [{ childId, childName, level, avatar, needs, day, ti
 const loading = ref(true)
 const error = ref('')
 const answering = ref('') // 'childId|day' of the request being answered (its buttons are disabled)
+
 const keyOf = (r) => `${r.childId}|${r.day}`
 
 async function loadRequests() {
@@ -44,6 +46,7 @@ async function answer(r, action) {
   error.value = ''
   try {
     await api.put(`/requests/${r.childId}`, { day: r.day, action })
+
     const request = requests.value.find(
       req => keyOf(req) === keyOf(r)
     )

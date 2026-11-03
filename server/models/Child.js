@@ -10,10 +10,22 @@ const childSchema = new mongoose.Schema(
     school: String,
     parentId: String, // -> User (role parent)
     // Child code a parent types in at sign up to link to this child (Kai Sen).
-    // select: false = never sent to the browser unless a route asks for it (only teachers see it).
+    // select: false = never sent to the browser unless a route asks for it (only coordinators see it).
     linkCode: { type: String, unique: true, sparse: true, select: false },
     volunteerIds: [String], // -> Users (role volunteer) assigned to this child
-    schedule: [{ _id: false, volunteerId: String, day: String, time: String }], // which day each volunteer sees this child (Yu Xuan)
+    // which day each volunteer sees this child (Yu Xuan)
+    // status (agreed with Yu Xuan): a new slot from matchmaking is 'pending' until the volunteer
+    // accepts it (routes/requests.js). Declining removes the slot. Slots without a status
+    // (seed data, older assignments) count as 'accepted'.
+    schedule: [
+      {
+        _id: false,
+        volunteerId: String,
+        day: String,
+        time: String,
+        status: { type: String, enum: ['pending', 'accepted'], default: 'accepted' },
+      },
+    ],
     needs: [String], // skills the child needs help with (matchmaking)
     points: { type: Number, default: 0 }, // gamification (Jachin)
     avatar: { type: String, default: '🙂' },

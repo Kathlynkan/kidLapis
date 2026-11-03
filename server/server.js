@@ -21,6 +21,8 @@ import messageRoutes from './routes/messages.js'
 import handoverRoutes from './routes/handover.js'
 import dashboardRoutes from './routes/dashboard.js'
 import matchmakingRoutes from './routes/matchmaking.js'
+import requestRoutes from './routes/requests.js'
+import notificationRoutes from './routes/notifications.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -41,13 +43,18 @@ app.set('io', io)
 // Security (Kai Sen): the live connection follows the same rules as GET /messages.
 //   1. No valid login token -> the connection is refused.
 //   2. You can only join the room of a child whose chat you may read
-//      (parents: their own children, teachers: every child; volunteers and children: none).
+//      (parents: their own children, coordinators: every child; volunteers and children: none).
 // Without this, anyone could connect without logging in, join "child:c_1" and read new messages.
+//
+// Every connection also joins its user's private room "user:<id>", used for live
+// bell updates (utils/notify.js).
 io.use(async (socket, next) => {
   try {
     const user = await userForToken(socket.handshake.auth?.token)
     if (!user) return next(new Error('Please log in again.'))
     socket.data.token = socket.handshake.auth.token
+    socket.data.userId = user.id
+    socket.data.role = user.role
     next()
   } catch {
     next(new Error('Could not check your login.'))
@@ -55,6 +62,8 @@ io.use(async (socket, next) => {
 })
 
 io.on('connection', (socket) => {
+  socket.join(`user:${socket.data.userId}`) // private room: only this user's browsers
+  socket.join(`role:${socket.data.role}`) // e.g. every coordinator, for live schedule updates
   socket.on('join', async (childId) => {
     // try/catch: an error here (e.g. the database is down) must not crash the whole server
     try {
@@ -80,6 +89,8 @@ app.use('/auth', authRoutes) // Kai Sen
 app.use('/users', userRoutes) // Kai Sen / Yu Xuan
 app.use('/children', childRoutes) // Kai Sen
 app.use('/matchmaking', matchmakingRoutes) // Yu Xuan
+app.use('/requests', requestRoutes) // Kai Sen (volunteers accept / decline new sessions)
+app.use('/notifications', notificationRoutes) // Kai Sen (the "Updates" in the bell)
 app.use('/dashboard', dashboardRoutes) // Yu Xuan
 app.use('/sessions', sessionRoutes) // Ning Xuan
 app.use('/homework', homeworkRoutes) // Ning Xuan (assign) + Jachin (complete / rewards)

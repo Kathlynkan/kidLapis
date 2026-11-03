@@ -1,5 +1,5 @@
 <!-- TopicSummaryChart - average accuracy per subject (bar chart)  Owner: Jachin
-     Used on: Child profile (Yuqi), Teacher dashboard (Yu Xuan)
+     Used on: Child profile (Yuqi), Coordinator dashboard (Yu Xuan)
      Props: sessions (Array), title (String),
             calm (Boolean) - the quiet look for a volunteer: plain teal bars with the percentage -->
 <script setup>
@@ -75,7 +75,7 @@ const chartOptions = {
     <div v-else-if="calm" class="topic-bars">
       <div v-for="t in bySubject" :key="t.subject" class="topic-bar">
         <div class="topic-bar-top"><span>{{ t.subject }}</span><b>{{ t.accuracy }}%</b></div>
-        <div class="topic-bar-track"><div class="topic-bar-fill" :style="{ width: t.accuracy + '%' }"></div></div>
+        <div class="topic-bar-track"><div class="topic-bar-fill" :style="{ width: t.accuracy + '%', background: SUBJECT_COLORS[t.subject] }"></div></div>
       </div>
     </div>
     <div
