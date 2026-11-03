@@ -15,46 +15,7 @@ const auth = useAuthStore()
 const entries  = ref([])
 const loading  = ref(true)
 const error    = ref('')
-const cheerMsg = ref('') // inline feedback after cheering
-
 const myId = computed(() => auth.user?.childId)
-
-// localStorage key: { date: 'YYYY-MM-DD', ids: ['c_...', ...] }
-const CHEER_KEY = computed(() => `lapis-cheers-${myId.value}`)
-
-function cheeredToday() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(CHEER_KEY.value) || '{}')
-    const today = new Date()
-    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-    if (stored.date !== date) return new Set()
-    return new Set(stored.ids || [])
-  } catch { return new Set() }
-}
-
-function markCheered(childId) {
-  const today = new Date()
-  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-  const prev = cheeredToday()
-  prev.add(childId)
-  localStorage.setItem(CHEER_KEY.value, JSON.stringify({ date, ids: [...prev] }))
-}
-
-const cheeredSet = ref(cheeredToday())
-
-async function cheerChild(childId) {
-  try {
-    await api.post(`/children/${childId}/cheer`)
-    markCheered(childId)
-    cheeredSet.value = cheeredToday()
-    cheerMsg.value = '👏 Cheered!'
-    setTimeout(() => { cheerMsg.value = '' }, 2500)
-    fetchLeaderboard()
-  } catch (err) {
-    cheerMsg.value = errorMessage(err)
-    setTimeout(() => { cheerMsg.value = '' }, 2500)
-  }
-}
 
 // every child with the place they share, and the child just ahead of them (the next one with more stars)
 const ranked = computed(() =>
@@ -116,8 +77,6 @@ onUnmounted(() => {
   <div class="container py-4 leaderboardpage">
     <PageHeader title="Leaderboard" subtitle="Verified stars in the last 7 days" />
 
-    <div v-if="cheerMsg" class="cheer-flash" role="status">{{ cheerMsg }}</div>
-
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
@@ -166,16 +125,6 @@ onUnmounted(() => {
 
               <div class="pnote">{{ slot.note }}</div>
 
-              <button
-                v-if="slot.entry && slot.entry.childId !== myId"
-                class="cheer-btn"
-                :class="{ 'cheer-btn-done': cheeredSet.has(slot.entry.childId) }"
-                :disabled="cheeredSet.has(slot.entry.childId)"
-                :title="cheeredSet.has(slot.entry.childId) ? 'Already cheered today' : `Cheer ${firstName(slot.entry.name)}`"
-                @click="cheerChild(slot.entry.childId)"
-              >
-                {{ cheeredSet.has(slot.entry.childId) ? '👏 Cheered' : '👏 Cheer' }}
-              </button>
             </div>
           </div>
         </div>
@@ -195,15 +144,6 @@ onUnmounted(() => {
             <span v-if="entry.childId === myId" class="lb-you">You</span>
             <span v-if="entry.childId === myId && passNote(entry)" class="row-hint">{{ passNote(entry) }}</span>
             <span class="lb-stars"><i class="bi bi-star-fill"></i>{{ entry.points }}</span>
-            <button
-              v-if="entry.childId !== myId"
-              class="cheer-btn"
-              :class="{ 'cheer-btn-done': cheeredSet.has(entry.childId) }"
-              :disabled="cheeredSet.has(entry.childId)"
-              @click="cheerChild(entry.childId)"
-            >
-              {{ cheeredSet.has(entry.childId) ? '👏' : '👏' }}
-            </button>
           </div>
         </div>
 
@@ -456,41 +396,6 @@ onUnmounted(() => {
 }
 
 .leaderboardpage .lb-go:hover { background: #EBAAC2; color: #4A3F3A; }
-
-/* ── Cheer button ───────────────────────────────────────────── */
-
-.leaderboardpage .cheer-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border: 0;
-  border-radius: 99px;
-  background: #FBE7A1;
-  color: #4A3F3A;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter 0.15s;
-}
-
-.leaderboardpage .cheer-btn:hover:not(:disabled) { filter: brightness(0.93); }
-.leaderboardpage .cheer-btn-done { background: #F0EDE8; color: #8D7F77; cursor: default; }
-.leaderboardpage .cheer-btn:disabled { opacity: 0.7; }
-
-/* inline flash message */
-.leaderboardpage .cheer-flash {
-  text-align: center;
-  padding: 6px 16px;
-  border-radius: 99px;
-  background: #FBE7A1;
-  color: #4A3F3A;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
 
 /* ── A small phone: three narrow steps ──────────────────────── */
 

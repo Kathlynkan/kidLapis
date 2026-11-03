@@ -237,40 +237,6 @@ router.delete('/:id/journal/:entryId', async (req, res) => {
   res.json(forViewer(child, req.user))
 })
 
-// POST /children/:id/cheer   body: {}
-// A child gives a 👏 to a classmate once per calendar day. Recipient gets +2 ★.
-// Old cheer records (> 30 days) are pruned to keep the array small.
-router.post('/:id/cheer', async (req, res) => {
-  if (req.user.role !== 'child') {
-    return res.status(403).json({ message: 'Only children can send cheers.' })
-  }
-  const fromChildId = req.user.childId
-  if (!fromChildId) return res.status(400).json({ message: 'No child profile linked to this account.' })
-  if (req.params.id === fromChildId) return res.status(400).json({ message: 'You cannot cheer yourself.' })
-
-  const child = await Child.findById(req.params.id)
-  if (!child) return res.status(404).json({ message: 'Child not found' })
-
-  const today = new Date()
-  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-
-  const alreadyCheered = child.cheersReceived.some(
-    (c) => c.fromChildId === fromChildId && c.date === date,
-  )
-  if (alreadyCheered) return res.status(409).json({ message: 'You already cheered this person today.' })
-
-  // Prune entries older than 30 days
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - 30)
-  const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
-  child.cheersReceived = child.cheersReceived.filter((c) => c.date >= cutoffStr)
-
-  child.cheersReceived.push({ fromChildId, date })
-  child.points = (child.points || 0) + 2
-  await child.save()
-  res.json({ success: true, points: child.points })
-})
-
 // DELETE /children/:id
 // Decision (Kai Sen): deleting a child also deletes everything that belongs to them,
 // so no session, homework, message or login is left pointing to a child that no longer

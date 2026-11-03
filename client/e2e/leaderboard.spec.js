@@ -8,7 +8,6 @@ test.describe('Leaderboard', () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, 'child')
     await page.goto('/child/leaderboard')
-    // Wait for the leaderboard to finish loading before each test
     await expect(page.getByRole('heading', { name: /Leaderboard/i })).toBeVisible()
   })
 
@@ -17,28 +16,21 @@ test.describe('Leaderboard', () => {
   // DB involvement: reads from GET /homework/leaderboard?period=week which
   //   aggregates verified homework points for the current rolling 7-day window.
   test('podium renders with at least one ranked entry', async ({ page }) => {
-    // The seed gives multiple children verified stars, so position 1 must be occupied.
     await expect(page.locator('[data-test="podium-1"]')).toBeVisible()
 
-    // The 1st-place step should show a star-count badge.
     const stars = page.locator('[data-test="podium-1"] .lb-stars')
     await expect(stars).toBeVisible()
     const text = await stars.textContent()
     expect(Number(text?.replace(/[^\d]/g, ''))).toBeGreaterThan(0)
   })
 
-  // ── Test Case 2: cheer button ────────────────────────────────────────────────
-  // Feature: a child can see a 👏 Cheer button next to every other child on the
-  //   podium (but not next to themselves).
-  // DB involvement: none on load — the button state is derived from localStorage.
-  test('cheer button appears on podium entries that are not the current child', async ({ page }) => {
-    // Ethan (child@) may or may not be on the podium; at least one other child
-    // from the seed occupies a podium slot, so at least one cheer button must appear.
-    const cheerBtns = page.locator('.podium-card .cheer-btn')
-    await expect(cheerBtns.first()).toBeVisible()
-
-    // The button label must be either "👏 Cheer" or "👏 Cheered" (already used today).
-    const label = await cheerBtns.first().textContent()
-    expect(label?.trim()).toMatch(/👏/)
+  // ── Test Case 2: "Go do a quest" link ───────────────────────────────────────
+  // Feature: the footer always shows a link back to the child's home page
+  //   so they can navigate to their quests without using the nav bar.
+  test('footer link navigates back to the child home page', async ({ page }) => {
+    const goLink = page.getByRole('link', { name: /Go do a quest/i })
+    await expect(goLink).toBeVisible()
+    await goLink.click()
+    await expect(page).toHaveURL(/\/child$/)
   })
 })
