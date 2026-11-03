@@ -1,6 +1,7 @@
 ﻿<!-- =============================================================
   Landing page (public).                              Owner: Kai Sen
-  Done: the title, "One app, four views" (a card for each role with its own log in button)
+  Done: the title, "One app, four views" (a card for each role: volunteers and parents can sign up
+        from their card, coordinator and child accounts are made by the centre, so their cards have Log in)
         and "How it works" (record -> summarise -> share -> continue).
         It is made of the same parts as the other pages: the page title, a sandy board with white cards,
         and the four layer colours (purple, green, aqua, pink) for the four roles.
@@ -13,21 +14,26 @@ import { useAuthStore } from "@/stores/auth"
 const auth = useAuthStore()
 
 // One card for each role. colour: the layer colour of that role (see main.css).
+// signUp: volunteers and parents can make their own account, so their card opens the sign up page with
+//         their role already chosen (/signup?role=parent).
+// logIn:  coordinator and child accounts are made by the centre (they cannot sign up), so those cards
+//         say so and have a Log in button instead.
 const roles = [
   {
     icon: "bi-person-heart",
     name: "Volunteers",
     short: "Record and hand over",
     text: "Get a briefing before each session, record it after, and set homework quests.",
-    button: "Volunteer log in",
+    signUp: { role: "volunteer", label: "Volunteer sign up" },
     colour: "green",
   },
   {
     icon: "bi-speedometer2",
     name: "Coordinators",
     short: "Run the centre",
-    text: "Spot children who need attention and match them with the right volunteer. Coordinator accounts are set up by the centre.",
-    button: "Coordinator log in",
+    text: "Spot children who need attention and match them with the right volunteer.",
+    note: "Coordinator accounts are set up by the centre.",
+    logIn: "Coordinator log in",
     colour: "purple",
   },
   {
@@ -35,7 +41,7 @@ const roles = [
     name: "Parents",
     short: "Follow progress",
     text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
-    button: "Parent log in",
+    signUp: { role: "parent", label: "Parent sign up" },
     colour: "aqua",
   },
   {
@@ -43,7 +49,8 @@ const roles = [
     name: "Children",
     short: "Earn stars",
     text: "Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.",
-    button: "Child log in",
+    note: "The centre gives each child their own login.",
+    logIn: "Child log in",
     colour: "pink",
   },
 ]
@@ -81,6 +88,7 @@ const steps = [
       <p class="page-subtitle">
         Kids Lapis connects volunteers, coordinators, parents and children — session notes become parent updates, homework becomes quests, and no child ever starts from zero.
       </p>
+      <!-- (not logged in: Log in and Sign up are in the NavBar, so they are not repeated here) -->
       <RouterLink v-if="auth.isLoggedIn" :to="auth.homePath" class="home-button colour-pink" data-test="go-dashboard">
         Go to my dashboard
       </RouterLink>
@@ -100,7 +108,21 @@ const steps = [
           </div>
           <p>{{ r.text }}</p>
           <div v-if="!auth.isLoggedIn" class="role-foot">
-            <RouterLink to="/login" class="home-button" :class="`colour-${r.colour}`">{{ r.button }}</RouterLink>
+            <RouterLink
+              v-if="r.signUp"
+              :to="{ path: '/signup', query: { role: r.signUp.role } }"
+              class="home-button"
+              :class="`colour-${r.colour}`"
+              data-test="role-signup"
+            >
+              {{ r.signUp.label }}
+            </RouterLink>
+            <template v-else>
+              <span class="role-note">{{ r.note }}</span>
+              <RouterLink to="/login" class="home-button" :class="`colour-${r.colour}`" data-test="role-login">
+                {{ r.logIn }}
+              </RouterLink>
+            </template>
           </div>
         </article>
       </div>
@@ -257,8 +279,18 @@ const steps = [
 
 .homepage .role-foot {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px 12px;
   margin-top: auto;
+}
+
+/* "Coordinator accounts are set up by the centre." where the other cards have a sign up button */
+.homepage .role-note {
+  color: #8D7F77;
+  font-size: 13px;
+  font-style: italic;
 }
 
 /* ---------- the steps: white rows, like the rows on the parent page ---------- */
