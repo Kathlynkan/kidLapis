@@ -103,9 +103,8 @@ function rowTag(item, groupKey) {
   return 'Done'
 }
 
-// how many badges the selected child has earned (for parent display)
-const earnedBadgeCount = computed(() =>
-  selectedChild.value ? earnedBadges(selectedChild.value, homework.value).length : 0,
+const earnedBadgeList = computed(() =>
+  selectedChild.value ? earnedBadges(selectedChild.value, homework.value) : [],
 )
 
 // the grey line under the title of a homework row (the subject is the tag in front of it)
@@ -299,7 +298,7 @@ watch(
           <ChildInitial :child="selectedChild" />
           <div>
             <h2 class="child-name">{{ selectedChild.name }}</h2>
-            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span> &middot; <span class="with-icon"><i class="bi bi-award-fill"></i>{{ earnedBadgeCount }}/{{ BADGES.length }} kueh earned</span></div>
+            <div class="muted">{{ selectedChild.level }} &middot; <span class="with-icon"><i class="bi bi-star-fill"></i>{{ selectedChild.points }} stars earned</span></div>
           </div>
         </div>
         <div v-if="children.length > 1" class="child-buttons">
@@ -313,6 +312,37 @@ watch(
           >
             {{ firstName(child.name) }}
           </button>
+        </div>
+      </div>
+
+      <!-- kueh earned: one small badge image per unlock, greyed cups for the rest -->
+      <div v-if="BADGES.length" class="kueh-row">
+        <div v-for="badge in BADGES" :key="badge.id" class="kueh-thumb-wrap" :title="badge.kueh">
+          <img
+            :src="`/child_badges_images/${badge.image}.webp`"
+            :alt="badge.kueh"
+            class="kueh-thumb"
+            :class="{ 'kueh-thumb-locked': !earnedBadgeList.some(b => b.id === badge.id) }"
+          />
+        </div>
+        <span class="kueh-row-label">
+          {{ earnedBadgeList.length }} / {{ BADGES.length }} kueh earned
+        </span>
+      </div>
+
+      <!-- child's interests and latest journal entry -->
+      <div v-if="selectedChild.interests?.length || selectedChild.journalEntries?.length" class="child-voice-row">
+        <div v-if="selectedChild.interests?.length" class="child-voice-interests">
+          <i class="bi bi-heart-fill child-voice-icon"></i>
+          <span v-for="(tag, i) in selectedChild.interests.slice(0, 5)" :key="tag" class="child-voice-tag">
+            {{ tag }}<template v-if="i < Math.min(selectedChild.interests.length, 5) - 1">,</template>
+          </span>
+          <span v-if="selectedChild.interests.length > 5" class="muted"> +{{ selectedChild.interests.length - 5 }} more</span>
+        </div>
+        <div v-if="selectedChild.journalEntries?.length" class="child-voice-journal">
+          <i class="bi bi-journal-text child-voice-icon"></i>
+          <span class="child-voice-quote">"{{ selectedChild.journalEntries[0].text }}"</span>
+          <span class="muted child-voice-date">— {{ formatDate(selectedChild.journalEntries[0].date) }}</span>
         </div>
       </div>
 
@@ -519,6 +549,83 @@ watch(
 .parentpage .child-name {
   margin: 0;
   font-size: 18px;
+}
+
+/* the row of earned kueh badges between the child info and the summary tiles */
+.parentpage .kueh-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.parentpage .kueh-thumb-wrap {
+  display: flex;
+}
+
+.parentpage .kueh-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #DDF0EF;
+  padding: 4px;
+}
+
+.parentpage .kueh-thumb-locked {
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+
+.parentpage .kueh-row-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5E6C80;
+  margin-left: 4px;
+  align-self: center;
+}
+
+/* child's interests and latest journal entry */
+.parentpage .child-voice-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(68, 144, 184, 0.08);
+}
+
+.parentpage .child-voice-interests,
+.parentpage .child-voice-journal {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.parentpage .child-voice-icon {
+  color: #4490B8;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.parentpage .child-voice-tag {
+  font-weight: 600;
+  color: #213C31;
+}
+
+.parentpage .child-voice-quote {
+  font-style: italic;
+  color: #213C31;
+  font-weight: 500;
+}
+
+.parentpage .child-voice-date {
+  font-size: 11px;
 }
 
 /* ---------- the three tiles ---------- */
