@@ -54,6 +54,8 @@ const activeHomework = computed(() =>
     .sort((a, b) => homeworkRank(a) - homeworkRank(b))
 )
 
+const submittedCount = computed(() => homework.value.filter(h => h.status === 'submitted').length)
+
 const completedHomework = computed(() =>
   [...homework.value]
     .filter(h => h.status === 'verified')
@@ -118,6 +120,16 @@ async function deleteHomework(homeworkId) {
   try {
     await api.delete(`/homework/${homeworkId}`)
     homework.value = homework.value.filter((h) => h.id !== homeworkId)
+  } catch (err) {
+    error.value = errorMessage(err)
+  }
+}
+
+async function rejectQuest(homeworkId) {
+  try {
+    await api.put(`/homework/${homeworkId}/reject`)
+    const h = await api.get('/homework', { params: { childId } })
+    homework.value = h.data
   } catch (err) {
     error.value = errorMessage(err)
   }
@@ -196,7 +208,7 @@ onMounted(() => {
           :to="{ name: 'messages', params: { childId: child.id } }"
           class="btn btn-outline-secondary"
         >
-          <i class="bi bi-chat-dots me-1"></i>Message parent
+          <i class="bi bi-chat-dots me-1"></i>Message Parent
         </RouterLink>
       </PageHeader>
 
@@ -233,6 +245,10 @@ onMounted(() => {
               icon="bi-journal-check"
               :initial-open="true"
             >
+              <div v-if="submittedCount > 0" class="quest-check-alert mb-3">
+                <i class="bi bi-bell-fill me-2"></i>
+                {{ submittedCount }} quest{{ submittedCount > 1 ? 's' : '' }} waiting for your review
+              </div>
               <div class="d-flex flex-column gap-2">
                 <HomeworkQuestCard
                   v-for="h in activeHomework"
@@ -241,6 +257,7 @@ onMounted(() => {
                   mode="volunteer"
                   :busy="checkingQuestId !== null"
                   @verify="verifyQuest"
+                  @reject="rejectQuest"
                   @edit="editHomework"
                   @delete="deleteHomework"
                 />
@@ -397,9 +414,32 @@ onMounted(() => {
   color: var(--cp-text);
 }
 
+/* Edit and Mark as Checked are the same pale green for a volunteer, so they are told apart by size and icon:
+   the action that matters (Mark as Checked, Return) is bigger, the everyday ones (Edit, Delete) are smaller */
+.childprofilepage .quest-check,
+.childprofilepage .quest-return {
+  padding: 7px 14px;
+  font-size: 15px;
+}
+
+.childprofilepage .quest-edit,
+.childprofilepage .quest-delete {
+  padding: 3px 9px;
+  font-size: 13px;
+}
+
+.role-volunteer .childprofilepage .quest-check {
+  background: var(--cp-soft);
+  color: #000000;
+}
+
+.role-volunteer .childprofilepage .quest-check:hover {
+  background: var(--cp-letter);
+  color: #000000;
+}
+
 /* delete and overdue are the same soft red */
-.childprofilepage .btn-outline-danger,
-.childprofilepage .quest-pill-late {
+.childprofilepage .btn-outline-danger {
   background: #EE9F96;
   color: var(--cp-text);
 }
@@ -407,6 +447,17 @@ onMounted(() => {
 .childprofilepage .btn-outline-danger:hover {
   background: #E68C81;
   color: var(--cp-text);
+}
+
+/* Return: black words on a deeper soft red, like the black words of Mark as Checked */
+.childprofilepage .btn-outline-danger.quest-return {
+  background: #D9776B;
+  color: #000000;
+}
+
+.childprofilepage .btn-outline-danger.quest-return:hover {
+  background: #CC6659;
+  color: #000000;
 }
 
 .childprofilepage .btn-link {
@@ -519,9 +570,7 @@ onMounted(() => {
 /* the small tags (the source of the summary, the topics that keep coming back, the score, the subject, the homework state): the text sits in the middle */
 .childprofilepage .handover-badge,
 .childprofilepage .session-score,
-.childprofilepage .session-tag,
-.childprofilepage .quest-pill,
-.childprofilepage .session-subject {
+.childprofilepage .session-tag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -558,20 +607,6 @@ onMounted(() => {
 .childprofilepage .board .session-card {
   background: #FFFFFF;
   box-shadow: 0 1px 6px var(--cp-shadow);
-}
-
-.childprofilepage .session-subject {
-  margin-right: 8px;
-  padding: 1px 10px;
-  border-radius: 999px;
-  background: var(--cp-teal);
-  color: var(--cp-text);
-  font-size: 12px;
-  vertical-align: 1px;
-}
-
-.childprofilepage .session-subject::after {
-  content: none;
 }
 
 .childprofilepage .session-title {
@@ -639,6 +674,16 @@ onMounted(() => {
 
 .childprofilepage .quest-waiting {
   border-left-color: var(--cp-teal);
+  border-left-style: dashed;
+}
+
+.childprofilepage .quest-check-alert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--cp-teal);
+  color: var(--cp-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .childprofilepage .quest-done {
@@ -656,24 +701,4 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.childprofilepage .quest-pill {
-  padding: 3px 11px;
-}
-
-.childprofilepage .quest-pill-todo {
-  background: #FFFFFF;
-  box-shadow: inset 0 0 0 1.5px #CFC9BC;
-  color: var(--cp-text);
-}
-
-.childprofilepage .quest-pill-waiting {
-  background: var(--cp-teal);
-  color: var(--cp-waiting-text);
-}
-
-.childprofilepage .quest-pill-done {
-  background: #2E8B57;
-  color: #FFFFFF;
-  font-size: 13px;
-}
 </style>

@@ -4,6 +4,7 @@ import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
+import { subjectStyle } from '@/utils/format'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 const Days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -181,7 +182,10 @@ onMounted(async () => {
           <div v-if="editing_ID !== v.id" class="facts">
             <div class="fact">
               <span class="fact-key">Teaches</span>
-              <span class="fact-value">{{ (v.skills || []).join(', ') || 'No skills to display' }}</span>
+              <span v-if="(v.skills || []).length" class="tags">
+                <span v-for="skill in v.skills" :key="skill" class="tag" :style="subjectStyle(skill)">{{ skill }}</span>
+              </span>
+              <span v-else class="fact-value">No skills to display</span>
             </div>
             <div class="fact">
               <span class="fact-key">Free on</span>

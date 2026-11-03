@@ -18,7 +18,7 @@ import {
   Filler,
 } from 'chart.js'
 import { accuracy, formatDate } from '@/utils/format'
-import { SUBJECT_COLORS } from '@/utils/constants'
+import { SUBJECT_COLORS, SUBJECT_LINE_COLORS } from '@/utils/constants'
 import '@/css/main/components.css'
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler)
@@ -51,6 +51,9 @@ const pillColors = computed(() =>
   ]))
 )
 
+// the deeper colour of the line of the subject that is open
+const lineColor = computed(() => SUBJECT_LINE_COLORS[selectedSubject.value] ?? pillColors.value[selectedSubject.value] ?? FALLBACK_COLORS[0])
+
 function pillStyle(subj) {
   const c = pillColors.value[subj]
   return { background: subj === selectedSubject.value ? c : c + '44', borderColor: c }
@@ -64,7 +67,7 @@ const selectedSessions = computed(() =>
 )
 
 const chartData = computed(() => {
-  const color = pillColors.value[selectedSubject.value] ?? FALLBACK_COLORS[0]
+  const color = lineColor.value
   return {
     labels: selectedSessions.value.map((s) => formatDate(s.date)),
     datasets: [{
@@ -103,7 +106,7 @@ const TONES = {
 const tone = computed(() => TONES[props.tone] ?? TONES.teal)
 
 const calmData = computed(() => {
-  const color = pillColors.value[selectedSubject.value] ?? FALLBACK_COLORS[0]
+  const color = lineColor.value
   return {
     labels: selectedSessions.value.map((s) => formatDate(s.date)),
     datasets: [{

@@ -75,7 +75,7 @@ const chartOptions = {
     <div v-else-if="calm" class="topic-bars">
       <div v-for="t in bySubject" :key="t.subject" class="topic-bar">
         <div class="topic-bar-top"><span>{{ t.subject }}</span><b>{{ t.accuracy }}%</b></div>
-        <div class="topic-bar-track"><div class="topic-bar-fill" :style="{ width: t.accuracy + '%' }"></div></div>
+        <div class="topic-bar-track"><div class="topic-bar-fill" :style="{ width: t.accuracy + '%', background: SUBJECT_COLORS[t.subject] }"></div></div>
       </div>
     </div>
     <div

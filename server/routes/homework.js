@@ -245,6 +245,7 @@ router.put('/:id/submit', requireRole('child'), async (req, res) => {
   }
   hw.status = 'submitted'
   hw.completedAt = new Date().toISOString().slice(0, 10)
+  hw.rejectedAt = null
   await hw.save()
   res.json(hw)
 })
@@ -268,6 +269,7 @@ router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
 // PUT /homework/:id/verify  (Jachin) -> volunteer confirms, child earns points
 // findOneAndUpdate with status condition makes the submitted→verified transition atomic,
 // preventing double-award if two requests race on the same homework.
+// Late penalty: if the child submitted after the due date, they earn half the points.
 router.put('/:id/verify', requireRole('volunteer', 'teacher'), async (req, res) => {
   const hw = await Homework.findOneAndUpdate(
     { _id: req.params.id, status: 'submitted' },
@@ -279,12 +281,31 @@ router.put('/:id/verify', requireRole('volunteer', 'teacher'), async (req, res) 
     if (!exists) return res.status(404).json({ message: 'Homework not found.' })
     return res.status(400).json({ message: 'Homework must be submitted before it can be verified.' })
   }
+  const isLate = hw.completedAt && hw.dueDate && hw.completedAt > hw.dueDate
+  const pointsAwarded = isLate ? Math.floor(hw.points / 2) : hw.points
+  await Homework.findByIdAndUpdate(hw._id, { $set: { pointsAwarded } })
   const child = await Child.findByIdAndUpdate(
     hw.childId,
-    { $inc: { points: hw.points } },
+    { $inc: { points: pointsAwarded } },
     { new: true },
   )
-  res.json({ homework: hw, points: child.points })
+  res.json({ homework: { ...hw.toJSON(), pointsAwarded }, points: child.points, pointsAwarded })
+})
+
+// PUT /homework/:id/reject  (Jachin) -> volunteer returns a submitted quest back to the child
+router.put('/:id/reject', requireRole('volunteer', 'teacher'), async (req, res) => {
+  const hw = await Homework.findById(req.params.id)
+  if (!hw) return res.status(404).json({ message: 'Homework not found.' })
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(hw.childId)) return res.status(403).json({ message: 'No access.' })
+  if (hw.status !== 'submitted') {
+    return res.status(400).json({ message: 'Only submitted homework can be returned.' })
+  }
+  hw.status = 'assigned'
+  hw.completedAt = null
+  hw.rejectedAt = new Date().toISOString().slice(0, 10)
+  await hw.save()
+  res.json(hw)
 })
 
 // DELETE /homework/:id  — volunteer or teacher; not allowed once verified (stars already awarded)

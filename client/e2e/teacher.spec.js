@@ -66,20 +66,13 @@ test.describe('Teacher: matchmaking', () => {
     await page.goto('/teacher/matchmaking')
   })
 
-  test('child selector is present', async ({ page }) => {
-    await expect(page.locator('[data-test="child-select"]')).toBeVisible()
+  test('every child is in the list', async ({ page }) => {
+    await expect(page.locator('[data-test="child-toggle"]').first()).toBeVisible()
   })
 
-  test('selecting a child shows volunteer suggestions', async ({ page }) => {
-    const select = page.locator('[data-test="child-select"]')
-    const options = select.locator('option')
-    // options[0] is the placeholder; options[1] is the first real child
-    const count = await options.count()
-    if (count > 1) {
-      const firstValue = await options.nth(1).getAttribute('value')
-      await select.selectOption(firstValue)
-      await expect(page.locator('[data-test="suggestion-card"]').first()).toBeVisible()
-    }
+  test('opening a child shows volunteer suggestions', async ({ page }) => {
+    await page.locator('[data-test="child-toggle"]').first().click()
+    await expect(page.locator('[data-test="suggestion-card"]').first()).toBeVisible()
   })
 })
 

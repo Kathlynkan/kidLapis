@@ -4,8 +4,8 @@
 ============================================================= -->
 <script setup>
 import { ref } from 'vue'
-import { formatDate, accuracy } from '@/utils/format'
-import { MOODS, SUBJECT_COLORS } from '@/utils/constants'
+import { formatDate, accuracy, subjectStyle } from '@/utils/format'
+import { MOODS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 
 const props = defineProps({
@@ -17,10 +17,6 @@ const emit = defineEmits(['edit', 'delete'])
 const mood = MOODS.find((m) => m.value === props.session.mood)
 const showDeleteModal = ref(false)
 const showFullNotes = ref(false)
-
-function subjectStyle(subj) {
-  return {backgroundColor: SUBJECT_COLORS[subj]}
-}
 
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.session.id); showDeleteModal.value = false }
@@ -74,14 +70,28 @@ function cancelDelete()  { showDeleteModal.value = false }
       </div>
     </div>
 
-    <div v-if="canEdit" class="mt-2 d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary" @click="emit('edit', session.id)">
-        <i class="bi bi-pencil"></i> Edit
-      </button>
-      <button class="btn btn-sm btn-outline-danger" @click="handleDelete">
-        <i class="bi bi-trash"></i> Delete
-      </button>
-    </div>
+    <template v-if="canEdit">
+      <div v-if="!session.parentViewed" class="mt-2 d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary quest-edit" @click="emit('edit', session.id)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+
+        <button class="btn btn-sm btn-outline-danger quest-delete" @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
+
+      <div v-else class="session-locked">
+        <div class="session-locked-title">
+          <i class="bi bi-eye me-2"></i>
+          Seen by parent · {{ formatDate(session.parentViewed) }}
+        </div>
+
+        <div class="session-locked-text">
+          The parent has read this session, so it can no longer be edited or deleted.
+        </div>
+      </div>
+    </template>
   </div>
 
   <Teleport to="body">

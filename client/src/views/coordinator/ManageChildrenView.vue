@@ -12,7 +12,7 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
-import { firstName } from '@/utils/format'
+import { firstName, subjectStyle } from '@/utils/format'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -296,7 +296,7 @@ async function confirmDelete() {
           </div>
           <div v-if="c.needs?.length" class="kv">
             <span class="kv-key">Needs</span>
-            <span class="tags"><span v-for="n in c.needs" :key="n" class="tag">{{ n }}</span></span>
+            <span class="tags"><span v-for="n in c.needs" :key="n" class="tag" :style="subjectStyle(n)">{{ n }}</span></span>
           </div>
           <div v-if="warningsOf(c).length" class="tags">
             <span v-for="w in warningsOf(c)" :key="w.type" class="tag" :class="w.class">{{ w.label }}</span>

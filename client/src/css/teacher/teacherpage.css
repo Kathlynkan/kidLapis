@@ -576,6 +576,13 @@
   overflow-wrap: anywhere;
 }
 
+/* a subject tag inside a fact box can wrap onto two lines instead of sticking out of the box */
+.teacherpage .fact .tag {
+  white-space: normal;
+  border-radius: 14px;
+  text-align: center;
+}
+
 /* the code a parent types to link their child */
 .teacherpage .child-code {
   padding: 1px 8px;

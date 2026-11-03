@@ -204,6 +204,31 @@ router.post('/', requireRole('volunteer', 'teacher'), async (req, res) => {
   }
 })
 
+// PUT /sessions/:id/viewed
+router.put('/:id/viewed', requireRole('parent'), async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id)
+
+    if (!session) {
+      return res.status(404).json({
+        message: 'Session not found'
+      })
+    }
+
+    // only mark once
+    if (!session.parentViewed) {
+      session.parentViewed = new Date()
+      await session.save()
+    }
+
+    return res.json(session)
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to mark session as viewed'
+    })
+  }
+})
+
 // PUT /sessions/:id
 router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => { 
   // only volunteers and coordinators can edit session
@@ -214,6 +239,12 @@ router.put('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
     if (!session) {
       return res.status(404).json({
         message: 'Session not found'
+      })
+    }
+
+    if (session.parentViewed) {
+      return res.status(403).json({
+        message: 'This session has already been viewed by the parent and cannot be edited'
       })
     }
 
@@ -297,6 +328,12 @@ router.delete('/:id', requireRole('volunteer', 'teacher'), async (req, res) => {
     if (!session) {
       return res.status(404).json({
         message: 'Session not found'
+      })
+    }
+
+    if (session.parentViewed) {
+      return res.status(403).json({
+        message: 'This session has already been viewed by the parent and cannot be deleted'
       })
     }
 

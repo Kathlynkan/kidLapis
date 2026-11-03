@@ -9,9 +9,10 @@ import ParentSocialDay from '@/components/ParentSocialDay.vue' // one day of the
 import SkillProgressChart from '@/components/charts/SkillProgressChart.vue' // accuracy over time
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture of the child
 import HandoverCard from '@/components/HandoverCard.vue' // the weekly AI summary box (shared with the volunteer page)   (Yuqi)
-import { firstName, formatDate, daysSince, activitiesOf } from '@/utils/format' // small helpers for names, dates and activities
+import { firstName, formatDate, daysSince, activitiesOf, subjectStyle } from '@/utils/format' // small helpers for names, dates, activities and subject colours
 import '@/css/parent/parentshared.css' // what the parent pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
+import '@/css/main/components.css' // the subject tag
 
 const auth = useAuthStore()
 
@@ -99,10 +100,10 @@ function rowTag(item, groupKey) {
   return 'Done'
 }
 
-// the grey line under the title of a homework row
+// the grey line under the title of a homework row (the subject is the tag in front of it)
 function rowMeta(item, groupKey) {
-  if (groupKey === 'todo') return item.subject + ' · due ' + formatDate(item.dueDate)
-  return item.subject + (item.completedAt ? ' · handed in ' + formatDate(item.completedAt) : '')
+  if (groupKey === 'todo') return 'due ' + formatDate(item.dueDate)
+  return item.completedAt ? 'handed in ' + formatDate(item.completedAt) : ''
 }
 
 // the session that shows how a finished homework went: the first session of the same subject
@@ -224,6 +225,15 @@ async function loadChild(childId) {
   loadHandover(childId) // no "await": the page does not wait for the AI
   const sessionResponse = await api.get('/sessions', { params: { childId } })
   sessions.value = sessionResponse.data
+
+  await Promise.all(
+    sessions.value
+      .filter(session => !session.parentViewed)
+      .map(session =>
+          api.put(`/sessions/${session.id}/viewed`)
+      )
+  )
+  
   const homeworkResponse = await api.get('/homework', { params: { childId } })
   homework.value = homeworkResponse.data
 }
@@ -341,7 +351,7 @@ onMounted(async () => {
                     <span class="row-tag">{{ rowTag(item, group.key) }}</span>
                   </span>
                   <span v-if="group.key === 'done' && scoreOf(resultSessions[item.id])" class="row-score">{{ scoreOf(resultSessions[item.id]) }}</span>
-                  <span class="muted">{{ rowMeta(item, group.key) }}</span>
+                  <span class="muted"><span class="session-subject" :style="subjectStyle(item.subject)">{{ item.subject }}</span>{{ rowMeta(item, group.key) }}</span>
                   <span v-if="group.key === 'done'" class="muted with-icon"><i class="bi bi-star-fill"></i>{{ item.points }} stars</span>
                 </summary>
 

@@ -87,12 +87,14 @@ Used in charts, subject tags, and any per-subject visual indicator. **These are 
 
 | Subject       | Token                    | Hex       | Rationale |
 |---------------|--------------------------|-----------|-----------|
-| English       | `--subject-english`      | `#88C0D8` | Sky blue — language, calm, reading |
-| Math          | `--subject-math`         | `#D4B840` | Amber/gold — analytical, precise |
-| Science       | `--subject-science`      | `#F5DF98` | Golden yellow — discovery, brightness |
-| Mother Tongue | `--subject-mother-tongue`| `#E8906C` | Coral — cultural warmth, heritage |
+| English       | `--subject-english`      | `#A3CDE6` | Sky — language, calm, reading |
+| Math          | `--subject-math`         | `#F4D08A` | Custard — analytical, warm |
+| Science       | `--subject-science`      | `#B2D8A6` | Pandan — discovery, freshness |
+| Mother Tongue | `--subject-mother-tongue`| `#F3B397` | Peach — cultural warmth, heritage |
 
-**Note for Chart.js:** CSS variables cannot be read by Chart.js at runtime. Hardcode the hex values from this table directly in `TopicSummaryChart.vue` and `SkillProgressChart.vue`. If you update a subject colour here, also update it in both charts.
+These are the "Kueh warm" colours. The pills and the bars of the charts use them. The lines of the skill progress chart use a deeper tone of each so they show on white: English `#5E9FC9`, Math `#DBA645`, Science `#6BAE63`, Mother Tongue `#E0805D`.
+
+**Where they live:** `SUBJECT_COLORS` and `SUBJECT_LINE_COLORS` in `src/utils/constants.js`. Both charts and the subject pills read them from there, so a subject colour is changed in that one file. (CSS variables cannot be read by Chart.js at runtime, which is why they are plain hex values in the script.)
 
 Both charts group sessions by **subject** (not by free-text topic), so each child gets at most 4 lines — one per PSLE subject.
 

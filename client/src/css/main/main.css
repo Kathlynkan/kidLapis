@@ -17,7 +17,8 @@
    The colours of the old cards, and their darker border tones:
      pink #E8A0B8 / #C07090    lime #A8CC90 / #68A048    yellow #F5DF98 / #C8A028
      blue #88C0D8 / #4890B8    orange #F5B880 / #C07838  purple #C0A8D8   cream border #C8B8A8
-   The four subjects (the charts):  English #88C0D8   Math #D4B840   Science #F5DF98   Mother Tongue #E8906C
+   The four subjects (pills and charts; the colours are in utils/constants.js):
+     English #A3CDE6   Math #F4D08A   Science #B2D8A6   Mother Tongue #F3B397   (deeper tones for chart lines: #5E9FC9 #DBA645 #6BAE63 #E0805D)
    Success #A8CC90 (pale #E8F5DC)   Messages #88C0D8   Alert #E8A0B8
    The quiet colours (a pale fill, a thin line, dark words):
      pink #FBE3DF / #F2B8B0 / #9A3F36 (an error, not seen, overdue)     yellow #FAF4D8 / #EEDFA6 / #7A6420 (struggling, a note)

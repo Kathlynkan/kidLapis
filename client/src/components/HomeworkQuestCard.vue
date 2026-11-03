@@ -3,19 +3,25 @@
      The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue -->
 <script setup>
 import { ref, computed } from 'vue'
-import { formatDate, daysSince } from '@/utils/format'
-import { HOMEWORK_STATUS, SUBJECT_COLORS } from '@/utils/constants'
+import { formatDate, daysSince, subjectStyle } from '@/utils/format'
+import { HOMEWORK_STATUS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
+import '@/css/main/labels.css' // the capital-letter captions
 
 const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
 })
-const emit = defineEmits(['submit', 'unsubmit', 'verify', 'edit', 'delete'])
+const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
 const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
+)
+const isLateSubmission = computed(
+  () => props.homework.completedAt &&
+        props.homework.dueDate &&
+        props.homework.completedAt > props.homework.dueDate,
 )
 
 // where the homework is now, for the volunteer's view: late, todo, waiting (to be checked) or done
@@ -24,13 +30,9 @@ const state = computed(() => {
   if (props.homework.status === 'submitted') return 'waiting'
   return isOverdue.value ? 'late' : 'todo'
 })
-const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Waiting to be checked', done: 'Checked' }
+const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
 const showDeleteModal = ref(false)
-
-function subjectStyle(subj) {
-  return {backgroundColor: SUBJECT_COLORS[subj]}
-}
 
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
@@ -49,12 +51,15 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span class="session-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
       <strong class="quest-title">{{ homework.title }}</strong>
 
-      <div class="small quest-meta">
+      <div class="small quest-meta mt-1">
         due {{ formatDate(homework.dueDate) }}
 
         <template v-if="mode === 'volunteer'">
-        · {{ homework.points }}
+        · {{ homework.pointsAwarded ?? homework.points }}
         <i class="bi bi-star-fill"></i>
+        <template v-if="isLateSubmission && homework.status !== 'verified'">
+          <span class="quest-late-penalty"> ({{ Math.floor(homework.points / 2) }}★ — submitted late)</span>
+        </template>
         </template>
       </div>
     </div>
@@ -68,7 +73,22 @@ function cancelDelete()  { showDeleteModal.value = false }
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
 
     <div class="mt-auto d-flex flex-column gap-2">
-      <span v-if="mode === 'child'" class="badge quest-status" :class="{ 'quest-status-done': homework.status === 'verified' }">
+      <span
+        v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
+        class="badge quest-returned">
+        <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
+      </span>
+
+      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-warn">
+        <i class="bi bi-exclamation-triangle me-1"></i>Late! Half stars if submitted now
+      </span>
+
+      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-warn">
+        Submitted late — you'll earn half stars
+      </span>
+
+      <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
+      <span v-if="mode === 'child' && homework.status !== 'assigned'" class="badge quest-status" :class="`quest-pill-${state}`">
         {{ status?.label }}
       </span>
 
@@ -90,27 +110,34 @@ function cancelDelete()  { showDeleteModal.value = false }
         <i class="bi bi-arrow-counterclockwise me-1"></i>Oops, undo!
       </button>
 
-      <div v-if="mode === 'volunteer' && homework.status !== 'verified'" 
-      class="mt-2 d-flex align-items-center">
+      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+      class="mt-2 d-flex align-items-center gap-2">
 
-        <button
-          v-if="homework.status === 'submitted'"
-          class="btn btn-sm btn-primary"
-          data-test="verify-homework-btn"
-          @click="emit('verify', homework.id)">
-          <i class="bi bi-check-circle"></i> Mark as Checked
-        </button>
+        <template v-if="homework.status === 'submitted'">
+          <button
+            class="btn btn-sm btn-primary quest-check"
+            data-test="verify-homework-btn"
+            @click="emit('verify', homework.id)">
+            <i class="bi bi-check-circle"></i> Mark as Checked
+          </button>
+          <button
+            class="btn btn-sm btn-outline-danger quest-return"
+            data-test="reject-homework-btn"
+            @click="emit('reject', homework.id)">
+            <i class="bi bi-arrow-return-left"></i> Return
+          </button>
+        </template>
 
         <div v-else>
           <button
-            class="btn btn-sm btn-outline-primary"
+            class="btn btn-sm btn-outline-primary quest-edit"
             data-test="edit-homework-btn"
             @click="emit('edit', homework.id)">
             <i class="bi bi-pencil"></i> Edit
           </button>
 
           <button
-            class="btn btn-sm btn-outline-danger ms-2"
+            class="btn btn-sm btn-outline-danger ms-2 quest-delete"
             data-test="delete-homework-btn"
             @click="handleDelete">
             <i class="bi bi-trash"></i> Delete
@@ -156,6 +183,17 @@ function cancelDelete()  { showDeleteModal.value = false }
   border-radius: 5px;
   box-shadow: none;
   font-size: 13px;
+  font-weight: 600;
+}
+
+/* the two notes sit on the left, as wide as their words */
+.quest-returned,
+.quest-late-warn {
+  align-self: flex-start;
+}
+
+.quest-late-penalty {
+  color: #EE9F96;
   font-weight: 600;
 }
 </style>
