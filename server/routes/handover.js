@@ -554,23 +554,18 @@ router.post('/:childId', async (req, res) => {
     weeks = listWeeks(allSessions)
 
     // Fri - Sun: this week. Mon - Thu: last week.
-    const usualWeek = getWeekRange()
-    let week = usualWeek
-
-    // the parent pressed an arrow -> the week they asked for (only one of the 8 weeks in the list)
-    let askedWeek = ''
-    if (req.body && req.body.week) {
-      askedWeek = String(req.body.week)
-    }
-    const asked = weeks.find((w) => w.start === askedWeek)
-    if (asked) {
-      week = asked
+    let week = getWeekRange()
+    weekTitle = 'This Week'
+    const today = new Date().getDay()
+    if (today >= 1 && today <= 4) {
+      weekTitle = 'Last Week'
     }
     sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
 
-    // nothing that week (e.g. away on holiday) -> use the latest week that has sessions
-    if (sessions.length === 0 && weeks.length > 0) {
-      week = weeks[0]
+    // nothing that week (e.g. a school holiday) -> use the latest week that has sessions
+    if (sessions.length === 0 && allSessions.length > 0) {
+      week = getWeekOf(new Date(allSessions[0].date + 'T00:00:00'))
+      weekTitle = 'Latest Week'
       sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
       // tell the parent why they see an older week
       if (week.start < usualWeek.start) {
@@ -580,9 +575,8 @@ router.post('/:childId', async (req, res) => {
     }
     weekStart = week.start
     periodLabel = formatWeek(week)
-    weekTitle = weekTitleFor(week)
-    weekWords = weekTitle.toLowerCase() // 'this week' or 'last week'
-    if (weekTitle !== 'This week' && weekTitle !== 'Last week') {
+    weekWords = weekTitle.toLowerCase()
+    if (weekTitle === 'Latest Week') {
       weekWords = `the week of ${periodLabel}`
     }
 

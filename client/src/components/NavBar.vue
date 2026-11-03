@@ -330,7 +330,6 @@ watch(
           <template v-if="auth.role === 'volunteer'">
             <!-- new sessions the coordinator assigned: answered on the Session requests page -->
             <template v-if="requests.length">
-              <div class="lapis-bell-title">Assignment Requests</div>
               <RouterLink
                 v-for="r in requests"
                 :key="`${r.childId}|${r.day}`"
@@ -340,16 +339,14 @@ watch(
               >
                 <i class="bi bi-calendar-plus"></i>
                 <span>
-                  <b>{{ r.childName }}</b> ({{ r.level }}) every <b>{{ r.day }}</b
-                  ><template v-if="r.time"> at {{ r.time }}</template>
+                  <b>{{ r.childName }}</b> ({{ r.level }})<br>
+                  Every <b>{{ r.day }}</b>
+                  <template v-if="r.time"> at {{ r.time }}</template>
                 </span>
-              </RouterLink>
-              <RouterLink :to="{ name: 'volunteer-requests' }" class="lapis-bell-more" data-test="nav-requests-link">
-                Accept or decline <i class="bi bi-arrow-right"></i>
               </RouterLink>
             </template>
 
-            <div class="lapis-bell-title">Quests to check</div>
+            <div class="lapis-bell-title">Submitted Quests</div>
             <p v-if="questsToCheck.length === 0" class="lapis-bell-empty">Nothing to check right now.</p>
             <RouterLink
               v-for="q in questsToCheck"
@@ -359,13 +356,13 @@ watch(
               data-test="nav-bell-item"
             >
               <i class="bi bi-journal-check"></i>
-              <span><b>{{ q.childName }}</b> handed in "{{ q.title }}"</span>
+              <span><b>{{ q.childName }}</b> submitted "{{ q.title }}"</span>
             </RouterLink>
           </template>
 
           <!-- PARENT -->
           <template v-else-if="auth.role === 'parent'">
-            <div class="lapis-bell-title">New updates</div>
+            <div class="lapis-bell-title">New Updates</div>
             <p v-if="parentUpdates.length === 0" class="lapis-bell-empty">You're all caught up.</p>
             <RouterLink
               v-for="u in parentUpdates"
@@ -419,7 +416,7 @@ watch(
               <small>{{ auth.role }}</small>
             </span>
           </RouterLink>
-          <button type="button" class="lapis-button" data-test="nav-logout" @click="logout">Log out</button>
+          <button type="button" class="lapis-button" data-test="nav-logout" @click="logout">Log Out</button>
         </div>
 
         <div v-else class="lapis-user">

@@ -56,8 +56,6 @@ const activeHomework = computed(() =>
     .sort((a, b) => homeworkRank(a) - homeworkRank(b))
 )
 
-const submittedCount = computed(() => homework.value.filter(h => h.status === 'submitted').length)
-
 const completedHomework = computed(() =>
   [...homework.value]
     .filter(h => h.status === 'verified')
@@ -205,7 +203,7 @@ onMounted(() => {
         class="back-link"
         :to="{ name: auth.role === 'coordinator' ? 'manage-children' : 'volunteer-home' }"
       >
-        <i class="bi bi-chevron-left"></i>{{ auth.role === 'coordinator' ? 'Children' : 'My children' }}
+        <i class="bi bi-chevron-left"></i>Back
       </RouterLink>
 
       <PageHeader :title="child.name" :subtitle="`${child.level} · ${child.school}`">
@@ -408,7 +406,7 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 3px 14px 3px 10px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--cp-lightest);
   color: var(--cp-text);
   font-size: 13px;

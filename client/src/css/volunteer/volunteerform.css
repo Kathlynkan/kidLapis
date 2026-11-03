@@ -257,7 +257,7 @@
   align-items: center; 
   gap: 6px;
   padding: 3px 14px 3px 10px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--cp-lightest);
   color: var(--cp-text);
   font-size: 13px;

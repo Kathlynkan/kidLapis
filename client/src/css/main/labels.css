@@ -4,7 +4,6 @@
    The size and the weight of each caption stay in the file of its page.
    The selectors start with body, so these rules win whatever order the css files load in. */
 
-body .parentpage .small-label,
 body .parentpage .group-heading,
 body .parentpage .tile span,
 body .parentpage .row-tag,
@@ -23,7 +22,6 @@ body .coordinatorpage .kv-key,
 body .coordinatorpage .fact-key,
 body .volunteerpage .tab,
 body .volunteerpage .pill,
-body .volunteerpage .last-seen,
 body .volunteerpage .needs-attention,
 body .volunteerpage .soft-button,
 body .role-volunteer .childprofilepage .back-link,

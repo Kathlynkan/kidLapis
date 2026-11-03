@@ -149,7 +149,7 @@ async function save() {
           </PeelCard>
 
           <!-- Change password (not for child — coordinator manages child accounts) -->
-          <PeelCard v-if="auth.role !== 'child'" title="Change password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
+          <PeelCard v-if="auth.role !== 'child'" title="Change Password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
             <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
             <div class="mb-3">
@@ -185,7 +185,7 @@ async function save() {
           </PeelCard>
 
           <!-- Skills + availability (volunteer only) -->
-          <PeelCard v-if="auth.role === 'volunteer'" title="Skills &amp; schedule" icon="bi-calendar-check" :open="activeCard === 'skills'" @toggle="activeCard = 'skills'">
+          <PeelCard v-if="auth.role === 'volunteer'" title="Subjects &amp; Availability" icon="bi-calendar-check" :open="activeCard === 'skills'" @toggle="activeCard = 'skills'">
             <fieldset class="mb-4">
               <legend class="form-label mb-2">Skills I can help with</legend>
               <div class="d-flex flex-wrap gap-2">
@@ -225,7 +225,7 @@ async function save() {
             <!-- right-aligned buttons with gap in between and top margin -->
             <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="loading" data-test="profile-save">
-              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span> Save changes
+              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span> Save Changes
             </button>
           </div>
 

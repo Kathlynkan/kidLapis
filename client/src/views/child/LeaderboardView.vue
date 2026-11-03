@@ -36,7 +36,7 @@ const slots = computed(() =>
     if (entry) {
       note = (place === 1 || !entry.ahead)
         ? 'Top of the week'
-        : `${entry.ahead.points - entry.points} behind ${firstName(entry.ahead.name)}`
+        : `${entry.ahead.points - entry.points} ★ to catch ${firstName(entry.ahead.name)}`
     }
     return { entry, place, note }
   }),

@@ -248,7 +248,7 @@
 .handover-key {
   color: #8D7F77;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   font-size: 12px;
 }
