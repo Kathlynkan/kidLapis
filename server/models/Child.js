@@ -23,7 +23,7 @@ const childSchema = new mongoose.Schema(
         volunteerId: String,
         day: String,
         time: String,
-        status: { type: String, enum: ['pending', 'accepted'], default: 'accepted' },
+        status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'accepted' },
       },
     ],
     needs: [String], // skills the child needs help with (matchmaking)
