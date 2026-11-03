@@ -17,6 +17,8 @@ const childSchema = new mongoose.Schema(
     // status (agreed with Yu Xuan): a new slot from matchmaking is 'pending' until the volunteer
     // accepts it (routes/requests.js). Declining removes the slot. Slots without a status
     // (seed data, older assignments) count as 'accepted'.
+    // startDate (Yuqi): the first date of the sessions, set when the volunteer accepts
+    // (the next time that weekday comes round). Empty = already running (seed data).
     schedule: [
       {
         _id: false,
@@ -24,6 +26,7 @@ const childSchema = new mongoose.Schema(
         day: String,
         time: String,
         status: { type: String, enum: ['pending', 'accepted'], default: 'accepted' },
+        startDate: { type: String, default: '' }, // 'YYYY-MM-DD'
       },
     ],
     needs: [String], // skills the child needs help with (matchmaking)

@@ -204,21 +204,33 @@ async function showHomework() {
 
 // ---------- ask the server for the weekly AI summary ----------
 // Fri - Sun: this week (Mon - Fri). Mon - Thu: last week, because this week is not finished yet.
-async function loadHandover(childId) {
-  handover.value = null
+// week = '' -> that usual week. week = '2026-10-19' -> the week the parent picked with the arrows (Yuqi)
+async function loadHandover(childId, week = '') {
+  if (!week) {
+    handover.value = null // a different child: clear the old summary
+  }
   handoverLoading.value = true
-  let summary = null // stays empty if something goes wrong, the rest of the page still works
+  let summary = null
   try {
-    // the server sees a parent is logged in, so it sends the weekly summary
-    // (Mon - Fri, learning and social, in simple friendly words)
-    const response = await api.post(`/handover/${childId}`)
+    let body = {}
+    if (week) {
+      body = { week: week }
+    }
+    const response = await api.post(`/handover/${childId}`, body)
     summary = response.data
   } catch {
     summary = null
   }
   if (childId !== selectedId.value) return // the parent already switched to another child, so ignore this answer
-  handover.value = summary
+  if (summary || !week) {
+    handover.value = summary // if another week failed to load, keep showing the week we had
+  }
   handoverLoading.value = false
+}
+
+// the Earlier week / Later week buttons on the summary card (Yuqi)
+function changeWeek(week) {
+  loadHandover(selectedId.value, week)
 }
 
 // ---------- show one child: their summary, sessions and homework ----------
@@ -329,7 +341,7 @@ watch(
 
       <!-- parent weekly AI summary: the same HandoverCard as the volunteer page; it shows the parent rows because a parent is logged in   (Yuqi) -->
       <!-- (Overview, Learning, Friends, Worth knowing, Proud moment, Try at home, Keep practising) -->
-      <HandoverCard :handover="handover" :loading="handoverLoading" />
+      <HandoverCard :handover="handover" :loading="handoverLoading" @change-week="changeWeek" />
 
       <!-- the board with two tabs -->
       <div id="homework-board" class="board" data-test="notice-board">

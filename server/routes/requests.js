@@ -5,19 +5,23 @@
 // 'pending' (models/Child.js). The volunteer sees it in their NavBar bell and
 // accepts or declines it here.
 //   accept  -> the slot becomes 'accepted' and the volunteer joins child.volunteerIds,
-//              so the child now appears on their page and counts as assigned
+//              so the child now appears on their page and counts as assigned.
+//              The slot also gets a startDate (Yuqi): the next time that weekday comes round,
+//              so the child never appears on a day that has already passed.
 //   decline -> the slot is removed, so the coordinator sees the child needs someone again
 // =============================================================
 import { Router } from 'express'
 import { Child } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { notifyCoordinators, addUpdate, coordinatorIds } from '../utils/notify.js'
+import { firstDateFor, formatStart } from '../utils/startDate.js' // Yuqi
 
 const router = Router()
 router.use(requireAuth, requireRole('volunteer')) // only the volunteer the request is for
 
-// GET /requests -> [{ childId, childName, level, avatar, needs, day, time }]
+// GET /requests -> [{ childId, childName, level, avatar, needs, day, time, startsOn }]
 // Only MY pending slots, from every child.
+// startsOn = the first session if I accept now, e.g. '2026-11-09' (Yuqi)
 router.get('/', async (req, res) => {
   const children = await Child.find({ schedule: { $elemMatch: { volunteerId: req.user.id, status: 'pending' } } })
   const requests = []
@@ -32,6 +36,7 @@ router.get('/', async (req, res) => {
           needs: child.needs,
           day: slot.day,
           time: slot.time || '',
+          startsOn: firstDateFor(slot.day, slot.time),
         })
       }
     }
@@ -57,6 +62,7 @@ router.put('/:childId', async (req, res) => {
 
   if (action === 'accept') {
     slot.status = 'accepted'
+    slot.startDate = firstDateFor(slot.day, slot.time) // the first session, e.g. next Monday (Yuqi)
     if (!child.volunteerIds.includes(req.user.id)) child.volunteerIds.push(req.user.id)
   } else {
     child.schedule = child.schedule.filter((s) => s !== slot)
@@ -74,7 +80,7 @@ router.put('/:childId', async (req, res) => {
     req,
     await coordinatorIds(),
     action === 'accept'
-      ? { text: `${req.user.name} accepted ${child.name}, every ${when}`, icon: 'bi-check-circle', link: '/coordinator/schedule' }
+      ? { text: `${req.user.name} accepted ${child.name}, every ${when}, starting ${formatStart(slot.startDate)}`, icon: 'bi-check-circle', link: '/coordinator/schedule' }
       : { text: `${req.user.name} declined ${child.name} on ${day}`, icon: 'bi-x-circle', link: `/coordinator/matchmaking/${child.id}` },
   )
   res.json({ message: action === 'accept' ? 'Request accepted.' : 'Request declined.' })
