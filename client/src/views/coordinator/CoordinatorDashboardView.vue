@@ -7,6 +7,8 @@
     [x] filter alerts by type + click a row -> child profile (unassigned -> matchmaking)
     [x] "Flag for follow-up" toggle per child -> PUT /dashboard/follow-up/:childId
     [x] recent activity feed (latest sessions across the centre)
+    [x] weekly schedule card above Needs attention (WeekScheduleCard)
+    [x] weekday coverage next to each child's name (WeekdayDots: green = volunteer that day)
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -16,7 +18,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
-import { firstName, subjectStyle } from '@/utils/format'
+import WeekScheduleCard from '@/components/WeekScheduleCard.vue'
+import WeekdayDots from '@/components/WeekdayDots.vue'
+import { firstName } from '@/utils/format'
 import '@/css/teacher/teacherpage.css' // the styles of the teacher pages
 
 const router = useRouter()
@@ -71,6 +75,9 @@ onMounted(async () => {
 
 // ---------- Needs attention ----------
 
+// Look up a child's full record (for their schedule) from an alert's childId.
+const childById = computed(() => Object.fromEntries(children.value.map((c) => [c.id, c])))
+
 // How many alerts of each type, for the numbers on the filter chips.
 const countByType = computed(() => {
   const counts = {}
@@ -123,7 +130,6 @@ async function toggleFollowUp(alert) {
 const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
 const childNames = computed(() => nameById(children.value))
 const volunteerNames = computed(() => nameById(volunteers.value))
-const volunteerPhotos = computed(() => Object.fromEntries(volunteers.value.map((v) => [v.id, v.avatar])))
 
 const recentSessions = computed(() =>
   [...sessions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6),
@@ -166,6 +172,9 @@ function daysAgo(dateStr) {
           <span class="tile-label"><i class="bi bi-hourglass-split"></i>Homework pending</span>
         </button>
       </div>
+
+      <!-- the weekly schedule (read-only; editing is on the Schedule page) -->
+      <WeekScheduleCard class="mb-4" :volunteers="volunteers" :children="children" />
 
       <!-- the sandy board: the filters and the white cards -->
       <div id="needs-attention" class="board">
@@ -241,6 +250,7 @@ function daysAgo(dateStr) {
                     >
                       {{ a.childName }}
                     </RouterLink>
+                    <WeekdayDots :schedule="childById[a.childId]?.schedule" />
                     <span class="tag" :class="TAG_CLASS[a.type]">{{ ALERT_TYPES[a.type] }}</span>
                   </span>
                   <span class="alert-msg">{{ a.message }}</span>
@@ -271,12 +281,12 @@ function daysAgo(dateStr) {
               <p v-if="!recentSessions.length" class="empty">No sessions logged yet.</p>
               <ul v-else class="recent">
                 <li v-for="s in recentSessions" :key="s.id">
-                  <ChildInitial class="small" :child="{ name: volunteerNames[s.volunteerId] || 'Someone', avatar: volunteerPhotos[s.volunteerId] }" />
+                  <ChildInitial class="small" :child="{ name: volunteerNames[s.volunteerId] || 'Someone' }" />
                   <span>
                     <strong>{{ firstName(volunteerNames[s.volunteerId] || 'Someone') }}</strong> worked with
                     <strong>{{ firstName(childNames[s.childId] || 'Someone') }}</strong> on {{ s.topic }}
                     <span v-if="s.attempted">({{ s.correct }}/{{ s.attempted }} correct)</span>
-                    <span class="when"><span class="tag" :style="subjectStyle(s.subject)">{{ s.subject }}</span> {{ daysAgo(s.date) }}</span>
+                    <span class="when">{{ s.subject }}, {{ daysAgo(s.date) }}</span>
                   </span>
                 </li>
               </ul>

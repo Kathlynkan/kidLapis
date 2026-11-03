@@ -28,6 +28,13 @@ test.describe('Teacher dashboard', () => {
     await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
   })
 
+  test('shows Chloe (not seen) and Sofia (no volunteer) in Needs attention', async ({ page }) => {
+    const rows = page.locator('[data-test="alert-row"]')
+    // Chloe can have more than one alert (e.g. also overdue homework), so match the exact one.
+    await expect(rows.filter({ hasText: 'Chloe Lee' }).filter({ hasText: 'Not seen' })).toBeVisible()
+    await expect(rows.filter({ hasText: 'Sofia Ong' }).filter({ hasText: 'No volunteer' })).toBeVisible()
+  })  
+
   test('alert type filter narrows the list', async ({ page }) => {
     await expect(page.locator('[data-test="alert-type-filter"]')).toBeVisible()
     await page.locator('[data-test="alert-filter-unassigned"]').click()
@@ -73,6 +80,38 @@ test.describe('Teacher: matchmaking', () => {
   test('opening a child shows volunteer suggestions', async ({ page }) => {
     await page.locator('[data-test="child-toggle"]').first().click()
     await expect(page.locator('[data-test="suggestion-card"]').first()).toBeVisible()
+  })
+  test('assigning a volunteer to Sofia removes her "No volunteer" alert', async ({ page, isMobile }) => {
+    // This test changes data, so it runs once (desktop only) to stop the two runs clashing.
+    test.skip(isMobile, 'Changes data: runs on desktop only')
+
+    const sofia = page.locator('[data-test="child-toggle"]', { hasText: 'Sofia Ong' })
+    await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toBeVisible() // fails if not reseeded
+
+    // Assign her top match, Priya, on Wednesday at 18:00.
+    await sofia.click()
+    const priya = page.locator('[data-test="suggestion-card"]', { hasText: 'Priya Nair' })
+    await priya.locator('[data-test="day-select"]').selectOption('Wed')
+    await priya.locator('[data-test="time-select"]').selectOption('18:00')
+    await priya.locator('[data-test="assign-btn"]').click()
+
+    try {
+      await expect(priya.locator('[data-test="slot-chip"]')).toContainText('Wed 18:00')
+      await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toHaveCount(0)
+
+      // On the dashboard, the "No volunteer" filter no longer lists Sofia.
+      await page.goto('/teacher')
+      await page.locator('[data-test="alert-filter-unassigned"]').click()
+      await expect(page.locator('[data-test="alert-row"]', { hasText: 'Sofia Ong' })).toHaveCount(0)
+    } finally {
+      // Undo the change, so the other tests (and the next run) still see Sofia unassigned.
+      await page.goto('/teacher/matchmaking/c_6')
+      await page
+        .locator('[data-test="suggestion-card"]', { hasText: 'Priya Nair' })
+        .locator('[data-test="unassign-btn"]')
+        .click()
+      await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toBeVisible()
+    }
   })
 })
 
