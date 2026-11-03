@@ -8,6 +8,8 @@ import {
   getWeekRange,
   getWeekOf,
   formatWeek,
+  listWeeks,
+  weekTitleFor,
 } from '../handover.js'
 
 // fake sessions, newest first (same shape as MongoDB)
@@ -100,5 +102,32 @@ describe('buildWeeklyFallback (parents)', () => {
 
   it('handles a week with no sessions', () => {
     expect(buildWeeklyFallback([]).headline).toBe('No sessions were recorded that week.')
+  })
+})
+
+describe('listWeeks', () => {
+  it('lists each week with sessions once, newest first, and skips empty weeks', () => {
+    const dates = ['2026-10-29', '2026-10-27', '2026-10-14', '2026-10-12'] // nothing in the week of 19 Oct
+    const weeks = listWeeks(dates.map((date) => ({ date })))
+    expect(weeks.map((w) => w.start)).toEqual(['2026-10-26', '2026-10-12'])
+  })
+
+  it('goes back at most 8 weeks', () => {
+    const dates = []
+    for (let i = 0; i < 12; i++) {
+      const d = new Date('2026-10-28T00:00:00')
+      d.setDate(d.getDate() - 7 * i)
+      dates.push({ date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })
+    }
+    expect(listWeeks(dates)).toHaveLength(8)
+  })
+})
+
+describe('weekTitleFor', () => {
+  const today = new Date('2026-11-04T10:00:00') // a Wednesday
+  it('names the week counted back from today', () => {
+    expect(weekTitleFor({ start: '2026-11-02' }, today)).toBe('This week')
+    expect(weekTitleFor({ start: '2026-10-26' }, today)).toBe('Last week')
+    expect(weekTitleFor({ start: '2026-10-12' }, today)).toBe('3 weeks ago')
   })
 })

@@ -1,7 +1,8 @@
 <!-- =============================================================
   HandoverCard - the AI summary box.                  Owner: Yuqi
     volunteer / coordinator (ChildProfileView) -> "Handover Notes" for the next session
-    parent (ParentHomeView)                -> the weekly summary 
+    parent (ParentHomeView)                -> the weekly summary, with arrows to look at earlier weeks
+                                              (the card sends 'change-week' and ParentHomeView loads that week)
   (the server also picks the summary by role, so both always match)
 ============================================================= -->
 <script setup>
@@ -13,6 +14,8 @@ const props = defineProps({
   handover: { type: Object, default: null },
   loading:  { type: Boolean, default: false },
 })
+
+const emit = defineEmits(['change-week']) // e.g. emit('change-week', '2026-10-19')
 
 const auth = useAuthStore()
 
@@ -60,6 +63,27 @@ const loadingText = computed(() => (isParent.value ? 'Getting the update...' : '
 const emptyText = computed(() => (isParent.value ? 'No summary yet.' : 'No handover available yet.'))
 
 const open = ref(true)
+
+// ---------- parents: step through the weeks that have sessions ----------
+// handover.weeks = ['2026-10-26', '2026-10-19', ...] (Mondays, newest first, at most 8)
+// handover.weekStart = the Monday of the week shown
+const weekList = computed(() => {
+  if (!isParent.value || !props.handover || !props.handover.weeks) return []
+  return props.handover.weeks
+})
+const weekIndex = computed(() => weekList.value.indexOf(props.handover?.weekStart))
+
+// the week before the one shown ('' if this is the oldest)
+const earlierWeek = computed(() => {
+  if (weekIndex.value < 0) return ''
+  return weekList.value[weekIndex.value + 1] || ''
+})
+
+// the week after the one shown ('' if this is the newest)
+const laterWeek = computed(() => {
+  if (weekIndex.value <= 0) return ''
+  return weekList.value[weekIndex.value - 1]
+})
 </script>
 
 <template>
@@ -92,27 +116,90 @@ const open = ref(true)
 
     <div class="peel-body" :class="{ 'peel-body--open': open }">
       <div class="peel-body-inner">
+        <!-- parents: earlier / later week (only weeks with sessions, so a holiday is skipped) -->
+        <div v-if="weekList.length > 1" class="handover-week-nav" data-test="week-nav">
+          <button
+            type="button"
+            class="handover-week-button"
+            :disabled="!earlierWeek || loading"
+            data-test="week-earlier"
+            @click="emit('change-week', earlierWeek)"
+          >
+            <i class="bi bi-chevron-left me-1"></i>Earlier week
+          </button>
+          <button
+            type="button"
+            class="handover-week-button"
+            :disabled="!laterWeek || loading"
+            data-test="week-later"
+            @click="emit('change-week', laterWeek)"
+          >
+            Later week<i class="bi bi-chevron-right ms-1"></i>
+          </button>
+        </div>
+
         <div v-if="loading" class="loading-msg">
           <span class="spinner-border spinner-border-sm me-2"></span>
           {{ loadingText }}
         </div>
 
-        <dl v-else-if="handover" class="row mb-0">
+        <!-- parents: why an older week is shown, e.g. 'No sessions since Wed 14 Oct. ...' -->
+        <p v-if="!loading && isParent && handover && handover.awayNote" class="handover-away" data-test="away-note">
+          <i class="bi bi-info-circle me-1"></i>{{ handover.awayNote }}
+        </p>
+
+        <dl v-if="!loading && handover" class="row mb-0">
           <template v-for="row in rows" :key="row.key">
             <!-- skip a row with nothing to say -->
             <template v-if="handover[row.key] && handover[row.key] !== '-'">
-              <dt class="col-12 col-sm-4 small handover-key">
+              <dt class="col-12 col-sm-3 col-lg-2 small handover-key">
                 <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
               </dt>
-              <dd class="col-12 col-sm-8 fw-semibold handover-value">
+              <dd class="col-12 col-sm-9 col-lg-10 fw-semibold handover-value">
                 {{ handover[row.key] }}
               </dd>
             </template>
           </template>
         </dl>
 
-        <p v-else class="small lapis-muted mb-0">{{ emptyText }}</p>
+        <p v-if="!loading && !handover" class="small lapis-muted mb-0">{{ emptyText }}</p>
       </div>
     </div>
   </div>
 </template>
+
+<style>
+/* parents: the earlier / later week buttons at the top of the summary */
+.handover-week-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.handover-week-button {
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.handover-week-button:hover:not(:disabled) {
+  background: #FFFFFF;
+}
+
+/* no earlier / later week: still there (so the buttons don't jump), but faded */
+.handover-week-button:disabled {
+  opacity: 0.4;
+}
+
+/* 'No sessions since ...' */
+.handover-away {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+</style>

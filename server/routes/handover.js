@@ -11,6 +11,8 @@
 //   'weekly'   - for PARENTS: Monday to Friday, learning + social.
 //                Fri-Sun shows this week, Mon-Thu shows last week.
 //                If that week has no sessions, it shows the latest week that has some.
+//                The parent can step back through the last 8 weeks that have sessions
+//                (POST body { week: '2026-10-19' }). Each week is saved once, so going back is free.
 //                Different volunteers write brief or detailed notes, so the AI combines them into one balanced picture of the week.
 // =============================================================
 import { Router } from 'express'
@@ -136,6 +138,38 @@ export function formatWeek(week) {
   const friday = new Date(week.end + 'T00:00:00')
   const options = { weekday: 'short', day: 'numeric', month: 'short' }
   return `${monday.toLocaleDateString('en-GB', options)} to ${friday.toLocaleDateString('en-GB', options)}`
+}
+
+// The weeks that have sessions, newest first, at most 8 summaries
+export const MAX_WEEKS = 8
+export function listWeeks(sessions) {
+  const weeks = []
+  for (const s of sessions) {
+    const week = getWeekOf(new Date(s.date + 'T00:00:00'))
+    const already = weeks.some((w) => w.start === week.start)
+    if (!already) {
+      weeks.push(week)
+    }
+    if (weeks.length === MAX_WEEKS) break
+  }
+  return weeks
+}
+
+// The title of a week, counted back from today:
+// 'This week', 'Last week', '2 weeks ago', '3 weeks ago' ...
+export function weekTitleFor(week, today = new Date()) {
+  const thisMonday = getWeekOf(today).start
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+  const weeksBack = Math.round((Date.parse(thisMonday) - Date.parse(week.start)) / WEEK_MS)
+  if (weeksBack <= 0) return 'This week'
+  if (weeksBack === 1) return 'Last week'
+  return `${weeksBack} weeks ago`
+}
+
+// A date for people, e.g. 'Wed 14 Oct'
+function formatDay(dateText) {
+  const options = { weekday: 'short', day: 'numeric', month: 'short' }
+  return new Date(dateText + 'T00:00:00').toLocaleDateString('en-GB', options)
 }
 
 // Backup summary for VOLUNTEERS: used when there is no API key or Gemini fails.
@@ -496,8 +530,8 @@ router.post('/:childId', async (req, res) => {
     return res.status(403).json({ message: 'You do not have access to this child.' })
   }
 
-  // get the child's sessions, newest first, at most 20
-  const allSessions = await Session.find({ childId: child.id }).sort({ date: -1 }).limit(20)
+  // get the child's sessions, newest first, at most 60 (enough for 8 weeks)
+  const allSessions = await Session.find({ childId: child.id }).sort({ date: -1 }).limit(60)
 
   // show summary depending on logged in user
   let audience = 'volunteer'
@@ -511,27 +545,44 @@ router.post('/:childId', async (req, res) => {
   let sessions = allSessions
   let lastWeek = [] // weekly only: the week before, to compare with
   let periodLabel = '' // weekly only: shown on the card, e.g. 'Mon 26 Oct to Fri 30 Oct'
-  let weekTitle = '' // weekly only: 'This week', 'Last week' or 'Latest week'
+  let weekTitle = '' // weekly only: 'This week', 'Last week', '2 weeks ago' ...
   let weekWords = 'this week' // weekly only: how the AI should call the week
+  let weeks = [] // weekly only: the weeks the parent can step through (the arrows on the card)
+  let weekStart = '' // weekly only: the Monday of the week shown, e.g. '2026-10-26'
+  let awayNote = '' // weekly only: e.g. 'No sessions since Wed 14 Oct. This is the last week Mia came.'
   if (type === 'weekly') {
+    weeks = listWeeks(allSessions)
+
     // Fri - Sun: this week. Mon - Thu: last week.
-    let week = getWeekRange()
-    weekTitle = 'This week'
-    const today = new Date().getDay()
-    if (today >= 1 && today <= 4) {
-      weekTitle = 'Last week'
+    const usualWeek = getWeekRange()
+    let week = usualWeek
+
+    // the parent pressed an arrow -> the week they asked for (only one of the 8 weeks in the list)
+    let askedWeek = ''
+    if (req.body && req.body.week) {
+      askedWeek = String(req.body.week)
+    }
+    const asked = weeks.find((w) => w.start === askedWeek)
+    if (asked) {
+      week = asked
     }
     sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
 
-    // nothing that week (e.g. a school holiday) -> use the latest week that has sessions
-    if (sessions.length === 0 && allSessions.length > 0) {
-      week = getWeekOf(new Date(allSessions[0].date + 'T00:00:00'))
-      weekTitle = 'Latest week'
+    // nothing that week (e.g. away on holiday) -> use the latest week that has sessions
+    if (sessions.length === 0 && weeks.length > 0) {
+      week = weeks[0]
       sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
+      // tell the parent why they see an older week
+      if (week.start < usualWeek.start) {
+        const firstName = child.name.split(' ')[0]
+        awayNote = `No sessions since ${formatDay(allSessions[0].date)}. This is the last week ${firstName} came.`
+      }
     }
+    weekStart = week.start
     periodLabel = formatWeek(week)
-    weekWords = weekTitle.toLowerCase()
-    if (weekTitle === 'Latest week') {
+    weekTitle = weekTitleFor(week)
+    weekWords = weekTitle.toLowerCase() // 'this week' or 'last week'
+    if (weekTitle !== 'This week' && weekTitle !== 'Last week') {
       weekWords = `the week of ${periodLabel}`
     }
 
@@ -540,6 +591,16 @@ router.post('/:childId', async (req, res) => {
     weekBefore.setDate(weekBefore.getDate() - 7)
     const before = getWeekOf(weekBefore)
     lastWeek = allSessions.filter((s) => s.date >= before.start && s.date <= before.end)
+  }
+
+  // the week facts the card needs (worked out above, never saved, so they are always up to date)
+  function addWeekInfo(result) {
+    result.periodLabel = periodLabel
+    result.weekTitle = weekTitle
+    result.weekStart = weekStart
+    result.weeks = weeks.map((w) => w.start) // e.g. ['2026-10-26', '2026-10-19', ...] newest first
+    result.awayNote = awayNote
+    return result
   }
 
   // no sessions -> nothing for the AI to read, send the backup (saves API calls)
@@ -551,28 +612,32 @@ router.post('/:childId', async (req, res) => {
     if (type === 'handover') {
       empty.recurring = findRecurring(allSessions) // struggles from the last 5 sessions (volunteers only)
     }
-    empty.periodLabel = periodLabel
-    empty.weekTitle = weekTitle
-    return res.json(empty)
+    return res.json(addWeekInfo(empty))
   }
 
   // if a session is added or deleted, this changes -> the saved summary is out of date
   // (if a session is edited, the IDs stay the same, so sessions.js deletes the saved summary)  
+  // handover: the newest 5 sessions. weekly: every session of that week.
+  let keySessions = sessions.slice(0, 5)
+  if (type === 'weekly') {
+    keySessions = sessions
+  }
   const ids = []
-  for (const s of sessions.slice(0, 5)) {
+  for (const s of keySessions) {
     ids.push(s.id)
   }
   const sessionsKey = type + ':' + ids.join(',') // e.g. 'weekly:s_3,s_2'
 
+  // one saved summary per week for parents ('2026-10-26'), one per child for volunteers ('')
+  const savedFilter = { childId: child.id, audience: audience, type: type, week: weekStart }
+
   // 1. use the saved summary if it is still up to date (no Gemini call)
-  const saved = await Handover.findOne({ childId: child.id, audience: audience, type: type })
+  const saved = await Handover.findOne(savedFilter)
   if (saved && saved.sessionsKey === sessionsKey) {
     const result = saved.summary
     result.cached = true // so we can tell it came from the database
     // the same week can be "This week" on Friday and "Last week" on Monday, so set these again
-    result.periodLabel = periodLabel
-    result.weekTitle = weekTitle
-    return res.json(result)
+    return res.json(addWeekInfo(result))
   }
 
   // 2. otherwise ask Gemini
@@ -586,8 +651,6 @@ router.post('/:childId', async (req, res) => {
         ai.recurring = findRecurring(allSessions) // volunteers only, parents do not see a list of struggles
       }
       ai.source = 'ai'
-      ai.periodLabel = periodLabel
-      ai.weekTitle = weekTitle
       // volunteer handover
       if (type === 'handover' && audience === 'volunteer') {
         // no semicolons: turn "a; b" into "a, b" (in case the AI still uses them)
@@ -606,11 +669,11 @@ router.post('/:childId', async (req, res) => {
 
       // save it for next time (update the old one, or create it if there is none yet)
       await Handover.findOneAndUpdate(
-        { childId: child.id, audience: audience, type: type },
+        savedFilter,
         { sessionsKey: sessionsKey, summary: ai, createdAt: new Date().toISOString() },
         { upsert: true },
       )
-      return res.json(ai)
+      return res.json(addWeekInfo(ai))
     }
   } catch (error) {
     console.error('Gemini call failed, using fallback:', error.message)
@@ -624,9 +687,7 @@ router.post('/:childId', async (req, res) => {
   if (type === 'handover') {
     fallback.recurring = findRecurring(allSessions) // volunteers only
   }
-  fallback.periodLabel = periodLabel
-  fallback.weekTitle = weekTitle
-  res.json(fallback)
+  res.json(addWeekInfo(fallback))
 })
 
 export default router

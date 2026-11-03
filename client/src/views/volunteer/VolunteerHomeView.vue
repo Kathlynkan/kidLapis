@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth' // get auth sotre from Pinia
 import PageHeader from '@/components/PageHeader.vue'
 import ChildCard from '@/components/ChildCard.vue'
 import StateMessage from '@/components/StateMessage.vue'
-import { firstName } from '@/utils/format'
+import { firstName, formatDate } from '@/utils/format'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
 import '@/css/main/labels.css' // the capital-letter captions
 
@@ -58,10 +58,47 @@ const lastSessionByChild = computed(() => {
   return map
 })
 
-// ---------- Today tab / Calendar ----------
+// ---------- My Schedule tab: this week's calendar ----------
+// Past days        -> the sessions I actually recorded that day (what happened)
+// Today and later  -> the children scheduled with me (what is planned),
+//                     only from the day their sessions with me start (slot.startDate)
+// So a child I accepted this week never shows up on a day that has already passed.
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] // Mon-first display order
 const today = DAY_NAMES[new Date().getDay()] // e.g. 'Fri'
+
+// a date as 'YYYY-MM-DD' in our time zone, e.g. '2026-11-03'
+function toDateText(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+const todayDate = toDateText(new Date())
+
+// the date of each day of THIS week, e.g. { Mon: '2026-11-02', Tue: '2026-11-03', ... }
+function buildWeekDates() {
+  const now = new Date()
+  let daysBack = now.getDay() - 1 // how many days back to this week's Monday
+  if (now.getDay() === 0) {
+    daysBack = 6 // Sunday: Monday was 6 days ago
+  }
+  const dates = {}
+  for (let i = 0; i < WEEK.length; i++) {
+    const date = new Date(now)
+    date.setDate(now.getDate() - daysBack + i)
+    dates[WEEK[i]] = toDateText(date)
+  }
+  return dates
+}
+const weekDates = buildWeekDates()
+
+// 'past', 'today' or 'future' (each has its own colour in the week strip)
+function timeOf(day) {
+  const date = weekDates[day]
+  if (date < todayDate) return 'past'
+  if (date === todayDate) return 'today'
+  return 'future'
+}
 
 const selectedDay = ref(today) // calendar selection, defaults to today
 
@@ -73,17 +110,35 @@ const myDays = computed(() => {
   return []
 })
 
-// children scheduled with me on a given day
+// my slot with this child on this day, e.g. { day: 'Mon', time: '16:00', startDate: '2026-11-09' }
+// (a slot still waiting for me to accept it does not count)
+function mySlot(child, day) {
+  const schedule = child.schedule || []
+  return schedule.find((slot) => slot.volunteerId === auth.user?.id && slot.day === day && slot.status === 'accepted')
+}
+
+// the children shown on a day of the week strip
 function childrenOnDay(day) {
+  const date = weekDates[day]
   const result = []
-  for (const child of children.value) {
-    const schedule = child.schedule || []
-    for (const slot of schedule) {
-      if (slot.volunteerId === auth.user?.id && slot.day === day) {
-        result.push(child)
-        break
-      }
+
+  // a day that has passed: what really happened (sessions I recorded on that date)
+  if (timeOf(day) === 'past') {
+    for (const child of children.value) {
+      const recorded = sessions.value.some(
+        (s) => s.childId === child.id && s.volunteerId === auth.user?.id && s.date === date,
+      )
+      if (recorded) result.push(child)
     }
+    return result
+  }
+
+  // today or later: what is planned (from the day the sessions start)
+  for (const child of children.value) {
+    const slot = mySlot(child, day)
+    if (!slot) continue
+    if (slot.startDate && slot.startDate > date) continue // not started yet on this date
+    result.push(child)
   }
   return result
 }
@@ -91,33 +146,25 @@ function childrenOnDay(day) {
 // children for the currently selected calendar day
 const selectedDayChildren = computed(() => childrenOnDay(selectedDay.value))
 
-// which children have the same struggle 2+ times in their last 5 sessions?
-// e.g. { c_1: true, c_3: true, c_4: false }   (same rule as findRecurring on the server)
-const needsAttentionByChild = computed(() => {
-  const result = {}
-  for (const child of children.value) {
-    // get latest 5 sessions of this child, sorted newest-first so we don't flag resolved struggles
-    const childSessions = sessions.value
-      .filter((s) => s.childId === child.id)
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5)
+// the small tag on a child's card in the week strip
+function scheduleBadge(child) {
+  if (timeOf(selectedDay.value) === 'past') return 'Session recorded'
+  const slot = mySlot(child, selectedDay.value)
+  if (slot && slot.startDate === weekDates[selectedDay.value]) return 'First session'
+  return ''
+}
 
-    const counts = {}
-    let repeated = false
-    for (const s of childSessions) {
-      for (const struggle of s.struggles) { //each struggle in sessions.struggles
-        if (counts[struggle]) {
-          counts[struggle] = counts[struggle] + 1
-          repeated = true // seen before -> this struggle keeps coming back
-        } else {
-          counts[struggle] = 1
-        }
-      }
+// the small tag on a child's card in "All my children": a child whose sessions with me start later
+// e.g. 'Starts Mon, 9 Nov'
+function startBadge(child) {
+  const schedule = child.schedule || []
+  for (const slot of schedule) {
+    if (slot.volunteerId === auth.user?.id && slot.status !== 'pending' && slot.startDate && slot.startDate > todayDate) {
+      return `Starts ${formatDate(slot.startDate)}`
     }
-    result[child.id] = repeated
   }
-  return result
-})
+  return ''
+}
 
 // ---------- All my children tab ----------
 // search + level filter
@@ -195,11 +242,11 @@ onMounted(loadData)
                 :key="day"
                 type="button"
                 class="week-day"
-                :class="{ selected: selectedDay === day, off: !myDays.includes(day) }"
+                :class="['is-' + timeOf(day), { selected: selectedDay === day, empty: childrenOnDay(day).length === 0 }]"
                 data-test="cal-day"
                 @click="selectedDay = day"
               >
-                <span class="week-name">{{ day }}</span>
+                <span class="week-name">{{ day }} {{ Number(weekDates[day].slice(8)) }}</span>
                 <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
                 <span class="week-count">{{ childrenOnDay(day).length }}</span>
               </button>
@@ -208,9 +255,11 @@ onMounted(loadData)
             <!-- selected day heading -->
             <div class="day-heading">
               <h3 class="day-title">
-                {{ selectedDay === today ? `Today (${today})` : selectedDay }}
+                {{ formatDate(weekDates[selectedDay]) }}
               </h3>
-              <span v-if="!myDays.includes(selectedDay)" class="pill pill-quiet">Day off</span>
+              <!-- a day that has passed shows what happened, not the plan -->
+              <span v-if="timeOf(selectedDay) === 'past'" class="pill pill-past">Past: sessions recorded</span>
+              <span v-else-if="!myDays.includes(selectedDay)" class="pill pill-quiet">Day off</span>
               <span v-else-if="selectedDayChildren.length === 0" class="pill pill-quiet">No children</span>
               <span v-else class="pill pill-green">{{ selectedDayChildren.length }} child{{ selectedDayChildren.length !== 1 ? 'ren' : '' }}</span>
             </div>
@@ -219,7 +268,8 @@ onMounted(loadData)
             <div v-if="selectedDayChildren.length === 0" class="empty-box" data-test="not-today">
               <i class="bi bi-calendar-x"></i>
               <p>
-                <strong v-if="myDays.includes(selectedDay)">No children scheduled with you on {{ selectedDay }}.</strong>
+                <strong v-if="timeOf(selectedDay) === 'past'">No sessions were recorded with you on {{ selectedDay }}.</strong>
+                <strong v-else-if="myDays.includes(selectedDay)">No children scheduled with you on {{ selectedDay }}.</strong>
                 <strong v-else>You're not volunteering on {{ selectedDay }}.</strong>
               </p>
               <p class="muted">
@@ -236,7 +286,7 @@ onMounted(loadData)
                 <ChildCard
                 :child="child"
                 :last-session="lastSessionByChild[child.id]"
-                :needs-attention="needsAttentionByChild[child.id]"
+                :badge="scheduleBadge(child)"
                 @open="openChild" />
               </div>
             </div>
@@ -288,7 +338,7 @@ onMounted(loadData)
                 <ChildCard
                 :child="child"
                 :last-session="lastSessionByChild[child.id]"
-                :needs-attention="needsAttentionByChild[child.id]"
+                :badge="startBadge(child)"
                 @open="openChild" />
               </div>
             </div>
@@ -314,7 +364,6 @@ onMounted(loadData)
      #B7D8D7 muted teal       the last session tag (the same as "Being checked" on the parent page)
      #E4F0EF pale teal        the search box and the "No children" tag
      #3E6B6A dark teal        the small icons, the arrows and the search focus line
-     #FBE7A1 yellow           needs attention (the same yellow as "due" on the parent page)
      #6B8177 grey green       small text
      #D9E8DF                  thin borders
      #F9F1E6 sand             the board (the same as on the parent page)
@@ -390,12 +439,18 @@ onMounted(loadData)
   margin-bottom: 18px;
 }
 
+/* The days of the week. One look for each thing, so it is easy to read:
+     selected day -> filled dark green, white text (the only filled day)
+     today        -> a dark green ring and the word "Today"
+     past day     -> grey (already happened)
+     other days   -> pale mint
+     no children / day off -> the number is faded */
 .volunteerpage .week-day {
   min-width: 0;
   padding: 7px 0 9px;
   border: 0;
   border-radius: 14px;
-  background: #E1F2E9;
+  background: #E1F2E9; /* pale mint */
   color: #213C31;
   font: inherit;
   font-size: 14px;
@@ -407,14 +462,19 @@ onMounted(loadData)
   background: #CDE9D8;
 }
 
-/* a day when I do not volunteer is faded, unless I opened it (the selected rule comes after, so it wins) */
-.volunteerpage .week-day.off {
-  opacity: 0.55;
+.volunteerpage .week-day.is-past {
+  background: #EEF0EE;
+  color: #8A968F;
 }
 
+.volunteerpage .week-day.is-today {
+  box-shadow: inset 0 0 0 2px #4A735F;
+}
+
+/* the selected rule comes last, so it wins over past and today */
 .volunteerpage .week-day.selected {
-  background: #9BD3B2;
-  opacity: 1;
+  background: #4A735F;
+  color: #FFFFFF;
 }
 
 .volunteerpage .week-name,
@@ -441,8 +501,15 @@ onMounted(loadData)
   line-height: 20px;
 }
 
+/* the number of children: faded when there are none */
+.volunteerpage .week-day.empty .week-count {
+  background: transparent;
+  color: #9AA7A0;
+}
+
 .volunteerpage .week-day.selected .week-count {
   background: #FFFFFF;
+  color: #213C31;
 }
 
 /* ---------- the heading of the chosen day ---------- */
@@ -474,6 +541,11 @@ onMounted(loadData)
 
 .volunteerpage .pill-quiet {
   background: #E4F0EF;
+}
+
+.volunteerpage .pill-past {
+  background: #EEF0EE;
+  color: #6B8177;
 }
 
 /* ---------- boxes with a message (nobody today, no children yet) ---------- */
@@ -605,12 +677,13 @@ onMounted(loadData)
   font-size: 17px;
 }
 
-.volunteerpage .needs-attention {
+/* the small tag on a child: 'Session recorded', 'First session', 'Starts Mon, 9 Nov' */
+.volunteerpage .child-badge {
   display: inline-block;
-  margin-top: 4px;
+  margin: 4px 6px 0 0;
   padding: 1px 10px;
   border-radius: 999px;
-  background: #FBE7A1;
+  background: #CDE9D8;
   font-size: 12px;
   font-weight: 700;
 }
