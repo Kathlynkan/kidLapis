@@ -5,7 +5,10 @@
   All children are listed as toggle buttons (unassigned first) with a search bar.
   Open a child -> volunteers ranked by score (GET /matchmaking/:childId)
   -> pick a day + time -> Assign (PUT /matchmaking/:childId/assign).
-  The server rejects days the volunteer isn't free and double-bookings.
+  An assigned volunteer can be given more days ("Add day"). Each booked day can be
+  edited in place (pencil: change day/time) or removed (x), or all at once ("Unassign all").
+  Time dropdowns grey out times that would double-book the volunteer or the child.
+  The server re-checks everything: days the volunteer isn't free, and double-bookings.
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
@@ -42,6 +45,10 @@ const panelError = ref({}) // { childId: 'message' }
 const dayChoice = ref({})
 const timeChoice = ref({})
 const busyKey = ref('')
+
+// The booked day being edited in place (one at a time), or null.
+// { childId, volunteerId, fromDay, fromTime, day, time }
+const editing = ref(null)
 
 const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
@@ -93,6 +100,7 @@ onMounted(async () => {
 // Click a child: open it (closing any other), or close it if it's already open.
 function toggle(child) {
   openId.value = openId.value === child.id ? '' : child.id
+  editing.value = null
   router.replace({ name: 'matchmaking', params: { childId: openId.value || undefined } })
   if (openId.value) loadSuggestions(openId.value)
 }
@@ -112,10 +120,55 @@ async function loadSuggestions(childId) {
   }
 }
 
-function slotsLabel(s) {
-  return s.scheduledSlots.map((slot) => (slot.time ? `${slot.day} ${slot.time}` : slot.day)).join(', ')
+// Days this volunteer is free but not yet booked with this child.
+const openDays = (s) => s.availability.filter((d) => !s.scheduledDays.includes(d))
+
+// ---------- Busy times (greyed out in the time dropdowns) ----------
+// The server makes the final decision; this just warns the coordinator before they click.
+const SESSION_MINUTES = 60 // same rule as server/utils/schedule.js
+const toMinutes = (time) => {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
 }
 
+// Every booked time on this day that would clash for this volunteer or this child.
+function busyTimes(child, s, day) {
+  const busy = []
+  for (const other of children.value) {
+    for (const slot of other.schedule || []) {
+      if (slot.day !== day || !slot.time) continue
+      if (other.id === child.id && slot.volunteerId === s.volunteerId) continue // this pair's own day
+      if (slot.volunteerId === s.volunteerId) {
+        busy.push({ time: slot.time, reason: `${firstName(s.name)} has ${firstName(other.name)}` })
+      } else if (other.id === child.id) {
+        busy.push({ time: slot.time, reason: `${firstName(child.name)} has another session` })
+      }
+    }
+  }
+  return busy
+}
+
+// All start times, with clashing ones disabled and labelled with the reason.
+function timeOptions(child, s, day) {
+  const busy = day ? busyTimes(child, s, day) : []
+  return TIMES.map((t) => {
+    const clash = busy.find((b) => Math.abs(toMinutes(b.time) - toMinutes(t)) < SESSION_MINUTES)
+    return { time: t, disabled: Boolean(clash), label: clash ? `${t} · ${clash.reason} at ${clash.time}` : t }
+  })
+}
+
+const isFreeTime = (child, s, day, time) =>
+  Boolean(time) && !timeOptions(child, s, day).find((o) => o.time === time)?.disabled
+
+// After the day changes, keep the chosen time only if it's still free on the new day.
+function onAddDayChange(child, s) {
+  const key = keyOf(child.id, s.volunteerId)
+  if (!isFreeTime(child, s, dayChoice.value[key], timeChoice.value[key])) delete timeChoice.value[key]
+}
+
+// ---------- Assign / add day / remove ----------
+
+// Returns true if the change was saved, so callers can close an editor only on success.
 async function changeAssignment(child, s, body) {
   const key = keyOf(child.id, s.volunteerId)
   busyKey.value = key
@@ -126,20 +179,70 @@ async function changeAssignment(child, s, body) {
     delete timeChoice.value[key]
     // Scores, workloads and the child's status all change after an assignment.
     await Promise.all([loadSuggestions(child.id), loadChildren()])
+    return true
   } catch (err) {
     panelError.value[child.id] = errorMessage(err) // e.g. "Aisha Rahman already has Ethan Wong on Mon at 16:00."
+    return false
   } finally {
     busyKey.value = ''
   }
 }
 
+// Assigns a new volunteer, or adds another day for one who is already assigned.
 function assign(child, s) {
   const key = keyOf(child.id, s.volunteerId)
   changeAssignment(child, s, { action: 'assign', day: dayChoice.value[key], time: timeChoice.value[key] })
 }
 
+// Removes just one day. If it was their last day together, the server also unassigns them.
+function removeDay(child, s, day) {
+  changeAssignment(child, s, { action: 'unassign', day })
+}
+
+// Removes the volunteer from this child on every day.
 function unassign(child, s) {
   changeAssignment(child, s, { action: 'unassign' })
+}
+
+// ---------- Editing a booked day in place ----------
+
+function startEdit(child, s, slot) {
+  editing.value = {
+    childId: child.id,
+    volunteerId: s.volunteerId,
+    fromDay: slot.day,
+    fromTime: slot.time,
+    day: slot.day,
+    time: slot.time,
+  }
+  panelError.value[child.id] = ''
+}
+
+const isEditing = (child, s, day) =>
+  editing.value?.childId === child.id && editing.value.volunteerId === s.volunteerId && editing.value.fromDay === day
+
+// The day being edited, plus any free day they don't already have together.
+const editDays = (s, fromDay) => s.availability.filter((d) => d === fromDay || !s.scheduledDays.includes(d))
+
+function onEditDayChange(child, s) {
+  if (!isFreeTime(child, s, editing.value.day, editing.value.time)) editing.value.time = ''
+}
+
+// Save only unlocks once the day or time has actually changed.
+const canSaveEdit = computed(
+  () =>
+    editing.value &&
+    editing.value.day &&
+    editing.value.time &&
+    (editing.value.day !== editing.value.fromDay || editing.value.time !== editing.value.fromTime),
+)
+
+// One "move" request changes the day/time in a single step, so a clash can never
+// leave the child with the old day deleted and no new day.
+async function saveEdit(child, s) {
+  const { fromDay, day, time } = editing.value
+  const saved = await changeAssignment(child, s, { action: 'move', fromDay, day, time })
+  if (saved) editing.value = null
 }
 </script>
 
@@ -236,9 +339,7 @@ function unassign(child, s) {
                           <div>
                             <div class="suggest-title">
                               <h4 class="person-name">{{ s.name }}</h4>
-                              <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">
-                                Assigned{{ s.scheduledSlots.length ? ` · ${slotsLabel(s)}` : '' }}
-                              </span>
+                              <span v-if="s.assigned" class="tag tag-ok" data-test="assigned-badge">Assigned</span>
                             </div>
                             <div class="person-sub">
                               Score {{ s.score }}: subjects +{{ s.breakdown.skills }}, days +{{ s.breakdown.days }},
@@ -247,29 +348,19 @@ function unassign(child, s) {
                           </div>
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Actions: assign a new volunteer, or add another day for an assigned one -->
                         <div class="suggest-actions">
-                          <button
-                            v-if="s.assigned"
-                            type="button"
-                            class="t-btn t-btn-soft"
-                            :disabled="busyKey !== ''"
-                            data-test="unassign-btn"
-                            @click="unassign(c, s)"
-                          >
-                            {{ busyKey === keyOf(c.id, s.volunteerId) ? 'Removing…' : 'Unassign' }}
-                          </button>
-
-                          <template v-else-if="s.availability.length">
+                          <template v-if="openDays(s).length">
                             <label class="visually-hidden" :for="`day-${c.id}-${s.volunteerId}`">Day for {{ s.name }}</label>
                             <select
                               :id="`day-${c.id}-${s.volunteerId}`"
                               v-model="dayChoice[keyOf(c.id, s.volunteerId)]"
                               class="form-select skill-select"
                               data-test="day-select"
+                              @change="onAddDayChange(c, s)"
                             >
                               <option :value="undefined" disabled>Day</option>
-                              <option v-for="d in s.availability" :key="d" :value="d">{{ d }}</option>
+                              <option v-for="d in openDays(s)" :key="d" :value="d">{{ d }}</option>
                             </select>
 
                             <label class="visually-hidden" :for="`time-${c.id}-${s.volunteerId}`">Time for {{ s.name }}</label>
@@ -280,7 +371,14 @@ function unassign(child, s) {
                               data-test="time-select"
                             >
                               <option :value="undefined" disabled>Time</option>
-                              <option v-for="t in TIMES" :key="t" :value="t">{{ t }}</option>
+                              <option
+                                v-for="o in timeOptions(c, s, dayChoice[keyOf(c.id, s.volunteerId)])"
+                                :key="o.time"
+                                :value="o.time"
+                                :disabled="o.disabled"
+                              >
+                                {{ o.label }}
+                              </option>
                             </select>
 
                             <button
@@ -294,12 +392,115 @@ function unassign(child, s) {
                               data-test="assign-btn"
                               @click="assign(c, s)"
                             >
-                              {{ busyKey === keyOf(c.id, s.volunteerId) ? 'Assigning…' : 'Assign' }}
+                              <template v-if="busyKey === keyOf(c.id, s.volunteerId)">Saving…</template>
+                              <template v-else-if="s.assigned"><i class="bi bi-plus-lg"></i> Add day</template>
+                              <template v-else>Assign</template>
                             </button>
                           </template>
 
-                          <span v-else class="person-sub">Set this volunteer's days on the Volunteers page first</span>
+                          <span v-else-if="!s.availability.length" class="person-sub">
+                            Set this volunteer's days on the Volunteers page first
+                          </span>
+                          <span v-else class="person-sub">Booked on all of {{ firstName(s.name) }}'s free days</span>
+
+                          <button
+                            v-if="s.assigned"
+                            type="button"
+                            class="t-btn t-btn-soft"
+                            :disabled="busyKey !== ''"
+                            data-test="unassign-btn"
+                            @click="unassign(c, s)"
+                          >
+                            Unassign all days
+                          </button>
                         </div>
+                      </div>
+
+                      <!-- The days already booked: each can be edited (pencil) or removed (x) -->
+                      <div v-if="s.scheduledSlots.length" class="sessions">
+                        <span class="fact-key">Booked</span>
+                        <template v-for="slot in s.scheduledSlots" :key="slot.day">
+                          <!-- editing this day -->
+                          <form
+                            v-if="isEditing(c, s, slot.day)"
+                            class="slot-editor"
+                            data-test="slot-editor"
+                            @submit.prevent="saveEdit(c, s)"
+                          >
+                            <label class="visually-hidden" :for="`edit-day-${c.id}-${s.volunteerId}`">New day</label>
+                            <select
+                              :id="`edit-day-${c.id}-${s.volunteerId}`"
+                              v-model="editing.day"
+                              class="form-select skill-select"
+                              data-test="edit-day-select"
+                              @change="onEditDayChange(c, s)"
+                            >
+                              <option v-for="d in editDays(s, slot.day)" :key="d" :value="d">{{ d }}</option>
+                            </select>
+
+                            <label class="visually-hidden" :for="`edit-time-${c.id}-${s.volunteerId}`">New time</label>
+                            <select
+                              :id="`edit-time-${c.id}-${s.volunteerId}`"
+                              v-model="editing.time"
+                              class="form-select skill-select"
+                              data-test="edit-time-select"
+                            >
+                              <option value="" disabled>Time</option>
+                              <option
+                                v-for="o in timeOptions(c, s, editing.day)"
+                                :key="o.time"
+                                :value="o.time"
+                                :disabled="o.disabled"
+                              >
+                                {{ o.label }}
+                              </option>
+                            </select>
+
+                            <button
+                              type="submit"
+                              class="t-btn"
+                              :disabled="!canSaveEdit || busyKey !== ''"
+                              data-test="save-edit-btn"
+                            >
+                              {{ busyKey === keyOf(c.id, s.volunteerId) ? 'Saving…' : 'Save' }}
+                            </button>
+                            <button
+                              type="button"
+                              class="t-btn t-btn-soft"
+                              :disabled="busyKey !== ''"
+                              @click="editing = null"
+                            >
+                              Cancel
+                            </button>
+                          </form>
+
+                          <!-- normal chip -->
+                          <span v-else class="slot-chip" data-test="slot-chip">
+                            {{ slot.day }} {{ slot.time || '--:--' }}
+                            <button
+                              type="button"
+                              class="chip-btn chip-edit"
+                              :disabled="busyKey !== '' || editing !== null"
+                              :aria-label="`Change ${slot.day} with ${s.name}`"
+                              title="Change day or time"
+                              data-test="edit-day-btn"
+                              @click="startEdit(c, s, slot)"
+                            >
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button
+                              type="button"
+                              class="chip-btn chip-remove"
+                              :disabled="busyKey !== '' || editing !== null"
+                              :aria-label="`Remove ${slot.day} with ${s.name}`"
+                              :title="`Remove ${slot.day}`"
+                              data-test="remove-day-btn"
+                              @click="removeDay(c, s, slot.day)"
+                            >
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          </span>
+                        </template>
                       </div>
 
                       <!-- WHY this volunteer -->
@@ -458,6 +659,70 @@ function unassign(child, s) {
 /* the day and time boxes sit next to the button, and wrap on a small screen */
 .matchpage .suggest-actions {
   flex-wrap: wrap;
+}
+
+/* the booked days: "Booked  Mon 16:00 ✎ ✕   Wed 18:00 ✎ ✕" */
+.matchpage .sessions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.matchpage .slot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px 3px 12px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 1.5px #A9D9BC;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.matchpage .chip-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 12px;
+}
+
+.matchpage .chip-edit {
+  color: #6B5CA5;
+}
+
+.matchpage .chip-remove {
+  color: #B4473B;
+}
+
+.matchpage .chip-btn:hover:not(:disabled) {
+  background: #F0EAF8;
+}
+
+.matchpage .chip-btn:focus-visible {
+  outline: 2px solid #6B5CA5;
+}
+
+.matchpage .chip-btn:disabled {
+  opacity: 0.4;
+}
+
+/* a booked day being edited: day, time, Save, Cancel */
+.matchpage .slot-editor {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #F0EAF8;
 }
 
 @media (max-width: 520px) {
