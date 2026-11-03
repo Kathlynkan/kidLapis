@@ -9,7 +9,7 @@
 ============================================================= -->
 <script setup>
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -23,13 +23,27 @@ const requests = ref([]) // [{ childId, childName, level, avatar, needs, day, ti
 const loading = ref(true)
 const error = ref('')
 const answering = ref('') // 'childId|day' of the request being answered (its buttons are disabled)
-const answered = ref([]) // what was just accepted/declined, so the page can say so
 
 const keyOf = (r) => `${r.childId}|${r.day}`
 
 async function loadRequests() {
   const res = await api.get('/requests')
-  requests.value = res.data
+  requests.value = res.data.sort((a, b) => {
+    const aPending = a.status === 'pending'
+    const bPending = b.status === 'pending'
+
+    if (aPending && !bPending) return -1
+    if (!aPending && bPending) return 1
+
+    const aTime = a.requestedAt ? new Date(a.requestedAt).getTime() : 0
+    const bTime = b.requestedAt ? new Date(b.requestedAt).getTime() : 0
+
+    if (bTime !== aTime) {
+      return bTime - aTime
+    }
+
+    return a.childName.localeCompare(b.childName)
+  })
 }
 
 onMounted(async () => {
@@ -47,8 +61,17 @@ async function answer(r, action) {
   error.value = ''
   try {
     await api.put(`/requests/${r.childId}`, { day: r.day, action })
-    answered.value.unshift({ ...r, action })
-    await loadRequests()
+
+    const request = requests.value.find(
+      req => keyOf(req) === keyOf(r)
+    )
+
+    if (request) {
+      request.status = action === 'accept'
+        ? 'accepted'
+        : 'declined'
+    }
+    
     window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell updates straight away
   } catch (err) {
     error.value = errorMessage(err) // e.g. the coordinator cancelled it meanwhile
@@ -61,35 +84,14 @@ async function answer(r, action) {
 
 <template>
   <div class="container py-4 volunteerpage">
-    <PageHeader title="Session requests" subtitle="The coordinator would like you to see these children. Accept or decline each day." />
+    <PageHeader title="Assignment Requests" subtitle="The coordinator would like you to tutor these children. Accept or decline each day." />
 
     <StateMessage v-if="loading" type="loading" />
 
     <template v-else>
       <div v-if="error" class="alert alert-danger" role="alert" data-test="requests-error">{{ error }}</div>
 
-      <!-- what was just answered -->
-      <div
-        v-for="a in answered"
-        :key="`done-${keyOf(a)}`"
-        class="alert"
-        :class="a.action === 'accept' ? 'alert-success' : 'alert-secondary'"
-        data-test="request-answered"
-      >
-        <template v-if="a.action === 'accept'">
-          <span>
-            You'll see <b>{{ a.childName }}</b> every {{ a.day }}<template v-if="a.time"> at {{ a.time }}</template>.
-          </span>
-          <RouterLink
-            :to="{ name: 'child-profile', params: { id: a.childId } }"
-            class="soft-button"
-            data-test="request-open-profile"
-          >
-            Open profile
-          </RouterLink>
-        </template>
-        <template v-else>You declined {{ a.childName }} on {{ a.day }}. The coordinator will find someone else.</template>
-      </div>
+      
 
       <StateMessage
         v-if="!requests.length"
@@ -111,26 +113,49 @@ async function answer(r, action) {
               <span v-for="n in r.needs" :key="n" class="session-subject" :style="subjectStyle(n)">{{ n }}</span>
             </div>
           </div>
+          
           <div class="request-actions">
-            <button
-              type="button"
-              class="soft-button soft-button-strong"
-              :disabled="answering !== ''"
-              data-test="request-accept"
-              @click="answer(r, 'accept')"
+
+            <template v-if="r.status === 'pending'">
+              <button
+                type="button"
+                class="btn btn-outline-primary quest-edit"
+                :disabled="answering !== ''"
+                @click="answer(r, 'accept')"
+              >
+                  <span
+                    v-if="answering === keyOf(r)"
+                    class="spinner-border spinner-border-sm me-1"
+                  ></span>
+
+                  <i v-else class="bi bi-check-circle me-1"></i>
+                Accept
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-outline-danger quest-delete"
+                :disabled="answering !== ''"
+                @click="answer(r, 'decline')"
+              >
+                <i class="bi bi-x-circle"></i> Decline
+              </button>
+            </template>
+
+            <span
+              v-else-if="r.status === 'accepted'"
+              class="request-status request-status-accepted"
             >
-              <span v-if="answering === keyOf(r)" class="spinner-border spinner-border-sm me-1"></span>
-              Accept
-            </button>
-            <button
-              type="button"
-              class="soft-button soft-button-plain"
-              :disabled="answering !== ''"
-              data-test="request-decline"
-              @click="answer(r, 'decline')"
+              <i class="bi bi-check-circle-fill me-1"></i>Accepted
+            </span>
+
+            <span
+              v-else
+              class="request-status request-status-declined"
             >
-              Decline
-            </button>
+              <i class="bi bi-x-circle-fill me-1"></i>Declined
+            </span>
+
           </div>
         </div>
       </div>
@@ -143,58 +168,45 @@ async function answer(r, action) {
 
 /* The mint pill buttons of the volunteer pages (same as "View all my children" on My Children).
    Repeated here because that page's styles only load when it is opened. */
-.volunteerpage .soft-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 20px;
+.volunteerpage .btn {
   border: 0;
-  border-radius: 999px;
-  background: #CDE9D8;
-  color: #213C31;
-  font: inherit;
+  border-radius: 5px;
+  box-shadow: none;
   font-size: 14px;
   font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
+  text-transform: none;
 }
 
-.volunteerpage .soft-button:hover {
-  background: #9BD3B2;
-  color: #213C31;
+.volunteerpage .btn-outline-primary {
+  background: var(--cp-soft);
+  color: var(--cp-text);
 }
 
-.volunteerpage .soft-button:disabled {
-  opacity: 0.6;
+.volunteerpage .btn-outline-primary:hover {
+  background: var(--cp-letter);
+  color: var(--cp-text);
 }
 
-/* Accept: the main action, a deeper green */
-.volunteerpage .soft-button-strong {
-  background: #9BD3B2;
+.volunteerpage .btn-outline-danger {
+  background: #EE9F96;
+  color: var(--cp-text);
 }
 
-.volunteerpage .soft-button-strong:hover {
-  background: #7CC39B;
+.volunteerpage .btn-outline-danger:hover {
+  background: #E68C81;
+  color: var(--cp-text);
 }
 
-/* Decline: white with a mint outline */
-.volunteerpage .soft-button-plain {
-  background: #FFFFFF;
-  box-shadow: inset 0 0 0 2px #CDE9D8;
+.volunteerpage .quest-edit,
+.volunteerpage .quest-delete {
+  padding: 3px 9px;
 }
 
-.volunteerpage .soft-button-plain:hover {
-  background: #F1F8F4;
-}
+
+
+
 
 /* "You'll see Sofia every Mon at 11:00.  [OPEN PROFILE]" */
-.volunteerpage [data-test='request-answered'] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
 .volunteerpage .request-list {
   display: flex;
   flex-direction: column;
@@ -265,8 +277,25 @@ async function answer(r, action) {
     width: 100%;
   }
 
-  .volunteerpage .request-actions .soft-button {
+  .volunteerpage .request-actions .btn {
     flex: 1;
   }
+}
+
+.volunteerpage .request-status {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.volunteerpage .request-status-accepted {
+  background: #CDE9D8;
+  color: #213C31;
+}
+
+.volunteerpage .request-status-declined {
+  background: #EDEDED;
+  color: #555;
 }
 </style>

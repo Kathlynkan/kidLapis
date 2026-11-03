@@ -11,6 +11,7 @@ import '@/css/main/labels.css' // the capital-letter captions
 const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
+  busy:     { type: Boolean, default: false },
 })
 const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
@@ -48,7 +49,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
   <div class="d-flex justify-content-between align-items-start gap-2">
     <div>
-      <span class="session-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
+      <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
       <strong class="quest-title">{{ homework.title }}</strong>
 
       <div class="small quest-meta mt-1">
@@ -65,6 +66,7 @@ function cancelDelete()  { showDeleteModal.value = false }
     </div>
 
       <span
+      v-if="state !== 'todo'"
       class="badge quest-pill" :class="`quest-pill-${state}`">
         {{ STATE_LABELS[state] }}
       </span>
@@ -79,12 +81,12 @@ function cancelDelete()  { showDeleteModal.value = false }
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
 
-      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-warn">
-        <i class="bi bi-exclamation-triangle me-1"></i>Late! Half stars if submitted now
+      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
+        Submit now and earn half ★!
       </span>
 
-      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-warn">
-        Submitted late — you'll earn half stars
+      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
+        Submit earlier next time for full ★!
       </span>
 
       <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
@@ -107,7 +109,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="undo-quest-btn"
         @click="emit('unsubmit', homework.id)"
       >
-        <i class="bi bi-arrow-counterclockwise me-1"></i>Oops, undo!
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Undo
       </button>
 
       <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
@@ -117,8 +119,11 @@ function cancelDelete()  { showDeleteModal.value = false }
           <button
             class="btn btn-sm btn-primary quest-check"
             data-test="verify-homework-btn"
+            :disabled="busy"
             @click="emit('verify', homework.id)">
-            <i class="bi bi-check-circle"></i> Mark as Checked
+            <span v-if="busy" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i v-else class="bi bi-check-circle"></i>
+            {{ busy ? 'Checking...' : 'Mark as Checked' }}
           </button>
           <button
             class="btn btn-sm btn-outline-danger quest-return"
@@ -189,6 +194,17 @@ function cancelDelete()  { showDeleteModal.value = false }
 /* the two notes sit on the left, as wide as their words */
 .quest-returned,
 .quest-late-warn {
+  align-self: flex-start;
+}
+
+.quest-late-info {
+  background: #FFE082;
+  color: #5C3D00;
+  border: 1.5px solid #F5B840;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
   align-self: flex-start;
 }
 

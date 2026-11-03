@@ -23,11 +23,17 @@ router.use(requireAuth, requireRole('volunteer')) // only the volunteer the requ
 // Only MY pending slots, from every child.
 // startsOn = the first session if I accept now, e.g. '2026-11-09' (Yuqi)
 router.get('/', async (req, res) => {
-  const children = await Child.find({ schedule: { $elemMatch: { volunteerId: req.user.id, status: 'pending' } } })
+  const children = await Child.find({
+    schedule: {
+      $elemMatch: {
+        volunteerId: req.user.id
+      }
+    }
+  })
   const requests = []
   for (const child of children) {
     for (const slot of child.schedule) {
-      if (slot.volunteerId === req.user.id && slot.status === 'pending') {
+      if (slot.volunteerId === req.user.id) {
         requests.push({
           childId: child.id,
           childName: child.name,
@@ -36,6 +42,8 @@ router.get('/', async (req, res) => {
           needs: child.needs,
           day: slot.day,
           time: slot.time || '',
+          status: slot.status,
+          requestedAt: slot.requestedAt,
           startsOn: firstDateFor(slot.day, slot.time),
         })
       }
@@ -65,7 +73,7 @@ router.put('/:childId', async (req, res) => {
     slot.startDate = firstDateFor(slot.day, slot.time) // the first session, e.g. next Monday (Yuqi)
     if (!child.volunteerIds.includes(req.user.id)) child.volunteerIds.push(req.user.id)
   } else {
-    child.schedule = child.schedule.filter((s) => s !== slot)
+    slot.status = 'declined'
     // No accepted days left together -> the volunteer is not assigned to this child
     if (!child.schedule.some((s) => s.volunteerId === req.user.id && s.status !== 'pending')) {
       child.volunteerIds = child.volunteerIds.filter((id) => id !== req.user.id)

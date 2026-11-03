@@ -25,14 +25,24 @@ const childSchema = new mongoose.Schema(
         volunteerId: String,
         day: String,
         time: String,
-        status: { type: String, enum: ['pending', 'accepted'], default: 'accepted' },
-        startDate: { type: String, default: '' }, // 'YYYY-MM-DD'
+        status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'accepted' },
+        requestedAt: { type: Date, default: Date.now },
+        startDate: { type: String, default: '' }, // for volunteer accept match
       },
     ],
     needs: [String], // skills the child needs help with (matchmaking)
     points: { type: Number, default: 0 }, // gamification (Jachin)
     avatar: { type: String, default: '🙂' },
     followUp: { type: Boolean, default: false }, // flagged by coordinator (Yu Xuan)
+    interests: [String], // things the child loves (Jachin)
+    journalEntries: [ // written by the child (Jachin)
+      {
+        _id: false,
+        id: { type: String, default: () => newId('je') },
+        date: { type: String, required: true }, // YYYY-MM-DD
+        text: { type: String, required: true, trim: true, maxlength: 500 },
+      },
+    ],
   },
   { toJSON: jsonOptions },
 )

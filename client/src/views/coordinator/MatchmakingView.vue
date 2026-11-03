@@ -784,10 +784,38 @@ async function saveEdit(child, s) {
   background: #F0EAF8;
 }
 
+/* Small screens: photo | name, subjects and status underneath | arrow */
 @media (max-width: 520px) {
-  .matchpage .child-toggle .count {
-    display: none;
+  .matchpage .child-toggle {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'avatar main   chevron'
+      'avatar status chevron';
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+    padding: 12px;
   }
+  .matchpage .child-toggle > :first-child {
+    grid-area: avatar; /* the round photo */
+  }
+  .matchpage .child-main {
+    grid-area: main;
+  }
+  .matchpage .child-toggle .tag-red,
+  .matchpage .child-toggle .count {
+    grid-area: status;
+    justify-self: start;
+  }
+  .matchpage .child-toggle .chevron {
+    grid-area: chevron;
+  }
+}
+
+/* Never let the name be squeezed narrower than a few letters */
+.matchpage .child-main {
+  min-width: 8ch;
 }
 
 /* people who turn animations off in their device settings */

@@ -2,7 +2,8 @@
   Weekly schedule (timetable)                         Owner: Yu Xuan
   Route: /coordinator/schedule
   -------------------------------------------------------------
-  Rows = volunteers, columns = days. Grey cells = volunteer not free.
+  Rows = volunteers, columns = days. Shaded cells = volunteer not free.
+  The grid itself is components/WeekGrid.vue, shared with the dashboard, so both look the same.
   "+ Add" -> pick child + start time -> PUT /matchmaking/:childId/assign
   "x" on a session -> removes just that day (unassign with day)
   The server blocks double-bookings (409) and days the volunteer isn't free.
@@ -11,20 +12,14 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
-import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
-import { firstName } from '@/utils/format'
-import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
-
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+import WeekGrid from '@/components/WeekGrid.vue'
 
 // Start times every 30 minutes from 09:00 to 19:30.
 const TIMES = []
 for (let h = 9; h <= 19; h++) {
   for (const m of ['00', '30']) TIMES.push(`${String(h).padStart(2, '0')}:${m}`)
 }
-
-const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Mon'
 
 const volunteers = ref([])
 const children = ref([])
@@ -58,42 +53,14 @@ onMounted(async () => {
     loading.value = false
   }
   window.addEventListener('keydown', onKeydown)
-  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('schedule-changed', onScheduleChanged)
-})
-
-// A volunteer accepted/declined a session (live, via the NavBar): the timetable updates
-// from "waiting" without a refresh (Kai Sen)
-function onScheduleChanged() {
-  loadData().catch(() => {})
-}
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()
 }
 
-// ---------- Building the grid ----------
-
-// { 'u_vol1|Mon': [{ child, time }, ...] } built once, sorted by time.
-const slotsByCell = computed(() => {
-  const map = {}
-  for (const child of children.value) {
-    for (const s of child.schedule || []) {
-      // pending = the volunteer hasn't accepted this day yet (shown dashed, "waiting")
-      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '', pending: s.status === 'pending' })
-    }
-  }
-  for (const list of Object.values(map)) {
-    list.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99')) // no time -> last
-  }
-  return map
-})
-
-const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
-const isFree = (v, day) => (v.availability || []).includes(day)
+const firstName = (name) => name.split(' ')[0]
 
 const sessionCount = computed(() => children.value.reduce((n, c) => n + (c.schedule || []).length, 0))
 
@@ -119,7 +86,11 @@ const childOptions = computed(() => {
   if (!adding.value) return []
   const { volunteer, day } = adding.value
   const skills = volunteer.skills || []
-  const bookedHere = new Set(slotsFor(volunteer, day).map((s) => s.child.id))
+  const bookedHere = new Set(
+    children.value
+      .filter((c) => (c.schedule || []).some((s) => s.volunteerId === volunteer.id && s.day === day))
+      .map((c) => c.id),
+  )
 
   return children.value
     .filter((c) => !bookedHere.has(c.id))
@@ -193,110 +164,43 @@ async function removeSlot(volunteer, day, slot) {
 </script>
 
 <template>
-  <div class="container py-4 coordinatorpage">
+  <div class="container py-4">
     <PageHeader title="Weekly schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
 
-    <!-- the sandy board: the legend and the white timetable -->
-    <div v-else class="board">
-      <div class="toolbar">
-        <span class="tag"><strong>{{ sessionCount }}</strong>&nbsp;sessions every week</span>
+    <template v-else>
+      <div class="d-flex flex-wrap align-items-center gap-3 small mb-3">
+        <span><strong>{{ sessionCount }}</strong> weekly slots</span>
         <span class="legend"><span class="swatch swatch-off"></span>Volunteer not free</span>
         <span class="legend"><span class="swatch swatch-today"></span>Today</span>
       </div>
 
-      <div v-if="actionError" class="note note-bad">{{ actionError }}</div>
+      <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
 
-      <div class="t-card schedule-wrap">
-        <table class="schedule-table" data-test="schedule-table">
-          <thead>
-            <tr>
-              <th scope="col" class="volunteer-col">Volunteer</th>
-              <th v-for="d in DAYS" :key="d" scope="col" class="day-head" :class="{ 'is-today': d === TODAY }">
-                {{ d }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="v in volunteers" :key="v.id" data-test="schedule-row">
-              <th scope="row" class="volunteer-col">
-                <div class="fw-semibold">{{ v.name }}</div>
-                <div class="person-sub fw-normal">{{ (v.skills || []).join(', ') || 'No skills set' }}</div>
-                <RouterLink
-                  v-if="!(v.availability || []).length"
-                  :to="{ name: 'manage-volunteers' }"
-                  class="person-sub fw-normal"
-                >
-                  Set available days
-                </RouterLink>
-              </th>
-
-              <td
-                v-for="d in DAYS"
-                :key="d"
-                :class="{ 'is-off': !isFree(v, d), 'is-today': d === TODAY }"
-                :data-day="d"
-                data-test="schedule-cell"
-              >
-                <template v-if="isFree(v, d)">
-                  <div
-                    v-for="slot in slotsFor(v, d)"
-                    :key="slot.child.id"
-                    class="slot"
-                    :class="{ 'is-pending': slot.pending }"
-                    :title="slot.pending ? `Waiting for ${firstName(v.name)} to accept` : undefined"
-                    data-test="schedule-slot"
-                  >
-                    <span class="slot-time">{{ slot.time || '--:--' }}</span>
-                    <span v-if="slot.pending" class="slot-waiting" data-test="slot-waiting">waiting</span>
-                    <RouterLink
-                      :to="{ name: 'child-profile', params: { id: slot.child.id } }"
-                      class="slot-name"
-                      :title="slot.child.name"
-                    >
-                      <ChildAvatar :avatar="slot.child.avatar" /> {{ firstName(slot.child.name) }}
-                    </RouterLink>
-                    <button
-                      type="button"
-                      class="slot-remove"
-                      :disabled="busyKey !== null"
-                      :aria-label="`Remove ${slot.child.name} from ${v.name} on ${d}`"
-                      data-test="remove-slot"
-                      @click="removeSlot(v, d, slot)"
-                    >
-                      <i class="bi bi-x-lg"></i>
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    class="t-btn t-btn-soft add-btn"
-                    :aria-label="`Add a session for ${v.name} on ${d}`"
-                    data-test="add-slot"
-                    @click="openAdd(v, d)"
-                  >
-                    <i class="bi bi-plus-lg"></i> Add
-                  </button>
-                </template>
-                <span v-else class="visually-hidden">Not free</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="cb-card p-2">
+        <WeekGrid
+          editable
+          :volunteers="volunteers"
+          :children="children"
+          :busy-key="busyKey"
+          @add="openAdd"
+          @remove="removeSlot"
+        />
       </div>
 
       <!-- Assigned but not on the timetable yet -->
-      <div v-if="unscheduled.length" class="t-card person" data-test="unscheduled">
-        <h2>Assigned without a day</h2>
-        <p class="person-sub mb-0">
+      <div v-if="unscheduled.length" class="cb-card p-3 mt-3" data-test="unscheduled">
+        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned without a day</h2>
+        <p class="small text-muted-cb mb-2">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
         </p>
         <ul class="small mb-0">
           <li v-for="u in unscheduled" :key="u.key">{{ u.child.name }} with {{ u.volunteerName }}</li>
         </ul>
       </div>
-    </div>
+    </template>
 
     <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue) -->
     <template v-if="adding">
@@ -323,7 +227,7 @@ async function removeSlot(volunteer, day, slot) {
                 <option value="" disabled>Choose a child</option>
                 <option v-for="o in childOptions" :key="o.child.id" :value="o.child.id">{{ optionLabel(o) }}</option>
               </select>
-              <div class="muted mt-1 mb-3">
+              <div class="small text-muted-cb mt-1 mb-3">
                 Children with no volunteer come first, then the best skill match for
                 {{ firstName(adding.volunteer.name) }}.
               </div>
@@ -334,16 +238,18 @@ async function removeSlot(volunteer, day, slot) {
                 <option v-for="t in TIMES" :key="t" :value="t">{{ t }}</option>
               </select>
 
-              <div v-if="formError" class="note note-bad mt-3" data-test="add-error">
+              <div v-if="formError" class="alert alert-danger small py-2 mt-3 mb-0" data-test="add-error">
                 {{ formError }}
               </div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="closeAdd">Cancel</button>
+              <button type="button" class="btn btn-outline-secondary" :disabled="saving" @click="closeAdd">
+                Cancel
+              </button>
               <button
                 type="submit"
-                class="t-btn"
+                class="btn btn-primary"
                 :disabled="!form.childId || !form.time || saving"
                 data-test="add-submit"
               >
@@ -358,17 +264,23 @@ async function removeSlot(volunteer, day, slot) {
   </div>
 </template>
 
-<style>
-/* A session the volunteer hasn't accepted yet (their bell: Accept / Decline): dashed, "waiting".
-   The other slot styles are in css/coordinator/coordinatorpage.css. */
-.coordinatorpage .slot.is-pending {
-  border: 1.5px dashed #C8A028;
-  background: #FBF5DC;
+<style scoped>
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
-
-.coordinatorpage .slot-waiting {
-  font-size: 11px;
-  font-weight: 600;
-  color: #8A6D12;
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(61, 52, 84, 0.12);
+}
+/* same colours as WeekGrid.vue */
+.swatch-off {
+  background: rgba(61, 52, 84, 0.06);
+}
+.swatch-today {
+  background: #f0eaf8;
 }
 </style>

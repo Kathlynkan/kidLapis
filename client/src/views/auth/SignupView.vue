@@ -7,7 +7,7 @@
 ============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { errorMessage } from '@/services/api'
 import { validateSignup, MIN_PASSWORD_LENGTH } from '@/utils/validation'
@@ -16,6 +16,7 @@ import '@/css/main/components.css' // the look of the small parts (the error mes
 import '@/css/main/authpage.css' // the look of this page and of the log in page
 
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 
 const form = ref({
@@ -23,7 +24,8 @@ const form = ref({
   email: '',
   password: '',
   confirmPassword: '',
-  role: 'volunteer',
+  // /signup?role=parent (the Parent card on the home page) starts with Parent chosen; anything else: Volunteer
+  role: route.query.role === 'parent' ? 'parent' : 'volunteer',
   skills: [], // volunteers only - ticked skill buttons go in here
   availability: [], // volunteers only - ticked days go in here
   childCode: '', // parents only - the code the centre gave them (optional)

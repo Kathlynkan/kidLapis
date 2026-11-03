@@ -114,7 +114,7 @@ const myDays = computed(() => {
 // (a slot still waiting for me to accept it does not count)
 function mySlot(child, day) {
   const schedule = child.schedule || []
-  return schedule.find((slot) => slot.volunteerId === auth.user?.id && slot.day === day && slot.status !== 'pending')
+  return schedule.find((slot) => slot.volunteerId === auth.user?.id && slot.day === day && slot.status === 'accepted')
 }
 
 // the children shown on a day of the week strip

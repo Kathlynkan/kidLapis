@@ -194,7 +194,9 @@ async function fetchBell() {
         api.get('/homework'),
         api.get('/children'),
       ])
-      requests.value = requestsRes.data
+      requests.value = requestsRes.data.filter(
+        r => r.status === 'pending'
+      )
       const nameOf = Object.fromEntries(childrenRes.data.map((c) => [c.id, c.name]))
       questsToCheck.value = homeworkRes.data
         .filter((h) => h.status === 'submitted')
@@ -328,7 +330,7 @@ watch(
           <template v-if="auth.role === 'volunteer'">
             <!-- new sessions the coordinator assigned: answered on the Session requests page -->
             <template v-if="requests.length">
-              <div class="lapis-bell-title">Session requests</div>
+              <div class="lapis-bell-title">Assignment Requests</div>
               <RouterLink
                 v-for="r in requests"
                 :key="`${r.childId}|${r.day}`"
@@ -383,19 +385,24 @@ watch(
         </div>
       </div>
 
-      <!-- the menu button (only shown on a small screen) -->
-      <button type="button" class="lapis-burger" aria-label="Menu" :aria-expanded="menuOpen" data-test="nav-burger" @click="menuOpen = !menuOpen">
+      <!-- the menu button (only shown on a small screen, and only when logged in: a guest has just
+           Log in and Sign up, so those are shown straight away instead of hidden behind the button) -->
+      <button v-if="auth.isLoggedIn" type="button" class="lapis-burger" aria-label="Menu" :aria-expanded="menuOpen" data-test="nav-burger" @click="menuOpen = !menuOpen">
         <i class="bi" :class="menuOpen ? 'bi-x-lg' : 'bi-list'"></i>
       </button>
 
-      <div class="lapis-menu" :class="{ open: menuOpen }">
+      <div class="lapis-menu" :class="{ open: menuOpen, guest: !auth.isLoggedIn }">
         <!-- the links, on the left next to the logo -->
         <div class="lapis-links">
           <RouterLink v-for="link in links" :key="link.to" class="lapis-nav-link" :class="{ open: isOpen(link) }" :to="link.to">
             {{ link.label }}
             <span v-if="link.to === '/messages' && unreadTotal > 0" class="lapis-badge">{{ unreadTotal }}</span>
-            <span v-if="link.to === '/volunteer/requests' && requests.length > 0" class="lapis-badge" data-test="nav-requests-badge">
-              {{ requests.length }}
+            <span
+              v-if="link.to === '/volunteer/requests' && requests.filter(r => r.status === 'pending').length > 0"
+              class="lapis-badge"
+              data-test="nav-requests-badge"
+            >
+              {{ requests.filter(r => r.status === 'pending').length }}
             </span>
           </RouterLink>
         </div>
@@ -538,8 +545,24 @@ watch(
   display: flex;
   align-items: center;
   gap: 10px;
+
+  height: 100%;
+  min-height: 58px;
+
+  padding: 0 14px;
+
+  border-radius: 6px;
   color: inherit;
   text-decoration: none;
+}
+
+.lapis-user-link:hover {
+  background: var(--role-accent-soft, #EAF6F5);
+}
+
+.lapis-user-link:focus-visible {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
 }
 
 .lapis-avatar {
@@ -580,7 +603,7 @@ watch(
 .lapis-button {
   padding: 4px 10px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #FFFFFF;
   box-shadow: inset 0 0 0 2px #D5CBEA;
   color: #4A3F3A;
@@ -790,6 +813,24 @@ watch(
   .lapis-user {
     justify-content: space-between;
     margin: 10px 0 0;
+  }
+
+  /* a guest (not logged in): no menu button, Log in and Sign up stay on the right of the logo */
+  .lapis-menu.guest {
+    display: flex;
+    flex: none;
+    flex-direction: row;
+    margin-left: auto;
+    padding-bottom: 0;
+  }
+
+  .lapis-menu.guest .lapis-links {
+    display: none;
+  }
+
+  .lapis-menu.guest .lapis-user {
+    gap: 6px;
+    margin: 0;
   }
 }
 </style>
