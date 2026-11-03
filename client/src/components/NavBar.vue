@@ -544,8 +544,24 @@ watch(
   display: flex;
   align-items: center;
   gap: 10px;
+
+  height: 100%;
+  min-height: 58px;
+
+  padding: 0 14px;
+
+  border-radius: 6px;
   color: inherit;
   text-decoration: none;
+}
+
+.lapis-user-link:hover {
+  background: var(--role-accent-soft, #EAF6F5);
+}
+
+.lapis-user-link:focus-visible {
+  background: var(--role-accent-soft, #EAF6F5);
+  border-radius: 6px;
 }
 
 .lapis-avatar {
