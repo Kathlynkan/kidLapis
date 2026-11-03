@@ -105,6 +105,7 @@ function editHomework(homeworkId) {
 }
 // The child handed a quest in; the volunteer checks it and the child is paid the berries (PUT /homework/:id/verify)
 const checkingQuestId = ref(null)
+const showAllJournal = ref(false)
 async function verifyQuest(homeworkId) {
   checkingQuestId.value = homeworkId
   const prevPoints     = child.value?.points || 0
@@ -273,11 +274,22 @@ onMounted(() => {
               <div v-if="child.journalEntries?.length">
                 <p class="handover-key mb-2">From the journal</p>
                 <div class="child-journal-entries">
-                  <div v-for="entry in child.journalEntries.slice(0, 3)" :key="entry.id" class="child-journal-entry">
+                  <div
+                    v-for="entry in (showAllJournal ? child.journalEntries : child.journalEntries.slice(0, 3))"
+                    :key="entry.id"
+                    class="child-journal-entry"
+                  >
                     <span class="child-journal-date">{{ entry.date }}</span>
                     <span class="child-journal-text">"{{ entry.text }}"</span>
                   </div>
                 </div>
+                <button
+                  v-if="child.journalEntries.length > 3"
+                  class="journal-show-more"
+                  @click="showAllJournal = !showAllJournal"
+                >
+                  {{ showAllJournal ? 'Show less' : `Show all ${child.journalEntries.length} entries` }}
+                </button>
               </div>
             </PeelCard>
 
@@ -796,6 +808,21 @@ onMounted(() => {
   line-height: 1.5;
   font-style: italic;
 }
+
+.journal-show-more {
+  margin-top: 8px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--cp-soft, #EFF6F5);
+  color: var(--cp-text, #3A4A47);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.journal-show-more:hover { filter: brightness(0.94); }
 
 /* toast shown after a quest is checked: fixed at the bottom so it never shifts the layout */
 .verify-impact-toast {
