@@ -28,7 +28,11 @@ const keyOf = (r) => `${r.childId}|${r.day}`
 
 async function loadRequests() {
   const res = await api.get('/requests')
-  requests.value = res.data
+  requests.value = res.data.sort((a, b) => {
+    if (a.status === 'pending' && b.status !== 'pending') return -1
+    if (a.status !== 'pending' && b.status === 'pending') return 1
+    return 0
+  })
 }
 
 onMounted(async () => {
@@ -52,7 +56,9 @@ async function answer(r, action) {
     )
 
     if (request) {
-      request.action = action
+      request.status = action === 'accept'
+        ? 'accepted'
+        : 'declined'
     }
     
     window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell updates straight away
@@ -99,7 +105,7 @@ async function answer(r, action) {
           
           <div class="request-actions">
 
-            <template v-if="!r.action">
+            <template v-if="r.status === 'pending'">
               <button
                 type="button"
                 class="soft-button soft-button-strong"
@@ -124,7 +130,7 @@ async function answer(r, action) {
             </template>
 
             <span
-              v-else-if="r.action === 'accept'"
+              v-else-if="r.status === 'accepted'"
               class="request-status request-status-accepted"
             >
               <i class="bi bi-check-circle-fill me-1"></i>Accepted
