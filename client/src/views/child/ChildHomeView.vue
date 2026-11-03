@@ -165,14 +165,6 @@ const journalStreak = computed(() => {
   return streak
 })
 
-// cheers received in the last 7 days
-const weeklyCheerCount = computed(() => {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - 7)
-  const cutoffStr = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`
-  return (me.value?.cheersReceived || []).filter((c) => c.date >= cutoffStr).length
-})
-
 // the label under the tin shows the kueh you tapped, or else the next one to earn
 const picked = ref(null)
 const shown = computed(() => picked.value || nextBadge.value?.badge || BADGES[0])
@@ -367,9 +359,6 @@ onUnmounted(() => {
             <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
           </div>
           <div class="small lapis-muted">{{ level.starsToNext }} ★ to Level {{ level.level + 1 }}</div>
-          <div v-if="weeklyCheerCount > 0" class="small mt-2 hero-cheer-line">
-            👏 {{ weeklyCheerCount }} {{ weeklyCheerCount === 1 ? 'classmate' : 'classmates' }} cheered for you this week!
-          </div>
           <div v-if="nextBadge" class="small mt-2">
             Next kueh: <strong>{{ nextBadge.badge.kueh }}</strong>. {{ nextBadge.badge.rule }}.
           </div>
@@ -1403,14 +1392,4 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* ── Hero cheer line ──────────────────────────────────────── */
-
-.hero-cheer-line {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 99px;
-  background: #FBE7A1;
-  color: #4A3F3A;
-  font-weight: 700;
-}
 </style>

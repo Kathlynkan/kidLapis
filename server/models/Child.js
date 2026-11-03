@@ -32,13 +32,6 @@ const childSchema = new mongoose.Schema(
     avatar: { type: String, default: '🙂' },
     followUp: { type: Boolean, default: false }, // flagged by coordinator (Yu Xuan)
     interests: [String], // things the child loves (Jachin)
-    cheersReceived: [ // 👏 given by classmates (Jachin)
-      {
-        _id: false,
-        fromChildId: { type: String, required: true },
-        date: { type: String, required: true }, // YYYY-MM-DD
-      },
-    ],
     journalEntries: [ // written by the child (Jachin)
       {
         _id: false,

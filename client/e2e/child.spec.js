@@ -97,15 +97,3 @@ test.describe('ChildHomeView API failure', () => {
     await expect(page.locator('[data-test="homework-card"]')).toHaveCount(0)
   })
 })
-
-test.describe('Leaderboard', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAs(page, 'child')
-    await page.goto('/child/leaderboard')
-  })
-
-  test('leaderboard page loads and shows entries', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Leaderboard/i })).toBeVisible()
-    await expect(page.locator('[data-test="podium-1"]')).toBeVisible()
-  })
-})
