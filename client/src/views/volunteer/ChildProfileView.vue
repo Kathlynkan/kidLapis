@@ -245,10 +245,6 @@ onMounted(() => {
               icon="bi-journal-check"
               :initial-open="true"
             >
-              <div v-if="submittedCount > 0" class="quest-check-alert mb-3">
-                <i class="bi bi-bell-fill me-2"></i>
-                {{ submittedCount }} quest{{ submittedCount > 1 ? 's' : '' }} waiting for your review
-              </div>
               <div class="d-flex flex-column gap-2">
                 <HomeworkQuestCard
                   v-for="h in activeHomework"
@@ -418,8 +414,8 @@ onMounted(() => {
    the action that matters (Mark as Checked, Return) is bigger, the everyday ones (Edit, Delete) are smaller */
 .childprofilepage .quest-check,
 .childprofilepage .quest-return {
-  padding: 7px 14px;
-  font-size: 15px;
+  padding: 3px 9px;
+  font-size: 13px;
 }
 
 .childprofilepage .quest-edit,
