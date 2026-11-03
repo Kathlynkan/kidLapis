@@ -165,6 +165,59 @@ describe('earnedBadges requires verified status — submitted homework does not 
   })
 })
 
+describe('earnedBadges — journal and interests badges', () => {
+  it('awards dear-diary after the first journal entry', () => {
+    const child = { points: 0, journalEntries: [{ date: '2026-10-01', text: 'Hello' }] }
+    expect(earnedBadges(child, []).map((b) => b.id)).toContain('dear-diary')
+  })
+
+  it('does not award dear-diary with no journal entries', () => {
+    expect(earnedBadges({ points: 0, journalEntries: [] }, []).map((b) => b.id)).not.toContain('dear-diary')
+  })
+
+  it('does not award dear-diary when journalEntries is missing', () => {
+    expect(earnedBadges(child0, []).map((b) => b.id)).not.toContain('dear-diary')
+  })
+
+  it('awards reflective after entries on 3 different days', () => {
+    const child = {
+      points: 0,
+      journalEntries: [
+        { date: '2026-10-01', text: 'Day 1' },
+        { date: '2026-10-02', text: 'Day 2' },
+        { date: '2026-10-03', text: 'Day 3' },
+      ],
+    }
+    expect(earnedBadges(child, []).map((b) => b.id)).toContain('reflective')
+  })
+
+  it('does not award reflective for 3 entries on only 2 different days', () => {
+    const child = {
+      points: 0,
+      journalEntries: [
+        { date: '2026-10-01', text: 'Entry A' },
+        { date: '2026-10-01', text: 'Entry B' },
+        { date: '2026-10-02', text: 'Entry C' },
+      ],
+    }
+    expect(earnedBadges(child, []).map((b) => b.id)).not.toContain('reflective')
+  })
+
+  it('awards self-aware after selecting 3 or more interests', () => {
+    const child = { points: 0, interests: ['Football', 'Reading', 'Science'] }
+    expect(earnedBadges(child, []).map((b) => b.id)).toContain('self-aware')
+  })
+
+  it('does not award self-aware with fewer than 3 interests', () => {
+    const child = { points: 0, interests: ['Football', 'Reading'] }
+    expect(earnedBadges(child, []).map((b) => b.id)).not.toContain('self-aware')
+  })
+
+  it('does not award self-aware when interests is missing', () => {
+    expect(earnedBadges(child0, []).map((b) => b.id)).not.toContain('self-aware')
+  })
+})
+
 describe('badgeProgress counts submitted homework for live display', () => {
   it('century counts pending points from submitted homework', () => {
     // child has 90 server-confirmed points; one submitted 10-pt quest tips them over

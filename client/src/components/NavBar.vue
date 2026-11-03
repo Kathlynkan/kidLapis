@@ -382,12 +382,13 @@ watch(
         </div>
       </div>
 
-      <!-- the menu button (only shown on a small screen) -->
-      <button type="button" class="lapis-burger" aria-label="Menu" :aria-expanded="menuOpen" data-test="nav-burger" @click="menuOpen = !menuOpen">
+      <!-- the menu button (only shown on a small screen, and only when logged in: a guest has just
+           Log in and Sign up, so those are shown straight away instead of hidden behind the button) -->
+      <button v-if="auth.isLoggedIn" type="button" class="lapis-burger" aria-label="Menu" :aria-expanded="menuOpen" data-test="nav-burger" @click="menuOpen = !menuOpen">
         <i class="bi" :class="menuOpen ? 'bi-x-lg' : 'bi-list'"></i>
       </button>
 
-      <div class="lapis-menu" :class="{ open: menuOpen }">
+      <div class="lapis-menu" :class="{ open: menuOpen, guest: !auth.isLoggedIn }">
         <!-- the links, on the left next to the logo -->
         <div class="lapis-links">
           <RouterLink v-for="link in links" :key="link.to" class="lapis-nav-link" :class="{ open: isOpen(link) }" :to="link.to">
@@ -809,6 +810,24 @@ watch(
   .lapis-user {
     justify-content: space-between;
     margin: 10px 0 0;
+  }
+
+  /* a guest (not logged in): no menu button, Log in and Sign up stay on the right of the logo */
+  .lapis-menu.guest {
+    display: flex;
+    flex: none;
+    flex-direction: row;
+    margin-left: auto;
+    padding-bottom: 0;
+  }
+
+  .lapis-menu.guest .lapis-links {
+    display: none;
+  }
+
+  .lapis-menu.guest .lapis-user {
+    gap: 6px;
+    margin: 0;
   }
 }
 </style>

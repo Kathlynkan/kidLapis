@@ -12,10 +12,9 @@ import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
 
 const auth = useAuthStore()
-const entries = ref([])
-const loading = ref(true)
-const error   = ref('')
-
+const entries  = ref([])
+const loading  = ref(true)
+const error    = ref('')
 const myId = computed(() => auth.user?.childId)
 
 // every child with the place they share, and the child just ahead of them (the next one with more stars)
@@ -125,6 +124,7 @@ onUnmounted(() => {
               </div>
 
               <div class="pnote">{{ slot.note }}</div>
+
             </div>
           </div>
         </div>

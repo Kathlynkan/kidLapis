@@ -1,202 +1,212 @@
-<!-- Compact, read-only weekly timetable for the dashboard.   Owner: Yu Xuan
+<!-- The schedule on the dashboard: today's sessions first, the full week one click away.   Owner: Yu Xuan
   <WeekScheduleCard :volunteers="volunteers" :children="children" />
-  Rows = volunteers, columns = weekdays (Sat/Sun only appear if someone works weekends).
-  Editing happens on the Schedule page; the "Edit schedule" link goes there.
+  The full week uses the same WeekGrid as the Schedule page, so both always look the same.
 -->
 <script setup>
-import { computed } from 'vue'
-import { firstName } from '@/utils/format'
+import { ref, computed } from 'vue'
+import MiniAvatar from '@/components/MiniAvatar.vue'
+import WeekGrid from '@/components/WeekGrid.vue'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
   children: { type: Array, default: () => [] },
 })
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Mon'
+const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Tue'
+const TODAY_LONG = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) // 'Tuesday 3 Nov'
+const firstName = (name) => (name || '').split(' ')[0]
 
-// Only show Sat/Sun when a volunteer is free or booked then, to keep the card compact.
-const days = computed(() => {
-  const weekend = ['Sat', 'Sun'].filter(
-    (d) =>
-      props.volunteers.some((v) => (v.availability || []).includes(d)) ||
-      props.children.some((c) => (c.schedule || []).some((s) => s.day === d)),
-  )
-  return [...WEEKDAYS, ...weekend]
-})
+const showWeek = ref(false)
 
-// { 'u_vol1|Mon': [{ child, time }, ...] }, sorted by time.
-const slotsByCell = computed(() => {
-  const map = {}
-  for (const child of props.children) {
-    for (const s of child.schedule || []) {
-      // pending = the volunteer hasn't accepted this day yet (shown dashed, "waiting")
-      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '', pending: s.status === 'pending' })
-    }
-  }
-  for (const list of Object.values(map)) {
-    list.sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'))
-  }
-  return map
-})
+const volunteerById = computed(() => Object.fromEntries(props.volunteers.map((v) => [v.id, v])))
 
-const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
-const isFree = (v, day) => (v.availability || []).includes(day)
-
-// Accepted sessions, and the ones still waiting for a volunteer to accept
-const sessionCount = computed(() =>
-  props.children.reduce((n, c) => n + (c.schedule || []).filter((s) => s.status !== 'pending').length, 0),
+// Every session booked for today's weekday, earliest first.
+const todaySessions = computed(() =>
+  props.children
+    .flatMap((child) =>
+      (child.schedule || [])
+        .filter((s) => s.day === TODAY)
+        .map((s) => ({ child, time: s.time || '', volunteer: volunteerById.value[s.volunteerId] })),
+    )
+    .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99')),
 )
-const waitingCount = computed(() =>
-  props.children.reduce((n, c) => n + (c.schedule || []).filter((s) => s.status === 'pending').length, 0),
-)
+
+// Booked slots that repeat every week (not the same thing as sessions logged this week).
+const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedule || []).length, 0))
 </script>
 
 <template>
   <section class="t-card week-card" data-test="week-schedule">
     <div class="card-head">
-      <h2>Weekly schedule</h2>
-      <span class="d-flex align-items-center gap-2">
-        <span class="tag">{{ sessionCount }} sessions</span>
-        <span v-if="waitingCount" class="tag tag-wait" data-test="week-waiting">{{ waitingCount }} waiting to accept</span>
+      <h2>Today <span class="today-date">· {{ TODAY_LONG }}</span></h2>
+      <span class="head-right">
+        <span class="tag">{{ weeklySlots }} weekly slots</span>
         <RouterLink :to="{ name: 'schedule' }" class="edit-link" data-test="edit-schedule">
           Edit schedule <i class="bi bi-arrow-right"></i>
         </RouterLink>
       </span>
     </div>
 
-    <p v-if="!volunteers.length" class="empty">No volunteers yet.</p>
+    <!-- today's sessions -->
+    <ul v-if="todaySessions.length" class="today-list" data-test="today-sessions">
+      <li v-for="s in todaySessions" :key="`${s.child.id}-${s.volunteer?.id}`">
+        <RouterLink :to="{ name: 'child-profile', params: { id: s.child.id } }" class="today-item">
+          <span v-if="s.time" class="today-time">{{ s.time }}</span>
+          <span v-else class="today-time no-time">No time</span>
+          <MiniAvatar :person="s.child" :size="30" />
+          <span class="today-text">
+            <strong>{{ firstName(s.child.name) }}</strong>
+            <span class="with">with {{ firstName(s.volunteer?.name) || 'a volunteer' }}</span>
+          </span>
+        </RouterLink>
+      </li>
+    </ul>
+    <p v-else class="empty-today">No sessions today.</p>
 
-    <div v-else class="week-scroll">
-      <table class="week-table">
-        <thead>
-          <tr>
-            <th scope="col" class="vol-col">Volunteer</th>
-            <th v-for="d in days" :key="d" scope="col" :class="{ 'is-today': d === TODAY }">
-              {{ d }}<span v-if="d === TODAY" class="visually-hidden"> (today)</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="v in volunteers" :key="v.id">
-            <th scope="row" class="vol-col">{{ firstName(v.name) }}</th>
-            <td
-              v-for="d in days"
-              :key="d"
-              :class="{ 'is-off': !isFree(v, d), 'is-today': d === TODAY }"
-            >
-              <template v-if="isFree(v, d)">
-                <RouterLink
-                  v-for="slot in slotsFor(v, d)"
-                  :key="slot.child.id"
-                  :to="{ name: 'child-profile', params: { id: slot.child.id } }"
-                  class="pill"
-                  :class="{ 'is-pending': slot.pending }"
-                  :title="`${slot.child.name} at ${slot.time || 'no time set'}${slot.pending ? ' (waiting for the volunteer to accept)' : ''}`"
-                >
-                  <span class="pill-time">{{ slot.time || '--:--' }}</span> {{ firstName(slot.child.name) }}
-                  <span v-if="slot.pending" class="pill-waiting">waiting</span>
-                </RouterLink>
-                <span v-if="!slotsFor(v, d).length" class="free">Free</span>
-              </template>
-              <span v-else class="visually-hidden">Not available</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- the full week, opened like a matchmaking card -->
+    <button
+      type="button"
+      class="week-toggle"
+      :aria-expanded="showWeek"
+      aria-controls="dashboard-week"
+      data-test="toggle-week"
+      @click="showWeek = !showWeek"
+    >
+      {{ showWeek ? 'Hide full week' : 'Show full week' }}
+      <i class="bi bi-chevron-down chevron" :class="{ 'is-open': showWeek }" aria-hidden="true"></i>
+    </button>
+
+    <Transition name="expand">
+      <div v-if="showWeek" id="dashboard-week" class="week-wrap">
+        <WeekGrid :volunteers="volunteers" :children="children" />
+      </div>
+    </Transition>
   </section>
 </template>
 
 <style scoped>
+.today-date {
+  font-weight: 400;
+  color: #7d7690;
+}
+.head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .edit-link {
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
+  color: #6b5ca5;
   text-decoration: none;
-  color: var(--cb-primary);
   white-space: nowrap;
 }
 .edit-link:hover {
   text-decoration: underline;
 }
-.week-scroll {
-  overflow-x: auto; /* scrolls sideways on small screens instead of squashing */
+
+/* today's sessions: a row of white pills that wraps */
+.today-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.week-table {
-  width: 100%;
-  min-width: 620px;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-  font-size: 0.85rem;
-}
-.week-table th,
-.week-table td {
-  padding: 0.4rem;
-  vertical-align: top;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-.week-table thead th {
-  border-top: 0;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  opacity: 0.75;
-  text-align: center;
-}
-.vol-col {
-  width: 90px;
-  text-align: left !important;
-  font-weight: 600;
-}
-.is-off {
-  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.025) 0 6px, rgba(0, 0, 0, 0.05) 6px 12px);
-}
-td.is-today:not(.is-off) {
-  background: var(--cb-primary-soft);
-}
-th.is-today {
-  color: var(--cb-primary);
-  opacity: 1 !important;
-}
-.pill {
-  display: block;
-  margin-bottom: 4px;
-  padding: 2px 8px;
+.today-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
   border-radius: 999px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: inherit;
+  background: #f7f4fb;
+  color: #3d3454;
   text-decoration: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.pill:hover {
-  border-color: var(--cb-primary);
+.today-item:hover {
+  box-shadow: inset 0 0 0 1.5px #d5cbea;
 }
-/* a session the volunteer hasn't accepted yet */
-.pill.is-pending {
-  border: 1.5px dashed #C8A028;
-  background: #FBF5DC;
+.today-item:focus-visible {
+  outline: 2px solid #6b5ca5;
 }
-.pill-waiting {
-  font-size: 0.7rem;
-  color: #8A6D12;
-}
-.tag-wait {
-  background: #FBF5DC;
-  color: #6E5410;
-  box-shadow: inset 0 0 0 1px #E3C76A;
-}
-.pill-time {
+.today-time {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #6b5ca5;
+  color: #fff;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.free {
-  display: block;
-  text-align: center;
-  font-size: 0.75rem;
-  opacity: 0.55;
+.today-time.no-time {
+  background: #fdf0ee;
+  color: #b4473b;
+}
+.today-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.with {
+  font-size: 13px;
+  color: #7d7690;
+}
+.empty-today {
+  margin: 0;
+  color: #7d7690;
+}
+
+/* show / hide the full week */
+.week-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 2px;
+  border: 0;
+  background: transparent;
+  color: #6b5ca5;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.week-toggle:focus-visible {
+  outline: 2px solid #6b5ca5;
+  border-radius: 6px;
+}
+.chevron {
+  transition: transform 0.3s ease;
+}
+.chevron.is-open {
+  transform: rotate(180deg);
+}
+.week-wrap {
+  margin-top: 8px;
+}
+.expand-enter-active,
+.expand-leave-active {
+  overflow: hidden;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 1200px;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .expand-enter-active,
+  .expand-leave-active {
+    transition: none;
+  }
 }
 </style>

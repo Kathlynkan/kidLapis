@@ -9,9 +9,9 @@ import '@/css/main/components.css' // the subject tag
 import ChildInitial from '@/components/ChildInitial.vue'
 
 const props = defineProps({
-  child:          { type: Object, required: true },
-  lastSession:    { type: Object, default: null },
-  needsAttention: { type: Boolean, default: false },
+  child:       { type: Object, required: true },
+  lastSession: { type: Object, default: null },
+  badge:       { type: String, default: '' }, // e.g. 'Session recorded', 'First session', 'Starts Mon, 9 Nov'
 })
 const emit = defineEmits(['open'])
 
@@ -27,9 +27,7 @@ const lastSeen = computed(() =>
       <div>
         <h2 class="child-name">{{ child.name }}</h2>
         <div class="muted">{{ child.level }} &middot; {{ child.school }}</div>
-        <span v-if="needsAttention" class="needs-attention" data-test="needs-attention">
-          <i class="bi bi-exclamation-triangle me-1"></i>Needs attention
-        </span>
+        <span v-if="badge" class="child-badge" data-test="child-badge">{{ badge }}</span>
       </div>
     </div>
 

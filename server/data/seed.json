@@ -146,11 +146,13 @@
         },
         {
           "volunteerId": "u_vol1",
-          "day": "Wed"
+          "day": "Wed",
+          "time": "12:00"
         },
         {
           "volunteerId": "u_vol2",
-          "day": "Thu"
+          "day": "Thu",
+          "time": "11:00"
         }
       ],
       "needs": [
@@ -158,7 +160,12 @@
       ],
       "points": 120,
       "avatar": "/photos/ethan.jpg",
-      "followUp": false
+      "followUp": false,
+      "interests": ["Football", "Video Games", "Dinosaurs"],
+      "journalEntries": [
+        { "id": "je_seed01", "date": "2026-10-08", "text": "I learned how to do long division today! It was hard at first but then I got it." },
+        { "id": "je_seed02", "date": "2026-10-03", "text": "We played a maths game with cards and I won! Games make it more fun." }
+      ]
     },
     {
       "id": "c_2",
@@ -182,7 +189,11 @@
       ],
       "points": 210,
       "avatar": "/photos/meera.jpg",
-      "followUp": false
+      "followUp": false,
+      "interests": ["Reading", "Drawing", "Science"],
+      "journalEntries": [
+        { "id": "je_seed03", "date": "2026-10-07", "text": "I really like science. We talked about plants and I want to grow one at home." }
+      ]
     },
     {
       "id": "c_3",
@@ -226,7 +237,7 @@
         {
           "volunteerId": "u_vol1",
           "day": "Mon",
-          "time": "17:00" 
+          "time": "17:00"
         }
       ],
       "needs": [
@@ -930,6 +941,158 @@
       "socialNotes": "Back to playing chess after lessons."
     },
     {
+      "id": "s_36",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-08-13",
+      "subject": "Math",
+      "topic": "Decimals",
+      "attempted": 8,
+      "correct": 5,
+      "struggles": [
+        "Rounding decimals"
+      ],
+      "whatWorked": "Placing the numbers on a number line",
+      "nextStep": "More rounding practice",
+      "mood": "okay",
+      "notes": "Works carefully but rushes the last few questions.",
+      "meal": "Chicken rice",
+      "portion": "Most",
+      "activity": [
+        "Reading"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Chatted with her brother Arjun at lunch."
+    },
+    {
+      "id": "s_37",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-08-20",
+      "subject": "Science",
+      "topic": "Water cycle",
+      "attempted": 8,
+      "correct": 7,
+      "struggles": [],
+      "whatWorked": "Drawing the cycle as a comic strip",
+      "nextStep": "Heat",
+      "mood": "happy",
+      "notes": "Explained evaporation using the puddles outside.",
+      "meal": "Fried rice",
+      "portion": "All",
+      "activity": [
+        "Drawing"
+      ],
+      "photos": [
+        "/photos/comics.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Made a water cycle poster for the classroom wall",
+      "socialNotes": "Showed her poster to the younger children and answered their questions."
+    },
+    {
+      "id": "s_38",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-08-27",
+      "subject": "Math",
+      "topic": "Problem Sums",
+      "attempted": 5,
+      "correct": 2,
+      "struggles": [
+        "Understanding long questions"
+      ],
+      "whatWorked": "Reading the question twice and underlining the numbers",
+      "nextStep": "Bar models for problem sums",
+      "mood": "frustrated",
+      "notes": "Got stuck on the long questions and said she is 'bad at maths'. Breaking each question into parts helped.",
+      "meal": "Fish soup",
+      "portion": "Half",
+      "activity": [
+        "Board games"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Was quieter than usual until a board game with friends at break."
+    },
+    {
+      "id": "s_39",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-09-03",
+      "subject": "English",
+      "topic": "Composition",
+      "attempted": 1,
+      "correct": 1,
+      "struggles": [
+        "Using more varied words"
+      ],
+      "whatWorked": "A 'better words' list next to her page",
+      "nextStep": "Heat (Science)",
+      "mood": "happy",
+      "notes": "Wrote a full page about her grandmother's cooking and was proud of it.",
+      "meal": "Nasi lemak",
+      "portion": "All",
+      "activity": [
+        "Reading"
+      ],
+      "photos": [
+        "/photos/reading-book.jpg"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Read her story to a friend, who asked to read it again."
+    },
+    {
+      "id": "s_27",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-09-10",
+      "subject": "Science",
+      "topic": "Heat",
+      "attempted": 6,
+      "correct": 4,
+      "struggles": [
+        "Conductors and insulators"
+      ],
+      "whatWorked": "Touching a metal spoon and a wooden spoon",
+      "nextStep": "Heat gain and heat loss",
+      "mood": "happy",
+      "notes": "Asked why pot handles are made of plastic.",
+      "meal": "Nasi lemak",
+      "portion": "All",
+      "activity": [
+        "Reading"
+      ],
+      "photos": [
+        "/photos/reading-corner.jpg"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Read a science magazine with a friend after her work."
+    },
+    {
+      "id": "s_28",
+      "childId": "c_2",
+      "volunteerId": "u_vol2",
+      "date": "2026-09-17",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 6,
+      "correct": 3,
+      "struggles": [
+        "Fraction of a remainder"
+      ],
+      "whatWorked": "Drawing the remainder as a new bar",
+      "nextStep": "Before-after problem sums",
+      "mood": "tired",
+      "notes": "Had a spelling test in school that day and was worn out.",
+      "meal": "Fried rice",
+      "portion": "Little",
+      "activity": [
+        "Drawing"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Quiet at break, but cheered up after her snack."
+    },
+    {
       "id": "s_7",
       "childId": "c_2",
       "volunteerId": "u_vol2",
@@ -944,7 +1107,14 @@
       "whatWorked": "Bar models",
       "nextStep": "More before-after questions",
       "mood": "okay",
-      "notes": ""
+      "notes": "Kept trying different models until one worked.",
+      "meal": "Chicken rice",
+      "portion": "Most",
+      "activity": [
+        "Board games"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Taught two younger children how to play Snakes and Ladders."
     },
     {
       "id": "s_8",
@@ -961,7 +1131,18 @@
       "whatWorked": "Bar models",
       "nextStep": "Mixed problem sums",
       "mood": "happy",
-      "notes": ""
+      "notes": "Drew the before and after bars on her own for 3 of the 4 questions.",
+      "meal": "Noodles",
+      "portion": "All",
+      "activity": [
+        "Outdoor play"
+      ],
+      "photos": [
+        "/photos/outdoor-play.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Explained a bar model to a P4 friend",
+      "socialNotes": "Played catching with a big group outside and was the one organising the teams."
     },
     {
       "id": "s_9",
@@ -976,7 +1157,18 @@
       "whatWorked": "Real-life examples",
       "nextStep": "Revise energy conversion",
       "mood": "happy",
-      "notes": ""
+      "notes": "Gave her own examples, like a torch changing electrical energy into light.",
+      "meal": "Nasi lemak",
+      "portion": "All",
+      "activity": [
+        "Reading"
+      ],
+      "photos": [
+        "/photos/lunch-girls.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Volunteered to tidy the science corner",
+      "socialNotes": "Chatted with friends over lunch about their science projects."
     },
     {
       "id": "s_11",
@@ -1143,6 +1335,134 @@
       "socialNotes": "Drew a comic of the story at break and proudly showed it around."
     },
     {
+      "id": "s_33",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-10",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 5,
+      "correct": 2,
+      "struggles": [
+        "Equivalent fractions"
+      ],
+      "whatWorked": "Folding paper strips",
+      "nextStep": "More equivalent fractions",
+      "mood": "okay",
+      "notes": "New to the centre and still learning the routine.",
+      "meal": "Fish soup",
+      "portion": "Half",
+      "activity": [
+        "Reading"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Polite but quiet. Read by herself at break."
+    },
+    {
+      "id": "s_34",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-17",
+      "subject": "English",
+      "topic": "Grammar",
+      "attempted": 10,
+      "correct": 7,
+      "struggles": [
+        "Irregular past tense"
+      ],
+      "whatWorked": "Making a 'today / yesterday' word chart",
+      "nextStep": "Comprehension",
+      "mood": "happy",
+      "notes": "Found it funny that 'go' turns into 'went'.",
+      "meal": "Chicken rice",
+      "portion": "All",
+      "activity": [
+        "Board games"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Joined a card game with two P4 girls and learned their names."
+    },
+    {
+      "id": "s_35",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-24",
+      "subject": "Math",
+      "topic": "Fractions",
+      "attempted": 5,
+      "correct": 4,
+      "struggles": [],
+      "whatWorked": "Fraction strips",
+      "nextStep": "Multiplication",
+      "mood": "happy",
+      "notes": "Equivalent fractions finally clicked. She explained 2/4 = 1/2 in her own words.",
+      "meal": "Noodles",
+      "portion": "Most",
+      "activity": [
+        "Drawing"
+      ],
+      "photos": [
+        "/photos/colouring.jpg"
+      ],
+      "interaction": "Good",
+      "behaviour": "Helped clear the table after snack time",
+      "socialNotes": "Drew with her new friends and was chatting the whole break."
+    },
+    {
+      "id": "s_25",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-31",
+      "subject": "English",
+      "topic": "Comprehension",
+      "attempted": 6,
+      "correct": 4,
+      "struggles": [
+        "Answering in full sentences"
+      ],
+      "whatWorked": "Underlining the key words in the question",
+      "nextStep": "Practise full-sentence answers",
+      "mood": "happy",
+      "notes": "Read the passage aloud confidently.",
+      "meal": "Chicken rice",
+      "portion": "All",
+      "activity": [
+        "Chess"
+      ],
+      "photos": [
+        "/photos/chicken-rice-2.jpg"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Watched the older children play chess at break and asked to learn."
+    },
+    {
+      "id": "s_26",
+      "childId": "c_4",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-07",
+      "subject": "Math",
+      "topic": "Multiplication",
+      "attempted": 8,
+      "correct": 5,
+      "struggles": [
+        "Carrying in long multiplication"
+      ],
+      "whatWorked": "Writing the carried number in a different colour",
+      "nextStep": "Area of rectangles",
+      "mood": "frustrated",
+      "notes": "Got upset when an answer was wrong twice. Slowing down and checking each step helped.",
+      "meal": "Fish soup",
+      "portion": "Half",
+      "activity": [
+        "Reading"
+      ],
+      "photos": [
+        "/photos/reading-book.jpg"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Wanted some quiet time after the session and read by herself."
+    },
+    {
       "id": "s_14",
       "childId": "c_4",
       "volunteerId": "u_vol1",
@@ -1157,7 +1477,14 @@
       "whatWorked": "Drawing on grid paper",
       "nextStep": "More grid-paper questions",
       "mood": "okay",
-      "notes": ""
+      "notes": "Calm and focused. Much better once she drew each shape out.",
+      "meal": "Noodles",
+      "portion": "Most",
+      "activity": [
+        "Board games"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Played Snakes and Ladders with two P4 girls at break."
     },
     {
       "id": "s_15",
@@ -1173,8 +1500,19 @@
       ],
       "whatWorked": "Mind map before writing",
       "nextStep": "Write a 3-paragraph story",
-      "mood": "okay",
-      "notes": ""
+      "mood": "happy",
+      "notes": "Planned her story with a mind map and wrote three clear paragraphs.",
+      "meal": "Fried rice",
+      "portion": "All",
+      "activity": [
+        "Drawing"
+      ],
+      "photos": [
+        "/photos/comics.jpg"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Read her story out to the group and clapped for everyone else's",
+      "socialNotes": "Turned her story into a comic with a friend at break."
     },
     {
       "id": "s_16",
@@ -1191,12 +1529,17 @@
       "whatWorked": "Drawing on grid paper",
       "nextStep": "Composite figures",
       "mood": "okay",
-      "notes": "",
+      "notes": "Mentioned her family is moving house soon and seemed a little distracted.",
       "activity": [
         "Chess"
       ],
       "interaction": "Good",
-      "socialNotes": "Played chess with Ethan at break - he taught her a new move."
+      "socialNotes": "Played chess with Ethan at break - he taught her a new move.",
+      "meal": "Chicken rice",
+      "portion": "Half",
+      "photos": [
+        "/photos/chess-chloe.jpg"
+      ]
     },
     {
       "id": "s_17",
@@ -1251,6 +1594,158 @@
       "notes": ""
     },
     {
+      "id": "s_29",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-12",
+      "subject": "English",
+      "topic": "Phonics",
+      "attempted": 8,
+      "correct": 3,
+      "struggles": [
+        "Letter sounds sh and ch"
+      ],
+      "whatWorked": "Picture cards for each sound",
+      "nextStep": "More sh and ch words",
+      "mood": "okay",
+      "notes": "Her first day at the centre. Held her volunteer's hand at drop-off and spoke very softly.",
+      "meal": "Chicken rice",
+      "portion": "Little",
+      "activity": [
+        "Colouring"
+      ],
+      "interaction": "Limited",
+      "socialNotes": "Did not talk to the other children yet, but watched them play."
+    },
+    {
+      "id": "s_30",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-19",
+      "subject": "Math",
+      "topic": "Counting",
+      "attempted": 10,
+      "correct": 7,
+      "struggles": [
+        "Counting backwards"
+      ],
+      "whatWorked": "Hopping along a number line on the floor",
+      "nextStep": "Counting and adding",
+      "mood": "happy",
+      "notes": "Loved the hopping game and asked to do it again.",
+      "meal": "Noodles",
+      "portion": "Half",
+      "activity": [
+        "Outdoor play"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Smiled and waved at the other P2 children but stayed close to her volunteer."
+    },
+    {
+      "id": "s_31",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-08-26",
+      "subject": "English",
+      "topic": "Sight words",
+      "attempted": 10,
+      "correct": 6,
+      "struggles": [
+        "Reading 'said' and 'was'"
+      ],
+      "whatWorked": "Flash cards in a quick game",
+      "nextStep": "Phonics: b and d",
+      "mood": "happy",
+      "notes": "Read a whole page of her picture book by herself.",
+      "meal": "Fried rice",
+      "portion": "All",
+      "activity": [
+        "Reading"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Sat with two girls in the reading corner, though she mostly listened."
+    },
+    {
+      "id": "s_32",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-02",
+      "subject": "Math",
+      "topic": "Shapes",
+      "attempted": 10,
+      "correct": 8,
+      "struggles": [],
+      "whatWorked": "Finding shapes around the room",
+      "nextStep": "Counting and adding",
+      "mood": "happy",
+      "notes": "Spotted a hexagon on the floor tiles before anyone else.",
+      "meal": "Nasi lemak",
+      "portion": "Most",
+      "activity": [
+        "Drawing"
+      ],
+      "photos": [
+        "/photos/colouring.jpg"
+      ],
+      "interaction": "Good",
+      "behaviour": "Showed a classmate how to draw a triangle",
+      "socialNotes": "Drew a 'shape robot' with another girl, her first time working with a friend."
+    },
+    {
+      "id": "s_23",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-09",
+      "subject": "English",
+      "topic": "Phonics",
+      "attempted": 8,
+      "correct": 5,
+      "struggles": [
+        "Mixing up b and d"
+      ],
+      "whatWorked": "Tracing the letters with her finger first",
+      "nextStep": "Short school words",
+      "mood": "okay",
+      "notes": "Very quiet at first, but warmed up after about 10 minutes.",
+      "meal": "Fried rice",
+      "portion": "Half",
+      "activity": [
+        "Colouring"
+      ],
+      "photos": [
+        "/photos/colouring.jpg"
+      ],
+      "interaction": "Fair",
+      "socialNotes": "Still shy with the other children. Sat next to her volunteer at break and coloured quietly."
+    },
+    {
+      "id": "s_24",
+      "childId": "c_7",
+      "volunteerId": "u_vol1",
+      "date": "2026-09-16",
+      "subject": "Math",
+      "topic": "Counting and adding",
+      "attempted": 10,
+      "correct": 6,
+      "struggles": [
+        "Adding past 20"
+      ],
+      "whatWorked": "Using counters",
+      "nextStep": "Adding with a number line",
+      "mood": "tired",
+      "notes": "Yawning a lot. She said she went to bed late.",
+      "meal": "Noodles",
+      "portion": "Little",
+      "activity": [
+        "Drawing"
+      ],
+      "photos": [
+        "/photos/noodles.jpg"
+      ],
+      "interaction": "Limited",
+      "socialNotes": "Drew on her own at break and did not want to join the group game."
+    },
+    {
       "id": "s_20",
       "childId": "c_7",
       "volunteerId": "u_vol1",
@@ -1265,7 +1760,17 @@
       "whatWorked": "Saying each word out loud",
       "nextStep": "Practice school words",
       "mood": "okay",
-      "notes": ""
+      "notes": "Picked her own picture book to read after the spelling.",
+      "meal": "Chicken rice",
+      "portion": "Most",
+      "activity": [
+        "Reading"
+      ],
+      "photos": [
+        "/photos/reading-corner.jpg"
+      ],
+      "interaction": "Good",
+      "socialNotes": "Shared her crayons with a new friend at the drawing table, the first time she joined in by herself."
     },
     {
       "id": "s_21",
@@ -1282,7 +1787,15 @@
       "whatWorked": "Using counters",
       "nextStep": "Add numbers up to 30",
       "mood": "happy",
-      "notes": ""
+      "notes": "Counted on from the bigger number without being reminded.",
+      "meal": "Fried rice",
+      "portion": "All",
+      "activity": [
+        "Board games"
+      ],
+      "interaction": "Good",
+      "behaviour": "Counted the squares out loud for everyone in Snakes and Ladders",
+      "socialNotes": "Laughed a lot during the board game and asked to play again next week."
     },
     {
       "id": "s_22",
@@ -1297,10 +1810,18 @@
       "whatWorked": "Look, cover, write, check",
       "nextStep": "Words that rhyme",
       "mood": "happy",
-      "notes": "",
+      "notes": "Wrote b and d correctly in every word today, and spelled 'friend' right for the first time.",
       "photos": [
         "/photos/lunch-girls.jpg"
-      ]
+      ],
+      "meal": "Nasi lemak",
+      "portion": "All",
+      "activity": [
+        "Drawing"
+      ],
+      "interaction": "Excellent",
+      "behaviour": "Helped a younger child find her school bag",
+      "socialNotes": "Chatty and giggly at lunch with the other girls. A big change from her first weeks."
     }
   ],
   "homework": [
