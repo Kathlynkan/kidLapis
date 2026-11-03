@@ -9,7 +9,7 @@
 ============================================================= -->
 <script setup>
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
@@ -23,7 +23,6 @@ const requests = ref([]) // [{ childId, childName, level, avatar, needs, day, ti
 const loading = ref(true)
 const error = ref('')
 const answering = ref('') // 'childId|day' of the request being answered (its buttons are disabled)
-const answered = ref([]) // what was just accepted/declined, so the page can say so
 
 const keyOf = (r) => `${r.childId}|${r.day}`
 
@@ -47,8 +46,15 @@ async function answer(r, action) {
   error.value = ''
   try {
     await api.put(`/requests/${r.childId}`, { day: r.day, action })
-    answered.value.unshift({ ...r, action })
-    await loadRequests()
+
+    const request = requests.value.find(
+      req => keyOf(req) === keyOf(r)
+    )
+
+    if (request) {
+      request.action = action
+    }
+    
     window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell updates straight away
   } catch (err) {
     error.value = errorMessage(err) // e.g. the coordinator cancelled it meanwhile
@@ -68,28 +74,7 @@ async function answer(r, action) {
     <template v-else>
       <div v-if="error" class="alert alert-danger" role="alert" data-test="requests-error">{{ error }}</div>
 
-      <!-- what was just answered -->
-      <div
-        v-for="a in answered"
-        :key="`done-${keyOf(a)}`"
-        class="alert"
-        :class="a.action === 'accept' ? 'alert-success' : 'alert-secondary'"
-        data-test="request-answered"
-      >
-        <template v-if="a.action === 'accept'">
-          <span>
-            You'll see <b>{{ a.childName }}</b> every {{ a.day }}<template v-if="a.time"> at {{ a.time }}</template>.
-          </span>
-          <RouterLink
-            :to="{ name: 'child-profile', params: { id: a.childId } }"
-            class="soft-button"
-            data-test="request-open-profile"
-          >
-            Open profile
-          </RouterLink>
-        </template>
-        <template v-else>You declined {{ a.childName }} on {{ a.day }}. The coordinator will find someone else.</template>
-      </div>
+      
 
       <StateMessage
         v-if="!requests.length"
@@ -111,26 +96,47 @@ async function answer(r, action) {
               <span v-for="n in r.needs" :key="n" class="session-subject" :style="subjectStyle(n)">{{ n }}</span>
             </div>
           </div>
+          
           <div class="request-actions">
-            <button
-              type="button"
-              class="soft-button soft-button-strong"
-              :disabled="answering !== ''"
-              data-test="request-accept"
-              @click="answer(r, 'accept')"
+
+            <template v-if="!r.action">
+              <button
+                type="button"
+                class="soft-button soft-button-strong"
+                :disabled="answering !== ''"
+                @click="answer(r, 'accept')"
+              >
+                  <span
+                    v-if="answering === keyOf(r)"
+                    class="spinner-border spinner-border-sm me-1"
+                  ></span>
+                Accept
+              </button>
+
+              <button
+                type="button"
+                class="soft-button soft-button-plain"
+                :disabled="answering !== ''"
+                @click="answer(r, 'decline')"
+              >
+                Decline
+              </button>
+            </template>
+
+            <span
+              v-else-if="r.action === 'accept'"
+              class="request-status request-status-accepted"
             >
-              <span v-if="answering === keyOf(r)" class="spinner-border spinner-border-sm me-1"></span>
-              Accept
-            </button>
-            <button
-              type="button"
-              class="soft-button soft-button-plain"
-              :disabled="answering !== ''"
-              data-test="request-decline"
-              @click="answer(r, 'decline')"
+              <i class="bi bi-check-circle-fill me-1"></i>Accepted
+            </span>
+
+            <span
+              v-else
+              class="request-status request-status-declined"
             >
-              Decline
-            </button>
+              <i class="bi bi-x-circle-fill me-1"></i>Declined
+            </span>
+
           </div>
         </div>
       </div>
@@ -188,13 +194,6 @@ async function answer(r, action) {
 }
 
 /* "You'll see Sofia every Mon at 11:00.  [OPEN PROFILE]" */
-.volunteerpage [data-test='request-answered'] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
 .volunteerpage .request-list {
   display: flex;
   flex-direction: column;
@@ -268,5 +267,22 @@ async function answer(r, action) {
   .volunteerpage .request-actions .soft-button {
     flex: 1;
   }
+}
+
+.volunteerpage .request-status {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.volunteerpage .request-status-accepted {
+  background: #CDE9D8;
+  color: #213C31;
+}
+
+.volunteerpage .request-status-declined {
+  background: #EDEDED;
+  color: #555;
 }
 </style>

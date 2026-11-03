@@ -580,7 +580,7 @@ watch(
 .lapis-button {
   padding: 4px 10px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #FFFFFF;
   box-shadow: inset 0 0 0 2px #D5CBEA;
   color: #4A3F3A;
