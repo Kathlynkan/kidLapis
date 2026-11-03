@@ -38,7 +38,8 @@ router.get('/', async (req, res) => {
           needs: child.needs,
           day: slot.day,
           time: slot.time || '',
-          status: slot.status
+          status: slot.status,
+          requestedAt: slot.requestedAt
         })
       }
     }
