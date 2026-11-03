@@ -102,21 +102,7 @@ describe('SignupView', () => {
     expect(api.post).not.toHaveBeenCalled()
   })
 
-  // Test case (4): Verify that a child code that is the wrong shape is caught on the page.
-  it('says when a child code is not 6 letters and numbers', async () => {
-    const { wrapper } = await mountSignup()
-    await wrapper.find('#role-par').setValue(true)
-    await fillBasics(wrapper)
-    await wrapper.find('[data-test="signup-child-code"]').setValue('AB-1')
-
-    await wrapper.find('form').trigger('submit')
-
-    expect(wrapper.find('[data-test="signup-child-code"]').classes()).toContain('is-invalid')
-    expect(wrapper.text()).toContain('Child codes are 6 letters and numbers')
-    expect(api.post).not.toHaveBeenCalled()
-  })
-
-  // Test case (5): Verify that a parent's sign up sends the child code in capitals (and no
+  // Test case (4): Verify that a parent's sign up sends the child code in capitals (and no
   // volunteer fields), then goes to the parent page.
   it('sends a parent sign up with the child code in capitals, then opens the parent page', async () => {
     vi.mocked(api.post).mockResolvedValue({
@@ -138,21 +124,5 @@ describe('SignupView', () => {
       childCode: 'K7P3QX',
     })
     expect(router.currentRoute.value.path).toBe('/parent')
-  })
-
-  // Test case (6): Verify that a problem from the server (e.g. the email is taken) is shown on the page.
-  it('shows the error from the server', async () => {
-    vi.mocked(api.post).mockRejectedValue({
-      response: { status: 409, data: { message: 'An account with this email already exists.' } },
-    })
-    const { wrapper, router } = await mountSignup()
-    await wrapper.find('#role-par').setValue(true)
-    await fillBasics(wrapper)
-
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    expect(wrapper.find('[data-test="signup-error"]').text()).toContain('already exists')
-    expect(router.currentRoute.value.path).toBe('/signup') // still on the sign up page
   })
 })

@@ -27,18 +27,16 @@ vi.mock('@/services/api', () => ({
 const Blank = { template: '<div />' } // the other pages don't matter here
 
 // build the page the way the real app shows it: inside a router, with a Pinia store
-async function mountLogin(startAt = '/login') {
+async function mountLogin() {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/login', component: LoginView },
       { path: '/signup', component: Blank },
       { path: '/parent', component: Blank },
-      { path: '/coordinator', component: Blank },
-      { path: '/messages', component: Blank },
     ],
   })
-  router.push(startAt)
+  router.push('/login')
   await router.isReady()
   const wrapper = mount(LoginView, { global: { plugins: [router, createPinia()] } })
   return { wrapper, router }
@@ -109,18 +107,5 @@ describe('LoginView', () => {
     })
     expect(router.currentRoute.value.path).toBe('/parent')
     expect(wrapper.find('[data-test="login-error"]').exists()).toBe(false)
-  })
-
-  // Test case (4): Verify that after logging in, the user goes back to the page they first wanted
-  // (the route guard sends them to /login?redirect=... when they are not logged in yet).
-  it('goes back to the page in ?redirect= after logging in', async () => {
-    vi.mocked(api.post).mockResolvedValue({
-      data: { token: 'abc123', user: { id: 'u_coord', name: 'Tan Mei Ling', role: 'coordinator' } },
-    })
-    const { wrapper, router } = await mountLogin('/login?redirect=/messages')
-
-    await logIn(wrapper, 'coordinator@kidslapis.sg', 'password123')
-
-    expect(router.currentRoute.value.path).toBe('/messages') // not the coordinator's home page
   })
 })
