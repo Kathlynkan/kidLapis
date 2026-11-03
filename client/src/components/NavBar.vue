@@ -194,7 +194,9 @@ async function fetchBell() {
         api.get('/homework'),
         api.get('/children'),
       ])
-      requests.value = requestsRes.data
+      requests.value = requestsRes.data.filter(
+        r => r.status === 'pending'
+      )
       const nameOf = Object.fromEntries(childrenRes.data.map((c) => [c.id, c.name]))
       questsToCheck.value = homeworkRes.data
         .filter((h) => h.status === 'submitted')
@@ -328,7 +330,7 @@ watch(
           <template v-if="auth.role === 'volunteer'">
             <!-- new sessions the coordinator assigned: answered on the Session requests page -->
             <template v-if="requests.length">
-              <div class="lapis-bell-title">Session requests</div>
+              <div class="lapis-bell-title">Assignment Requests</div>
               <RouterLink
                 v-for="r in requests"
                 :key="`${r.childId}|${r.day}`"
@@ -394,8 +396,12 @@ watch(
           <RouterLink v-for="link in links" :key="link.to" class="lapis-nav-link" :class="{ open: isOpen(link) }" :to="link.to">
             {{ link.label }}
             <span v-if="link.to === '/messages' && unreadTotal > 0" class="lapis-badge">{{ unreadTotal }}</span>
-            <span v-if="link.to === '/volunteer/requests' && requests.length > 0" class="lapis-badge" data-test="nav-requests-badge">
-              {{ requests.length }}
+            <span
+              v-if="link.to === '/volunteer/requests' && requests.filter(r => r.status === 'pending').length > 0"
+              class="lapis-badge"
+              data-test="nav-requests-badge"
+            >
+              {{ requests.filter(r => r.status === 'pending').length }}
             </span>
           </RouterLink>
         </div>

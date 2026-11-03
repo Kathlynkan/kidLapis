@@ -27,7 +27,11 @@
 
 /* the round picture of a child (the size and colour are set by each page): a photo fills the circle */
 .child-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  border-radius: 50%;
 }
 
 .child-initial img {
