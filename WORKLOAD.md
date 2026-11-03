@@ -141,27 +141,41 @@ The homework route is split — see the callout at the bottom of this section.
 
 | File | What it does |
 |---|---|
-| `client/src/views/child/ChildHomeView.vue` | "My Quests" — level bar, badge shelf, quest cards, badge-unlock animation |
-| `client/src/views/child/LeaderboardView.vue` | All-time + weekly leaderboard — podium top 3, highlights "me" |
+| `client/src/views/child/ChildHomeView.vue` | 3-tab child home — Quests (submit/unsubmit, reject flow), Journal (streak, daily +5★, delete entry), Kueh Tin (badge shelf); hero with kueh lapis progress, weekly cheer count, badge-unlock animation |
+| `client/src/views/child/LeaderboardView.vue` | Weekly leaderboard — podium top 3, rows 4+, anonymous 👏 cheer button (localStorage, once per day, disables self) |
 | `client/src/components/charts/SkillProgressChart.vue` | Chart.js line chart — topic accuracy over sessions (used on 3 pages) |
 | `client/src/components/charts/TopicSummaryChart.vue` | Chart.js horizontal bar — topics coloured needs-help/steady/strong |
-| `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), "Verify & give points" (volunteer) |
+| `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), undo, "Verify & give points" (volunteer), late-penalty label, reject flow |
 | `client/src/components/ChildAvatar.vue` | Child avatar display — photo if path, emoji if text; used in leaderboard |
-| `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework)` — 6 badge conditions |
-| `client/src/tests/child/gamification.spec.js` | Unit tests for all gamification rules and edge cases |
+| `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework)` — 9 badges: 6 homework + 3 reflection (dear-diary, reflective, self-aware) |
+| `client/src/tests/child/gamification.spec.js` | Unit tests for all 9 badge conditions and edge cases (31 tests) |
+| `client/src/components/__tests__/HomeworkQuestCard.spec.js` | Unit tests for quest card in child/volunteer mode — submit, verify, undo, busy state |
+| `client/src/components/__tests__/ChildAvatar.spec.js` | Unit tests for avatar rendering (image path vs emoji vs empty) |
 | `server/routes/progress.js` | GET /progress/:childId (per-topic accuracy + trend), GET /progress/overview |
 | `server/routes/decks.js` | GET /decks — question banks for the homework deck picker |
-| `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards berries), GET /homework/leaderboard |
+| `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards points), GET /homework/leaderboard |
 | `server/models/Deck.js` | Mongoose schema — question bank (title, subject, questions with answers) |
-| `client/e2e/child.spec.js` | E2E — child marks quest done, verify flow (DB write), API failure state, badge shelf, leaderboard |
+| `client/e2e/child.spec.js` | E2E — quest submit, volunteer verify (DB write), API failure state, badge shelf (Kueh Tin tab), leaderboard |
+
+**Also modified (with teammates' knowledge):**
+
+| File | Owner | What Jachin added |
+|---|---|---|
+| `server/models/Child.js` | Kai Sen | `interests [String]`, `journalEntries` subdocs, `cheersReceived` subdocs |
+| `server/routes/children.js` | Kai Sen | `PUT /:id/interests`, `POST /:id/journal`, `DELETE /:id/journal/:entryId`, `POST /:id/cheer` |
+| `server/routes/handover.js` | Yuqi | Updated `buildPrompt` to include child interests + 3 recent journal entries in the AI prompt |
+| `client/src/views/shared/ProfileView.vue` | Kai Sen | Interests section — predefined category chip grid, child-safe (no free text) |
+| `client/src/views/volunteer/ChildProfileView.vue` | Yuqi | "About [name]" PeelCard — interests as tag pills + 3 most recent journal quotes |
+| `client/src/views/parent/ParentHomeView.vue` | Kat | Child voice row — interests list + latest journal entry shown to parent |
 
 ### Shared files — everyone can explain how it applies to their slice
 
 | File | What it does |
 |---|---|
-| `client/src/utils/constants.js` | SUBJECTS, SKILL_OPTIONS, LEVELS, DAYS, MOODS, HOMEWORK_STATUS |
+| `client/src/utils/constants.js` | SUBJECTS, SKILL_OPTIONS, LEVELS, DAYS, MOODS, HOMEWORK_STATUS, INTEREST_OPTIONS (Jachin) |
 | `client/src/utils/format.js` | `formatDate`, `accuracy`, `relativeDay`, `firstName`, `daysSince` |
 | `client/src/tests/shared/format.spec.js` | Unit tests for format helpers |
+| `server/data/seed.json` | Demo data — children with interests + journal entries (Jachin), sessions, homework, messages |
 
 ### The `homework.js` route split
 
@@ -279,31 +293,39 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 **Files:**
 - `components/charts/SkillProgressChart.vue` — Chart.js line chart (topic accuracy over time)
 - `components/charts/TopicSummaryChart.vue` — Bar chart coloured by status (needs help / steady / strong)
-- `views/child/ChildHomeView.vue` — Quests, badges, level progress, pirate theme
-- `views/child/LeaderboardView.vue` — All-time and weekly leaderboard
-- `components/HomeworkQuestCard.vue` — Quest card with question-answer interaction and submit
-- `utils/gamification.js` — `levelFor()`, `earnedBadges()` (6 badge conditions)
-- `server/models/Deck.js` — Question bank model (title, subject, questions with answers)
-- `server/routes/decks.js` — `GET /decks` for the homework assignment form
+- `views/child/ChildHomeView.vue` — 3-tab child home: Quests, Journal, Kueh Tin; kueh lapis hero, badge-unlock overlay, toast notifications
+- `views/child/LeaderboardView.vue` — Weekly leaderboard, podium, anonymous cheer button
+- `components/HomeworkQuestCard.vue` — Quest card with submit, undo, verify, reject flow, late-penalty label
+- `components/ChildAvatar.vue` — Avatar display (image path or emoji)
+- `utils/gamification.js` — `levelFor()`, `earnedBadges()`, `badgeProgress()` — 9 badges (6 homework + 3 reflection)
+- `server/models/Deck.js` — Question bank model
+- `server/routes/decks.js` — `GET /decks`
 - `server/routes/progress.js` — `GET /progress/:childId`, `GET /progress/overview`
-- `server/routes/homework.js` — submit, verify, leaderboard endpoints (+ deck support in POST)
+- `server/routes/homework.js` — submit, verify, leaderboard endpoints
+- *Also added to Kai Sen's `server/routes/children.js`*: journal CRUD, interests PUT, cheer POST
+- *Also added to Kai Sen's `server/models/Child.js`*: interests, journalEntries, cheersReceived fields
 
 | Priority | Task |
 |---|---|
 | ✅ Must | `SkillProgressChart`: Chart.js line chart showing topic accuracy over sessions. Used on Child Profile and Parent Home. |
 | ✅ Should | `TopicSummaryChart`: bar chart coloured by trend (needs help / steady / strong). Used on Child Profile and Coordinator Dashboard. |
 | ✅ Should | `GET /progress/:childId`: per-topic accuracy, trend, recurring struggles. `GET /progress/overview` for coordinator dashboard. |
-| ✅ Should | Child "My Quests": `PUT /homework/:id/submit` when child presses "I'm done!". Volunteer "Verify" → `PUT /homework/:id/verify` awards berries. |
-| ✅ Should | Levels + progress bar (`levelFor`), badge shelf (`earnedBadges`) with 6 badges — locked badges greyed, celebration animation on submit. |
-| ✅ Should | Deck quiz system: `server/models/Deck.js` with 11 question banks (Math, English, Science). Homework form includes a deck picker; selected deck's questions are copied into the quest so children answer interactively. |
-| ✅ Stretch | Leaderboard with two tabs: all-time berry total and weekly earned. Podium for top 3, table for the rest. Highlights the logged-in child. |
+| ✅ Should | Child "My Quests": `PUT /homework/:id/submit` (child), `PUT /homework/:id/verify` (volunteer awards points). Undo, reject/late-penalty flow. Toast notifications on points gained, quest returned, new quest. |
+| ✅ Should | Levels + kueh lapis progress bar (`levelFor`), pending points preview, 9-badge Kueh Tin (`earnedBadges`) — locked badges greyed, badge-unlock celebration overlay, badge nudge in hero. |
+| ✅ Should | Deck quiz system: `server/models/Deck.js` with 11 question banks. Homework form deck picker; questions copied into quest for interactive answering. |
+| ✅ Stretch | Leaderboard — weekly stars, podium for top 3, rows for the rest, highlights logged-in child, anonymous 👏 cheer button (one per day, localStorage, no self-cheer). |
+| ✅ Stretch | **Learning journal**: child writes daily reflections (`POST /children/:id/journal`), +5★ for first entry of the day (anti-spam), streak counter, delete entry. Journal tab on child home. |
+| ✅ Stretch | **Interests**: predefined category chips on Profile page (`PUT /children/:id/interests`), shown on volunteer briefing page and parent home, feeds into Gemini AI prompt. |
+| ✅ Stretch | **3 reflection badges**: `dear-diary` (first journal entry), `reflective` (3 different days), `self-aware` (3+ interests). |
 
 **Tests:**
-- `e2e/child.spec.js`: child marks quest done → status changes, badge shelf renders, leaderboard loads and tab switch works. ✅
-- `src/tests/child/gamification.spec.js`: `levelFor()` and all 6 `earnedBadges()` conditions with edge cases. ✅
+- `e2e/child.spec.js`: quest submit, volunteer verify (DB write), API failure state, Kueh Tin tab + badge names, leaderboard podium. ✅
+- `src/tests/child/gamification.spec.js`: `levelFor()`, all 9 `earnedBadges()` conditions (31 tests). ✅
+- `src/components/__tests__/HomeworkQuestCard.spec.js`: child/volunteer modes, submit, verify, undo, busy state. ✅
+- `src/components/__tests__/ChildAvatar.spec.js`: image path vs emoji vs empty. ✅
 - `src/tests/shared/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
 
-**Q&A angle:** computed properties to reshape data for charts, component props contract (`sessions` array in → chart rendered), deck quiz data flow (deck → questions copied to homework → child sees interactive quest), motivation design for kids (berries, levels, badges), responsive charts.
+**Q&A angle:** computed properties to reshape data for charts, component props contract (`sessions` array in → chart rendered), deck quiz data flow, motivation design for kids (kueh lapis, badges), journal streak computed from a Set of dates, predefined interests for child safety (no free text), Handover cache invalidation when interests/journal change, localStorage for cheer state without a server round-trip.
 
 ---
 
@@ -349,9 +371,10 @@ Ning Xuan (sessions) ─────────────┬─► Yuqi (hand
 Ning Xuan (assign homework) ──────► Jachin (child completes) ──► Kat (parent sees status)
 Yuqi (handover API) ──────────────► Kat (parent-friendly summary)
 Jachin (chart components) ────────► Yuqi, Kat, Yu Xuan (drop-in on their pages)
+Jachin (journal + interests) ─────► Yuqi (AI prompt includes them) ──► Kat (parent sees them)
 Kat (unread counts) ──────────────► Kai Sen (navbar badge)
 ```
 
-**Each member owns the Mongoose model their feature writes to.** Ning Xuan owns `Session` and `Homework` (with Jachin), Kat owns `Message`, Kai Sen owns `User` and `Child`, and Jachin owns `Deck` and `Handover` (cache invalidation is in sessions.js but the model belongs here). Adding a field to a model is fine. Renaming or removing one needs a heads-up in the chat.
+**Each member owns the Mongoose model their feature writes to.** Ning Xuan owns `Session` and `Homework` (with Jachin), Kat owns `Message`, Kai Sen owns `User` and `Child` (Jachin added interests/journal/cheer fields with Kai Sen's knowledge), and Jachin owns `Deck`. Adding a field to a model is fine. Renaming or removing one needs a heads-up in the chat.
 
 **Nobody needs to wait.** The demo data in `server/data/seed.json` (loaded into MongoDB with `pnpm seed`) already has sessions, homework with question banks, messages, and handovers across 6 children. The `GET` endpoints work, and the handover has a working non-AI fallback. Build against the demo data now and connect to each other's `POST` endpoints when they are ready.
