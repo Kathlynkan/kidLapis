@@ -203,17 +203,15 @@
   outline-offset: 1px;
 }
 
-.coordinatorpage .skill-select {
+.coordinatorpage .form-select.skill-select {
   width: auto;
-  padding: 7px 34px 7px 16px;
+  padding: 9px 34px 9px 16px;
   border: 0;
   border-radius: 999px;
   background-color: #FFFFFF;
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
   color: #3D3454;
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
 }
 
 /* ---------- tags ---------- */
@@ -278,7 +276,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border: 0;
   border-radius: 5px;
   background: #D5CBEA;
@@ -579,7 +577,7 @@
 /* a subject tag inside a fact box can wrap onto two lines instead of sticking out of the box */
 .coordinatorpage .fact .tag {
   white-space: normal;
-  border-radius: 14px;
+  border-radius: 999px;
   text-align: center;
 }
 
@@ -612,7 +610,7 @@
 .coordinatorpage .form-control,
 .coordinatorpage .form-select {
   border: 1px solid #E3DBF0;
-  border-radius: 12px;
+  border-radius: 6px;
   background-color: #FFFFFF;
   color: #3D3454;
   font-family: inherit;

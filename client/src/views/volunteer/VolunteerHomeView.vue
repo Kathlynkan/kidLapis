@@ -709,7 +709,7 @@ onMounted(loadData)
   font-size: 14px;
 }
 
-/* the small caption above the topic, then the topic on the left with its subject tag on the right */
+/* the small caption above the topic, then the topic with its subject tag right next to it */
 .volunteerpage .fact-caption {
   color: #5E7473;
   font-size: 12px;
@@ -719,15 +719,11 @@ onMounted(loadData)
 }
 
 .volunteerpage .fact-topic {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
   margin-bottom: 6px;
 }
 
 .volunteerpage .fact-topic .session-subject {
-  flex-shrink: 0;
+  margin-left: 6px;
 }
 
 .volunteerpage .child-bottom {
