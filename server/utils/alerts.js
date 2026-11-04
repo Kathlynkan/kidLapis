@@ -47,7 +47,7 @@ export function noRecentSessionAlert(child, childSessions, today) {
   return {
     type: 'no-session',
     severity: days > URGENT_NO_SESSION_DAYS ? 'high' : 'medium',
-    message: `No session in ${days} days (last on ${lastDate})`,
+    message: `No session for ${days} days (last on ${lastDate})`,
   }
 }
 

@@ -218,7 +218,7 @@ async function confirmDelete() {
       <!-- disabled until the list has loaded: otherwise the slow first load could finish AFTER
            a quick "add" and overwrite the list, so the new child would vanish from the page -->
       <button class="t-btn" :disabled="loading" data-test="add-child" @click="openAdd">
-        <i class="bi bi-plus-lg"></i>Add child
+        <i class="bi bi-plus-lg"></i>Add Child
       </button>
     </PageHeader>
 
