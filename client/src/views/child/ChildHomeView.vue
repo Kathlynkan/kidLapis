@@ -590,8 +590,7 @@ onUnmounted(() => {
   border: 2px dashed #B7D8D7;
 }
 
-/* the I'm done! button: the shape of the Edit and Delete buttons of the volunteer page (small, 5px corners, no outline),
-   in pale pink with dark text */
+/* submit button: pale pink, same shape as the volunteer Edit/Delete buttons (small, 5px corners, no outline) */
 .childhomepage .quest-submit {
   --bs-btn-color: #4A3F3A;
   --bs-btn-bg: #F3C1D3;
