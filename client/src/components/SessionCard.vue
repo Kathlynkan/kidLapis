@@ -1,10 +1,12 @@
 <!-- =============================================================
   SessionCard - one past session in the history list.   Owner: Ning Xuan
+  Shows the learning part first, then the social part (lunch, play, friends) under a thin line,
+  so a volunteer can see everything they wrote before editing it (social part added by Yuqi).
   The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
 ============================================================= -->
 <script setup>
-import { ref } from 'vue'
-import { formatDate, accuracy, subjectStyle } from '@/utils/format'
+import { ref, computed } from 'vue'
+import { formatDate, accuracy, subjectStyle, activitiesOf } from '@/utils/format'
 import { MOODS } from '@/utils/constants'
 import '@/css/main/components.css' // the look of the small parts
 
@@ -17,6 +19,15 @@ const emit = defineEmits(['edit', 'delete'])
 const mood = MOODS.find((m) => m.value === props.session.mood)
 const showDeleteModal = ref(false)
 const showFullNotes = ref(false)
+const activities = computed(() => activitiesOf(props.session)) // e.g. ['Chess', 'Drawing']
+
+const PORTION_WORDS = { All: 'ate it all', Most: 'ate most of it', Half: 'ate half', Little: 'ate a little', None: "didn't eat" }
+
+// true if the volunteer filled in anything social
+const hasSocial = computed(() => {
+  const s = props.session
+  return Boolean(s.meal || s.portion || activities.value.length || s.interaction || s.behaviour || s.socialNotes)
+})
 
 function handleDelete() { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.session.id); showDeleteModal.value = false }
@@ -68,6 +79,24 @@ function cancelDelete()  { showDeleteModal.value = false }
           {{ showFullNotes ? 'Show less' : 'Show more' }}
         </button>
       </div>
+
+      <!-- social side: what the volunteer wrote about lunch, play and friends -->
+      <div v-if="hasSocial" class="session-social" data-test="session-social">
+        <div v-if="session.meal || session.portion">
+          <i class="bi bi-egg-fried me-1 session-icon"></i>Lunch:
+          {{ session.meal || 'Not noted' }}<template v-if="PORTION_WORDS[session.portion]">, {{ PORTION_WORDS[session.portion] }}</template>
+        </div>
+        <div v-if="activities.length">
+          <i class="bi bi-controller me-1 session-icon"></i>Played: {{ activities.join(', ') }}
+        </div>
+        <div v-if="session.interaction">
+          <i class="bi bi-people me-1 session-icon"></i>With others: {{ session.interaction }}
+        </div>
+        <div v-if="session.behaviour">
+          <i class="bi bi-star me-1 session-icon"></i>Good moment: {{ session.behaviour }}
+        </div>
+        <div v-if="session.socialNotes" class="fst-italic text-break">"{{ session.socialNotes }}"</div>
+      </div>
     </div>
 
     <template v-if="canEdit">
@@ -117,3 +146,11 @@ function cancelDelete()  { showDeleteModal.value = false }
     <div v-if="showDeleteModal" class="modal-backdrop fade show"></div>
   </Teleport>
 </template>
+
+<style>
+.session-card .session-social {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(33, 60, 49, 0.12);
+}
+</style>

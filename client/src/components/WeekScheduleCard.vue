@@ -131,7 +131,7 @@ const pendingSlots = computed(() => countSlots(isPending))
   flex-wrap: wrap;
   gap: 10px;
   margin: 0;
-  padding: 0;
+  padding: 0 16px; 
   list-style: none;
 }
 .today-item {
@@ -174,6 +174,7 @@ const pendingSlots = computed(() => countSlots(isPending))
 }
 .empty-today {
   margin: 0;
+  padding: 0 16px;
   color: #7d7690;
 }
 
@@ -209,7 +210,7 @@ const pendingSlots = computed(() => countSlots(isPending))
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 14px;
+  margin: 14px 0 6px 14px; 
   padding: 6px 2px;
   border: 0;
   background: transparent;

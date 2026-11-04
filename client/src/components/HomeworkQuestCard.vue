@@ -12,6 +12,7 @@ const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
   busy:     { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false }, // true = no Mark as Checked / Return / Edit / Delete buttons
 })
 const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
@@ -148,7 +149,7 @@ function cancelDelete()  { showDeleteModal.value = false }
     </div>
 
     <!-- volunteer actions -->
-    <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+    <div v-if="mode === 'volunteer' && !readonly && homework.status !== 'verified'"
       class="mt-2 d-flex align-items-center gap-2">
       <template v-if="homework.status === 'submitted'">
         <button
