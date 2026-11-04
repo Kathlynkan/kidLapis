@@ -73,7 +73,7 @@ const completedHomework = computed(() =>
 async function loadHandover() {
   handoverLoading.value = true
   try {
-    const response = await api.post(`/handover/${childId}`, { audience: 'volunteer' })
+    const response = await api.post(`/handover/${childId}`)
     handover.value = response.data
   } catch {
     handover.value = null // the rest of the page still works without the summary
@@ -862,12 +862,6 @@ onMounted(() => {
 .childprofilepage .handover-source-ai,
 .childprofilepage .handover-source-last {
   background: var(--cp-teal-soft);
-  color: var(--cp-text);
-}
-
-/* the topics that keep coming back are struggles too: the same muted yellow as "struggled with" */
-.childprofilepage .handover-tag {
-  background: #EEDFA6;
   color: var(--cp-text);
 }
 
