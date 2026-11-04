@@ -83,7 +83,7 @@ onUnmounted(() => {
       <template v-if="entries.length === 0">
         <StateMessage message="No quests verified this week yet — complete one to appear!" />
         <div class="lb-foot">
-          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go do a quest</RouterLink>
+          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go Do a Quest</RouterLink>
         </div>
       </template>
 
@@ -150,7 +150,7 @@ onUnmounted(() => {
         <p v-else-if="!hasMe" class="lb-hint">You are not on the board yet. Do a quest to earn stars and join!</p>
 
         <div class="lb-foot">
-          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go do a quest</RouterLink>
+          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go Do a Quest</RouterLink>
         </div>
       </template>
     </div>

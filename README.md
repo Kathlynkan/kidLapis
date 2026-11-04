@@ -112,7 +112,7 @@ The demo data is built to trigger interesting cases:
 
 ```bash
 cd client
-pnpm test:unit                         # Vitest unit + component tests (src/tests/<parent|child|volunteer|coordinator|shared>)
+pnpm test:unit                         # Vitest unit + component tests (src/__tests__/<parent|child|volunteer|coordinator|shared>)
 pnpm exec playwright install chromium  # first time only
 pnpm test:e2e                          # Playwright E2E - starts API + Vue for you, re-seeds YOUR database
 pnpm exec playwright show-report       # open the HTML report
@@ -125,9 +125,24 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 | `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email, parent with a child code) | Kai Sen |
 | `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
 | `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
-| `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, recurring badge, session timeline with mood labels, SkillProgressChart, child switcher, switching children | Jachin |
+| `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, session timeline with mood labels, SkillProgressChart (Progress tab), child switcher, switching children | Jachin |
 | `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
-| `e2e/messages.spec.js` | Parent child list, chat thread visible, switch child, send message + real-time delivery, coordinator sees same thread | Kat |
+| `e2e/messages.spec.js` | A parent's message reaches the coordinator (and the bell shows it), the coordinator's reply reaches the parent, each child has a separate chat | Kat |
+| `e2e/parent-viewed.spec.js` | When the parent opens her page, the volunteer sees the child's sessions as "Seen by parent" and can no longer edit or delete them | Kat |
+
+The unit and component tests (Vitest, no database or browser needed) are in `client/src/__tests__/`, one folder for each role:
+
+| Test | Type | Covers |
+|---|---|---|
+| `parent/parentHelpers.spec.js` | unit | `activitiesOf`: a session's activities as a list (list, one word, none, empty, null) |
+| `parent/ParentSocialDay.spec.js` | component | one day on the Social tab: meal, what the child did, volunteer note, photo pop-up, empty day |
+| `parent/ChatThread.spec.js` | component | the chat: a bubble for each message, empty chat, sending a message, an empty message is not sent |
+| `child/ChildAvatar.spec.js`, `child/gamification.spec.js` | component, unit | the avatar (image, emoji, empty) and the badge and level rules |
+| `volunteer/HomeworkQuestCard.spec.js` | component | the quest card in child and volunteer mode: submit, verify, undo, busy |
+| `shared/LoginView.spec.js`, `shared/SignupView.spec.js` | component | the login and sign-up pages |
+| `shared/auth.spec.js`, `shared/format.spec.js`, `shared/validation.spec.js` | unit | the login store, the format helpers and the form rules |
+
+To run only one folder, for example the parent's: `pnpm exec vitest run src/__tests__/parent`. To run only one E2E file: `pnpm exec playwright test e2e/messages.spec.js --project=chromium`.
 
 ---
 

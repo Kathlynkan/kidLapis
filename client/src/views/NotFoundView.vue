@@ -14,7 +14,7 @@ import '@/css/main/authpage.css' // the card on the board, the title and the sen
             <h1 class="page-title">Page not found</h1>
             <p class="page-subtitle">The page you are looking for does not exist.</p>
           </header>
-          <RouterLink to="/" class="notfound-button">Back to home</RouterLink>
+          <RouterLink to="/" class="notfound-button">Back to Home</RouterLink>
         </div>
       </div>
     </div>

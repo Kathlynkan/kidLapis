@@ -92,7 +92,7 @@ const pendingSlots = computed(() => countSlots(isPending))
       data-test="toggle-week"
       @click="showWeek = !showWeek"
     >
-      {{ showWeek ? 'Hide full week' : 'Show full week' }}
+      {{ showWeek ? 'Hide Full Week' : 'Show Full Week' }}
       <i class="bi bi-chevron-down chevron" :class="{ 'is-open': showWeek }" aria-hidden="true"></i>
     </button>
 

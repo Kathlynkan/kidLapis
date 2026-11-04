@@ -32,7 +32,6 @@ const menuOpen = ref(false) // on a small screen the menu is hidden until this i
 watch(() => route.fullPath, () => {
   menuOpen.value = false
   bellOpen.value = false
-  fetchUnread()
   fetchPhoto()
   fetchBell()
 })
@@ -108,16 +107,27 @@ async function fetchPhoto() {
   }
 }
 
-// how many messages the user has not read yet (shown next to Messages)
-const unreadTotal = ref(0)
+// the messages the user has not read yet, one line for each child (shown in the bell)
+const messageUpdates = ref([]) // [{ childId, childName, count }]
+const unreadTotal = computed(() => messageUpdates.value.reduce((n, m) => n + m.count, 0))
 
 async function fetchUnread() {
-  if (!auth.isLoggedIn || !['coordinator', 'parent'].includes(auth.role)) return
+  if (!auth.isLoggedIn || !['coordinator', 'parent'].includes(auth.role)) {
+    messageUpdates.value = []
+    return
+  }
   try {
-    const res = await api.get('/messages/unread')
-    unreadTotal.value = Object.values(res.data).reduce((a, b) => a + b, 0)
+    const counts = (await api.get('/messages/unread')).data
+    const childIds = Object.keys(counts).filter((id) => counts[id] > 0)
+    if (childIds.length === 0) {
+      messageUpdates.value = []
+      return
+    }
+    const children = (await api.get('/children')).data
+    const nameOf = Object.fromEntries(children.map((c) => [c.id, c.name]))
+    messageUpdates.value = childIds.map((id) => ({ childId: id, childName: nameOf[id] || 'a child', count: counts[id] }))
   } catch {
-    // the number is not important, so we ignore errors
+    // the messages are not important here, so we ignore errors and keep the old list
   }
 }
 
@@ -149,7 +159,8 @@ const bellCount = computed(
     requests.value.length +
     questsToCheck.value.length +
     parentUpdates.value.reduce((n, u) => n + u.count, 0) +
-    unreadNotices.value,
+    unreadNotices.value +
+    unreadTotal.value,
 )
 
 // Open/close the bell. Opening it marks the updates as read (the count drops, they stay listed
@@ -172,6 +183,7 @@ const noticeTime = (iso) =>
   new Date(iso).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 async function fetchBell() {
+  fetchUnread() // the unread messages are part of the bell
   if (!hasBell.value) {
     requests.value = []
     questsToCheck.value = []
@@ -266,7 +278,6 @@ function connectBellSocket() {
 }
 
 onMounted(() => {
-  fetchUnread()
   fetchPhoto()
   fetchBell()
   connectBellSocket()
@@ -391,6 +402,22 @@ watch(
               </span>
             </RouterLink>
           </template>
+
+          <!-- COORDINATOR AND PARENT: the messages nobody has read yet (after the updates) -->
+          <template v-if="['coordinator', 'parent'].includes(auth.role)">
+            <div class="lapis-bell-title">Messages</div>
+            <p v-if="messageUpdates.length === 0" class="lapis-bell-empty">No new messages.</p>
+            <RouterLink
+              v-for="m in messageUpdates"
+              :key="m.childId"
+              :to="{ name: 'messages', params: { childId: m.childId } }"
+              class="lapis-bell-item"
+              data-test="nav-message"
+            >
+              <i class="bi bi-chat-dots"></i>
+              <span>{{ m.count }} new message{{ m.count === 1 ? '' : 's' }} about <b>{{ m.childName }}</b></span>
+            </RouterLink>
+          </template>
         </div>
       </div>
 
@@ -405,7 +432,6 @@ watch(
         <div class="lapis-links">
           <RouterLink v-for="link in links" :key="link.to" class="lapis-nav-link" :class="{ open: isOpen(link) }" :to="link.to">
             {{ link.label }}
-            <span v-if="link.to === '/messages' && unreadTotal > 0" class="lapis-badge">{{ unreadTotal }}</span>
             <span
               v-if="link.to === '/volunteer/requests' && requests.filter(r => r.status === 'pending').length > 0"
               class="lapis-badge"
@@ -433,7 +459,7 @@ watch(
 
         <div v-else class="lapis-user">
           <RouterLink class="lapis-button" to="/login">Log in</RouterLink>
-          <RouterLink class="lapis-button lapis-button-filled" to="/signup">Sign up</RouterLink>
+          <RouterLink class="lapis-button lapis-button-filled" to="/signup">Sign Up</RouterLink>
         </div>
       </div>
     </div>

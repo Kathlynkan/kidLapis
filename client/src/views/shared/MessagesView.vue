@@ -70,7 +70,9 @@ async function loadMessages(childId) {
     messages.value = response.data
     unread.value[childId] = 0
     // tell the server these messages are read (this also clears the badge in the top bar)
-    api.put('/messages/read', { childId }).catch(() => {})
+    api.put('/messages/read', { childId })
+      .then(() => window.dispatchEvent(new Event('bell-refresh'))) // the bell drops these messages
+      .catch(() => {})
   } catch (err) {
     error.value = errorMessage(err)
   }

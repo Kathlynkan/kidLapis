@@ -36,15 +36,18 @@ describe('ChatThread', () => {
         ).toHaveLength(2)
     })
 
-    // Test case (2): Verify that the component displays the words of a message.
-    it('shows the words of a message', () => {
+    // Test case (2): Verify that my own message goes on my side and the other person's message does not.
+    it('puts my message on my side of the chat', () => {
+        // the logged in person is the parent (u_par1), so the first message is mine and the second is the coordinator's
         const wrapper = mount(ChatThread, {
             props: { messages, currentUserId: 'u_par1' },
         })
 
-        // wrapper.text() is all the words on the screen, so we check Hi there is one of them
-        expect(wrapper.text())
-            .toContain('Hi there')
+        const rows = wrapper.findAll('.message-row')
+
+        // the component adds the class from-me to the rows of my own messages
+        expect(rows[0].classes('from-me')).toBe(true)
+        expect(rows[1].classes('from-me')).toBe(false)
     })
 
     // Test case (3): Verify that the component says there are no messages yet when the chat is empty.

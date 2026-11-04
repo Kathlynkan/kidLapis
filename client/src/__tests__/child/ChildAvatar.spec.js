@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ChildAvatar from '../ChildAvatar.vue'
+import ChildAvatar from '@/components/ChildAvatar.vue'
 
 describe('ChildAvatar', () => {
   it('renders an img when avatar is a file path starting with /', () => {

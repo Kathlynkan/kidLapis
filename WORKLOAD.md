@@ -53,9 +53,9 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/stores/auth.js` | Pinia store — token + user in sessionStorage, login/logout/patchUser |
 | `client/src/services/api.js` | Axios instance — base URL, auth header, 401 handler |
 | `client/src/utils/validation.js` | `isValidEmail`, `isValidChildCode`, `validateSignup` — same rules as server |
-| `client/src/tests/shared/validation.spec.js` | Unit test for `isValidChildCode` |
-| `client/src/tests/shared/LoginView.spec.js` | Component test — show/hide password, link to sign up |
-| `client/src/tests/shared/SignupView.spec.js` | Component test — fields change with the role, `?role=parent`, empty form errors |
+| `client/src/__tests__/shared/validation.spec.js` | Unit test for `isValidChildCode` |
+| `client/src/__tests__/shared/LoginView.spec.js` | Component test — show/hide password, link to sign up |
+| `client/src/__tests__/shared/SignupView.spec.js` | Component test — fields change with the role, `?role=parent`, empty form errors |
 | `client/src/views/volunteer/RequestsView.vue` | Volunteer accepts or declines new session requests |
 | `client/src/main.js` | App bootstrap — Vue, Pinia, Router, 401 handler wired up |
 | `client/src/App.vue` | Root shell — NavBar, `<RouterView>`, page-peel transition |
@@ -81,7 +81,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/server.js` | Express + socket.io app — CORS, JSON, login check on connect, rooms per user / role / child, mounts all routes |
 | `server/config.env` | DB connection string + Gemini API key (not in git) |
 | `server/data/seed.json` | Demo data — children, parents, volunteers, sessions, homework, messages |
-| `client/src/tests/shared/auth.spec.js` | Unit tests for the auth Pinia store |
+| `client/src/__tests__/shared/auth.spec.js` | Unit tests for the auth Pinia store |
 | `client/e2e/auth.spec.js` | E2E — login per role, wrong password, wrong-role redirect, sign-up flow, child code |
 | `README.md`, `CONTRIBUTING.md`, `WORKLOAD.md` | Project docs, setup instructions, team split |
 | `pnpm-workspace.yaml`, `client/vite.config.js`, `client/vitest.config.js`, `client/playwright.config.js` | Build, test, workspace config |
@@ -97,7 +97,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/PeelCard.vue` | Reusable collapsible accordion (grid-template-rows animation) |
 | `server/routes/handover.js` | POST /handover/:childId — calls Gemini, parses JSON, caches result, fallback |
 | `server/models/Handover.js` | Mongoose schema — cached AI summary per child, `audience` field |
-| `server/routes/__tests__/handover.test.js` | Unit/integration tests for the handover route |
+| `server/tests/handover.test.js` | Unit/integration tests for the handover route |
 | `client/e2e/volunteer.spec.js` | E2E — handover shows, session history, recurring struggle badge |
 
 ### Ning Xuan — Session logging & homework assignment
@@ -141,7 +141,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/utils/schedule.js` | Schedule helper utilities |
 | `server/tests/alerts.test.js` | Unit tests for each alert rule |
 | `server/tests/matchmaking.test.js` | Unit tests for the scoring function |
-| `server/tests/Schedule.test.js` | Unit tests for schedule logic |
+| `server/tests/schedule.test.js` | Unit tests for schedule logic |
 | `client/e2e/coordinator.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
 
 ### Jachin — Data visualisation & child gamification
@@ -155,9 +155,9 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/HomeworkQuestCard.vue` | Quest card — "I'm done!" (child), undo, "Verify & give points" (volunteer), late-penalty label, reject flow |
 | `client/src/components/ChildAvatar.vue` | Child avatar display — photo if path, emoji if text; used in leaderboard |
 | `client/src/utils/gamification.js` | `levelFor(points)`, `earnedBadges(child, homework)` — 9 badges: 6 homework + 3 reflection (dear-diary, reflective, self-aware) |
-| `client/src/tests/child/gamification.spec.js` | Unit tests for all 9 badge conditions and edge cases (31 tests) |
-| `client/src/components/__tests__/HomeworkQuestCard.spec.js` | Unit tests for quest card in child/volunteer mode — submit, verify, undo, busy state |
-| `client/src/components/__tests__/ChildAvatar.spec.js` | Unit tests for avatar rendering (image path vs emoji vs empty) |
+| `client/src/__tests__/child/gamification.spec.js` | Unit tests for all 9 badge conditions and edge cases (31 tests) |
+| `client/src/__tests__/volunteer/HomeworkQuestCard.spec.js` | Unit tests for quest card in child/volunteer mode — submit, verify, undo, busy state |
+| `client/src/__tests__/child/ChildAvatar.spec.js` | Unit tests for avatar rendering (image path vs emoji vs empty) |
 | `server/routes/progress.js` | GET /progress/:childId (per-topic accuracy + trend), GET /progress/overview |
 | `server/routes/decks.js` | GET /decks — question banks for the homework deck picker |
 | `server/routes/homework.js` *(shared — submit/verify/leaderboard only)* | PUT /homework/:id/submit (child), PUT /homework/:id/verify (awards points), GET /homework/leaderboard |
@@ -181,7 +181,7 @@ The homework route is split — see the callout at the bottom of this section.
 |---|---|
 | `client/src/utils/constants.js` | SUBJECTS, SKILL_OPTIONS, LEVELS, DAYS, MOODS, HOMEWORK_STATUS, INTEREST_OPTIONS (Jachin) |
 | `client/src/utils/format.js` | `formatDate`, `accuracy`, `relativeDay`, `firstName`, `daysSince` |
-| `client/src/tests/shared/format.spec.js` | Unit tests for format helpers |
+| `client/src/__tests__/shared/format.spec.js` | Unit tests for format helpers |
 | `server/data/seed.json` | Demo data — children with interests + journal entries (Jachin), sessions, homework, messages |
 
 ### The `homework.js` route split
@@ -327,10 +327,10 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 
 **Tests:**
 - `e2e/child.spec.js`: quest submit, volunteer verify (DB write), API failure state, Kueh Tin tab + badge names, leaderboard podium. ✅
-- `src/tests/child/gamification.spec.js`: `levelFor()`, all 9 `earnedBadges()` conditions (31 tests). ✅
-- `src/components/__tests__/HomeworkQuestCard.spec.js`: child/volunteer modes, submit, verify, undo, busy state. ✅
-- `src/components/__tests__/ChildAvatar.spec.js`: image path vs emoji vs empty. ✅
-- `src/tests/shared/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
+- `src/__tests__/child/gamification.spec.js`: `levelFor()`, all 9 `earnedBadges()` conditions (31 tests). ✅
+- `src/__tests__/volunteer/HomeworkQuestCard.spec.js`: child/volunteer modes, submit, verify, undo, busy state. ✅
+- `src/__tests__/child/ChildAvatar.spec.js`: image path vs emoji vs empty. ✅
+- `src/__tests__/shared/format.spec.js`: accuracy, daysSince, relativeDay, firstName. ✅
 
 **Q&A angle:** computed properties to reshape data for charts, component props contract (`sessions` array in → chart rendered), deck quiz data flow, motivation design for kids (kueh lapis, badges), journal streak computed from a Set of dates, predefined interests for child safety (no free text), Handover cache invalidation when interests/journal change, localStorage for cheer state without a server round-trip.
 

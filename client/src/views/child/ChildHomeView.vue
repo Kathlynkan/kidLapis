@@ -308,7 +308,7 @@ onUnmounted(() => {
             :style="{ background: c.color, '--tx': c.tx + 'px', '--ty': c.ty + 'px', animationDelay: (i * 0.03) + 's' }"
             aria-hidden="true"
           ></span>
-          <div class="badge-unlock-label">New kueh unlocked!</div>
+          <div class="badge-unlock-label">New Kueh Unlocked!</div>
           <img :src="`/child_badges_images/${newBadge.image}.webp`" :alt="newBadge.kueh" class="badge-unlock-img" />
           <div class="badge-unlock-body">
             <div class="badge-unlock-name">{{ newBadge.kueh }}</div>
@@ -411,7 +411,7 @@ onUnmounted(() => {
               <template v-else>to next layer</template>
             </span>
             <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
-            <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ being checked</span>
+            <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ Being Checked</span>
           </div>
         </div>
       </div>
@@ -463,7 +463,7 @@ onUnmounted(() => {
         <template v-if="done.length > 0">
           <button class="quest-history-toggle mb-2" @click="showDone = !showDone">
             <i :class="showDone ? 'bi bi-chevron-up' : 'bi bi-chevron-down'" class="me-1"></i>
-            Past quests
+            Past Quests
             <span class="quest-history-count ms-1">{{ done.length }}</span>
           </button>
           <div v-if="showDone" class="row g-3 mb-2">

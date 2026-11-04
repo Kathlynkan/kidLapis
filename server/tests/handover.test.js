@@ -10,7 +10,7 @@ import {
   formatWeek,
   listWeeks,
   weekTitleFor,
-} from '../handover.js'
+} from '../routes/handover.js'
 
 // fake sessions, newest first (same shape as MongoDB)
 const sessions = [

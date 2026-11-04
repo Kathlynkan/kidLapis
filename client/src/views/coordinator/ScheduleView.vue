@@ -175,7 +175,7 @@ async function removeSlot(volunteer, day, slot) {
 
 <template>
   <div class="container py-4">
-    <PageHeader title="Weekly schedule" subtitle="Who sees which child, on which day, at what time." />
+    <PageHeader title="Weekly Schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -206,7 +206,7 @@ async function removeSlot(volunteer, day, slot) {
 
       <!-- Assigned but not on the timetable yet -->
       <div v-if="unscheduled.length" class="cb-card p-3 mt-3" data-test="unscheduled">
-        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned without a day</h2>
+        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned Without a Day</h2>
         <p class="small text-muted-cb mb-2">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
         </p>
@@ -230,7 +230,7 @@ async function removeSlot(volunteer, day, slot) {
           <form class="modal-content" data-test="add-slot-form" @submit.prevent="submitAdd">
             <div class="modal-header">
               <h2 id="add-title" class="modal-title h6">
-                Add a session · {{ adding.volunteer.name }} · {{ adding.day }}
+                Add a Session · {{ adding.volunteer.name }} · {{ adding.day }}
               </h2>
               <button type="button" class="btn-close" aria-label="Close" :disabled="saving" @click="closeAdd"></button>
             </div>
@@ -259,7 +259,7 @@ async function removeSlot(volunteer, day, slot) {
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" :disabled="saving" @click="closeAdd">
+              <button type="button" class="btn btn-outline-danger btn-sm" :disabled="saving" @click="closeAdd">
                 Cancel
               </button>
               <button

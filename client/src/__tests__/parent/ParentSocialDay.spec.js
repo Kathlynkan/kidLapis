@@ -35,7 +35,7 @@ describe('ParentSocialDay', () => {
         })
 
         expect(wrapper.text())
-            .toContain('What Ethan did')
+            .toContain('What Ethan Did')
         expect(wrapper.text())
             .toContain('Chess')
     })

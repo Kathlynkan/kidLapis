@@ -1605,6 +1605,11 @@
       "activity": [
         "Colouring"
       ],
+      "photos": [
+        "/photos/watching-cards.jpg",
+        "/photos/colouring-flower.jpg",
+        "/photos/mia-chicken-rice.jpg"
+      ],
       "interaction": "Limited",
       "socialNotes": "Did not talk to the other children yet, but watched them play."
     },
@@ -1628,6 +1633,11 @@
       "portion": "Half",
       "activity": [
         "Outdoor play"
+      ],
+      "photos": [
+        "/photos/mia-noodles.jpg",
+        "/photos/mia-soccer.jpg",
+        "/photos/mia-waving.jpg"
       ],
       "interaction": "Fair",
       "socialNotes": "Smiled and waved at the other P2 children but stayed close to her volunteer."
@@ -1653,6 +1663,10 @@
       "activity": [
         "Reading"
       ],
+      "photos": [
+        "/photos/mia-fried-rice.jpg",
+        "/photos/mia-reading-corner.jpg"
+      ],
       "interaction": "Fair",
       "socialNotes": "Sat with two girls in the reading corner, though she mostly listened."
     },
@@ -1676,7 +1690,8 @@
         "Drawing"
       ],
       "photos": [
-        "/photos/colouring.jpg"
+        "/photos/mia-nasi-lemak.jpg",
+        "/photos/mia-shape-robot.jpg"
       ],
       "interaction": "Good",
       "behaviour": "Showed a classmate how to draw a triangle",
@@ -1704,7 +1719,8 @@
         "Colouring"
       ],
       "photos": [
-        "/photos/colouring.jpg"
+        "/photos/mia-fried-rice-2.jpg",
+        "/photos/mia-colouring-aisha.jpg"
       ],
       "interaction": "Fair",
       "socialNotes": "Still shy with the other children. Sat next to her volunteer at break and coloured quietly."
@@ -1731,7 +1747,8 @@
         "Drawing"
       ],
       "photos": [
-        "/photos/noodles.jpg"
+        "/photos/mia-drawing-cat.jpg",
+        "/photos/mia-noodles-friends.jpg"
       ],
       "interaction": "Limited",
       "socialNotes": "Drew on her own at break and did not want to join the group game."
@@ -1758,7 +1775,9 @@
         "Reading"
       ],
       "photos": [
-        "/photos/reading-corner.jpg"
+        "/photos/mia-chicken-rice-friends.jpg",
+        "/photos/mia-sharing-crayons.jpg",
+        "/photos/mia-reading-bear.jpg"
       ],
       "interaction": "Good",
       "socialNotes": "Shared her crayons with a new friend at the drawing table, the first time she joined in by herself."
@@ -1784,6 +1803,10 @@
       "activity": [
         "Board games"
       ],
+      "photos": [
+        "/photos/mia-board-game.jpg",
+        "/photos/mia-fried-rice-friends.jpg"
+      ],
       "interaction": "Good",
       "behaviour": "Counted the squares out loud for everyone in Snakes and Ladders",
       "socialNotes": "Laughed a lot during the board game and asked to play again next week."
@@ -1803,7 +1826,8 @@
       "mood": "happy",
       "notes": "Wrote b and d correctly in every word today, and spelled 'friend' right for the first time.",
       "photos": [
-        "/photos/lunch-girls.jpg"
+        "/photos/mia-nasi-lemak-lunch.jpg",
+        "/photos/mia-helping-bag.jpg"
       ],
       "meal": "Nasi lemak",
       "portion": "All",

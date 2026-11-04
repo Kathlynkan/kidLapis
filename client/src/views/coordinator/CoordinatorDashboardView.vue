@@ -304,11 +304,11 @@ function daysAgo(dateStr) {
           </section>
 
           <div class="side">
-            <TopicSummaryChart :sessions="sessions" title="Accuracy by subject" calm />
+            <TopicSummaryChart :sessions="sessions" title="Accuracy by Subject" calm />
 
             <!-- Recent activity -->
             <section class="t-card" data-test="activity-feed">
-              <div class="card-head"><h2>Recent sessions</h2></div>
+              <div class="card-head"><h2>Recent Sessions</h2></div>
               <p v-if="!recentSessions.length" class="empty">No sessions logged yet.</p>
               <ul v-else class="recent">
                 <li v-for="s in recentSessions" :key="s.id">

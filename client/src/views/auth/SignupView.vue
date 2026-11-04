@@ -79,7 +79,7 @@ async function handleSignup() {
       <div class="board">
         <div class="auth-card">
           <header>
-            <h1 class="page-title">Create an account</h1>
+            <h1 class="page-title">Create an Account</h1>
             <p class="page-subtitle">Coordinators create child accounts for the centre.</p>
           </header>
 
@@ -220,7 +220,7 @@ async function handleSignup() {
             </div>
 
             <button type="submit" class="auth-submit" :disabled="loading" data-test="signup-submit">
-              {{ loading ? 'Signing up...' : 'Sign up' }}
+              {{ loading ? 'Signing Up...' : 'Sign Up' }}
             </button>
           </form>
 

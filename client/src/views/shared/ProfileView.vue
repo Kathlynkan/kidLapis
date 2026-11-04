@@ -198,7 +198,7 @@ async function save() {
 
           <div class="d-flex justify-content-end gap-2 mt-4">
             <!-- right-aligned buttons with gap in between and top margin -->
-            <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="loading" data-test="profile-save">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span> Save Changes
             </button>

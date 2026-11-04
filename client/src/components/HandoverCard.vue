@@ -60,7 +60,7 @@ const title = computed(() => {
 // the small badge next to the title
 const sourceText = computed(() => {
   if (props.handover && props.handover.source === 'ai') return 'AI summary'
-  return isParent.value ? 'From the session notes' : 'From last session'
+  return isParent.value ? 'From the Session Notes' : 'From Last Session'
 })
 
 const loadingText = computed(() => (isParent.value ? 'Getting the update...' : 'Preparing handover...'))

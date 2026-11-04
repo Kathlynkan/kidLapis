@@ -499,7 +499,7 @@ async function saveEdit(child, s) {
                             </button>
                             <button
                               type="button"
-                              class="t-btn t-btn-soft"
+                              class="t-btn t-btn-red"
                               :disabled="busyKey !== ''"
                               @click="editing = null"
                             >

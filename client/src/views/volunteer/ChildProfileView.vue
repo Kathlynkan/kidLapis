@@ -508,7 +508,7 @@ onMounted(() => {
 
           <div class="col-lg-5 d-flex flex-column gap-4">
             <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
-              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" explain />
             </PeelCard>
 
             <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
@@ -576,7 +576,7 @@ onMounted(() => {
               ></textarea>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary btn-sm" @click="rejectPendingId = null">Cancel</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" @click="rejectPendingId = null">Cancel</button>
               <button type="button" class="btn btn-danger btn-sm" @click="confirmReject">
                 <i class="bi bi-arrow-return-left me-1"></i>Return Quest
               </button>

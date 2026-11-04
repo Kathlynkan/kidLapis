@@ -174,7 +174,7 @@ onMounted(async () => {
               >
                 {{ deleting ? 'Removing...' : 'Yes, remove' }}
               </button>
-              <button type="button" class="t-btn t-btn-soft" :disabled="deleting" @click="cancelDelete">Cancel</button>
+              <button type="button" class="t-btn t-btn-red" :disabled="deleting" @click="cancelDelete">Cancel</button>
             </div>
           </div>
 
@@ -217,7 +217,7 @@ onMounted(async () => {
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-volunteer">
                 {{ saving ? 'Saving...' : 'Save Changes' }}
               </button>
-              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="cancelEdit">Cancel</button>
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="cancelEdit">Cancel</button>
             </div>
           </form>
 
