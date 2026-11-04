@@ -225,7 +225,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 .quest-star-todo { background: #FFF0DC; color: #B86A00; }
 .quest-star-late { background: #FBE3DF; color: #9A3F36; }
 
-.quest-star-original { opacity: 0.55; font-weight: 600; }
+.quest-star-original { opacity: 0.55; font-weight: 600; text-decoration: line-through; }
 
 /* due chip: icon + compact label in a colored pill */
 .quest-due {
