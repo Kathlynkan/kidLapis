@@ -97,7 +97,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/components/PeelCard.vue` | Reusable collapsible accordion (grid-template-rows animation) |
 | `server/routes/handover.js` | POST /handover/:childId — calls Gemini, parses JSON, caches result, fallback |
 | `server/models/Handover.js` | Mongoose schema — cached AI summary per child, `audience` field |
-| `server/routes/__tests__/handover.test.js` | Unit/integration tests for the handover route |
+| `server/tests/handover.test.js` | Unit/integration tests for the handover route |
 | `client/e2e/volunteer.spec.js` | E2E — handover shows, session history, recurring struggle badge |
 
 ### Ning Xuan — Session logging & homework assignment
@@ -141,7 +141,7 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/utils/schedule.js` | Schedule helper utilities |
 | `server/tests/alerts.test.js` | Unit tests for each alert rule |
 | `server/tests/matchmaking.test.js` | Unit tests for the scoring function |
-| `server/tests/Schedule.test.js` | Unit tests for schedule logic |
+| `server/tests/schedule.test.js` | Unit tests for schedule logic |
 | `client/e2e/coordinator.spec.js` | E2E — dashboard KPI cards, alerts table + filter, follow-up toggle, matchmaking, manage children, manage volunteers |
 
 ### Jachin — Data visualisation & child gamification
