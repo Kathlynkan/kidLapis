@@ -80,11 +80,11 @@ function cancelDelete()  { showDeleteModal.value = false }
       </span>
 
       <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
-        Late • {{ Math.ceil(homework.points / 2) }} ★ only
+        Submit now to still earn {{ Math.ceil(homework.points / 2) }} ★!
       </span>
 
       <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
-        Late — {{ Math.ceil(homework.points / 2) }} ★ only
+        Late hand-in — you'll earn {{ Math.ceil(homework.points / 2) }} ★
       </span>
 
       <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
