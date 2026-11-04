@@ -125,7 +125,7 @@ const laterWeek = computed(() => {
             data-test="week-earlier"
             @click="emit('change-week', earlierWeek)"
           >
-            <i class="bi bi-chevron-left me-1"></i>Earlier week
+            <i class="bi bi-chevron-left me-1"></i>Previous Week
           </button>
           <button
             type="button"
@@ -134,7 +134,7 @@ const laterWeek = computed(() => {
             data-test="week-later"
             @click="emit('change-week', laterWeek)"
           >
-            Later week<i class="bi bi-chevron-right ms-1"></i>
+            Next Week<i class="bi bi-chevron-right ms-1"></i>
           </button>
         </div>
 

@@ -362,7 +362,7 @@ watch(
 
           <!-- PARENT -->
           <template v-else-if="auth.role === 'parent'">
-            <div class="lapis-bell-title">New Updates</div>
+            <div class="lapis-bell-title">Updates</div>
             <p v-if="parentUpdates.length === 0" class="lapis-bell-empty">You're all caught up.</p>
             <RouterLink
               v-for="u in parentUpdates"
@@ -602,12 +602,16 @@ watch(
   border: 0;
   border-radius: 6px;
   background: #FFFFFF;
-  box-shadow: inset 0 0 0 2px #D5CBEA;
+  box-shadow: inset 0 0 0 1.5px var(--role-accent, #D5CBEA);
   color: #4A3F3A;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
+}
+
+.lapis-button:hover {
+  background: var(--role-accent-soft, #EAF6F5);
 }
 
 .lapis-button-filled {
