@@ -117,7 +117,7 @@ function cancelDelete()  { showDeleteModal.value = false }
       >
         <i class="bi bi-check-lg me-1"></i>
         <template v-if="isOverdue">Submit — earn {{ chipStars }} ★</template>
-        <template v-else>I'm done!</template>
+        <template v-else>I'm done! · {{ chipStars }} ★</template>
       </button>
 
       <button
