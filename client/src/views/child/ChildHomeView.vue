@@ -7,7 +7,6 @@ import StateMessage from '@/components/StateMessage.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
 import { formatDate } from '@/utils/format'
-import { INTEREST_OPTIONS } from '@/utils/constants'
 
 const auth = useAuthStore()
 
@@ -121,49 +120,7 @@ const nextBadge = computed(() => {
 })
 
 // ── Tabs ──────────────────────────────────────────────────────
-const activeTab = ref('quests') // 'quests' | 'journal' | 'tin'
-
-// ── Journal ───────────────────────────────────────────────────
-const journalInput  = ref('')
-const addingJournal = ref(false)
-
-async function addJournalEntry() {
-  const text = journalInput.value.trim()
-  if (!text) return
-  try {
-    addingJournal.value = true
-    const res = await api.post(`/children/${auth.user.childId}/journal`, { text })
-    me.value = res.data
-    journalInput.value = ''
-    if (res.data.pointsAwarded > 0) {
-      showToast('bi-journal-text', `+${res.data.pointsAwarded} ★ for your reflection!`, '#A9577A')
-    }
-    queueUnseen(600) // check for newly unlocked reflection badges
-  } catch { /* silent */ } finally {
-    addingJournal.value = false
-  }
-}
-
-async function deleteJournalEntry(entryId) {
-  try {
-    const res = await api.delete(`/children/${auth.user.childId}/journal/${entryId}`)
-    me.value = res.data
-  } catch { /* silent */ }
-}
-
-// consecutive days with at least one journal entry, counting back from today
-const journalStreak = computed(() => {
-  const dates = new Set((me.value?.journalEntries || []).map((e) => e.date))
-  let streak = 0
-  const d = new Date()
-  while (true) {
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    if (!dates.has(key)) break
-    streak++
-    d.setDate(d.getDate() - 1)
-  }
-  return streak
-})
+const activeTab = ref('quests') // 'quests' | 'tin'
 
 // the label under the tin shows the kueh you tapped, or else the next one to earn
 const picked = ref(null)
@@ -414,16 +371,6 @@ onUnmounted(() => {
         >
           <i class="bi bi-map"></i> Quests
           <span v-if="todo.length > 0" class="child-tab-count">{{ todo.length }}</span>
-        </button>
-        <button
-          role="tab"
-          :aria-selected="activeTab === 'journal'"
-          class="child-tab"
-          :class="{ 'child-tab-active': activeTab === 'journal' }"
-          @click="activeTab = 'journal'"
-        >
-          <i class="bi bi-journal-text"></i> Journal
-          <span v-if="journalStreak > 0" class="child-tab-streak">🔥{{ journalStreak }}</span>
         </button>
         <button
           role="tab"
@@ -1203,137 +1150,5 @@ onUnmounted(() => {
   font-weight: 700;
 }
 
-.child-tab-streak {
-  font-size: 12px;
-  font-weight: 700;
-  color: #C47A35;
-}
-
-/* ── Journal header ──────────────────────────────────────── */
-
-.journal-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.journal-streak-badge {
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: #FFF0DC;
-  color: #C47A35;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.journal-streak-hint {
-  font-size: 13px;
-  color: #8D7F77;
-}
-
-/* ── My Journal ───────────────────────────────────────────── */
-
-.journal-card {
-  padding: 18px 20px;
-  border-radius: 18px;
-  background: var(--role-accent-soft, #FBF8F3);
-  box-shadow: 0 1px 6px rgba(74, 63, 58, 0.10);
-}
-
-.journal-form { display: flex; flex-direction: column; gap: 8px; }
-
-.journal-textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 14px;
-  background: #FFFFFF;
-  box-shadow: 0 1px 4px rgba(74, 63, 58, 0.10);
-  font: inherit;
-  font-size: 14px;
-  color: #4A3F3A;
-  resize: vertical;
-  outline: none;
-}
-
-.journal-textarea:focus { box-shadow: 0 0 0 2px #D5CBEA; }
-
-.journal-form-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.journal-char-count {
-  font-size: 12px;
-  color: #8D7F77;
-}
-
-.journal-add-btn {
-  padding: 8px 18px;
-  border: 0;
-  border-radius: 999px;
-  background: #D5CBEA;
-  color: #4A3F3A;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.journal-add-btn:hover:not(:disabled) { background: #C0A8D8; }
-.journal-add-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.journal-entries {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.journal-entry {
-  padding: 12px 16px;
-  border-radius: 14px;
-  background: #FFFFFF;
-  box-shadow: 0 1px 4px rgba(74, 63, 58, 0.08);
-}
-
-.journal-entry-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.journal-entry-date {
-  font-size: 12px;
-  font-weight: 700;
-  color: #A9577A;
-}
-
-.journal-entry-delete {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #C0A8A8;
-  font-size: 14px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.journal-entry-delete:hover { color: #9A3F36; }
-
-.journal-entry-text {
-  font-size: 14px;
-  color: #4A3F3A;
-  line-height: 1.5;
-}
-
-.journal-empty {
-  font-size: 14px;
-  color: #8D7F77;
-  margin: 0;
-}
 
 </style>
