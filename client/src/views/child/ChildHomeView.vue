@@ -394,6 +394,19 @@ onUnmounted(() => {
             <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
           </div>
         </div>
+
+        <template v-if="done.length > 0">
+          <button class="quest-history-toggle mb-2" @click="showDone = !showDone">
+            <i :class="showDone ? 'bi bi-chevron-up' : 'bi bi-chevron-down'" class="me-1"></i>
+            {{ showDone ? 'Hide' : 'Show' }} completed
+            <span class="quest-history-count ms-1">{{ done.length }}</span>
+          </button>
+          <div v-if="showDone" class="row g-3 mb-2">
+            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
+              <HomeworkQuestCard :homework="h" mode="child" @unsubmit="unsubmitQuest" />
+            </div>
+          </div>
+        </template>
       </div>
 
       <!-- ── Kueh Tin tab ───────────────────────────────────── -->
