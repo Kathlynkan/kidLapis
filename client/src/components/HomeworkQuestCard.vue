@@ -81,25 +81,26 @@ function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
-  <div
+    <div
     class="lapis-card lapis-card-yellow lapis-card-top quest-card p-3 h-100 d-flex flex-column"
     :class="`quest-${state}`"
     data-test="homework-card"
   >
-
-  <div class="d-flex justify-content-between align-items-start gap-2">
-    <div>
+    <!-- top row: subject left, reward/state chip right — both on the same baseline -->
+    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
       <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
-      <strong class="quest-title">{{ homework.title }}</strong>
 
       <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
       <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
         <s v-if="isOverdue" class="quest-star-original">{{ homework.points }}</s>
         {{ chipStars }} <i class="bi bi-star-fill"></i>
       </span>
+      <!-- volunteer: always show the status pill -->
+      <span v-if="mode === 'volunteer'" class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
     </div>
 
-    <p class="small mb-3 quest-details">{{ homework.details }}</p>
+    <!-- title -->
+    <strong class="quest-title mb-1">{{ homework.title }}</strong>
 
     <!-- volunteer: exact date + points -->
     <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
@@ -126,23 +127,13 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
         <i class="bi bi-arrow-return-left me-1"></i>Returned
       </span>
-
-      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
-        Late • Half ★
-      </span>
-
-      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
-        Submit earlier next time for full ★!
-      </span>
-
-      <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
-      <span v-if="mode === 'child' && homework.status !== 'assigned'" class="badge quest-status" :class="`quest-pill-${state}`">
-        {{ status?.label }}
-      </span>
+      <p v-if="homework.rejectMessage && homework.status === 'assigned'" class="quest-reject-message">
+        {{ homework.rejectMessage }}
+      </p>
 
       <button
-        v-if="mode === 'child' && homework.status === 'assigned'"
-        class="btn btn-primary btn-sm mt-1 quest-submit"
+        v-if="homework.status === 'assigned'"
+        class="btn btn-primary btn-sm quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
@@ -150,50 +141,48 @@ function cancelDelete()  { showDeleteModal.value = false }
       </button>
 
       <button
-        v-if="mode === 'child' && homework.status === 'submitted'"
-        class="btn btn-sm mt-1 quest-undo"
+        v-if="homework.status === 'submitted'"
+        class="btn btn-sm quest-undo"
         data-test="undo-quest-btn"
         @click="emit('unsubmit', homework.id)"
       >
         <i class="bi bi-arrow-counterclockwise me-1"></i>Undo
       </button>
+    </div>
 
-      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+    <!-- volunteer actions -->
+    <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
       class="mt-2 d-flex align-items-center gap-2">
-
-        <template v-if="homework.status === 'submitted'">
-          <button
-            class="btn btn-sm btn-primary quest-check"
-            data-test="verify-homework-btn"
-            :disabled="busy"
-            @click="emit('verify', homework.id)">
-            <span v-if="busy" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-            <i v-else class="bi bi-check-circle"></i>
-            {{ busy ? 'Checking...' : 'Mark as Checked' }}
-          </button>
-          <button
-            class="btn btn-sm btn-outline-danger quest-return"
-            data-test="reject-homework-btn"
-            @click="emit('reject', homework.id)">
-            <i class="bi bi-arrow-return-left"></i> Return
-          </button>
-        </template>
-
-        <div v-else>
-          <button
-            class="btn btn-sm btn-outline-primary quest-edit"
-            data-test="edit-homework-btn"
-            @click="emit('edit', homework.id)">
-            <i class="bi bi-pencil"></i> Edit
-          </button>
-
-          <button
-            class="btn btn-sm btn-outline-danger ms-2 quest-delete"
-            data-test="delete-homework-btn"
-            @click="handleDelete">
-            <i class="bi bi-trash"></i> Delete
-          </button>
-        </div>
+      <template v-if="homework.status === 'submitted'">
+        <button
+          class="btn btn-sm btn-primary quest-check"
+          data-test="verify-homework-btn"
+          :disabled="busy"
+          @click="emit('verify', homework.id)">
+          <span v-if="busy" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          <i v-else class="bi bi-check-circle"></i>
+          {{ busy ? 'Checking...' : 'Mark as Checked' }}
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger quest-return"
+          data-test="reject-homework-btn"
+          @click="emit('reject', homework.id)">
+          <i class="bi bi-arrow-return-left"></i> Return
+        </button>
+      </template>
+      <div v-else>
+        <button
+          class="btn btn-sm btn-outline-primary quest-edit"
+          data-test="edit-homework-btn"
+          @click="emit('edit', homework.id)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger ms-2 quest-delete"
+          data-test="delete-homework-btn"
+          @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
+        </button>
       </div>
     </div>
   </div>
