@@ -1,5 +1,5 @@
-// verify that HomeWorkQuestCard displays correct volunteer actions
-// and status indicators according to the homework status
+// Verify that HomeWorkQuestCard displays correct volunteer
+// actions according to the homework status and componenet state
 
 import { describe, test, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -66,20 +66,21 @@ describe('HomeworkQuestCard', () => {
     expect(wrapper.text()).not.toContain('Return')
   })
 
-  // Test Case 4: Homework is submitted late by child
-  test('shows late submission warning for late homework', () => {
+  // Test Case 4: Homework is submitted and readonly is true
+  test('hides volunteer action buttons when readonly is true', () => {
     const wrapper = mount(HomeworkQuestCard, {
       props: {
         mode: 'volunteer',
+        readonly: true,
         homework: {
           ...baseHomework,
-          status: 'submitted',
-          completedAt: '2026-11-12'
+          status: 'submitted'
         }
       }
     })
 
-    expect(wrapper.text()).toContain('submitted late')
+    expect(wrapper.text()).not.toContain('Mark as Checked')
+    expect(wrapper.text()).not.toContain('Return')
   })
 
 })
