@@ -24,3 +24,6 @@ client/playwright/.cache/
 .idea
 .DS_Store
 *.log
+
+# Local-only HTML reports
+jachin-*.html

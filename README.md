@@ -8,9 +8,9 @@ Parents whose children attend student care centres often have limited visibility
 
 > 👉 **Team members: read [WORKLOAD.md](WORKLOAD.md) first.** It says who owns what. Then read [CONTRIBUTING.md](CONTRIBUTING.md) for the git workflow.
 
-- **Deployed app:** _TODO (Kai Sen)_
+- **Deployed app:** https://kidlapis-2.onrender.com (API: https://kidlapis-api.onrender.com). The free server sleeps when unused, so the first log in can take up to a minute.
 - **Video:** _TODO_
-- **Git repo:** _TODO (must be public)_
+- **Git repo:** https://github.com/Kathlynkan/kidLapis
 
 ---
 
@@ -25,7 +25,9 @@ Parents whose children attend student care centres often have limited visibility
 | Data store | MongoDB Atlas via Mongoose (models in `server/models/`). Demo data is loaded from `server/data/seed.json` with `pnpm seed`. |
 | External API | Google Gemini API (LLM handover and parent summaries), called from the server so the API key stays secret |
 | Charts | Chart.js + vue-chartjs |
-| Testing | Playwright (end-to-end, desktop + iPhone 6 viewport), Vitest (unit) |
+| Live updates | socket.io (chat, the NavBar bell, schedule changes). Each user joins a private room after their login is checked. |
+| Hosting | Render (Web Service for the API, Static Site for the Vue app) |
+| Testing | Playwright (end-to-end, desktop + iPhone 6 viewport), Vitest + Vue Test Utils (unit + component) |
 
 ---
 
@@ -89,8 +91,12 @@ Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
 | Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
 | Parent | `parent@kidslapis.sg` | Ms Grace — parent of Ethan **and** Mia |
 | Parent | `parent2@kidslapis.sg` | Ravi — parent of Meera **and** Arjun |
+| Parent | `parent3@kidslapis.sg` | Linda — parent of Chloe |
+| Parent | `parent4@kidslapis.sg` | Marcus — parent of Ryan **and** Sofia |
 | Child | `child@kidslapis.sg` | Ethan |
 | Child | `child2@kidslapis.sg` | Meera |
+
+**New parent accounts:** each child has a 6-character **child code** (e.g. `K7P3QX`). The coordinator sees it on Manage Children. A parent types it when signing up and is linked to that child straight away. Each code works once, then a new one is made.
 
 The demo data is built to trigger interesting cases:
 
@@ -116,7 +122,7 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 
 | Spec | Covers | Owner |
 |---|---|---|
-| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email) | Kai Sen |
+| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email, parent with a child code) | Kai Sen |
 | `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
 | `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
 | `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, recurring badge, session timeline with mood labels, SkillProgressChart, child switcher, switching children | Jachin |
@@ -135,7 +141,7 @@ kids-lapis/
 │   ├── server.js          <- mounts all routes
 │   ├── config.env.example <- copy to config.env (git-ignored)
 │   ├── middleware/auth.js <- requireAuth, requireRole
-│   ├── models/            <- Mongoose schemas: User, Child, Session, Homework, Message, Handover, Deck
+│   ├── models/            <- Mongoose schemas: User, Child, Session, Homework, Message, Handover, Deck, Notification
 │   ├── utils/db.js        <- MongoDB connection (DB= in config.env)
 │   ├── utils/seed.js      <- `pnpm seed`: reset your database with the demo data
 │   ├── utils/access.js    <- who can see which child (+ the same rule as a Mongo filter)
@@ -165,6 +171,8 @@ All routes except `/auth/signup` and `/auth/login` need `Authorization: Bearer <
 | `POST /auth/signup`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | Accounts | ✅ done | Kai Sen |
 | `GET /children`, `GET /children/:id` | Children visible to me | ✅ done | Kai Sen |
 | `POST / PUT / DELETE /children` | Manage children | ✅ done | Kai Sen |
+| `GET /requests`, `PUT /requests/:childId` | Volunteer's session requests: accept or decline | ✅ done | Kai Sen |
+| `GET /notifications`, `PUT /notifications/read` | The bell's updates, marked read once seen | ✅ done | Kai Sen |
 | `GET /users?role=volunteer`, `GET /users/:id`, `PUT /users/:id` | Volunteers & profiles | ✅ done | Yu Xuan |
 | `GET /sessions?childId=`, `GET /sessions/:id` | Session history | ✅ done | Ning Xuan |
 | `POST / PUT / DELETE /sessions` | Record / edit / delete | ✅ done | Ning Xuan |
