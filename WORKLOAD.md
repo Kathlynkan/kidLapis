@@ -20,7 +20,7 @@ Owning the whole slice end to end means:
 | 1 | **Yuqi** | Volunteer A: briefing & AI handover | My Children, Child Profile (pre-session briefing) | `routes/handover.js` | **External LLM API (Gemini)** writes the handover. This covers the required external API. |
 | 2 | **Ning Xuan** | Volunteer B: session logging & homework | Record/Edit Session form, Session history, Give Homework form | `routes/sessions.js`, `POST /homework` | The full CRUD that feeds the whole app |
 | 3 | **Kat** | Parent portal & messaging | Parent Home, Messages (shared by volunteers, parents and coordinators) | `routes/messages.js` | Parent sees "today at student care" + chats with the volunteer |
-| 4 | **Kai Sen** | Coordinator A: accounts, children & platform lead | Landing, Login, Sign up, NavBar, Manage Children | `routes/auth.js`, `routes/children.js`, `middleware/auth.js` | Role-based access (4 roles) + **deployment & integration lead** |
+| 4 | **Kai Sen** | Coordinator A: accounts, children & deployment | Landing, Login, Sign up, NavBar (+ bell), Manage Children, Session requests | `routes/auth.js`, `routes/children.js`, `routes/requests.js`, `routes/notifications.js`, `middleware/auth.js` | Role-based access (4 roles) + live notifications (socket.io) + **deployment** |
 | 5 | **Yu Xuan** | Coordinator B: dashboard, matchmaking & schedule | Coordinator Dashboard, Volunteers, Matchmaking, Schedule | `routes/dashboard.js`, `routes/matchmaking.js`, `routes/users.js` | "Needs attention" alerts + skills-based volunteer matching |
 | 6 | **Jachin** | Data visualisation & child gamification | Charts (on 3 pages), Child Home (quests, badges, level), Leaderboard | `routes/progress.js`, `routes/decks.js`, homework submit/verify/leaderboard in `routes/homework.js` | Interactive question-answer homework quests + Chart.js progress charts + berry-based levels, badges, and leaderboard |
 
@@ -30,7 +30,7 @@ Owning the whole slice end to end means:
 - The **Child** screen moves from Kat to **Jachin**. The child page is mostly visual progress (berries, levels, badges), which fits data viz. Data viz alone was the lightest role.
 - The two **volunteer** people split by *before the session* (Yuqi: read and brief) and *after the session* (Ning Xuan: record).
 - The two **coordinator** people split by *setting up the centre* (Kai Sen: accounts and children) and *watching the centre* (Yu Xuan: dashboard and matching).
-- **Kai Sen** is also the **integration lead**: he merges pull requests, keeps `main` working and deploys. He has a lighter feature list so he has time for this.
+- **Kai Sen** also **deploys the app** on Render.
 
 ---
 
@@ -52,11 +52,14 @@ The homework route is split — see the callout at the bottom of this section.
 | `client/src/router/index.js` | All routes, `meta.roles`, `meta.guestOnly`, `beforeEach` guard |
 | `client/src/stores/auth.js` | Pinia store — token + user in sessionStorage, login/logout/patchUser |
 | `client/src/services/api.js` | Axios instance — base URL, auth header, 401 handler |
-| `client/src/utils/validation.js` | `isValidEmail`, `isStrongPassword` — same rules as server |
-| `client/src/tests/shared/validation.spec.js` | Unit tests for validation rules |
+| `client/src/utils/validation.js` | `isValidEmail`, `isValidChildCode`, `validateSignup` — same rules as server |
+| `client/src/tests/shared/validation.spec.js` | Unit test for `isValidChildCode` |
+| `client/src/tests/shared/LoginView.spec.js` | Component test — show/hide password, link to sign up |
+| `client/src/tests/shared/SignupView.spec.js` | Component test — fields change with the role, `?role=parent`, empty form errors |
+| `client/src/views/volunteer/RequestsView.vue` | Volunteer accepts or declines new session requests |
 | `client/src/main.js` | App bootstrap — Vue, Pinia, Router, 401 handler wired up |
 | `client/src/App.vue` | Root shell — NavBar, `<RouterView>`, page-peel transition |
-| `client/src/components/NavBar.vue` | Top nav bar — role-aware links, unread message badge |
+| `client/src/components/NavBar.vue` | Top nav bar — role-aware links, unread message badge, notification bell, log out |
 | `client/src/components/PageHeader.vue` | Shared page title + subtitle + action-buttons slot |
 | `client/src/components/StateMessage.vue` | Shared loading / error / empty state message |
 | `client/src/components/ChildInitial.vue` | Round child picture — shows photo if available, else initial letter; used in NavBar and ProfileView |
@@ -71,11 +74,15 @@ The homework route is split — see the callout at the bottom of this section.
 | `server/utils/db.js` | MongoDB Atlas connection (loads `config.env`) |
 | `server/utils/seed.js` | `pnpm seed` — wipes DB and loads `server/data/seed.json` |
 | `server/utils/toPlain.js` | Helper to strip Mongoose document wrappers to plain objects |
-| `server/server.js` | Express + socket.io app — CORS, JSON, socket rooms per childId, mounts all routes |
+| `server/routes/requests.js` | GET /requests, PUT /requests/:childId — volunteer accepts or declines a session |
+| `server/routes/notifications.js` | GET /notifications, PUT /notifications/read — the bell's updates |
+| `server/models/Notification.js` | Mongoose schema — one saved update for one user |
+| `server/utils/notify.js` | Sends bell updates over socket.io (`notifyBell`, `notifyCoordinators`, `addUpdate`) |
+| `server/server.js` | Express + socket.io app — CORS, JSON, login check on connect, rooms per user / role / child, mounts all routes |
 | `server/config.env` | DB connection string + Gemini API key (not in git) |
 | `server/data/seed.json` | Demo data — children, parents, volunteers, sessions, homework, messages |
 | `client/src/tests/shared/auth.spec.js` | Unit tests for the auth Pinia store |
-| `client/e2e/auth.spec.js` | E2E — login per role, wrong-role redirect, sign-up flow |
+| `client/e2e/auth.spec.js` | E2E — login per role, wrong password, wrong-role redirect, sign-up flow, child code |
 | `README.md`, `CONTRIBUTING.md`, `WORKLOAD.md` | Project docs, setup instructions, team split |
 | `pnpm-workspace.yaml`, `client/vite.config.js`, `client/vitest.config.js`, `client/playwright.config.js` | Build, test, workspace config |
 
@@ -253,24 +260,24 @@ Every page in the running app shows a yellow **"Owner / to build"** panel (`<Tod
 **Tests:** E2E: parent logs in → sees the latest session. Parent sends a message → volunteer sees it. Unit: group-messages-by-day helper.
 **Q&A angle:** props/emit between `ChatThread` and the page, watchers on route params, polling vs. real-time trade-offs, privacy (children cannot see the chat).
 
-### 4) Kai Sen — Accounts, children & platform lead
+### 4) Kai Sen — Accounts, children & deployment
 
-**Files:** `views/HomeView.vue`, `views/auth/*`, `components/NavBar.vue`, `views/coordinator/ManageChildrenView.vue`, `router/index.js`, `stores/auth.js`, `server/routes/auth.js`, `server/routes/children.js`, `server/middleware/auth.js`, `server/models/User.js`, `server/models/Child.js`, `server/utils/db.js`
+**Files:** `views/HomeView.vue`, `views/auth/*`, `components/NavBar.vue`, `views/coordinator/ManageChildrenView.vue`, `views/volunteer/RequestsView.vue`, `router/index.js`, `stores/auth.js`, `server/routes/auth.js`, `server/routes/children.js`, `server/routes/requests.js`, `server/routes/notifications.js`, `server/middleware/auth.js`, `server/models/User.js`, `server/models/Child.js`, `server/models/Notification.js`, `server/utils/notify.js`, `server/utils/db.js`
 
 | Priority | Task |
 |---|---|
 | ✅ Must | `POST /children` + "Add child" Bootstrap modal on Manage Children. |
-| Should | `PUT` / `DELETE /children/:id` (decide what happens to that child's sessions). |
+| ✅ Should | `PUT` / `DELETE /children/:id`. Deleting a child also deletes their sessions, homework and messages. |
 | ✅ Should | Hash passwords with `bcryptjs`. Better validation on sign up (email format, password ≥ 8, confirm password, skills/days for volunteers). |
-| Should | Sign up extras: volunteers pick skills + days, parents enter a **child code** from the centre to link their child. |
-| Should | Navbar unread-message badge (using Kat's endpoint). Landing page polish. Remove the demo-account box before submission (keep the accounts in the README). |
+| ✅ Should | Sign up extras: volunteers pick skills + days, parents enter a **child code** from the centre to link their child. |
+| ✅ Should | Navbar unread-message badge (using Kat's endpoint). Landing page polish (sign-up / log-in button for each role). Removed the demo-account box (the accounts are in the README). |
 | ✅ Must | **MongoDB Atlas setup** for the team: one free cluster, one database user, Network Access `0.0.0.0/0`. Share the connection string privately. Everyone uses their own database name for development (see README, Step 0). |
-| Should | **Deployment:** API and Vue site hosted online on Render, with `DB=` pointing at the shared database. |
-| ✅ Should | **Integration lead:** review/merge PRs, keep `main` green (run all tests before merging), final README. |
+| ✅ Should | **Deployment:** API (Web Service) and Vue site (Static Site) hosted on Render, with `DB=` pointing at the shared database. |
+| ✅ Stretch | **Notification bell** for every role, plus the **accept / decline** flow: the coordinator assigns a session, it stays "waiting" until the volunteer accepts it on the Requests page. Updates arrive instantly over socket.io. |
 | Stretch | Swap the in-memory tokens for JWT, so logins survive server restarts on deployment. |
 
-**Tests:** E2E `e2e/auth.spec.js` (each role lands on the right page, guards, sign-up). Unit: auth store.
-**Q&A angle:** route guards with `meta.roles`, Pinia store + localStorage, Authorization header, why passwords are hashed, server-side role checks, Mongoose schemas + connection.
+**Tests:** Unit `validation.spec.js` (`isValidChildCode`). Component `LoginView.spec.js`, `SignupView.spec.js`. E2E `e2e/auth.spec.js` (wrong password shows an error, a parent cannot open the coordinator dashboard, plus each role's landing page and sign-up).
+**Q&A angle:** route guards with `meta.roles`, Pinia store + sessionStorage, Authorization header, why passwords are hashed, server-side role checks, child code, socket.io rooms, deploying on Render.
 
 ### 5) Yu Xuan — Coordinator dashboard & skills-based matchmaking
 
