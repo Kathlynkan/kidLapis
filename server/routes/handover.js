@@ -49,7 +49,7 @@ export function findRecurring(sessions) {
   return recurring
 }
 
-// Count mood in the 3 newest sessions
+// Count mood in the 3 newest sessions (mood change fast so 3 is enough)
 // Always gives a short summary, good or bad, e.g.
 //   'Tired in 2 of the last 3 sessions. Check in at the start and keep tasks short.'
 //   'Was tired last session, so keep an eye on it.'
@@ -70,13 +70,19 @@ export function checkMood(sessions) {
 
   // 'the last session' or 'the last 3 sessions' (a new child may have fewer than 3)
   let period = `the last ${lastThree.length} sessions`
-  if (lastThree.length === 1) period = 'the last session'
+  if (lastThree.length === 1) {
+    period = 'the last session'
+  }
 
-  // 2 or 3 low moods -> a pattern: tell the volunteer to pay more attention
+  // 2 or 3 low moods -> tell the volunteer to pay more attention
   if (low >= 2) {
-    let feeling = 'Tired or frustrated'
-    if (frustrated === 0) feeling = 'Tired'
-    if (tired === 0) feeling = 'Frustrated'
+    let feeling = 'Tired or frustrated' // mix of both
+    if (frustrated === 0){
+      feeling = 'Tired'
+    }
+    if (tired === 0) {
+      feeling = 'Frustrated'
+    }
     return `${feeling} in ${low} of ${period}. Check in at the start and keep tasks short.`
   }
 
@@ -86,7 +92,7 @@ export function checkMood(sessions) {
     if (newest.mood === 'tired' || newest.mood === 'frustrated') {
       return `Was ${newest.mood} last session, so keep an eye on it.`
     }
-    return 'Had one low day recently, but has been fine since.'
+    return 'Had one low day recently, but has been fine since.' //low mood not for latest session
   }
 
   // no low moods
@@ -132,7 +138,7 @@ export function getWeekRange(today = new Date()) {
   return getWeekOf(today)
 }
 
-// The week written for people, e.g. 'Mon 26 Oct to Fri 30 Oct'
+// format the week nicely in summary 'Mon 26 Oct to Fri 30 Oct'
 export function formatWeek(week) {
   const monday = new Date(week.start + 'T00:00:00')
   const friday = new Date(week.end + 'T00:00:00')
@@ -172,15 +178,12 @@ function formatDay(dateText) {
   return new Date(dateText + 'T00:00:00').toLocaleDateString('en-GB', options)
 }
 
-// Backup summary for VOLUNTEERS: used when there is no API key or Gemini fails.
-// (Parents get the weekly summary, so their backup is buildWeeklyFallback below.)
-// It uses the newest session, plus the mood of the last 3.
+// -------- Backup summary for VOLUNTEERS -------- 
 export function buildFallbackHandover(sessions) {
   // child has no sessions yet
   if (sessions.length === 0) {
     return {
       nextStep: 'No sessions yet. Get to know the child and find out what they are working on.',
-      recurring: [],
       source: 'fallback',
     }
   }
@@ -207,14 +210,11 @@ export function buildFallbackHandover(sessions) {
     lastResult: `Got ${last.correct}/${last.attempted} on ${last.topic} last session.`,
     whatWorked: whatWorked,
     watchFor: checkMood(sessions),
-    recurring: findRecurring(sessions),
     source: 'fallback',
   }
 }
 
-// for PARENTS: backup for the weekly summary (no API key, or Gemini fails)
-// It goes through the week's sessions, oldest first, and fills the same lines as the AI.
-// name = the child's first name, e.g. 'Ethan'
+// -------- Backup summary for PARENTS -------- 
 export function buildWeeklyFallback(sessions, name = 'Your child') {
   if (sessions.length === 0) {
     return { headline: 'No sessions were recorded that week.', source: 'fallback' }
@@ -549,19 +549,25 @@ router.post('/:childId', async (req, res) => {
   if (type === 'weekly') {
     weeks = listWeeks(allSessions)
 
-    // Fri - Sun: this week. Mon - Thu: last week.
-    let week = getWeekRange()
-    weekTitle = 'This Week'
-    const today = new Date().getDay()
-    if (today >= 1 && today <= 4) {
-      weekTitle = 'Last Week'
+    // Fri - Sun: this week. Mon - Thu: last week
+    const usualWeek = getWeekRange()
+    let week = usualWeek
+
+    // the parent pressed Earlier / Later week 
+    let askedWeek = ''
+    if (req.body && req.body.week) {
+      askedWeek = String(req.body.week)
+    }
+    for (const w of weeks) {
+      if (w.start === askedWeek) {
+        week = w
+      }
     }
     sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
 
     // nothing that week (e.g. a school holiday) -> use the latest week that has sessions
-    if (sessions.length === 0 && allSessions.length > 0) {
-      week = getWeekOf(new Date(allSessions[0].date + 'T00:00:00'))
-      weekTitle = 'Latest Week'
+    if (sessions.length === 0 && weeks.length > 0) {
+      week = weeks[0]
       sessions = allSessions.filter((s) => s.date >= week.start && s.date <= week.end)
       // tell the parent why they see an older week
       if (week.start < usualWeek.start) {
@@ -571,9 +577,10 @@ router.post('/:childId', async (req, res) => {
     }
     weekStart = week.start
     periodLabel = formatWeek(week)
+    weekTitle = weekTitleFor(week) // 'This week', 'Last week', '2 weeks ago' ...
     weekWords = weekTitle.toLowerCase()
-    if (weekTitle === 'Latest Week') {
-      weekWords = `the week of ${periodLabel}`
+    if (weekTitle !== 'This week' && weekTitle !== 'Last week') {
+      weekWords = `the week of ${periodLabel}` // e.g. 'the week of Mon 12 Oct to Fri 16 Oct'
     }
 
     // the Monday to Friday before that week, to compare with
@@ -599,9 +606,6 @@ router.post('/:childId', async (req, res) => {
     if (type === 'handover') {
       empty = buildFallbackHandover(sessions)
     }
-    if (type === 'handover') {
-      empty.recurring = findRecurring(allSessions) // struggles from the last 5 sessions (volunteers only)
-    }
     return res.json(addWeekInfo(empty))
   }
 
@@ -625,7 +629,6 @@ router.post('/:childId', async (req, res) => {
   const saved = await Handover.findOne(savedFilter)
   if (saved && saved.sessionsKey === sessionsKey) {
     const result = saved.summary
-    result.cached = true // so we can tell it came from the database
     // the same week can be "This week" on Friday and "Last week" on Monday, so set these again
     return res.json(addWeekInfo(result))
   }
@@ -636,13 +639,9 @@ router.post('/:childId', async (req, res) => {
     const ai = await callLLM(prompt)
 
     if (ai) {
-      // add own fields to the AI answer
-      if (type === 'handover') {
-        ai.recurring = findRecurring(allSessions) // volunteers only, parents do not see a list of struggles
-      }
       ai.source = 'ai'
       // volunteer handover
-      if (type === 'handover' && audience === 'volunteer') {
+      if (type === 'handover') {
         // no semicolons: turn "a; b" into "a, b" (in case the AI still uses them)
         for (const key of ['nextStep', 'struggle', 'lastResult', 'whatWorked', 'watchFor']) {
           if (ai[key]) {
@@ -673,9 +672,6 @@ router.post('/:childId', async (req, res) => {
   let fallback = buildWeeklyFallback(sessions, child.name.split(' ')[0])
   if (type === 'handover') {
     fallback = buildFallbackHandover(sessions)
-  }
-  if (type === 'handover') {
-    fallback.recurring = findRecurring(allSessions) // volunteers only
   }
   res.json(addWeekInfo(fallback))
 })

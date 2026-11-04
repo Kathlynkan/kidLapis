@@ -52,7 +52,7 @@ const title = computed(() => {
   if (!isParent.value) return 'Handover Notes'
   let week = 'This Week'
   if (props.handover && props.handover.weekTitle) {
-    week = props.handover.weekTitle // 'This week', 'Last week' or 'Latest week'
+    week = props.handover.weekTitle // e.g. 'This week', 'Last week', '2 weeks ago'
   }
   return `${week} at Student Care`
 })
