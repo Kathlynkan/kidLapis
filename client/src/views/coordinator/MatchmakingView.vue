@@ -633,7 +633,7 @@ async function saveEdit(child, s) {
 
 /* the line under the search can be long: it wraps on a small screen */
 .matchpage .toolbar .tag {
-  border-radius: 14px;
+  border-radius: 999px;
   white-space: normal;
 }
 

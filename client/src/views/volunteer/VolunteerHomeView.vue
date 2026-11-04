@@ -709,9 +709,21 @@ onMounted(loadData)
   font-size: 14px;
 }
 
-.volunteerpage .child-facts i {
-  margin-right: 5px;
-  color: #3E6B6A;
+/* the small caption above the topic, then the topic with its subject tag right next to it */
+.volunteerpage .fact-caption {
+  color: #5E7473;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.volunteerpage .fact-topic {
+  margin-bottom: 6px;
+}
+
+.volunteerpage .fact-topic .session-subject {
+  margin-left: 6px;
 }
 
 .volunteerpage .child-bottom {

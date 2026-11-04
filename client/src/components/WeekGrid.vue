@@ -51,6 +51,17 @@ const slotsByCell = computed(() => {
 
 const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
 const isFree = (v, day) => (v.availability || []).includes(day)
+
+// every row is as tall as the fullest day, so all the boxes are the same size
+const PILL_HEIGHT = 36 // one session pill and the space under it
+const ADD_HEIGHT = 34 // the "+ Add" button (Schedule page only)
+const rowHeight = computed(() => {
+  let most = 0
+  for (const v of props.volunteers) {
+    for (const d of days.value) most = Math.max(most, isFree(v, d) ? slotsFor(v, d).length : 0)
+  }
+  return Math.max(84, 18 + most * PILL_HEIGHT + (props.editable ? ADD_HEIGHT : 0))
+})
 </script>
 
 <template>
@@ -66,7 +77,7 @@ const isFree = (v, day) => (v.availability || []).includes(day)
         </tr>
       </thead>
       <tbody>
-        <tr v-for="v in volunteers" :key="v.id" data-test="schedule-row">
+        <tr v-for="v in volunteers" :key="v.id" :style="{ height: rowHeight + 'px' }" data-test="schedule-row">
           <!-- the volunteer: photo, name, subjects -->
           <th scope="row" class="wg-vol-col">
             <span class="wg-vol">

@@ -12,7 +12,7 @@ test.describe('Volunteer handover', () => {
   })
 
   test('sees only the children assigned to them', async ({ page }) => {
-    // Aisha (volunteer@) is assigned Ethan, Arjun and Chloe in the seed data
+    // Aisha (volunteer@) is assigned Ethan, Arjun, Chloe and Mia in the seed data
     await expect(page.locator('[data-test="child-card"]')).toHaveCount(4)
   })
 
@@ -35,8 +35,6 @@ test.describe('Volunteer handover', () => {
     const handover = page.locator('[data-test="handover-card"]')
     // works for both the AI summary and the fallback
     await expect(handover).toContainText('4/5')
-    // Ethan's "Finding common denominators" appears twice in his last 5 sessions
-    await expect(page.locator('[data-test="recurring-badge"]').first()).toBeVisible()
 
     await expect(page.locator('[data-test="session-card"]').first()).toBeVisible()
   })

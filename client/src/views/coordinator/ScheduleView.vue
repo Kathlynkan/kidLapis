@@ -16,6 +16,7 @@ import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
 
 // Start times every 30 minutes from 09:00 to 19:30.
@@ -174,7 +175,7 @@ async function removeSlot(volunteer, day, slot) {
 </script>
 
 <template>
-  <div class="container py-4">
+  <div class="container py-4 coordinatorpage">
     <PageHeader title="Weekly Schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
@@ -193,7 +194,7 @@ async function removeSlot(volunteer, day, slot) {
 
       <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
 
-      <div class="cb-card p-2">
+      <div class="t-card p-2">
         <WeekGrid
           editable
           :volunteers="volunteers"
@@ -205,7 +206,7 @@ async function removeSlot(volunteer, day, slot) {
       </div>
 
       <!-- Assigned but not on the timetable yet -->
-      <div v-if="unscheduled.length" class="cb-card p-3 mt-3" data-test="unscheduled">
+      <div v-if="unscheduled.length" class="t-card p-3 mt-3" data-test="unscheduled">
         <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned Without a Day</h2>
         <p class="small text-muted-cb mb-2">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
@@ -259,12 +260,12 @@ async function removeSlot(volunteer, day, slot) {
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-danger btn-sm" :disabled="saving" @click="closeAdd">
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="closeAdd">
                 Cancel
               </button>
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="t-btn"
                 :disabled="!form.childId || !form.time || saving"
                 data-test="add-submit"
               >

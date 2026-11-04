@@ -377,7 +377,7 @@ async function save() {
 
 .profilepage .form-control {
   border: 1px solid var(--pf-line);
-  border-radius: 14px;
+  border-radius: 6px;
   background: #FFFFFF;
   color: var(--pf-text);
   box-shadow: none;

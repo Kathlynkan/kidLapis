@@ -267,26 +267,20 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-/* Delete in a pop-up: the same soft red as the Delete on a session */
-.btn-danger {
+/* Delete in a pop-up, and every Cancel button: the same soft red as the Delete on a session, a little darker on hover */
+.btn-danger,
+.btn-outline-danger {
+  --bs-btn-border-color:        #EE9F96;
+  --bs-btn-hover-border-color:  #E68C81;
   background: #EE9F96;
   color: var(--cp-text);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-danger:hover {
+.btn-danger:hover,
+.btn-outline-danger:hover {
   background: #E68C81;
   color: var(--cp-text);
-}
-
-.btn-outline-danger {
-  --bs-btn-color:               #C07090;
-  --bs-btn-border-color:        #C07090;
-  --bs-btn-hover-bg:            #E8A0B8;
-  --bs-btn-hover-border-color:  #C07090;
-  --bs-btn-hover-color:         #FBF8F3;
-  background: #FBF8F3;
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
 /* every button lifts a little on hover ... */

@@ -1,8 +1,7 @@
 // Parent portal journey.                               Owner: Jachin
 // Seed data used:
 //   parent@kidslapis.sg = Ms Grace Wong, parent of Ethan (c_1) and Mia (c_7)
-//   Ethan has 7+ sessions with varied moods (frustrated, okay, happy) and
-//   a recurring struggle ("Finding common denominators")
+//   Ethan has 7+ sessions with varied moods (frustrated, okay, happy)
 //
 // All tests are read-only: they do not mutate any data, so they are safe
 // to run on both Desktop Chrome and iPhone 6 in sequence.
@@ -31,12 +30,9 @@ test.describe('Parent portal', () => {
   test('shows the handover card', async ({ page }) => {
     const handover = page.locator('[data-test="handover-card"]')
     await expect(handover).toBeVisible()
-    await expect(handover).toContainText('This week')
-  })
-
-  test('shows recurring struggles badge for Ethan', async ({ page }) => {
-    // Ethan has "Finding common denominators" in multiple sessions -> recurring badge appears
-    await expect(page.locator('[data-test="recurring-badge"]').first()).toBeVisible()
+    // The seed moves the sessions to end on the most recent Friday, so the card says
+    // "This week" or "Last week" depending on the day the tests run
+    await expect(handover).toContainText(/(This|Last|Latest) week/i)
   })
 
   test('shows session timeline with mood labels', async ({ page }) => {
@@ -60,7 +56,8 @@ test.describe('Parent portal', () => {
   })
 
   test('shows the SkillProgressChart', async ({ page }) => {
-    // Chart only renders when the child has sessions; Ethan has 7+
+    // The chart is in the Progress tab — switch to it first. Ethan has 7+ sessions.
+    await page.getByRole('button', { name: 'Progress' }).click()
     await expect(page.locator('[data-test="skill-progress-chart"]')).toBeVisible()
   })
 

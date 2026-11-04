@@ -20,8 +20,10 @@ test('after the parent opens her page, the volunteer sees the sessions as locked
   await loginAs(volunteerPage, 'volunteer')
   await volunteerPage.goto('/children/c_1')
 
-  // 3. the session says "Seen by parent" and has no Edit or Delete button
-  const session = volunteerPage.locator('[data-test="session-card"]').first()
+  // 3. the session says "Seen by parent" and has no Edit or Delete button.
+  //    A volunteer only sees this on her own sessions, and Ethan's newest session may be Daniel's,
+  //    so pick Aisha's newest one.
+  const session = volunteerPage.locator('[data-test="session-card"]', { hasText: 'by Aisha Rahman' }).first()
   await expect(session).toContainText(/seen by parent/i)
   await expect(session.getByRole('button', { name: 'Edit' })).toHaveCount(0)
   await expect(session.getByRole('button', { name: 'Delete' })).toHaveCount(0)
