@@ -28,8 +28,6 @@ const state = computed(() => {
 })
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
-<<<<<<< HEAD
-=======
 // stars shown in the top-right chip for child assigned quests
 const chipStars = computed(() =>
   isOverdue.value
@@ -75,7 +73,6 @@ const dueUrgency = computed(() => {
 const showDesc = computed(() => props.mode === 'volunteer' || props.homework.status === 'assigned')
 
 const expanded = ref(false)
->>>>>>> main
 const showDeleteModal = ref(false)
 
 function handleDelete() { showDeleteModal.value = true }
@@ -95,42 +92,15 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
       <strong class="quest-title">{{ homework.title }}</strong>
 
-<<<<<<< HEAD
-      <div class="small quest-meta mt-1">
-        due {{ formatDate(homework.dueDate) }}
-
-        <template v-if="mode === 'volunteer'">
-        · {{ homework.pointsAwarded ?? homework.points }}
-        <i class="bi bi-star-fill"></i>
-        <template v-if="isLateSubmission && homework.status !== 'verified'">
-          <span class="quest-late-penalty"> ({{ Math.floor(homework.points / 2) }}★ — submitted late)</span>
-        </template>
-        </template>
-      </div>
-    </div>
-
-      <span
-      v-if="state !== 'todo'"
-      class="badge quest-pill" :class="`quest-pill-${state}`">
-        {{ STATE_LABELS[state] }}
-=======
       <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
       <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
         <s v-if="isOverdue" class="quest-star-original">{{ homework.points }}</s>
         {{ chipStars }} <i class="bi bi-star-fill"></i>
->>>>>>> main
       </span>
     </div>
 
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
 
-<<<<<<< HEAD
-    <div class="mt-auto d-flex flex-column gap-2">
-      <span
-        v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
-        class="badge quest-returned">
-        <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
-=======
     <!-- volunteer: exact date + points -->
     <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
       due {{ formatDate(homework.dueDate) }} &middot; {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
@@ -155,7 +125,6 @@ function cancelDelete()  { showDeleteModal.value = false }
     <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
       <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
         <i class="bi bi-arrow-return-left me-1"></i>Returned
->>>>>>> main
       </span>
 
       <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
@@ -177,11 +146,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-<<<<<<< HEAD
-        <i class="bi bi-check-lg me-1"></i>I'm done!
-=======
         <i class="bi bi-check-lg me-1"></i>Submit
->>>>>>> main
       </button>
 
       <button
@@ -258,8 +223,6 @@ function cancelDelete()  { showDeleteModal.value = false }
 </template>
 
 <style scoped>
-<<<<<<< HEAD
-=======
 /* star reward chip — top-right for assigned quests in child mode */
 .quest-star-chip {
   display: inline-flex;
@@ -309,7 +272,6 @@ function cancelDelete()  { showDeleteModal.value = false }
 /* submit button: full width */
 .quest-submit { width: 100%; }
 
->>>>>>> main
 .quest-undo {
   --bs-btn-color: #4A3F3A;
   --bs-btn-bg: #EDE8E0;
@@ -345,9 +307,5 @@ function cancelDelete()  { showDeleteModal.value = false }
   color: #e87a6e;
   font-weight: 600;
 }
-<<<<<<< HEAD
-</style>
-=======
 
 </style>
->>>>>>> main
