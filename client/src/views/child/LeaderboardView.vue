@@ -46,6 +46,9 @@ const slots = computed(() =>
 const rest  = computed(() => ranked.value.slice(3))
 const hasMe = computed(() => entries.value.some((entry) => entry.childId === myId.value))
 
+const CROWN_COLORS = { 1: '#F2CB5C', 2: '#A8A8BC', 3: '#C07840' }
+function crownColor(place) { return CROWN_COLORS[place] }
+
 async function fetchLeaderboard() {
   try {
     const res = await api.get('/homework/leaderboard', { params: { period: 'week' } })
@@ -97,11 +100,11 @@ onUnmounted(() => {
               :data-test="slot.entry ? `podium-${slot.place}` : null"
             >
               <div class="pavatar-wrap">
-                <svg v-if="slot.entry && slot.place === 1" class="crown" viewBox="0 0 30 22" aria-hidden="true">
-                  <path fill="#F2CB5C" d="M2 6l7 6 6-10 6 10 7-6-3 15H5z" />
-                  <circle cx="2" cy="6" r="2" fill="#F2CB5C" />
-                  <circle cx="15" cy="2" r="2" fill="#F2CB5C" />
-                  <circle cx="28" cy="6" r="2" fill="#F2CB5C" />
+                <svg v-if="slot.entry" class="crown" viewBox="0 0 30 22" aria-hidden="true">
+                  <path :fill="crownColor(slot.place)" d="M2 6l7 6 6-10 6 10 7-6-3 15H5z" />
+                  <circle cx="2" cy="6" r="2" :fill="crownColor(slot.place)" />
+                  <circle cx="15" cy="2" r="2" :fill="crownColor(slot.place)" />
+                  <circle cx="28" cy="6" r="2" :fill="crownColor(slot.place)" />
                 </svg>
                 <div class="pavatar">
                   <ChildAvatar v-if="slot.entry" :avatar="slot.entry.avatar" />
@@ -403,5 +406,17 @@ onUnmounted(() => {
   .leaderboardpage .podium { gap: 6px; }
   .leaderboardpage .pavatar { width: 54px; height: 54px; font-size: 30px; }
   .leaderboardpage .pcol[data-rank='1'] .pavatar { width: 68px; height: 68px; font-size: 38px; }
+}
+
+@media (max-width: 360px) {
+  .leaderboardpage .podium { gap: 4px; }
+  .leaderboardpage .pavatar { width: 46px; height: 46px; font-size: 24px; }
+  .leaderboardpage .pcol[data-rank='1'] .pavatar { width: 58px; height: 58px; font-size: 32px; }
+  .leaderboardpage .pcol[data-rank='1'] .step { height: 90px; }
+  .leaderboardpage .pcol[data-rank='2'] .step { height: 72px; }
+  .leaderboardpage .step { height: 56px; }
+  .leaderboardpage .pname { font-size: 11px; }
+  .leaderboardpage .lb-stars,
+  .leaderboardpage .lb-you { font-size: 10px; padding: 2px 6px; }
 }
 </style>

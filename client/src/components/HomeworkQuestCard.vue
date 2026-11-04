@@ -19,11 +19,6 @@ const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
 )
-const isLateSubmission = computed(
-  () => props.homework.completedAt &&
-        props.homework.dueDate &&
-        props.homework.completedAt > props.homework.dueDate,
-)
 
 // where the homework is now, for the volunteer's view: late, todo, waiting (to be checked) or done
 const state = computed(() => {
@@ -33,6 +28,54 @@ const state = computed(() => {
 })
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
+<<<<<<< HEAD
+=======
+// stars shown in the top-right chip for child assigned quests
+const chipStars = computed(() =>
+  isOverdue.value
+    ? Math.ceil(props.homework.points / 2)
+    : (props.homework.pointsAwarded ?? props.homework.points),
+)
+
+// compact due chip label + matching icon for the child's card
+const dueLabel = computed(() => {
+  if (props.homework.status === 'submitted') return 'In review'
+  if (props.homework.status === 'verified') {
+    const pts = props.homework.pointsAwarded ?? props.homework.points
+    return `+${pts} ★`
+  }
+  const days = daysSince(props.homework.dueDate)
+  if (days < -1) return `${-days}d left`
+  if (days === -1) return 'Tomorrow'
+  if (days === 0) return 'Today'
+  if (days === 1) return '1d late'
+  return `${days}d late`
+})
+
+const dueIcon = computed(() => {
+  if (props.homework.status === 'verified')  return 'bi-patch-check-fill'
+  if (props.homework.status === 'submitted') return 'bi-hourglass-split'
+  const days = daysSince(props.homework.dueDate)
+  if (days > 0)  return 'bi-exclamation-triangle-fill'
+  if (days === 0) return 'bi-clock-fill'
+  return 'bi-clock'
+})
+
+const dueUrgency = computed(() => {
+  if (props.homework.status === 'verified') return 'done'
+  if (props.homework.status !== 'assigned') return 'neutral'
+  const days = daysSince(props.homework.dueDate)
+  if (days > 0)  return 'overdue'
+  if (days === 0) return 'today'
+  if (days >= -2) return 'soon'
+  return 'ok'
+})
+
+// only show description when the child still needs to act on the quest
+const showDesc = computed(() => props.mode === 'volunteer' || props.homework.status === 'assigned')
+
+const expanded = ref(false)
+>>>>>>> main
 const showDeleteModal = ref(false)
 
 function handleDelete() { showDeleteModal.value = true }
@@ -52,6 +95,7 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
       <strong class="quest-title">{{ homework.title }}</strong>
 
+<<<<<<< HEAD
       <div class="small quest-meta mt-1">
         due {{ formatDate(homework.dueDate) }}
 
@@ -69,16 +113,49 @@ function cancelDelete()  { showDeleteModal.value = false }
       v-if="state !== 'todo'"
       class="badge quest-pill" :class="`quest-pill-${state}`">
         {{ STATE_LABELS[state] }}
+=======
+      <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
+      <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
+        <s v-if="isOverdue" class="quest-star-original">{{ homework.points }}</s>
+        {{ chipStars }} <i class="bi bi-star-fill"></i>
+>>>>>>> main
       </span>
     </div>
 
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
 
+<<<<<<< HEAD
     <div class="mt-auto d-flex flex-column gap-2">
       <span
         v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
         class="badge quest-returned">
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
+=======
+    <!-- volunteer: exact date + points -->
+    <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
+      due {{ formatDate(homework.dueDate) }} &middot; {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
+    </div>
+
+    <!-- description: only when the child still needs to read it (assigned); always for volunteer -->
+    <p v-if="showDesc" class="small quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
+    <div class="mb-2">
+      <button
+        v-if="mode === 'child' && homework.status === 'assigned' && homework.details && homework.details.length > 100"
+        class="quest-read-more"
+        @click="expanded = !expanded"
+      >{{ expanded ? 'Show less' : 'Read more' }}</button>
+    </div>
+
+    <!-- child: compact due chip — below description so urgency sits next to the action button -->
+    <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">
+      <i :class="`bi ${dueIcon}`"></i>{{ dueLabel }}
+    </div>
+
+    <!-- child actions -->
+    <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
+      <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
+        <i class="bi bi-arrow-return-left me-1"></i>Returned
+>>>>>>> main
       </span>
 
       <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
@@ -100,7 +177,11 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
+<<<<<<< HEAD
         <i class="bi bi-check-lg me-1"></i>I'm done!
+=======
+        <i class="bi bi-check-lg me-1"></i>Submit
+>>>>>>> main
       </button>
 
       <button
@@ -177,6 +258,58 @@ function cancelDelete()  { showDeleteModal.value = false }
 </template>
 
 <style scoped>
+<<<<<<< HEAD
+=======
+/* star reward chip — top-right for assigned quests in child mode */
+.quest-star-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.quest-star-todo { background: #FFF0DC; color: #B86A00; }
+.quest-star-late { background: #FBE3DF; color: #9A3F36; }
+
+.quest-star-original { opacity: 0.55; font-weight: 600; text-decoration: line-through; }
+
+/* due chip: icon + compact label in a colored pill */
+.quest-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+.quest-due .bi { font-size: 10px; }
+
+.quest-due-ok      { background: #E6F4EC; color: #2E8B57; }
+.quest-due-done    { background: #E6F4EC; color: #2E8B57; }
+.quest-due-soon    { background: #FFF0DC; color: #B86A00; }
+.quest-due-today   { background: #FEF3C7; color: #C47A00; }
+.quest-due-overdue { background: #FEE2E2; color: #9A3F36; }
+.quest-due-neutral { background: #F3F0EE; color: #8D7F77; }
+
+/* description: 2-line clamp in child mode */
+.quest-details-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* submit button: full width */
+.quest-submit { width: 100%; }
+
+>>>>>>> main
 .quest-undo {
   --bs-btn-color: #4A3F3A;
   --bs-btn-bg: #EDE8E0;
@@ -212,4 +345,9 @@ function cancelDelete()  { showDeleteModal.value = false }
   color: #e87a6e;
   font-weight: 600;
 }
+<<<<<<< HEAD
 </style>
+=======
+
+</style>
+>>>>>>> main
