@@ -81,6 +81,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
       <template v-if="mode === 'child'">
         <span v-if="homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
+          <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>
           {{ chipStars }} <i class="bi bi-star-fill"></i>
         </span>
         <span v-else class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
@@ -115,7 +116,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>Submit · {{ chipStars }} ★
+        <i class="bi bi-check-lg me-1"></i>Submit · <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>{{ chipStars }} ★
       </button>
 
       <button
@@ -205,12 +206,14 @@ function cancelDelete()  { showDeleteModal.value = false }
 .quest-star-todo { background: #FFF0DC; color: #B86A00; }
 .quest-star-late { background: #FBE3DF; color: #9A3F36; }
 
+.quest-chip-original { opacity: 0.55; margin-right: 2px; }
+
 /* relative due line */
 .quest-due {
   font-size: 12px;
   font-weight: 600;
 }
-.quest-due-ok      { color: #8D7F77; }
+.quest-due-ok      { color: #2E8B57; }
 .quest-due-soon    { color: #B86A00; }
 .quest-due-today   { color: #D97706; }
 .quest-due-overdue { color: #9A3F36; }
