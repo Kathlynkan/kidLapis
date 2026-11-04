@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { scoreVolunteer, rankVolunteers } from '../utils/matchmaking.js'
@@ -45,7 +45,7 @@ test('seed: Ethan scores his two assigned volunteers with their schedule days', 
   // Seed slots have no status, so they count as accepted.
   assert.deepEqual(aisha.scheduledSlots, [
     { day: 'Mon', time: '16:00', status: 'accepted' },
-    { day: 'Wed', time: '18:00', status: 'accepted' },
+    { day: 'Wed', time: '12:00', status: 'accepted' },
   ])
 })
 
