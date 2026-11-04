@@ -2,7 +2,7 @@
   Profile - every logged-in user can view and edit their own profile.
   All roles: name + password change.
   Volunteer:  + skills and available days (used by matchmaking).
-  Child:      avatar picker (name is managed by the coordinator).
+  Child:      name is managed by the coordinator.
 ============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'

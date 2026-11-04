@@ -63,6 +63,7 @@ const dueUrgency = computed(() => {
   return 'ok'
 })
 
+const expanded = ref(false)
 const showDeleteModal = ref(false)
 function handleDelete()  { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
@@ -102,13 +103,22 @@ function cancelDelete()  { showDeleteModal.value = false }
     </div>
 
     <!-- description -->
-    <p class="small mb-3 quest-details" :class="{ 'quest-details-clamp': mode === 'child' }">{{ homework.details }}</p>
+    <p class="small mb-1 quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
+    <button
+      v-if="mode === 'child' && homework.details && homework.details.length > 100"
+      class="quest-read-more mb-2"
+      @click="expanded = !expanded"
+    >{{ expanded ? 'Show less' : 'Read more' }}</button>
+    <div v-else class="mb-2"></div>
 
     <!-- child actions -->
     <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
       <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
+      <p v-if="homework.rejectMessage && homework.status === 'assigned'" class="quest-reject-message">
+        {{ homework.rejectMessage }}
+      </p>
 
       <button
         v-if="homework.status === 'assigned'"
@@ -245,6 +255,30 @@ function cancelDelete()  { showDeleteModal.value = false }
 }
 
 .quest-returned { align-self: flex-start; }
+
+.quest-reject-message {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #FEF0F0;
+  color: #7A3030;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.quest-read-more {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8D7F77;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 .quest-late-penalty { color: #e87a6e; font-weight: 600; }
 </style>

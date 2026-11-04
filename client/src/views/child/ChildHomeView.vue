@@ -75,6 +75,7 @@ const earned    = computed(() => me.value ? earnedBadges(me.value, homework.valu
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
 const todo      = computed(() => homework.value.filter((h) => h.status === 'assigned'))
 const done      = computed(() => homework.value.filter((h) => h.status !== 'assigned'))
+const returned  = computed(() => homework.value.filter((h) => h.rejectedAt && h.status === 'assigned'))
 const showDone  = ref(false)
 
 const emptyQuestMessage = computed(() =>
@@ -184,7 +185,11 @@ async function refreshData() {
     // Quest returned by volunteer
     const newlyRejected = h.data.filter((hw) => hw.rejectedAt && !prevRejectedIds.has(hw.id))
     if (newlyRejected.length) {
-      showToast('bi-arrow-return-left', 'A quest was returned — check your quests!', '#B05030')
+      const single = newlyRejected.length === 1
+      const msg = single && newlyRejected[0].rejectMessage
+        ? `Returned: "${newlyRejected[0].rejectMessage}"`
+        : single ? 'A quest was returned — check below!' : `${newlyRejected.length} quests were returned!`
+      showToast('bi-arrow-return-left', msg, '#B05030')
     }
 
     // New homework allocated
@@ -366,8 +371,9 @@ onUnmounted(() => {
           :class="{ 'child-tab-active': activeTab === 'quests' }"
           @click="activeTab = 'quests'"
         >
-          <i class="bi bi-map"></i> Quests
-          <span v-if="todo.length > 0" class="child-tab-count">{{ todo.length }}</span>
+          <i :class="returned.length ? 'bi bi-arrow-return-left' : 'bi bi-map'"></i> Quests
+          <span v-if="returned.length" class="child-tab-count child-tab-returned">{{ returned.length }}</span>
+          <span v-else-if="todo.length > 0" class="child-tab-count">{{ todo.length }}</span>
         </button>
         <button
           role="tab"
@@ -386,6 +392,11 @@ onUnmounted(() => {
         <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
           <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
           <button type="button" class="btn-close btn-sm float-end" @click="submitError = ''"></button>
+        </div>
+
+        <div v-if="returned.length" class="returned-banner mb-3">
+          <i class="bi bi-arrow-return-left me-2"></i>
+          {{ returned.length === 1 ? '1 quest was returned' : `${returned.length} quests were returned` }} — check below!
         </div>
 
         <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
@@ -1158,6 +1169,19 @@ onUnmounted(() => {
   background: #E8A0B8;
   color: #4A3F3A;
   font-size: 11px;
+  font-weight: 700;
+}
+
+.child-tab-returned { background: #E8696B; color: #FFFFFF; }
+
+.returned-banner {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #FEF0F0;
+  color: #7A3030;
+  font-size: 14px;
   font-weight: 700;
 }
 

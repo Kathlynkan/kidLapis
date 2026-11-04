@@ -103,6 +103,8 @@ function editHomework(homeworkId) {
 }
 // The child handed a quest in; the volunteer checks it and the child is paid the berries (PUT /homework/:id/verify)
 const checkingQuestId = ref(null)
+const rejectPendingId = ref(null)
+const rejectMsg = ref('')
 async function verifyQuest(homeworkId) {
   checkingQuestId.value = homeworkId
   const prevPoints     = child.value?.points || 0
@@ -142,13 +144,21 @@ async function deleteHomework(homeworkId) {
   }
 }
 
-async function rejectQuest(homeworkId) {
+function rejectQuest(homeworkId) {
+  rejectPendingId.value = homeworkId
+  rejectMsg.value = ''
+}
+
+async function confirmReject() {
   try {
-    await api.put(`/homework/${homeworkId}/reject`)
+    await api.put(`/homework/${rejectPendingId.value}/reject`, { message: rejectMsg.value })
     const h = await api.get('/homework', { params: { childId } })
     homework.value = h.data
   } catch (err) {
     error.value = errorMessage(err)
+  } finally {
+    rejectPendingId.value = null
+    rejectMsg.value = ''
   }
 }
 
@@ -303,6 +313,37 @@ onMounted(() => {
       </div>
     </template>
   </div>
+
+  <!-- Return quest modal: volunteer optionally explains why -->
+  <Teleport to="body">
+    <div v-if="rejectPendingId" class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Return Quest</h5>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2" style="font-size:14px">The quest goes back to the child as "assigned". Leave a note so they know what to fix (optional).</p>
+            <textarea
+              v-model="rejectMsg"
+              class="form-control"
+              rows="3"
+              maxlength="300"
+              placeholder="e.g. Please write in full sentences."
+              style="font-size:14px; resize:none;"
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" @click="rejectPendingId = null">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" @click="confirmReject">
+              <i class="bi bi-arrow-return-left me-1"></i>Return Quest
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="rejectPendingId" class="modal-backdrop fade show"></div>
+  </Teleport>
 </template>
 
 <style>
