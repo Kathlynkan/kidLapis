@@ -158,7 +158,7 @@
       "needs": [
         "Math"
       ],
-      "points": 199,
+      "points": 160,
       "avatar": "/photos/ethan.jpg",
       "followUp": false
     },
@@ -2138,7 +2138,7 @@
       "dueDate": "2026-10-08",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-10-07T16:00:00.000Z"
+      "completedAt": "2026-09-15T16:00:00.000Z"
     },
     {
       "id": "h_14",

@@ -108,6 +108,15 @@ const tier = computed(() => {
 })
 const plateTier  = computed(() => tier.value ? `cake-plate-${tier.value}` : '')
 const tierName   = computed(() => ({ '': 'Basic', bronze: 'Bronze', silver: 'Silver', gold: 'Gold', diamond: 'Diamond' })[tier.value])
+const TIER_ORDER = ['', 'bronze', 'silver', 'gold', 'diamond']
+const nextTierName = computed(() => {
+  const next = TIER_ORDER[TIER_ORDER.indexOf(tier.value) + 1]
+  return next ? next.charAt(0).toUpperCase() + next.slice(1) : null
+})
+const isLastLevelOfTier  = computed(() => cakeProgress.value.level === 4)
+const renderedLayers     = computed(() => Math.min(layers.value + 1, 4))
+// each layer is 44px, each gap is 2px; empty space sits at the top of the min-height container
+const markerTop          = computed(() => 184 - renderedLayers.value * 46)
 const layers       = computed(() => Math.min(cakeProgress.value.level - 1, 4))
 
 // pending points: submitted but not yet verified (uses half-points if late, same as backend)
@@ -355,7 +364,11 @@ onUnmounted(() => {
           >
             <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
           </div>
-          <div class="small lapis-muted">{{ level.starsToNext }} ★ to Level {{ level.level + 1 }}</div>
+          <div class="small lapis-muted">
+            {{ level.starsToNext }} ★
+            <template v-if="isLastLevelOfTier && nextTierName">to {{ nextTierName }} tier</template>
+            <template v-else>to Level {{ level.level + 1 }}</template>
+          </div>
         </div>
 
         <!-- the kueh lapis: a layer for every level, the next one fills up -->
@@ -381,7 +394,7 @@ onUnmounted(() => {
               <div
                 v-if="cakeProgress.progress > 0 && layers < 4"
                 class="cake-marker"
-                :style="{ left: cakeProgress.progress + '%' }"
+                :style="{ left: cakeProgress.progress + '%', top: markerTop + 'px' }"
                 aria-hidden="true"
               ></div>
             </div>
@@ -392,7 +405,11 @@ onUnmounted(() => {
           </div>
           <div class="cake-caption">
             Kueh Lapis
-            <span v-if="layers < 4" class="cake-progress-label">{{ cakeProgress.starsToNext }} more ★ for next layer</span>
+            <span v-if="layers < 4" class="cake-progress-label">
+              {{ cakeProgress.starsToNext }} more ★
+              <template v-if="isLastLevelOfTier && nextTierName">to {{ nextTierName }} tier</template>
+              <template v-else>to next layer</template>
+            </span>
             <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
             <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ being checked</span>
           </div>
