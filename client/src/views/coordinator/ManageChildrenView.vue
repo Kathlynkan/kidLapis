@@ -305,9 +305,6 @@ async function confirmDelete() {
           </div>
 
           <div class="person-foot">
-            <RouterLink :to="{ name: 'child-profile', params: { id: c.id } }" class="t-btn t-btn-soft">
-              View
-            </RouterLink>
             <button
               type="button"
               class="t-btn t-btn-edit"

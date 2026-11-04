@@ -162,6 +162,7 @@ function busyTimes(child, s, day) {
   const busy = []
   for (const other of children.value) {
     for (const slot of other.schedule || []) {
+      if (slot.status === 'declined') continue // a declined request doesn't hold the time
       if (slot.day !== day || !slot.time) continue
       if (other.id === child.id && slot.volunteerId === s.volunteerId) continue // this pair's own day
       if (slot.volunteerId === s.volunteerId) {
@@ -791,11 +792,17 @@ async function saveEdit(child, s) {
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
       'avatar main   chevron'
-      'avatar status chevron';
+      'avatar status chevron'
+      'avatar wait   chevron';
     align-items: center;
     column-gap: 12px;
     row-gap: 6px;
     padding: 12px;
+  }
+  .matchpage .child-toggle .tag-wait {
+    grid-area: wait;
+    justify-self: start;
+    white-space: normal; /* the sentence can wrap on a narrow screen */
   }
   .matchpage .child-toggle > :first-child {
     grid-area: avatar; /* the round photo */

@@ -1,10 +1,12 @@
 <!-- Which weekdays a child has a volunteer, e.g. next to a child's name.   Owner: Yu Xuan
   <WeekdayDots :schedule="child.schedule" />
-  Green = a volunteer is booked that day, red = nobody. Also shows "2/5" and a
+  Green = an accepted volunteer that day, red = nobody, dashed amber = a request is waiting
+  for the volunteer to accept (it doesn't count until they do). Also shows "2/5" and a
   full sentence for screen readers, so it never relies on colour alone.
 -->
 <script setup>
 import { computed } from 'vue'
+import { isConfirmed, isPending } from '@/utils/slots'
 
 const props = defineProps({
   schedule: { type: Array, default: () => [] }, // child.schedule: [{ volunteerId, day, time }]
@@ -12,14 +14,29 @@ const props = defineProps({
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 
-const coveredDays = computed(() => new Set((props.schedule || []).map((slot) => slot.day)))
-const covered = computed(() => WEEKDAYS.filter((d) => coveredDays.value.has(d)))
+const daysWhere = (test) => new Set((props.schedule || []).filter(test).map((slot) => slot.day))
+const coveredDays = computed(() => daysWhere(isConfirmed))
+// Waiting for the volunteer, and not already covered by someone else that day.
+const pendingDays = computed(() => {
+  const days = daysWhere(isPending)
+  for (const d of coveredDays.value) days.delete(d)
+  return days
+})
 
-const description = computed(() =>
-  covered.value.length
-    ? `Volunteer on ${covered.value.join(', ')} (${covered.value.length} of 5 weekdays)`
-    : 'No volunteer on any weekday',
-)
+const covered = computed(() => WEEKDAYS.filter((d) => coveredDays.value.has(d)))
+const pending = computed(() => WEEKDAYS.filter((d) => pendingDays.value.has(d)))
+
+const description = computed(() => {
+  const parts = [
+    covered.value.length
+      ? `Volunteer on ${covered.value.join(', ')} (${covered.value.length} of 5 weekdays)`
+      : 'No volunteer on any weekday',
+  ]
+  if (pending.value.length) parts.push(`waiting for a volunteer to accept ${pending.value.join(', ')}`)
+  return parts.join('; ')
+})
+
+const dayClass = (d) => (coveredDays.value.has(d) ? 'is-on' : pendingDays.value.has(d) ? 'is-pending' : 'is-off')
 </script>
 
 <template>
@@ -28,7 +45,7 @@ const description = computed(() =>
       v-for="d in WEEKDAYS"
       :key="d"
       class="day"
-      :class="coveredDays.has(d) ? 'is-on' : 'is-off'"
+      :class="dayClass(d)"
       aria-hidden="true"
     >
       {{ d.slice(0, 2) }}
@@ -65,6 +82,11 @@ const description = computed(() =>
   background: #fdf0ee;
   color: #b4473b;
   border: 1px solid #e8b4ad;
+}
+.day.is-pending {
+  background: #fffaf0;
+  color: #8a5a00;
+  border: 1px dashed #e0b45a;
 }
 .count {
   margin-left: 4px;

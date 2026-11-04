@@ -3,6 +3,8 @@
 //   +1 per shared day
 //   -1 per OTHER child the volunteer already has (workload)
 
+import { isActive, isPending, slotStatus } from './schedule.js'
+
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // Children's needs and volunteers' skills are both just subjects, the same words
@@ -25,9 +27,10 @@ export function scoreVolunteer(child, volunteer, allChildren) {
     (c) => c.id !== child.id && (c.volunteerIds || []).includes(volunteer.id),
   ).length
 
-  // This volunteer's sessions with this child, in week order.
+  // This volunteer's sessions (and pending requests) with this child, in week order.
+  // Declined requests are left out, so that day can be requested again.
   const mySlots = (child.schedule || [])
-    .filter((s) => s.volunteerId === volunteer.id)
+    .filter((s) => s.volunteerId === volunteer.id && isActive(s))
     .sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day))
 
   const breakdown = { skills: 2 * matchedSkills.length, days: sharedDays.length, workload: -workload }
@@ -35,7 +38,7 @@ export function scoreVolunteer(child, volunteer, allChildren) {
   return {
     volunteerId: volunteer.id,
     name: volunteer.name,
-    avatar: volunteer.avatar, // the photo, shown next to the name
+    avatar: volunteer.avatar, // the volunteer's photo on the Matchmaking page
     availability: volunteerDays,
     score: breakdown.skills + breakdown.days + breakdown.workload,
     breakdown,
@@ -44,9 +47,9 @@ export function scoreVolunteer(child, volunteer, allChildren) {
     workload,
     assigned: (child.volunteerIds || []).includes(volunteer.id),
     scheduledDays: mySlots.map((s) => s.day),
-    scheduledSlots: mySlots.map((s) => ({ day: s.day, time: s.time || '' })), // e.g. [{ day: 'Mon', time: '16:00' }]
-    // Days the coordinator assigned that the volunteer hasn't accepted yet (routes/requests.js)
-    pendingDays: mySlots.filter((s) => s.status === 'pending').map((s) => s.day),
+    pendingDays: mySlots.filter(isPending).map((s) => s.day), // days waiting for the volunteer to accept
+    // e.g. [{ day: 'Mon', time: '16:00', status: 'accepted' }, { day: 'Wed', time: '18:00', status: 'pending' }]
+    scheduledSlots: mySlots.map((s) => ({ day: s.day, time: s.time || '', status: slotStatus(s) })),
   }
 }
 

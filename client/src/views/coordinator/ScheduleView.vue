@@ -7,6 +7,8 @@
   "+ Add" -> pick child + start time -> PUT /matchmaking/:childId/assign
   "x" on a session -> removes just that day (unassign with day)
   The server blocks double-bookings (409) and days the volunteer isn't free.
+  A new session is a REQUEST: it shows as "Pending" until the volunteer accepts it
+  (Kai Sen, routes/requests.js). Declined requests are not shown.
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -14,6 +16,7 @@ import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
+import { isActive, isConfirmed, isPending } from '@/utils/slots'
 
 // Start times every 30 minutes from 09:00 to 19:30.
 const TIMES = []
@@ -62,7 +65,10 @@ function onKeydown(e) {
 
 const firstName = (name) => name.split(' ')[0]
 
-const sessionCount = computed(() => children.value.reduce((n, c) => n + (c.schedule || []).length, 0))
+// Accepted weekly sessions, and requests still waiting for the volunteer.
+const countSlots = (test) => children.value.reduce((n, c) => n + (c.schedule || []).filter(test).length, 0)
+const sessionCount = computed(() => countSlots(isConfirmed))
+const pendingCount = computed(() => countSlots(isPending))
 
 // Assigned in volunteerIds but no day on the timetable (e.g. assigned before schedules existed).
 const unscheduled = computed(() => {
@@ -70,7 +76,7 @@ const unscheduled = computed(() => {
   const list = []
   for (const c of children.value) {
     for (const vid of c.volunteerIds || []) {
-      if (!(c.schedule || []).some((s) => s.volunteerId === vid)) {
+      if (!(c.schedule || []).some((s) => s.volunteerId === vid && isActive(s))) {
         list.push({ key: `${c.id}|${vid}`, child: c, volunteerName: volunteerName[vid] || 'Unknown volunteer' })
       }
     }
@@ -81,14 +87,17 @@ const unscheduled = computed(() => {
 // ---------- Add a session ----------
 
 // Children to offer: unassigned first, then best skill match for this volunteer.
-// Children already booked with this volunteer on this day are left out.
+// Children already booked (or requested) with this volunteer on this day are left out;
+// a request they declined doesn't count, so that child can be asked again.
 const childOptions = computed(() => {
   if (!adding.value) return []
   const { volunteer, day } = adding.value
   const skills = volunteer.skills || []
   const bookedHere = new Set(
     children.value
-      .filter((c) => (c.schedule || []).some((s) => s.volunteerId === volunteer.id && s.day === day))
+      .filter((c) =>
+        (c.schedule || []).some((s) => s.volunteerId === volunteer.id && s.day === day && isActive(s)),
+      )
       .map((c) => c.id),
   )
 
@@ -145,6 +154,7 @@ async function submitAdd() {
 
 // ---------- Remove a session ----------
 
+// Removes one day (or cancels a pending request for it).
 async function removeSlot(volunteer, day, slot) {
   busyKey.value = `${volunteer.id}|${day}|${slot.child.id}`
   actionError.value = ''
@@ -173,6 +183,10 @@ async function removeSlot(volunteer, day, slot) {
     <template v-else>
       <div class="d-flex flex-wrap align-items-center gap-3 small mb-3">
         <span><strong>{{ sessionCount }}</strong> weekly slots</span>
+        <span v-if="pendingCount" data-test="pending-count">
+          <strong>{{ pendingCount }}</strong> waiting for a volunteer to accept
+        </span>
+        <span class="legend"><span class="swatch swatch-pending"></span>Pending request</span>
         <span class="legend"><span class="swatch swatch-off"></span>Volunteer not free</span>
         <span class="legend"><span class="swatch swatch-today"></span>Today</span>
       </div>
@@ -229,7 +243,8 @@ async function removeSlot(volunteer, day, slot) {
               </select>
               <div class="small text-muted-cb mt-1 mb-3">
                 Children with no volunteer come first, then the best skill match for
-                {{ firstName(adding.volunteer.name) }}.
+                {{ firstName(adding.volunteer.name) }}. {{ firstName(adding.volunteer.name) }} gets a request
+                to accept before the session is confirmed.
               </div>
 
               <label for="add-time" class="form-label small fw-semibold">Start time (1-hour session)</label>
@@ -253,7 +268,7 @@ async function removeSlot(volunteer, day, slot) {
                 :disabled="!form.childId || !form.time || saving"
                 data-test="add-submit"
               >
-                {{ saving ? 'Adding…' : 'Add session' }}
+                {{ saving ? 'Sending…' : 'Send request' }}
               </button>
             </div>
           </form>
@@ -282,5 +297,9 @@ async function removeSlot(volunteer, day, slot) {
 }
 .swatch-today {
   background: #f0eaf8;
+}
+.swatch-pending {
+  background: #fffaf0;
+  border: 1.5px dashed #e0b45a;
 }
 </style>

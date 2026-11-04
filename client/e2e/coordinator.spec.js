@@ -1,12 +1,12 @@
 // Coordinator portal journey.                              Owner: Jachin
-// Seed data used:
+// Seed data used (run `pnpm seed` in server/ before the tests):
 //   coordinator@kidslapis.sg = centre coordinator
-//   Seed includes children with unassigned volunteers, recurring struggles,
-//   overdue homework, and 7-day gaps — all of which trigger dashboard alerts.
+//   Sofia Ong has no volunteer on any weekday; Chloe Lee has a volunteer on Mon only.
 //
 // Note: the follow-up toggle test mutates the follow-up flag. Both runs (Desktop
 // Chrome and iPhone 6) read the current state before flipping, so the test
 // remains deterministic regardless of which state the DB is in.
+// The "assign Sofia" test also changes data, so it runs on desktop only and undoes itself.
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
@@ -23,34 +23,46 @@ test.describe('Coordinator dashboard', () => {
     await expect(page.locator('.tile-label', { hasText: 'Sessions this week' })).toBeVisible()
   })
 
-  test('alerts list loads with at least one row', async ({ page }) => {
-    await expect(page.locator('[data-test="alerts-table"]')).toBeVisible()
-    await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
+  test('the full weekly schedule opens from the dashboard', async ({ page }) => {
+    await expect(page.locator('[data-test="week-schedule"]')).toBeVisible()
+    await page.locator('[data-test="toggle-week"]').click()
+    await expect(page.locator('[data-test="schedule-table"]')).toBeVisible()
   })
 
-  test('shows Chloe (not seen) and Sofia (no volunteer) in Needs attention', async ({ page }) => {
-    const rows = page.locator('[data-test="alert-row"]')
-    // Chloe can have more than one alert (e.g. also overdue homework), so match the exact one.
-    await expect(rows.filter({ hasText: 'Chloe Lee' }).filter({ hasText: 'Not seen' })).toBeVisible()
-    await expect(rows.filter({ hasText: 'Sofia Ong' }).filter({ hasText: 'No volunteer' })).toBeVisible()
-  })  
-
-  test('alert type filter narrows the list', async ({ page }) => {
-    await expect(page.locator('[data-test="alert-type-filter"]')).toBeVisible()
-    await page.locator('[data-test="alert-filter-unassigned"]').click()
-    // Every remaining row should be an "unassigned" alert
-    const rows = page.locator('[data-test="alert-row"]')
-    const count = await rows.count()
-    if (count > 0) {
-      await expect(rows.first()).toContainText('No volunteer')
-    }
+  test('volunteer assignment list loads with a row per child', async ({ page }) => {
+    await expect(page.locator('[data-test="assignment-list"]')).toBeVisible()
+    await expect(page.locator('[data-test="assignment-row"]').first()).toBeVisible()
   })
 
-  test('clicking an unassigned alert navigates to matchmaking', async ({ page }) => {
-    await page.locator('[data-test="alert-filter-unassigned"]').click()
-    await expect(page.locator('[data-test="alert-row"]').first()).toBeVisible()
-    await page.locator('[data-test="alert-row"]').first().click()
-    await expect(page).toHaveURL(/\/coordinator\/matchmaking/)
+  test('shows Sofia with no volunteer and Chloe with some days', async ({ page }) => {
+    const rows = page.locator('[data-test="assignment-row"]')
+    // Every child has exactly one row now, so "the row with Sofia Ong" is unique.
+    const sofia = rows.filter({ hasText: 'Sofia Ong' })
+    const chloe = rows.filter({ hasText: 'Chloe Lee' })
+
+    await expect(sofia.locator('[data-test="assignment-status"]')).toHaveText('No volunteer')
+    await expect(sofia.locator('[data-test="weekday-dots"]')).toContainText('0/5')
+
+    await expect(chloe.locator('[data-test="assignment-status"]')).toHaveText('Some days')
+    await expect(chloe.locator('[data-test="weekday-dots"]')).toContainText('1/5')
+  })
+
+  test('the "No volunteer" filter only shows children with no volunteer', async ({ page }) => {
+    await expect(page.locator('[data-test="assignment-row"]').first()).toBeVisible() // wait for the list
+    await page.locator('[data-test="assignment-filter-none"]').click()
+
+    // Every remaining row should be a "No volunteer" child (and there is at least one: Sofia)
+    const statuses = page.locator('[data-test="assignment-status"]')
+    await expect(statuses.first()).toBeVisible()
+    await expect(statuses.filter({ hasNotText: 'No volunteer' })).toHaveCount(0)
+  })
+
+  test('clicking a child opens them in matchmaking', async ({ page }) => {
+    await page.locator('[data-test="assignment-filter-none"]').click()
+    await expect(page.locator('[data-test="assignment-row"]').first()).toBeVisible()
+    await page.locator('[data-test="assignment-row"]').first().click()
+    await expect(page).toHaveURL(/\/coordinator\/matchmaking\/.+/)
+    await expect(page.locator('[data-test="child-panel"]')).toBeVisible() // that child is opened
   })
 
   test('can toggle a follow-up flag', async ({ page }) => {
@@ -81,7 +93,8 @@ test.describe('Coordinator: matchmaking', () => {
     await page.locator('[data-test="child-toggle"]').first().click()
     await expect(page.locator('[data-test="suggestion-card"]').first()).toBeVisible()
   })
-  test('assigning a volunteer to Sofia removes her "No volunteer" alert once they accept', async ({
+
+  test('assigning a volunteer to Sofia gives her "Some days" once they accept', async ({
     page,
     request,
     isMobile,
@@ -122,10 +135,11 @@ test.describe('Coordinator: matchmaking', () => {
       await expect(sofia.locator('[data-test="waiting-badge"]')).toHaveCount(0)
       await expect(sofia.locator('[data-test="no-volunteer-badge"]')).toHaveCount(0)
 
-      // On the dashboard, the "No volunteer" filter no longer lists Sofia.
+      // On the dashboard, Sofia now has a volunteer on 1 of 5 weekdays (Wednesday).
       await page.goto('/coordinator')
-      await page.locator('[data-test="alert-filter-unassigned"]').click()
-      await expect(page.locator('[data-test="alert-row"]', { hasText: 'Sofia Ong' })).toHaveCount(0)
+      const row = page.locator('[data-test="assignment-row"]', { hasText: 'Sofia Ong' })
+      await expect(row.locator('[data-test="assignment-status"]')).toHaveText('Some days')
+      await expect(row.locator('[data-test="weekday-dots"]')).toContainText('1/5')
     } finally {
       // Undo the change, so the other tests (and the next run) still see Sofia unassigned.
       await page.goto('/coordinator/matchmaking/c_6')

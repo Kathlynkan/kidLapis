@@ -1,11 +1,13 @@
 <!-- The schedule on the dashboard: today's sessions first, the full week one click away.   Owner: Yu Xuan
   <WeekScheduleCard :volunteers="volunteers" :children="children" />
   The full week uses the same WeekGrid as the Schedule page, so both always look the same.
+  Pending requests show a "Pending" tag; declined ones are left out.
 -->
 <script setup>
 import { ref, computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
+import { isActive, isConfirmed, isPending } from '@/utils/slots'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -20,19 +22,27 @@ const showWeek = ref(false)
 
 const volunteerById = computed(() => Object.fromEntries(props.volunteers.map((v) => [v.id, v])))
 
-// Every session booked for today's weekday, earliest first.
+// Every session (or pending request) for today's weekday, earliest first. Declined ones are left out.
 const todaySessions = computed(() =>
   props.children
     .flatMap((child) =>
       (child.schedule || [])
-        .filter((s) => s.day === TODAY)
-        .map((s) => ({ child, time: s.time || '', volunteer: volunteerById.value[s.volunteerId] })),
+        .filter((s) => s.day === TODAY && isActive(s))
+        .map((s) => ({
+          child,
+          time: s.time || '',
+          volunteer: volunteerById.value[s.volunteerId],
+          pending: isPending(s),
+        })),
     )
     .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99')),
 )
 
-// Booked slots that repeat every week (not the same thing as sessions logged this week).
-const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedule || []).length, 0))
+// Accepted slots that repeat every week (not the same thing as sessions logged this week),
+// and how many requests are still waiting for an answer.
+const countSlots = (test) => props.children.reduce((n, c) => n + (c.schedule || []).filter(test).length, 0)
+const weeklySlots = computed(() => countSlots(isConfirmed))
+const pendingSlots = computed(() => countSlots(isPending))
 </script>
 
 <template>
@@ -41,6 +51,7 @@ const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedu
       <h2>Today <span class="today-date">· {{ TODAY_LONG }}</span></h2>
       <span class="head-right">
         <span class="tag">{{ weeklySlots }} weekly slots</span>
+        <span v-if="pendingSlots" class="tag tag-pending" data-test="pending-count">{{ pendingSlots }} pending</span>
         <RouterLink :to="{ name: 'schedule' }" class="edit-link" data-test="edit-schedule">
           Edit schedule <i class="bi bi-arrow-right"></i>
         </RouterLink>
@@ -50,13 +61,22 @@ const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedu
     <!-- today's sessions -->
     <ul v-if="todaySessions.length" class="today-list" data-test="today-sessions">
       <li v-for="s in todaySessions" :key="`${s.child.id}-${s.volunteer?.id}`">
-        <RouterLink :to="{ name: 'child-profile', params: { id: s.child.id } }" class="today-item">
+        <RouterLink
+          :to="{ name: 'child-profile', params: { id: s.child.id } }"
+          class="today-item"
+          :class="{ 'is-pending': s.pending }"
+        >
           <span v-if="s.time" class="today-time">{{ s.time }}</span>
           <span v-else class="today-time no-time">No time</span>
           <MiniAvatar :person="s.child" :size="30" />
           <span class="today-text">
-            <strong>{{ firstName(s.child.name) }}</strong>
-            <span class="with">with {{ firstName(s.volunteer?.name) || 'a volunteer' }}</span>
+            <strong>
+              {{ firstName(s.child.name) }}
+              <span v-if="s.pending" class="pending-tag" data-test="pending-tag">Pending</span>
+            </strong>
+            <span class="with">
+              {{ s.pending ? 'waiting for' : 'with' }} {{ firstName(s.volunteer?.name) || 'a volunteer' }}
+            </span>
           </span>
         </RouterLink>
       </li>
@@ -155,6 +175,33 @@ const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedu
 .empty-today {
   margin: 0;
   color: #7d7690;
+}
+
+/* a pending request: dashed outline, until the volunteer accepts */
+.today-item.is-pending {
+  background: #fffaf0;
+  outline: 1.5px dashed #e0b45a;
+  outline-offset: -1.5px;
+}
+.today-item.is-pending .today-time {
+  background: #e0b45a;
+}
+.pending-tag,
+.tag-pending {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fbefd2;
+  color: #8a5a00;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+}
+.tag-pending {
+  font-size: 12px;
+  padding: 4px 12px;
+  vertical-align: 0;
 }
 
 /* show / hide the full week */

@@ -42,5 +42,26 @@ test('seed: Ethan scores his two assigned volunteers with their schedule days', 
   const aisha = ranked.find((r) => r.name === 'Aisha Rahman')
   assert.equal(aisha.assigned, true)
   assert.deepEqual(aisha.scheduledDays, ['Mon', 'Wed'])
-  assert.deepEqual(aisha.scheduledSlots, [{ day: 'Mon', time: '16:00' }, { day: 'Wed', time: '18:00'}])
+  // Seed slots have no status, so they count as accepted.
+  assert.deepEqual(aisha.scheduledSlots, [
+    { day: 'Mon', time: '16:00', status: 'accepted' },
+    { day: 'Wed', time: '18:00', status: 'accepted' },
+  ])
+})
+
+test('pending requests are listed with their status; declined ones are left out', () => {
+  const child = {
+    id: 'c_x',
+    needs: [],
+    volunteerIds: [],
+    schedule: [
+      { volunteerId: 'v', day: 'Mon', time: '16:00', status: 'pending' },
+      { volunteerId: 'v', day: 'Wed', time: '16:00', status: 'declined' },
+    ],
+  }
+  const volunteer = { id: 'v', name: 'V', skills: [], availability: ['Mon', 'Wed'] }
+  const result = scoreVolunteer(child, volunteer, [child])
+  assert.deepEqual(result.scheduledSlots, [{ day: 'Mon', time: '16:00', status: 'pending' }])
+  assert.deepEqual(result.scheduledDays, ['Mon']) // Wed can be requested again
+  assert.deepEqual(result.pendingDays, ['Mon']) // the Matchmaking page shows "waiting" for these
 })
