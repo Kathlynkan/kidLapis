@@ -263,13 +263,13 @@ async function confirmDelete() {
 
       <div v-if="children.length === 0" class="t-card empty">
         <strong>No children yet</strong>
-        Click "Add child" to enrol the first one.
+        Click "Add Child" to enrol the first one.
       </div>
       <div v-else-if="filteredChildren.length === 0" class="t-card empty">
         <strong>No children found</strong>
         Try another name or level.
         <div class="mt-2">
-          <button type="button" class="t-btn t-btn-soft" @click="clearFilters">Clear search</button>
+          <button type="button" class="t-btn t-btn-soft" @click="clearFilters">Clear Search</button>
         </div>
       </div>
 
@@ -343,7 +343,7 @@ async function confirmDelete() {
           <form class="modal-content" novalidate data-test="child-form" @submit.prevent="saveChild">
             <div class="modal-header">
               <h2 id="childFormTitle" class="modal-title h5">
-                {{ editingId ? 'Edit child' : 'Add a child' }}
+                {{ editingId ? 'Edit Child' : 'Add a Child' }}
               </h2>
               <button
                 type="button"
@@ -466,12 +466,12 @@ async function confirmDelete() {
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="closeModal">
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="closeModal">
                 Cancel
               </button>
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-child">
                 <span v-if="saving" class="spinner-border spinner-border-sm"></span>
-                {{ editingId ? 'Save Changes' : 'Save child' }}
+                {{ editingId ? 'Save Changes' : 'Save Child' }}
               </button>
             </div>
           </form>
@@ -516,7 +516,7 @@ async function confirmDelete() {
               </p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="t-btn t-btn-soft" :disabled="deleting" @click="closeDelete">
+              <button type="button" class="t-btn t-btn-red" :disabled="deleting" @click="closeDelete">
                 Cancel
               </button>
               <button

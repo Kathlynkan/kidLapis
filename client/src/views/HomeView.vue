@@ -24,7 +24,7 @@ const roles = [
     name: "Volunteers",
     short: "Record and hand over",
     text: "Get a briefing before each session, record it after, and set homework quests.",
-    signUp: { role: "volunteer", label: "Volunteer sign up" },
+    signUp: { role: "volunteer", label: "Volunteer Sign Up" },
     colour: "green",
   },
   {
@@ -41,7 +41,7 @@ const roles = [
     name: "Parents",
     short: "Follow progress",
     text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
-    signUp: { role: "parent", label: "Parent sign up" },
+    signUp: { role: "parent", label: "Parent Sign Up" },
     colour: "aqua",
   },
   {
@@ -96,7 +96,7 @@ const steps = [
 
     <!-- the sandy board with a white card for each role -->
     <section class="board" aria-labelledby="roles-title">
-      <h2 id="roles-title">One app, four views</h2>
+      <h2 id="roles-title">One App, Four Views</h2>
       <div class="role-grid">
         <article v-for="r in roles" :key="r.name" class="role-card" data-test="role-card">
           <div class="role-top">
@@ -130,7 +130,7 @@ const steps = [
 
     <!-- the four steps, as white rows -->
     <section class="board" aria-labelledby="steps-title">
-      <h2 id="steps-title">How it works</h2>
+      <h2 id="steps-title">How It Works</h2>
       <div class="step-grid">
         <div v-for="(s, i) in steps" :key="s.name" class="step-row" data-test="how-step">
           <span class="step-num" :class="`colour-${s.colour}`">{{ i + 1 }}</span>

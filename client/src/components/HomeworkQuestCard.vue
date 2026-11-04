@@ -196,8 +196,8 @@ function cancelDelete()  { showDeleteModal.value = false }
             <p>Are you sure you want to delete this homework?</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">
-              <i class="bi bi-x-circle"></i> Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="cancelDelete">
+              Cancel</button>
             <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">
               <i class="bi bi-trash"></i> Delete</button>
           </div>

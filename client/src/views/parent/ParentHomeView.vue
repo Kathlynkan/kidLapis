@@ -422,7 +422,7 @@ watch(
 
         <!-- tab: progress = accuracy over time, one subject at a time -->
         <div v-else-if="openTab === 'progress'" class="board-panel" data-test="progress-tab">
-          <SkillProgressChart :sessions="sessions" />
+          <SkillProgressChart :sessions="sessions" calm explain />
         </div>
 
         <!-- tab: social = a diary: the newest day is open, the earlier days are short cards -->
@@ -773,6 +773,14 @@ watch(
   box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
+/* the progress chart: a white card like the rows of the homework and social tabs */
+.parentpage [data-test='skill-progress-chart'] {
+  border: 0;
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
+}
+
 .parentpage .show-more {
   display: block;
   width: 100%;
@@ -914,6 +922,16 @@ watch(
 
 .parentpage .day-card-small {
   padding: 11px 16px;
+  transition: background 0.15s;
+}
+
+/* a closed earlier day goes a little darker under the mouse and the pointer shows it can be pressed */
+.parentpage .day-card-small summary {
+  cursor: pointer;
+}
+
+.parentpage .day-card-small:not([open]):hover {
+  background: #EDF1F3;
 }
 
 .parentpage .day-head {

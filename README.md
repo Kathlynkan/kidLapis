@@ -106,7 +106,7 @@ The demo data is built to trigger interesting cases:
 
 ```bash
 cd client
-pnpm test:unit                         # Vitest unit + component tests (src/tests/<parent|child|volunteer|coordinator|shared>)
+pnpm test:unit                         # Vitest unit + component tests (src/__tests__/<parent|child|volunteer|coordinator|shared>)
 pnpm exec playwright install chromium  # first time only
 pnpm test:e2e                          # Playwright E2E - starts API + Vue for you, re-seeds YOUR database
 pnpm exec playwright show-report       # open the HTML report

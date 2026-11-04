@@ -9,6 +9,7 @@ import { Router } from 'express'
 import { Child, Message, User } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'
 import { canAccessChild, visibleChildIds } from '../utils/access.js'
+import { notifyBell, coordinatorIds } from '../utils/notify.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -60,6 +61,8 @@ router.post('/', async (req, res) => {
   // Push to every browser currently viewing this child's thread (real-time)
   const io = req.app.get('io')
   if (io) io.to(`child:${childId}`).emit('new-message', payload)
+  // the bell of the parent and of the coordinators (not of the sender) shows the new message
+  notifyBell(req, [child.parentId, ...(await coordinatorIds())].filter((id) => id !== req.user.id))
   res.status(201).json(payload)
 })
 

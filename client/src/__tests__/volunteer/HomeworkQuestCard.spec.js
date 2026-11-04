@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import HomeworkQuestCard from '../HomeworkQuestCard.vue'
+import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 
 const baseHw = {
   id: 'hw1',

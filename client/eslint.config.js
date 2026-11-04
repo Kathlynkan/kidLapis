@@ -36,7 +36,7 @@ export default defineConfig([
 
   {
     ...pluginVitest.configs.recommended,
-    files: ['src/tests/**/*.{test,spec}.js'],
+    files: ['src/__tests__/**/*.{test,spec}.js'],
   },
 
   {

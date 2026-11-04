@@ -20,7 +20,7 @@ ChartJS.defaults.font.family = 'Inter, system-ui, sans-serif'
 
 const props = defineProps({
   sessions: { type: Array, default: () => [] },
-  title: { type: String, default: 'Accuracy by subject' },
+  title: { type: String, default: 'Accuracy by Subject' },
   calm: { type: Boolean, default: false },
 })
 

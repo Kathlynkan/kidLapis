@@ -44,7 +44,7 @@ async function handleLogin() {
       <div class="board">
         <div class="auth-card">
           <header>
-            <h1 class="page-title">Welcome back</h1>
+            <h1 class="page-title">Welcome Back</h1>
             <p class="page-subtitle">Log in to continue to Kids Lapis.</p>
           </header>
 
