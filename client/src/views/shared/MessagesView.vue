@@ -155,7 +155,7 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <ChatThread :messages="messages" :current-user-id="auth.user.id" :sending="sending" @send="onSend" />
+      <ChatThread :messages="messages" :current-user-id="auth.user?.id" :sending="sending" @send="onSend" />
     </template>
   </div>
 </template>

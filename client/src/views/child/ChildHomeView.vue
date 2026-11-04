@@ -1003,6 +1003,7 @@ onUnmounted(() => {
 @media (max-width: 520px) {
   .kueh-tin { padding: 16px 12px 20px; }
   .kueh-detail { grid-template-columns: 1fr; }
+  .kueh-detail > img { display: block; margin: 0 auto; }
 }
 
 /* ── Celebrate overlay ──────────────────────────────────────── */
