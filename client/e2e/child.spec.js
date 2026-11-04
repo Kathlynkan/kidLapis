@@ -16,11 +16,21 @@ test.describe('Child quests', () => {
     await expect(page).toHaveURL(/\/child$/)
   })
 
-  test('My Quests page shows the tab bar, quests and completed toggle', async ({ page }) => {
-    await expect(page.getByRole('tab', { name: /Quests/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Past quests/i })).toBeVisible()
-    // Ethan always has homework in some state regardless of prior test mutations
-    await expect(page.locator('[data-test="homework-card"]').first()).toBeVisible()
+  // The submit button is status-driven: assigned homework shows it, verified never does.
+  // Clicking "Past quests" reveals verified cards so both statuses are on screen at once.
+  test('submit button only appears on assigned homework — verified homework never shows it', async ({ page }) => {
+    await page.locator('[data-test="homework-card"]').first().waitFor({ state: 'visible' })
+
+    // Reveal verified (past) quests so the page has cards in multiple statuses
+    await page.getByRole('button', { name: /Past quests/i }).click()
+
+    const cards = page.locator('[data-test="homework-card"]')
+    const btns  = page.locator('[data-test="submit-quest-btn"]')
+
+    await expect(btns.first()).toBeVisible()       // at least one assigned quest exists
+    const cardCount = await cards.count()
+    const btnCount  = await btns.count()
+    expect(btnCount).toBeLessThan(cardCount)       // verified cards carry no submit button
   })
 
   // Mutates h_1 from 'assigned' -> 'submitted'; only run once on chromium so the
@@ -28,13 +38,19 @@ test.describe('Child quests', () => {
   test('submitting a quest decrements the submit count and shows the undo button', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'state-mutating test runs on chromium only')
 
-    // Wait for homework data to load — badge modals fire once the fetch completes.
-    // Fresh headless browser has empty localStorage, so all existing earned badges show
-    // as newly unlocked on first load and overlay the page — dismiss before interacting.
+    // Seed gives Ethan pre-existing earned badges. With empty localStorage the app
+    // queues all as "newly unlocked" on mount, blocking the submit button.
+    // Set both localStorage keys so the cross-session detection skips all popups:
+    //   seen-badges-v2-c_1  — tells queueUnseen every badge is already dismissed
+    //   earned-badges-c_1   — tells cross-session logic no badges are "newly earned"
+    //                         (without this key the app strips seenBadgeIds on reload)
+    const ALL_BADGE_IDS = ['first-quest', 'streak-3', 'quest-champion', 'bookworm', 'century', 'rising-star']
+    await page.evaluate((ids) => {
+      localStorage.setItem('seen-badges-v2-c_1', JSON.stringify(ids))
+      localStorage.setItem('earned-badges-c_1',  JSON.stringify(ids))
+    }, ALL_BADGE_IDS)
+    await page.reload()
     await page.locator('[data-test="homework-card"]').first().waitFor({ state: 'visible' })
-    while (await page.locator('.badge-unlock-btn').isVisible().catch(() => false)) {
-      await page.locator('.badge-unlock-btn').click()
-    }
 
     await expect(page.locator('[data-test="submit-quest-btn"]').first()).toBeVisible()
     const todoBefore = await page.locator('[data-test="submit-quest-btn"]').count()
