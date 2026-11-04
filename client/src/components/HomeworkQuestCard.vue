@@ -126,7 +126,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>Submit · <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>{{ chipStars }} ★
+        <i class="bi bi-check-lg me-1"></i>Submit · {{ chipStars }} ★
       </button>
 
       <button
