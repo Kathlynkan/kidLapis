@@ -41,20 +41,21 @@ const chipStars = computed(() =>
 
 // relative due string for the child's card
 const dueLabel = computed(() => {
-  if (props.homework.status === 'submitted') return 'Waiting to be checked'
+  if (props.homework.status === 'submitted') return 'Being checked...'
   if (props.homework.status === 'verified') {
     const pts = props.homework.pointsAwarded ?? props.homework.points
-    return `Checked · earned ${pts} ★`
+    return `Earned ${pts} ★`
   }
   const days = daysSince(props.homework.dueDate)
-  if (days < -1) return `Due in ${-days} days`
-  if (days === -1) return 'Due tomorrow'
-  if (days === 0) return 'Due today!'
-  if (days === 1) return '1 day overdue'
-  return `${days} days overdue`
+  if (days < -1) return `${-days} days left`
+  if (days === -1) return 'Tomorrow'
+  if (days === 0) return 'Today!'
+  if (days === 1) return '1 day late'
+  return `${days} days late`
 })
 
 const dueUrgency = computed(() => {
+  if (props.homework.status === 'verified') return 'done'
   if (props.homework.status !== 'assigned') return 'neutral'
   const days = daysSince(props.homework.dueDate)
   if (days > 0)  return 'overdue'
@@ -62,6 +63,9 @@ const dueUrgency = computed(() => {
   if (days >= -2) return 'soon'
   return 'ok'
 })
+
+// only show description when the child still needs to act on the quest
+const showDesc = computed(() => props.mode === 'volunteer' || props.homework.status === 'assigned')
 
 const expanded = ref(false)
 const showDeleteModal = ref(false)
@@ -80,14 +84,13 @@ function cancelDelete()  { showDeleteModal.value = false }
     <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
       <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
 
-      <template v-if="mode === 'child'">
-        <span v-if="homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
-          <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>
-          {{ chipStars }} <i class="bi bi-star-fill"></i>
-        </span>
-        <span v-else class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
-      </template>
-      <span v-else class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
+      <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
+      <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
+        <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>
+        {{ chipStars }} <i class="bi bi-star-fill"></i>
+      </span>
+      <!-- volunteer: always show the status pill -->
+      <span v-if="mode === 'volunteer'" class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
     </div>
 
     <!-- title -->
@@ -102,14 +105,15 @@ function cancelDelete()  { showDeleteModal.value = false }
       <span v-if="isLateSubmission && homework.status !== 'verified'" class="quest-late-penalty"> (submitted late)</span>
     </div>
 
-    <!-- description -->
-    <p class="small mb-1 quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
-    <button
-      v-if="mode === 'child' && homework.details && homework.details.length > 100"
-      class="quest-read-more mb-2"
-      @click="expanded = !expanded"
-    >{{ expanded ? 'Show less' : 'Read more' }}</button>
-    <div v-else class="mb-2"></div>
+    <!-- description: only when the child still needs to read it (assigned); always for volunteer -->
+    <p v-if="showDesc" class="small quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
+    <div class="mb-2">
+      <button
+        v-if="mode === 'child' && homework.status === 'assigned' && homework.details && homework.details.length > 100"
+        class="quest-read-more"
+        @click="expanded = !expanded"
+      >{{ expanded ? 'Show less' : 'Read more' }}</button>
+    </div>
 
     <!-- child actions -->
     <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
@@ -224,6 +228,7 @@ function cancelDelete()  { showDeleteModal.value = false }
   font-weight: 600;
 }
 .quest-due-ok      { color: #2E8B57; }
+.quest-due-done    { color: #2E8B57; }
 .quest-due-soon    { color: #B86A00; }
 .quest-due-today   { color: #D97706; }
 .quest-due-overdue { color: #9A3F36; }

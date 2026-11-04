@@ -73,15 +73,16 @@ const displayPoints = computed(() => me.value?.points || 0)
 const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
 const earnedIds = computed(() => new Set(earned.value.map((b) => b.id)))
-const todo      = computed(() => homework.value.filter((h) => h.status === 'assigned'))
-const done      = computed(() => homework.value.filter((h) => h.status !== 'assigned'))
+const todo      = computed(() => homework.value.filter((h) => h.status !== 'verified'))   // assigned + submitted
+const done      = computed(() => homework.value.filter((h) => h.status === 'verified'))
 const returned  = computed(() => homework.value.filter((h) => h.rejectedAt && h.status === 'assigned'))
+const todoCount = computed(() => homework.value.filter((h) => h.status === 'assigned').length) // badge: needs-action only
 const showDone  = ref(false)
 
 const emptyQuestMessage = computed(() =>
   homework.value.length === 0
     ? 'No quests yet — your coordinator will add some soon!'
-    : 'All quests done — great work!',
+    : 'All caught up — great work!',
 )
 
 // the kueh lapis resets every 200 pts (one full cake) — each restart is a new "season"
@@ -139,7 +140,6 @@ async function submitQuest(homeworkId) {
       h.completedAt = new Date().toISOString().slice(0, 10)
       h.rejectedAt  = null
     }
-    showDone.value    = true
     celebrating.value = true
     setTimeout(() => (celebrating.value = false), 2200)
   } catch (err) {
@@ -373,7 +373,7 @@ onUnmounted(() => {
         >
           <i :class="returned.length ? 'bi bi-arrow-return-left' : 'bi bi-map'"></i> Quests
           <span v-if="returned.length" class="child-tab-count child-tab-returned">{{ returned.length }}</span>
-          <span v-else-if="todo.length > 0" class="child-tab-count">{{ todo.length }}</span>
+          <span v-else-if="todoCount > 0" class="child-tab-count">{{ todoCount }}</span>
         </button>
         <button
           role="tab"
@@ -409,7 +409,7 @@ onUnmounted(() => {
         <template v-if="done.length > 0">
           <button class="quest-history-toggle mb-2" @click="showDone = !showDone">
             <i :class="showDone ? 'bi bi-chevron-up' : 'bi bi-chevron-down'" class="me-1"></i>
-            {{ showDone ? 'Hide' : 'Show' }} completed
+            Past quests
             <span class="quest-history-count ms-1">{{ done.length }}</span>
           </button>
           <div v-if="showDone" class="row g-3 mb-2">
