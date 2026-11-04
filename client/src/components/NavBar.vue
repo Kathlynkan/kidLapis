@@ -252,6 +252,17 @@ function closeBellOnOutsideClick(event) {
 let bellTimer = null
 let bellSocket = null
 
+function refreshEverywhere() {
+  window.dispatchEvent(new Event('bell-refresh'))
+}
+
+// Clicking a request in the bell: close the bell and reload the Requests page. If the volunteer is
+// already on that page, the link does not change the address, so without this nothing would happen
+function openRequest() {
+  bellOpen.value = false
+  refreshEverywhere()
+}
+
 // Coordinators have no bell, but use the same live connection: when a volunteer accepts or
 // declines a session, the server sends 'schedule-changed', and the open coordinator page
 // (Dashboard, Matchmaking, Schedule) reloads its data (they listen for the window event).
@@ -262,7 +273,7 @@ function connectBellSocket() {
   if ((!hasBell.value && !isCoordinator) || !auth.token) return
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000'
   bellSocket = io(apiBase, { auth: { token: auth.token }, transports: ['websocket', 'polling'] })
-  bellSocket.on('bell-refresh', fetchBell)
+  bellSocket.on('bell-refresh', refreshEverywhere) 
   bellSocket.on('schedule-changed', () => window.dispatchEvent(new Event('schedule-changed')))
 }
 
@@ -270,7 +281,7 @@ onMounted(() => {
   fetchPhoto()
   fetchBell()
   connectBellSocket()
-  bellTimer = setInterval(fetchBell, 60000)
+  bellTimer = setInterval(refreshEverywhere, 60000)
   document.addEventListener('click', closeBellOnOutsideClick)
   window.addEventListener('bell-refresh', fetchBell)
 })
@@ -347,11 +358,12 @@ watch(
                 :to="{ name: 'volunteer-requests' }"
                 class="lapis-bell-item"
                 data-test="nav-request"
+                @click="openRequest"
               >
                 <i class="bi bi-calendar-plus"></i>
                 <span>
-                  <b>{{ r.childName }}</b> ({{ r.level }})<br>
-                  Every <b>{{ r.day }}</b>
+                  <b>{{ r.changedFrom ? 'Change request:' : 'Pending request:' }}</b> {{ r.childName }} ({{ r.level }})<br>
+                  <template v-if="r.changedFrom">{{ r.changedFrom }} → </template>Every <b>{{ r.day }}</b>
                   <template v-if="r.time"> at {{ r.time }}</template>
                 </span>
               </RouterLink>

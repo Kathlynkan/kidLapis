@@ -43,6 +43,10 @@ const isParent = computed(() => auth.role === 'parent')
 // the rows to show
 const rows = computed(() => (isParent.value ? PARENT_ROWS : VOLUNTEER_ROWS))
 
+// label and text widths: the parent card is full width, the volunteer card is half width (next to the chart)
+const keyClass = computed(() => (isParent.value ? 'col-sm-3 col-lg-2' : 'col-sm-4'))
+const valueClass = computed(() => (isParent.value ? 'col-sm-9 col-lg-10' : 'col-sm-8'))
+
 // the title: 'Handover Notes', or e.g. 'Last week at student care'
 const title = computed(() => {
   if (!isParent.value) return 'Handover Notes'
@@ -152,10 +156,10 @@ const laterWeek = computed(() => {
           <template v-for="row in rows" :key="row.key">
             <!-- skip a row with nothing to say -->
             <template v-if="handover[row.key] && handover[row.key] !== '-'">
-              <dt class="col-12 col-sm-3 col-lg-2 small handover-key">
+              <dt class="col-12 small handover-key" :class="keyClass">
                 <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
               </dt>
-              <dd class="col-12 col-sm-9 col-lg-10 fw-semibold handover-value">
+              <dd class="col-12 fw-semibold handover-value" :class="valueClass">
                 {{ handover[row.key] }}
               </dd>
             </template>

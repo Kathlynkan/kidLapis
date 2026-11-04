@@ -18,6 +18,19 @@ router.use(requireAuth, requireRole('coordinator')) // every matchmaking route i
 // seed.json use, which is what the pure functions in utils/ expect.
 const toPlain = (doc) => ({ ...doc.toJSON(), id: doc.id })
 
+// The coordinator changed the day or time of an ACCEPTED session:
+// the volunteer has to agree again, so it goes back to being a request.
+// It is remembered, so if the volunteer says no, the session goes back to it (routes/requests.js).
+function askAgain(slot, old) {
+  slot.prevDay = old.day
+  slot.prevTime = old.time || ''
+  slot.prevStartDate = old.startDate || ''
+  slot.declinedChange = ''
+  slot.status = 'pending'
+  slot.startDate = '' // set again when they accept (routes/requests.js)
+  slot.requestedAt = new Date()
+}
+
 // GET /matchmaking/:childId -> { child, suggestions: [...ranked volunteers] }
 router.get('/:childId', async (req, res) => {
   const [child, volunteers, allChildren] = await Promise.all([
@@ -119,14 +132,22 @@ router.put('/:childId/assign', async (req, res) => {
     day,
     time,
   })
-  if (clash) return res.status(409).json({ message: clash }) // 409 Conflict
+  if (clash) return res.status(409).json({ message: clash })
 
-  let changedSession = null // a CONFIRMED session whose day/time changed -> the volunteer is told below
+  let changedSession = null // a CONFIRMED session whose day/time changed -> it becomes a request again (below)
   if (action === 'move') {
     const before = `${slotToMove.day} ${slotToMove.time || ''}`.trim()
+    const after = `${day} ${time}`
+    const old = { day: slotToMove.day, time: slotToMove.time, startDate: slotToMove.startDate }
+    const wasConfirmed = isConfirmed(slotToMove)
     slotToMove.day = day
     slotToMove.time = time
-    if (isConfirmed(slotToMove)) changedSession = { before, after: `${day} ${time}` }
+    if (wasConfirmed && before !== after) {
+      askAgain(slotToMove, old) // the volunteer must accept the new day/time
+      changedSession = { before, after }
+    } else {
+      slotToMove.requestedAt = new Date() // a request that was still waiting: now asked again with the new time
+    }
   } else {
     // The volunteer is NOT added to child.volunteerIds here: that happens when they accept
     // (routes/requests.js). Until then the child still counts as needing a volunteer, and
@@ -136,6 +157,7 @@ router.put('/:childId/assign', async (req, res) => {
       // same volunteer + day again = change the time
       if (time && time !== existing.time && isConfirmed(existing)) {
         changedSession = { before: `${day} ${existing.time || ''}`.trim(), after: `${day} ${time}` }
+        askAgain(existing, { day: existing.day, time: existing.time, startDate: existing.startDate }) // the volunteer must accept the new time
       }
       if (time) existing.time = time
     } else {
@@ -150,9 +172,9 @@ router.put('/:childId/assign', async (req, res) => {
   notifyBell(req, [volunteerId]) // a new or changed request shows on the volunteer's bell straight away
   if (changedSession) {
     await addUpdate(req, [volunteerId], {
-      text: `${child.name}'s session moved from ${changedSession.before} to ${changedSession.after}`,
+      text: `The coordinator would like to move ${child.name} from ${changedSession.before} to ${changedSession.after}. Accept the change, or keep ${changedSession.before}.`,
       icon: 'bi-calendar-event',
-      link: '/volunteer',
+      link: '/volunteer/requests',
     })
   }
   res.json(child)

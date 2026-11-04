@@ -80,7 +80,7 @@ async function handleLogin() {
                      getByLabel('Password'), which would also match a "Show password" button -->
                 <button
                   type="button"
-                  class="auth-show"
+                  class="auth-show lapis-button"
                   :aria-pressed="showPassword"
                   data-test="toggle-password"
                   @click="showPassword = !showPassword"
@@ -103,3 +103,27 @@ async function handleLogin() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.lapis-button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 1.5px var(--role-accent, #D5CBEA);
+  color: #4A3F3A;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lapis-button:hover {
+  background: var(--role-accent-soft, #EAF6F5);
+}
+
+.lapis-button-filled {
+  background: #E8A0B8;
+  box-shadow: none;
+}
+</style>

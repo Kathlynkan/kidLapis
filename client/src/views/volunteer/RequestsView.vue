@@ -8,13 +8,13 @@
   someone again). Uses GET /requests and PUT /requests/:childId (routes/requests.js).
 ============================================================= -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
-import { subjectStyle } from '@/utils/format'
+import { subjectStyle, formatDate } from '@/utils/format'
 import '@/css/volunteer/volunteershared.css' // what the volunteer pages have in common
 import '@/css/main/labels.css' // the capital-letter captions (the buttons, like "View all my children")
 import '@/css/main/components.css' // the subject label ("MATH"), the same as on session and quest cards
@@ -22,9 +22,14 @@ import '@/css/main/components.css' // the subject label ("MATH"), the same as on
 const requests = ref([]) // [{ childId, childName, level, avatar, needs, day, time }]
 const loading = ref(true)
 const error = ref('')
-const answering = ref('') // 'childId|day' of the request being answered (its buttons are disabled)
+const info = ref('') // what happened after Accept / Decline, e.g. 'Your session with Sofia stays every Wed at 12:00.'
+const answering = ref('') 
 
 const keyOf = (r) => `${r.childId}|${r.day}`
+
+// today as 'YYYY-MM-DD' in our time zone, to tell "Starts" from "Started" 
+const now = new Date()
+const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
 async function loadRequests() {
   const res = await api.get('/requests')
@@ -46,6 +51,17 @@ async function loadRequests() {
   })
 }
 
+// A new or changed request arrived (the NavBar sends 'bell-refresh': live from the server,
+// when the volunteer clicks a request in the bell, or every 60 seconds): show it without refreshing the page.
+async function reloadQuietly() {
+  if (answering.value) return // in the middle of accepting / declining: that reloads by itself
+  try {
+    await loadRequests()
+  } catch {
+    // keep the list we have, it will try again next time
+  }
+}
+
 onMounted(async () => {
   try {
     await loadRequests()
@@ -54,24 +70,22 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  window.addEventListener('bell-refresh', reloadQuietly)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('bell-refresh', reloadQuietly)
 })
 
 async function answer(r, action) {
   answering.value = keyOf(r)
   error.value = ''
+  info.value = ''
   try {
-    await api.put(`/requests/${r.childId}`, { day: r.day, action })
-
-    const request = requests.value.find(
-      req => keyOf(req) === keyOf(r)
-    )
-
-    if (request) {
-      request.status = action === 'accept'
-        ? 'accepted'
-        : 'declined'
-    }
-    
+    const res = await api.put(`/requests/${r.childId}`, { day: r.day, action })
+    info.value = res.data.message // e.g. 'You said no to the change. Your session with Sofia stays every Wed at 12:00.'
+    // load the list again: saying no to a change moves the session back to its old day and time
+    await loadRequests()
     window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell updates straight away
   } catch (err) {
     error.value = errorMessage(err) // e.g. the coordinator cancelled it meanwhile
@@ -90,6 +104,7 @@ async function answer(r, action) {
 
     <template v-else>
       <div v-if="error" class="alert alert-danger" role="alert" data-test="requests-error">{{ error }}</div>
+      <div v-if="info" class="alert alert-success" role="status" data-test="requests-info">{{ info }}</div>
 
       
 
@@ -104,9 +119,26 @@ async function answer(r, action) {
           <ChildInitial :child="{ name: r.childName, avatar: r.avatar }" class="request-photo" />
           <div class="request-info">
             <div class="request-name">{{ r.childName }} <span class="request-level">({{ r.level }})</span></div>
-            <div class="request-when">
+            <template v-if="r.changedFrom && r.status === 'pending'">
+              <div class="request-when">
+                <i class="bi bi-calendar-event"></i> Every <b>{{ r.prevDay }}</b>
+                <template v-if="r.prevTime"> at <b>{{ r.prevTime }}</b></template>
+              </div>
+              <div class="request-changed" data-test="request-changed">
+                <i class="bi bi-arrow-repeat"></i> The coordinator asked to change this to every <b>{{ r.day }}</b>
+                <template v-if="r.time"> at <b>{{ r.time }}</b></template>
+              </div>
+            </template>
+            <div v-else class="request-when">
               <i class="bi bi-calendar-event"></i> Every <b>{{ r.day }}</b>
               <template v-if="r.time"> at <b>{{ r.time }}</b></template>
+            </div>
+            <!-- when the sessions start  -->
+            <div v-if="r.status === 'pending' && r.startsOn" class="request-start" data-test="request-start">
+              <i class="bi bi-flag"></i> First session <b>{{ formatDate(r.startsOn) }}</b> if you accept<template v-if="r.changedFrom"> the change</template> now
+            </div>
+            <div v-else-if="r.status === 'accepted' && r.startDate" class="request-start" data-test="request-start">
+              <i class="bi bi-flag"></i> {{ r.startDate > todayDate ? 'Starts' : 'Started' }} <b>{{ formatDate(r.startDate) }}</b>
             </div>
             <div v-if="r.needs?.length" class="request-needs">
               Needs help with
@@ -129,7 +161,7 @@ async function answer(r, action) {
                   ></span>
 
                   <i v-else class="bi bi-check-circle me-1"></i>
-                Accept
+                {{ r.changedFrom ? 'Accept change' : 'Accept' }}
               </button>
 
               <button
@@ -138,7 +170,8 @@ async function answer(r, action) {
                 :disabled="answering !== ''"
                 @click="answer(r, 'decline')"
               >
-                <i class="bi bi-x-circle"></i> Decline
+                <template v-if="r.changedFrom"><i class="bi bi-arrow-counterclockwise"></i> Keep current time</template>
+                <template v-else><i class="bi bi-x-circle"></i> Decline</template>
               </button>
             </template>
 
@@ -165,6 +198,21 @@ async function answer(r, action) {
 
 <style>
 /* INTERNAL CSS: only this page uses these styles. */
+
+/* the start date and "Changed from" lines under the day */
+.volunteerpage .request-start,
+.volunteerpage .request-changed{
+  margin-top: 2px;
+  font-size: 14px;
+}
+
+.volunteerpage .request-changed {
+  align-self: flex-start; /* only as wide as its words, not the whole card */
+  max-width: 100%;
+  padding: 2px 12px;
+  border-radius: 12px; /* still looks neat if the words wrap onto two lines */
+  background: #FBE7A1; /* the same yellow as "waiting" */
+}
 
 /* The mint pill buttons of the volunteer pages (same as "View all my children" on My Children).
    Repeated here because that page's styles only load when it is opened. */
@@ -267,14 +315,23 @@ async function answer(r, action) {
   flex-shrink: 0;
 }
 
-/* a phone: the buttons go under the child, full width */
-@media (max-width: 575px) {
+/* a tablet or a narrow window: the buttons go under the child's details, lined up with the text */
+@media (max-width: 991px) {
   .volunteerpage .request-card {
     flex-wrap: wrap;
+    align-items: flex-start;
   }
 
   .volunteerpage .request-actions {
     width: 100%;
+    padding-left: 72px; /* the photo (56px) + the gap (16px), so the buttons start under the name */
+  }
+}
+
+/* a phone: the buttons are full width and share the row */
+@media (max-width: 575px) {
+  .volunteerpage .request-actions {
+    padding-left: 0;
   }
 
   .volunteerpage .request-actions .btn {

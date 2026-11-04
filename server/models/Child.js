@@ -28,6 +28,14 @@ const childSchema = new mongoose.Schema(
         status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'accepted' },
         requestedAt: { type: Date, default: Date.now },
         startDate: { type: String, default: '' }, // for volunteer accept match
+        // (Yuqi) When the coordinator changes the day/time of an ACCEPTED session, it becomes a request again.
+        // prevDay / prevTime / prevStartDate remember the old session: if the volunteer says no to the change,
+        // the session goes back to the old day and time instead of being lost. 
+        prevDay: { type: String, default: '' },
+        prevTime: { type: String, default: '' },
+        prevStartDate: { type: String, default: '' },
+        // the change the volunteer said no to, e.g. 'Thu 15:00' (shown on their Requests page)
+        declinedChange: { type: String, default: '' },
       },
     ],
     needs: [String], // skills the child needs help with (matchmaking)
