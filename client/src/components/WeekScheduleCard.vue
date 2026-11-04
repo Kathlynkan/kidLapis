@@ -40,9 +40,9 @@ const weeklySlots = computed(() => props.children.reduce((n, c) => n + (c.schedu
     <div class="card-head">
       <h2>Today <span class="today-date">· {{ TODAY_LONG }}</span></h2>
       <span class="head-right">
-        <span class="tag">{{ weeklySlots }} weekly slots</span>
+        <span class="tag">{{ weeklySlots }} Weekly Slots</span>
         <RouterLink :to="{ name: 'schedule' }" class="edit-link" data-test="edit-schedule">
-          Edit schedule <i class="bi bi-arrow-right"></i>
+          Edit Schedule <i class="bi bi-arrow-right"></i>
         </RouterLink>
       </span>
     </div>

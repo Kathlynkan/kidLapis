@@ -40,8 +40,8 @@ const actionError = ref('')
 // One place that says how each alert type looks: its name and its tag colour.
 // Red for the three that need action, muted yellow for a child who is struggling.
 const ALERT_TYPES = {
-  unassigned: 'No volunteer',
-  'no-session': 'Not seen',
+  unassigned: 'No Volunteer',
+  'no-session': 'Not Seen',
   'repeated-struggle': 'Struggling',
   'overdue-homework': 'Overdue',
 }
@@ -157,7 +157,7 @@ function daysAgo(dateStr) {
 
 <template>
   <div class="container py-4 coordinatorpage">
-    <PageHeader title="Centre dashboard" subtitle="See who needs follow-up at a glance." />
+    <PageHeader title="Student Care Dashboard" subtitle="See who needs follow-up at a glance." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -227,8 +227,8 @@ function daysAgo(dateStr) {
           <!-- Needs attention -->
           <section class="t-card">
             <div class="card-head">
-              <h2>Needs attention</h2>
-              <span class="tag">{{ filteredAlerts.length }} shown</span>
+              <h2>Needs Attention</h2>
+              <span class="tag">{{ filteredAlerts.length }} Shown</span>
             </div>
 
             <div v-if="!alerts.length" class="empty" data-test="no-alerts">
