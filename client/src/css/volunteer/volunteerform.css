@@ -222,21 +222,30 @@
   border-top: 3px solid var(--cp-letter); /* the same line as between Academic and Social */
 }
 
-.volunteerformpage .justify-content-end .btn {
+.volunteerformpage .btn {
   border: 0;
   border-radius: 6px;
+  padding: 10px 22px;
+  box-shadow: none;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
-.volunteerformpage .justify-content-end .btn-outline-secondary {
-  padding: 0;
-  background: none;
-  box-shadow: none;
-  color: var(--cp-deep);
-  font-weight: 600;
-  text-decoration: underline;
+.volunteerformpage .btn-outline-secondary {
+  background: #CDE9D8;
+  text-decoration: none;
+}
+
+.volunteerformpage .btn-outline-secondary:hover {
+  background: #9BD3B2;
+}
+
+.volunteerformpage .btn-primary {
+  background: #B7D8D7;
+}
+
+.volunteerformpage .btn-primary:hover {
+  background: #A3CAC8;
 }
 
 .volunteerformpage .justify-content-end .btn-primary {
