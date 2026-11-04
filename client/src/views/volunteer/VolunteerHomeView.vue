@@ -159,7 +159,7 @@ function scheduleBadge(child) {
 function startBadge(child) {
   const schedule = child.schedule || []
   for (const slot of schedule) {
-    if (slot.volunteerId === auth.user?.id && slot.status !== 'pending' && slot.startDate && slot.startDate > todayDate) {
+    if (slot.volunteerId === auth.user?.id && slot.status === 'accepted' && slot.startDate && slot.startDate > todayDate) {
       return `Starts ${formatDate(slot.startDate)}`
     }
   }
@@ -246,7 +246,7 @@ onMounted(loadData)
                 data-test="cal-day"
                 @click="selectedDay = day"
               >
-                <span class="week-name">{{ day }} {{ Number(weekDates[day].slice(8)) }}</span>
+                <span class="week-name">{{ formatDate(weekDates[day]) }}</span>
                 <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
                 <span class="week-count">{{ childrenOnDay(day).length }}</span>
               </button>
@@ -481,6 +481,11 @@ onMounted(loadData)
   color: #FFFFFF;
 }
 
+.volunteerpage .week-name {
+  padding: 0 4px;
+  line-height: 1.25; /* on a small screen the date wraps onto two lines instead of overflowing */
+}
+
 .volunteerpage .week-name,
 .volunteerpage .week-today,
 .volunteerpage .week-count {
@@ -514,6 +519,13 @@ onMounted(loadData)
 .volunteerpage .week-day.selected .week-count {
   background: #FFFFFF;
   color: #213C31;
+}
+
+/* small screens: a smaller date so the 7 days still fit */
+@media (max-width: 768px) {
+  .volunteerpage .week-day {
+    font-size: 12px;
+  }
 }
 
 /* ---------- the heading of the chosen day ---------- */
