@@ -467,6 +467,10 @@ onMounted(loadData)
   color: #8A968F;
 }
 
+.volunteerpage .week-day.is-past:hover {
+  background: #CDE9D8;
+}
+
 .volunteerpage .week-day.is-today {
   box-shadow: inset 0 0 0 2px #4A735F;
 }
