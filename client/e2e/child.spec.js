@@ -2,7 +2,7 @@
 // Seed data used:
 //   child@kidslapis.sg = Ethan (c_1)
 //   h_1 "Fraction addition worksheet" is status='assigned' at the start of each run
-//   h_2 is status='verified' (Ethan has 120 points in seed)
+//   h_2 is status='verified' (Ethan has 160 points in seed)
 //
 // Note: tests run sequentially across projects (chromium then mobile) against one
 // shared database. The submit test mutates h_1, so it is marked chromium-only.

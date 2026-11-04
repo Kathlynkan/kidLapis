@@ -1,6 +1,6 @@
 // Leaderboard journey.                                    Owner: Jachin
-// Seed data: child@kidslapis.sg = Ethan (c_1), who has verified homework
-// and sits on the podium. Other children also have verified quests.
+// Seed data: multiple children have verified homework this week (Mia 1st, Chloe 2nd,
+// Ryan 3rd, Ethan 4th) — podium-1 is always occupied.
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
