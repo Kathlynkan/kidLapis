@@ -18,15 +18,23 @@ test.describe('Child quests', () => {
 
   test('My Quests page shows the tab bar, quests and completed toggle', async ({ page }) => {
     await expect(page.getByRole('tab', { name: /Quests/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Completed quests/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Past quests/i })).toBeVisible()
     // Ethan always has homework in some state regardless of prior test mutations
     await expect(page.locator('[data-test="homework-card"]').first()).toBeVisible()
   })
 
   // Mutates h_1 from 'assigned' -> 'submitted'; only run once on chromium so the
   // mobile project (which runs after) is not left with zero assigned quests.
-  test('clicking I\'m done! submits the quest and shows it as waiting for check', async ({ page }, testInfo) => {
+  test('submitting a quest decrements the submit count and shows the undo button', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'state-mutating test runs on chromium only')
+
+    // Wait for homework data to load — badge modals fire once the fetch completes.
+    // Fresh headless browser has empty localStorage, so all existing earned badges show
+    // as newly unlocked on first load and overlay the page — dismiss before interacting.
+    await page.locator('[data-test="homework-card"]').first().waitFor({ state: 'visible' })
+    while (await page.locator('.badge-unlock-btn').isVisible().catch(() => false)) {
+      await page.locator('.badge-unlock-btn').click()
+    }
 
     await expect(page.locator('[data-test="submit-quest-btn"]').first()).toBeVisible()
     const todoBefore = await page.locator('[data-test="submit-quest-btn"]').count()
@@ -34,7 +42,7 @@ test.describe('Child quests', () => {
     await page.locator('[data-test="submit-quest-btn"]').first().click()
 
     await expect(page.locator('[data-test="submit-quest-btn"]')).toHaveCount(todoBefore - 1)
-    await expect(page.getByText('Done - waiting for check').first()).toBeVisible()
+    await expect(page.locator('[data-test="undo-quest-btn"]').first()).toBeVisible()
   })
 
   test('badge shelf renders all expected badges', async ({ page }) => {
