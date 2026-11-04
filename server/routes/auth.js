@@ -151,7 +151,7 @@ router.put('/profile', requireAuth, async (req, res) => {
   }
 
   // Password change (optional — only sent when the user fills in the password section)
-  if (user.role !== 'child' && req.body.newPassword !== undefined) {
+  if (req.body.newPassword !== undefined) {
     if (!req.body.currentPassword) {
       return res.status(400).json({ message: 'Enter your current password to change it.' })
     }

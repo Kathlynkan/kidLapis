@@ -123,8 +123,8 @@ async function save() {
             </div>
           </PeelCard>
 
-          <!-- Change password (not for child — coordinator manages child accounts) -->
-          <PeelCard v-if="auth.role !== 'child'" title="Change Password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
+          <!-- Change password -->
+          <PeelCard title="Change Password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
             <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
             <div class="mb-3">
