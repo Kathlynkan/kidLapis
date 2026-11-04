@@ -78,7 +78,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 </script>
 
 <template>
-  <div
+    <div
     class="lapis-card lapis-card-yellow lapis-card-top quest-card p-3 h-100 d-flex flex-column"
     :class="`quest-${state}`"
     data-test="homework-card"
