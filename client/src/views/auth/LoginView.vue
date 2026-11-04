@@ -63,6 +63,7 @@ async function handleLogin() {
                 class="auth-input"
                 required
                 autocomplete="username"
+                data-test="login-email"
               />
             </div>
             <div class="auth-field">
@@ -75,6 +76,7 @@ async function handleLogin() {
                   class="auth-input"
                   required
                   autocomplete="current-password"
+                  data-test="login-password"
                 />
                 <!-- No "password" in this button's name: the E2E tests find the box with
                      getByLabel('Password'), which would also match a "Show password" button -->
@@ -90,7 +92,7 @@ async function handleLogin() {
                 </button>
               </div>
             </div>
-            <button type="submit" class="auth-submit" :disabled="loading">
+            <button type="submit" class="auth-submit" data-test="login-submit" :disabled="loading">
               {{ loading ? 'Logging in...' : 'Log in' }}
             </button>
           </form>
