@@ -180,7 +180,7 @@ function daysAgo(dateStr) {
 
 <template>
   <div class="container py-4 coordinatorpage">
-    <PageHeader title="Centre dashboard" subtitle="See who needs a volunteer at a glance." />
+    <PageHeader title="Student Care Dashboard" subtitle="See who needs a volunteer at a glance." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -250,8 +250,8 @@ function daysAgo(dateStr) {
           <!-- Volunteer assignment -->
           <section class="t-card">
             <div class="card-head">
-              <h2>Volunteer assignment</h2>
-              <span class="tag">{{ filteredAssignments.length }} shown</span>
+              <h2>Volunteer Assignment</h2>
+              <span class="tag">{{ filteredAssignments.length }} Shown</span>
             </div>
 
             <div v-if="!assignments.length" class="empty" data-test="no-children">
