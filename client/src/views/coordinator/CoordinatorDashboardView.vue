@@ -81,6 +81,8 @@ onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChang
 const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
 const childNames = computed(() => nameById(children.value))
 const volunteerNames = computed(() => nameById(volunteers.value))
+// the whole volunteer (with the photo) for each id, for the round picture in Recent Sessions
+const volunteerById = computed(() => Object.fromEntries(volunteers.value.map((v) => [v.id, v])))
 
 // ---------- Volunteer assignment ----------
 
@@ -312,7 +314,7 @@ function daysAgo(dateStr) {
               <p v-if="!recentSessions.length" class="empty">No sessions logged yet.</p>
               <ul v-else class="recent">
                 <li v-for="s in recentSessions" :key="s.id">
-                  <ChildInitial class="small" :child="{ name: volunteerNames[s.volunteerId] || 'Someone' }" />
+                  <ChildInitial class="small" :child="volunteerById[s.volunteerId] || { name: 'Someone' }" />
                   <span>
                     <strong>{{ firstName(volunteerNames[s.volunteerId] || 'Someone') }}</strong> worked with
                     <strong>{{ firstName(childNames[s.childId] || 'Someone') }}</strong> on {{ s.topic }}
