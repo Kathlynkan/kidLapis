@@ -697,9 +697,25 @@ onMounted(loadData)
   font-size: 14px;
 }
 
-.volunteerpage .child-facts i {
-  margin-right: 5px;
-  color: #3E6B6A;
+/* the small caption above the topic, then the topic on the left with its subject tag on the right */
+.volunteerpage .fact-caption {
+  color: #5E7473;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.volunteerpage .fact-topic {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.volunteerpage .fact-topic .session-subject {
+  flex-shrink: 0;
 }
 
 .volunteerpage .child-bottom {
