@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import StateMessage from '@/components/StateMessage.vue'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'
 import { BADGES, levelFor, earnedBadges, badgeProgress } from '@/utils/gamification'
-import { formatDate } from '@/utils/format'
+
 
 const auth = useAuthStore()
 

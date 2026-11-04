@@ -9,7 +9,7 @@
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
 import { firstName, subjectStyle } from '@/utils/format'

@@ -4,7 +4,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, daysSince, subjectStyle } from '@/utils/format'
-import { HOMEWORK_STATUS } from '@/utils/constants'
+
 import '@/css/main/components.css'
 import '@/css/main/labels.css'
 
@@ -15,7 +15,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
-const status    = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
 )
