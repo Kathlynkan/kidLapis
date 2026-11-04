@@ -15,6 +15,8 @@ const homework = ref([])
 const loading  = ref(true)
 const error    = ref('')
 const celebrating     = ref(false)
+const celebrateKey    = ref(0)
+let   celebrateTimer  = null
 const submitError     = ref('')
 const badgeQueue      = ref([])    // badges waiting to be shown one by one
 const newBadge        = computed(() => badgeQueue.value[0] || null)
@@ -23,8 +25,11 @@ const toastQueue      = ref([])    // notification toasts: [{ id, icon, message,
 let   toastCounter    = 0
 
 // Track which badge popups this child has already dismissed (per device, per child)
-const SEEN_KEY    = `seen-badges-${auth.user.childId}`
+// v2: key bumped to clear stale data from code versions that showed popups on submit
+const SEEN_KEY    = `seen-badges-v2-${auth.user.childId}`
 const seenBadgeIds = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'))
+// Tracks which badges were earned as of the last page load — used to detect cross-session unlocks
+const EARNED_KEY  = `earned-badges-${auth.user.childId}`
 
 function dismissBadge() {
   const badge = badgeQueue.value[0]
@@ -42,7 +47,9 @@ function queueUnseen(delay) {
   const inQueue = new Set(badgeQueue.value.map((b) => b.id))
   const toShow  = earned.value.filter((b) => !seenBadgeIds.has(b.id) && !inQueue.has(b.id))
   if (!toShow.length) return
-  setTimeout(() => { toShow.forEach(showNextBadge) }, delay)
+  setTimeout(() => {
+    toShow.filter((b) => !seenBadgeIds.has(b.id)).forEach(showNextBadge)
+  }, delay)
 }
 
 function showToast(icon, message, color) {
@@ -90,6 +97,17 @@ const SEASON_PTS = 200
 const STEP       = 50
 const season       = computed(() => Math.floor(displayPoints.value / SEASON_PTS) + 1)
 const cakeProgress = computed(() => levelFor(displayPoints.value % SEASON_PTS))
+
+// plate tier: '' (s1) → 'bronze' (s2) → 'silver' (s3) → 'gold' (s4) → 'diamond' (s5+)
+const tier = computed(() => {
+  if (season.value >= 5) return 'diamond'
+  if (season.value === 4) return 'gold'
+  if (season.value === 3) return 'silver'
+  if (season.value === 2) return 'bronze'
+  return ''
+})
+const plateTier  = computed(() => tier.value ? `cake-plate-${tier.value}` : '')
+const tierName   = computed(() => ({ '': 'Basic', bronze: 'Bronze', silver: 'Silver', gold: 'Gold', diamond: 'Diamond' })[tier.value])
 const layers       = computed(() => Math.min(cakeProgress.value.level - 1, 4))
 
 // pending points: submitted but not yet verified (uses half-points if late, same as backend)
@@ -140,8 +158,10 @@ async function submitQuest(homeworkId) {
       h.completedAt = new Date().toISOString().slice(0, 10)
       h.rejectedAt  = null
     }
+    clearTimeout(celebrateTimer)
     celebrating.value = true
-    setTimeout(() => (celebrating.value = false), 2200)
+    celebrateKey.value++
+    celebrateTimer = setTimeout(() => (celebrating.value = false), 2200)
   } catch (err) {
     submitError.value = errorMessage(err)
   }
@@ -209,7 +229,17 @@ async function refreshData() {
     if (justUnlocked.length) {
       justUnlockedId.value = justUnlocked[0].id
       setTimeout(() => { justUnlockedId.value = null }, 1400)
+      // Clear any stale dismissal so the popup fires for the real verification event
+      justUnlocked.forEach((b) => seenBadgeIds.delete(b.id))
+      localStorage.setItem(SEEN_KEY, JSON.stringify([...seenBadgeIds]))
+      // Celebrate when a badge is newly unlocked during the session
+      clearTimeout(celebrateTimer)
+      celebrating.value = true
+      celebrateKey.value++
+      celebrateTimer = setTimeout(() => (celebrating.value = false), 2200)
     }
+    // Keep the cross-session earned snapshot up to date
+    localStorage.setItem(EARNED_KEY, JSON.stringify(earned.value.map((b) => b.id)))
     // Show popup for any earned badge not yet dismissed (new this cycle, or missed on a previous load)
     queueUnseen(gained > 0 ? 4000 : 2400)
   } catch {
@@ -228,7 +258,12 @@ onMounted(async () => {
     ])
     me.value       = c.data
     homework.value = h.data
-    queueUnseen(1200) // show popups for any earned badges not yet dismissed
+    // Detect badges earned since the last page load (e.g. volunteer verified while child was away).
+    // Cross-session detection: compare current earned list against the localStorage snapshot.
+    const prevEarnedIds = new Set(JSON.parse(localStorage.getItem(EARNED_KEY) || '[]'))
+    earned.value.filter((b) => !prevEarnedIds.has(b.id)).forEach((b) => seenBadgeIds.delete(b.id))
+    localStorage.setItem(EARNED_KEY, JSON.stringify(earned.value.map((b) => b.id)))
+    queueUnseen(1200)
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
@@ -277,7 +312,7 @@ onUnmounted(() => {
     </Transition>
 
     <Transition name="celebrate">
-      <div v-if="celebrating" class="celebrate-overlay" aria-hidden="true">
+      <div v-if="celebrating" :key="celebrateKey" class="celebrate-overlay" aria-hidden="true">
         <i class="bi bi-award-fill celebrate-main"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s1"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s2"></i>
@@ -350,11 +385,13 @@ onUnmounted(() => {
                 aria-hidden="true"
               ></div>
             </div>
-            <div class="cake-plate" :class="{ 'cake-plate-gold': season > 1 }" aria-hidden="true"></div>
+            <div class="cake-plate-row">
+              <div class="cake-plate" :class="plateTier" aria-hidden="true"></div>
+              <span class="cake-tier-label" :class="`cake-tier-${tier || 'basic'}`">{{ tierName }}</span>
+            </div>
           </div>
           <div class="cake-caption">
             Kueh Lapis
-            <span v-if="season > 1" class="cake-season-badge">Season {{ season }}</span>
             <span v-if="layers < 4" class="cake-progress-label">{{ cakeProgress.starsToNext }} more ★ for next layer</span>
             <span v-else class="cake-progress-label cake-progress-done">Full cake — keep going for Season {{ season + 1 }}!</span>
             <span v-if="pendingPoints > 0" class="cake-pending-label">+{{ pendingPoints }} ★ being checked</span>
@@ -396,13 +433,13 @@ onUnmounted(() => {
 
         <div v-if="returned.length" class="returned-banner mb-3">
           <i class="bi bi-arrow-return-left me-2"></i>
-          {{ returned.length === 1 ? '1 quest was returned' : `${returned.length} quests were returned` }} — check below!
+          {{ returned.length === 1 ? '1 quest returned' : `${returned.length} quests returned` }} — check below
         </div>
 
         <StateMessage v-if="todo.length === 0" :message="emptyQuestMessage" />
         <div class="row g-3 mb-2">
-          <div v-for="h in todo" :key="h.id" class="col-sm-6 col-lg-4">
-            <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
+          <div v-for="h in todo" :key="h.id" class="col-sm-6 col-md-4">
+            <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" @unsubmit="unsubmitQuest" />
           </div>
         </div>
 
@@ -413,7 +450,7 @@ onUnmounted(() => {
             <span class="quest-history-count ms-1">{{ done.length }}</span>
           </button>
           <div v-if="showDone" class="row g-3 mb-2">
-            <div v-for="h in done" :key="h.id" class="col-sm-6 col-lg-4">
+            <div v-for="h in done" :key="h.id" class="col-sm-6 col-md-4">
               <HomeworkQuestCard :homework="h" mode="child" @unsubmit="unsubmitQuest" />
             </div>
           </div>
@@ -435,14 +472,17 @@ onUnmounted(() => {
                 :key="b.id"
                 type="button"
                 class="kueh-tile"
-                :class="{ 'kueh-locked': !earnedIds.has(b.id), 'kueh-just-unlocked': justUnlockedId === b.id }"
+                :class="{ 'kueh-locked': !earnedIds.has(b.id), 'kueh-earned': earnedIds.has(b.id), 'kueh-just-unlocked': justUnlockedId === b.id }"
                 :aria-pressed="shown.id === b.id"
                 @click="picked = b"
               >
-                <span class="kueh-cup"><img :src="`/child_badges_images/${b.image}.webp`" alt="" /></span>
+                <span class="kueh-cup">
+                  <img :src="`/child_badges_images/${b.image}.webp`" alt="" />
+                  <i v-if="earnedIds.has(b.id)" class="bi bi-check-circle-fill kueh-state-badge kueh-state-earned" aria-hidden="true"></i>
+                  <i v-else class="bi bi-lock-fill kueh-state-badge kueh-state-locked" aria-hidden="true"></i>
+                </span>
                 <span class="kueh-name">{{ b.kueh }}</span>
                 <span class="kueh-badge-name">{{ b.name }}</span>
-                <span class="kueh-state">{{ earnedIds.has(b.id) ? 'Earned!' : 'Locked' }}</span>
               </button>
             </div>
 
@@ -603,6 +643,7 @@ onUnmounted(() => {
   gap: 2px;                         /* thin gap so each layer reads as distinct */
   width: 220px;
   max-width: 100%;
+  min-height: 182px;                /* 4 × 44px layers + 3 × 2px gaps — plate stays fixed */
 }
 
 /* the layers touch at the ends: only the bottom of the first layer and the top of the last one are round */
@@ -669,15 +710,35 @@ onUnmounted(() => {
 }
 
 /* the oval plate the cake sits on */
+.cake-plate-row {
+  position: relative;
+  margin-top: 2px;
+}
+
 .cake-plate {
   width: 260px;
-  max-width: 110%;
   height: 18px;
-  margin-top: 2px;
-  background: #E8D8C4;
+  background: #F5F0EC;
   border-radius: 0 0 50% 50% / 0 0 100% 100%;
   box-shadow: 0 3px 6px rgba(74, 63, 58, 0.12);
 }
+
+/* tier label sits to the right of the plate, out of flow so it never shifts the plate */
+.cake-tier-label {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cake-tier-basic   { color: #8D7F77; }
+.cake-tier-bronze  { color: #7A4A1E; }
+.cake-tier-silver  { color: #4A4A6A; }
+.cake-tier-gold    { color: #8B6914; }
+.cake-tier-diamond { color: #5A3A9A; }
 
 .cake-caption {
   margin-top: 12px;
@@ -707,20 +768,19 @@ onUnmounted(() => {
   opacity: 0.85;
 }
 
-/* gold plate for season 2+ */
+/* plate tiers for seasons 2 / 3 / 4+ */
+.cake-plate-bronze {
+  background: #C07840;
+}
+.cake-plate-silver {
+  background: #A8A8BC;
+}
 .cake-plate-gold {
-  background: linear-gradient(90deg, #F5E070 0%, #DBA82A 50%, #F5E070 100%);
+  background: #DBA82A;
 }
 
-.cake-season-badge {
-  display: inline-block;
-  padding: 2px 11px;
-  border-radius: 999px;
-  background: #F5E070;
-  color: #8B6914;
-  font-size: 12px;
-  font-weight: 700;
-}
+
+.cake-plate-diamond { background: #C8B8F8; }
 
 /* notification toasts: stacked above the bottom of the screen */
 .child-toast-stack {
@@ -830,6 +890,7 @@ onUnmounted(() => {
 
 /* the round white cup the kueh sits in */
 .kueh-cup {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100px;
@@ -847,11 +908,46 @@ onUnmounted(() => {
 }
 
 .kueh-tile:hover .kueh-cup { transform: translateY(-3px); }
-.kueh-tile[aria-pressed='true'] .kueh-cup { box-shadow: 0 0 0 3px #A9577A; }
+
+/* earned: golden ring + soft glow */
+.kueh-earned .kueh-cup {
+  box-shadow: 0 0 0 3px #E8C84A, 0 0 12px 3px rgba(232, 200, 74, 0.40);
+}
+.kueh-earned[aria-pressed='true'] .kueh-cup {
+  box-shadow: 0 0 0 3px #A9577A, 0 0 10px 3px rgba(169, 87, 122, 0.30);
+}
+
+/* locked: selected state only (no glow at rest) */
+.kueh-locked[aria-pressed='true'] .kueh-cup { box-shadow: 0 0 0 3px #A9577A; }
+
+/* earned / lock icon badge anchored to bottom-right of the cup */
+.kueh-state-badge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(74, 63, 58, 0.22);
+}
+
+.kueh-state-earned { color: #2E8B57; }
+.kueh-state-locked { color: #BFAE9A; }
 
 .kueh-name { margin-top: 2px; font-size: 14px; font-weight: 700; line-height: 1.2; }
 .kueh-badge-name { font-size: 12px; font-weight: 600; color: #8D7F77; }
 
+/* a kueh you have not earned yet: faded grey picture */
+.kueh-locked img { filter: grayscale(1); opacity: 0.38; }
+.kueh-locked .kueh-name { color: #8D7F77; }
+
+/* detail panel state pill (not used in tiles) */
 .kueh-state {
   display: inline-block;
   padding: 2px 11px;
@@ -861,11 +957,6 @@ onUnmounted(() => {
   font-size: 12px;
   font-weight: 700;
 }
-
-/* a kueh you have not earned yet: faded grey picture */
-.kueh-locked img { filter: grayscale(1); opacity: 0.35; }
-.kueh-locked .kueh-name { color: #8D7F77; }
-.kueh-locked .kueh-state { background: #FFFFFF; color: #8D7F77; }
 
 /* in the label of the kueh you picked, "x of y done" is soft yellow */
 .kueh-detail .kueh-state.kueh-todo { background: #FBE7A1; color: #4A3F3A; }

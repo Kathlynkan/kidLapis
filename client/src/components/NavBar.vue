@@ -299,7 +299,7 @@ watch(
           data-test="nav-bell"
           @click="toggleBell"
         >
-          <i class="bi" :class="bellCount ? 'bi-bell-fill' : 'bi-bell'"></i>
+          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellCount > 0 }]"></i>
           <span v-if="bellCount" class="lapis-bell-count" data-test="nav-bell-count">
             {{ bellCount }}
           </span>
@@ -660,6 +660,27 @@ watch(
 
 .lapis-bell:hover {
   background: var(--role-accent-soft, #EAF6F5);
+}
+
+/* ring animation: quick swing, then a long pause (only 20% of the cycle is motion) */
+@keyframes bell-ring {
+  0%, 20%, 100% { transform: rotate(0deg); }
+  3%  { transform: rotate(18deg); }
+  6%  { transform: rotate(-15deg); }
+  9%  { transform: rotate(12deg); }
+  12% { transform: rotate(-9deg); }
+  15% { transform: rotate(5deg); }
+  18% { transform: rotate(-2deg); }
+}
+
+.bell-ringing {
+  display: inline-block;
+  transform-origin: top center;
+  animation: bell-ring 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell-ringing { animation: none; }
 }
 
 .lapis-bell-count {

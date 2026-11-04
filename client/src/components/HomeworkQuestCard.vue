@@ -19,11 +19,6 @@ const status    = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
 )
-const isLateSubmission = computed(
-  () => props.homework.completedAt &&
-        props.homework.dueDate &&
-        props.homework.completedAt > props.homework.dueDate,
-)
 
 const state = computed(() => {
   if (props.homework.status === 'verified') return 'done'
@@ -39,19 +34,28 @@ const chipStars = computed(() =>
     : (props.homework.pointsAwarded ?? props.homework.points),
 )
 
-// relative due string for the child's card
+// compact due chip label + matching icon for the child's card
 const dueLabel = computed(() => {
-  if (props.homework.status === 'submitted') return 'Being checked...'
+  if (props.homework.status === 'submitted') return 'In review'
   if (props.homework.status === 'verified') {
     const pts = props.homework.pointsAwarded ?? props.homework.points
-    return `Earned ${pts} ★`
+    return `+${pts} ★`
   }
   const days = daysSince(props.homework.dueDate)
-  if (days < -1) return `${-days} days left`
+  if (days < -1) return `${-days}d left`
   if (days === -1) return 'Tomorrow'
-  if (days === 0) return 'Today!'
-  if (days === 1) return '1 day late'
-  return `${days} days late`
+  if (days === 0) return 'Today'
+  if (days === 1) return '1d late'
+  return `${days}d late`
+})
+
+const dueIcon = computed(() => {
+  if (props.homework.status === 'verified')  return 'bi-patch-check-fill'
+  if (props.homework.status === 'submitted') return 'bi-hourglass-split'
+  const days = daysSince(props.homework.dueDate)
+  if (days > 0)  return 'bi-exclamation-triangle-fill'
+  if (days === 0) return 'bi-clock-fill'
+  return 'bi-clock'
 })
 
 const dueUrgency = computed(() => {
@@ -86,7 +90,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
       <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
       <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
-        <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>
+        <s v-if="isOverdue" class="quest-star-original">{{ homework.points }}</s>
         {{ chipStars }} <i class="bi bi-star-fill"></i>
       </span>
       <!-- volunteer: always show the status pill -->
@@ -96,13 +100,9 @@ function cancelDelete()  { showDeleteModal.value = false }
     <!-- title -->
     <strong class="quest-title mb-1">{{ homework.title }}</strong>
 
-    <!-- child: relative due line -->
-    <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">{{ dueLabel }}</div>
-
     <!-- volunteer: exact date + points -->
     <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
       due {{ formatDate(homework.dueDate) }} &middot; {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
-      <span v-if="isLateSubmission && homework.status !== 'verified'" class="quest-late-penalty"> (submitted late)</span>
     </div>
 
     <!-- description: only when the child still needs to read it (assigned); always for volunteer -->
@@ -115,10 +115,15 @@ function cancelDelete()  { showDeleteModal.value = false }
       >{{ expanded ? 'Show less' : 'Read more' }}</button>
     </div>
 
+    <!-- child: compact due chip — below description so urgency sits next to the action button -->
+    <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">
+      <i :class="`bi ${dueIcon}`"></i>{{ dueLabel }}
+    </div>
+
     <!-- child actions -->
     <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
       <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
-        <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
+        <i class="bi bi-arrow-return-left me-1"></i>Returned
       </span>
       <p v-if="homework.rejectMessage && homework.status === 'assigned'" class="quest-reject-message">
         {{ homework.rejectMessage }}
@@ -130,7 +135,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>Submit · {{ chipStars }} ★
+        <i class="bi bi-check-lg me-1"></i>Submit
       </button>
 
       <button
@@ -220,19 +225,28 @@ function cancelDelete()  { showDeleteModal.value = false }
 .quest-star-todo { background: #FFF0DC; color: #B86A00; }
 .quest-star-late { background: #FBE3DF; color: #9A3F36; }
 
-.quest-chip-original { opacity: 0.55; margin-right: 2px; }
+.quest-star-original { opacity: 0.55; font-weight: 600; }
 
-/* relative due line */
+/* due chip: icon + compact label in a colored pill */
 .quest-due {
-  font-size: 12px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
 }
-.quest-due-ok      { color: #2E8B57; }
-.quest-due-done    { color: #2E8B57; }
-.quest-due-soon    { color: #B86A00; }
-.quest-due-today   { color: #D97706; }
-.quest-due-overdue { color: #9A3F36; }
-.quest-due-neutral { color: #8D7F77; }
+.quest-due .bi { font-size: 10px; }
+
+.quest-due-ok      { background: #E6F4EC; color: #2E8B57; }
+.quest-due-done    { background: #E6F4EC; color: #2E8B57; }
+.quest-due-soon    { background: #FFF0DC; color: #B86A00; }
+.quest-due-today   { background: #FEF3C7; color: #C47A00; }
+.quest-due-overdue { background: #FEE2E2; color: #9A3F36; }
+.quest-due-neutral { background: #F3F0EE; color: #8D7F77; }
 
 /* description: 2-line clamp in child mode */
 .quest-details-clamp {
@@ -285,5 +299,4 @@ function cancelDelete()  { showDeleteModal.value = false }
   cursor: pointer;
 }
 
-.quest-late-penalty { color: #e87a6e; font-weight: 600; }
 </style>
