@@ -2,13 +2,15 @@
   Coordinator dashboard                               Owner: Yu Xuan
   -------------------------------------------------------------
   KPI cards from GET /dashboard/summary + centre-wide topic chart.
-    [x] "Needs attention" list from GET /dashboard/alerts
-        (no session in 7 days, recurring struggle, overdue homework, unassigned child)
-    [x] filter alerts by type + click a row -> child profile (unassigned -> matchmaking)
+    [x] today's sessions + expandable weekly schedule (WeekScheduleCard)
+    [x] "Volunteer assignment" list: every child, with which weekdays (Mon-Fri) have a volunteer
+        - No volunteer (0 of 5 weekdays), Some days (1-4), Every weekday (5 of 5)
+        - filter by status, click a row -> matchmaking for that child
+        - only ACCEPTED sessions count; requests waiting for a volunteer are mentioned, not counted
+    [x] weekday coverage next to each child's name (WeekdayDots: green = volunteer that day)
     [x] "Flag for follow-up" toggle per child -> PUT /dashboard/follow-up/:childId
     [x] recent activity feed (latest sessions across the centre)
-    [x] weekly schedule card above Needs attention (WeekScheduleCard)
-    [x] weekday coverage next to each child's name (WeekdayDots: green = volunteer that day)
+    [x] reloads quietly when a volunteer accepts/declines a session (schedule-changed, Kai Sen)
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
@@ -21,48 +23,40 @@ import TopicSummaryChart from '@/components/charts/TopicSummaryChart.vue'
 import WeekScheduleCard from '@/components/WeekScheduleCard.vue'
 import WeekdayDots from '@/components/WeekdayDots.vue'
 import { firstName } from '@/utils/format'
+import { isConfirmed, isPending } from '@/utils/slots'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
 const router = useRouter()
 
 const summary = ref(null)
 const sessions = ref([])
-const alerts = ref([])
 const children = ref([])
 const volunteers = ref([])
 const loading = ref(true)
 const error = ref('')
 
-const typeFilter = ref('') // '' = all, 'followUp' = flagged children, otherwise an alert type
+const statusFilter = ref('') // '' = all, 'followUp' = flagged children, otherwise a status below
 const busyChildId = ref(null)
 const actionError = ref('')
 
-// One place that says how each alert type looks: its name and its tag colour.
-// Red for the three that need action, muted yellow for a child who is struggling.
-const ALERT_TYPES = {
-  unassigned: 'No Volunteer',
-  'no-session': 'Not Seen',
-  'repeated-struggle': 'Struggling',
-  'overdue-homework': 'Overdue',
-}
-const TAG_CLASS = {
-  unassigned: 'tag-red',
-  'no-session': 'tag-red',
-  'overdue-homework': 'tag-red',
-  'repeated-struggle': 'tag-struggle',
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+
+// One place that says how each status looks: its name and its tag colour.
+const STATUS = {
+  none: { label: 'No volunteer', tag: 'tag-red' },
+  some: { label: 'Some days', tag: 'tag-struggle' },
+  all: { label: 'Every weekday', tag: 'tag-ok' },
 }
 
 async function loadDashboard() {
-  const [sum, s, a, c, v] = await Promise.all([
+  const [sum, s, c, v] = await Promise.all([
     api.get('/dashboard/summary'),
     api.get('/sessions'),
-    api.get('/dashboard/alerts'),
     api.get('/children'),
     api.get('/users', { params: { role: 'volunteer' } }),
   ])
   summary.value = sum.data
   sessions.value = s.data
-  alerts.value = a.data
   children.value = c.data
   volunteers.value = v.data
 }
@@ -84,51 +78,84 @@ onMounted(async () => {
 })
 onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
 
-// ---------- Needs attention ----------
+const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
+const childNames = computed(() => nameById(children.value))
+const volunteerNames = computed(() => nameById(volunteers.value))
 
-// Look up a child's full record (for their schedule) from an alert's childId.
-const childById = computed(() => Object.fromEntries(children.value.map((c) => [c.id, c])))
+// ---------- Volunteer assignment ----------
 
-// How many alerts of each type, for the numbers on the filter chips.
-const countByType = computed(() => {
-  const counts = {}
-  for (const a of alerts.value) counts[a.type] = (counts[a.type] || 0) + 1
+// One row per child: which weekdays are covered, a status, and a short sentence.
+// Fewest covered days first, so children who need a volunteer are at the top.
+const assignments = computed(() =>
+  children.value
+    .map((child) => {
+      const weekday = (s) => WEEKDAYS.includes(s.day)
+      const slots = (child.schedule || []).filter((s) => weekday(s) && isConfirmed(s)) // accepted only
+      const requests = (child.schedule || []).filter((s) => weekday(s) && isPending(s))
+      const covered = WEEKDAYS.filter((d) => slots.some((s) => s.day === d))
+      const missing = WEEKDAYS.filter((d) => !covered.includes(d))
+      const status = covered.length === 0 ? 'none' : covered.length === WEEKDAYS.length ? 'all' : 'some'
+
+      // "Aisha (Mon, Wed) · Daniel (Tue)"
+      const daysByVolunteer = {}
+      for (const s of slots) (daysByVolunteer[s.volunteerId] ??= []).push(s.day)
+      const who = Object.entries(daysByVolunteer)
+        .map(([id, days]) => {
+          const name = firstName(volunteerNames.value[id] || 'Volunteer')
+          return `${name} (${WEEKDAYS.filter((d) => days.includes(d)).join(', ')})`
+        })
+        .join(' · ')
+
+      // "Waiting for Priya (Wed)"
+      const waitingByVolunteer = {}
+      for (const s of requests) (waitingByVolunteer[s.volunteerId] ??= []).push(s.day)
+      const waiting = Object.entries(waitingByVolunteer)
+        .map(([id, days]) => {
+          const name = firstName(volunteerNames.value[id] || 'a volunteer')
+          return `Waiting for ${name} (${WEEKDAYS.filter((d) => days.includes(d)).join(', ')})`
+        })
+        .join(' · ')
+
+      let message
+      if (status === 'all') message = who
+      else if (status === 'some') message = `${who} · No volunteer on ${missing.join(', ')}`
+      else if (waiting) message = 'No volunteer on any weekday yet'
+      else if ((child.volunteerIds || []).length) message = 'Assigned, but no weekdays booked yet'
+      else message = 'No volunteer on any weekday'
+      if (waiting) message += ` · ${waiting}`
+
+      return { child, status, coveredCount: covered.length, message, hasPending: requests.length > 0 }
+    })
+    .sort((a, b) => a.coveredCount - b.coveredCount || a.child.name.localeCompare(b.child.name)),
+)
+
+// How many children have each status, for the numbers on the filter chips.
+const countByStatus = computed(() => {
+  const counts = { none: 0, some: 0, all: 0 }
+  for (const a of assignments.value) counts[a.status]++
   return counts
 })
 
-const flaggedCount = computed(() => new Set(alerts.value.filter((a) => a.followUp).map((a) => a.childId)).size)
+const flaggedCount = computed(() => children.value.filter((c) => c.followUp).length)
 
-const filteredAlerts = computed(() => {
-  if (!typeFilter.value) return alerts.value
-  if (typeFilter.value === 'followUp') return alerts.value.filter((a) => a.followUp)
-  return alerts.value.filter((a) => a.type === typeFilter.value)
+const filteredAssignments = computed(() => {
+  if (!statusFilter.value) return assignments.value
+  if (statusFilter.value === 'followUp') return assignments.value.filter((a) => a.child.followUp)
+  return assignments.value.filter((a) => a.status === statusFilter.value)
 })
 
-// The "Homework pending" tile: show the overdue homework alerts and scroll down to them.
-function showOverdue() {
-  typeFilter.value = 'overdue-homework'
-  document.getElementById('needs-attention')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+// The fix for any gap is in matchmaking, so a row opens that child there.
+function openMatchmaking(child) {
+  router.push({ name: 'matchmaking', params: { childId: child.id } })
 }
 
-// Unassigned children go to matchmaking (that's the fix); everyone else to their profile.
-function openChild(alert) {
-  if (alert.type === 'unassigned') {
-    router.push({ name: 'matchmaking', params: { childId: alert.childId } })
-  } else {
-    router.push({ name: 'child-profile', params: { id: alert.childId } })
-  }
-}
-
-async function toggleFollowUp(alert) {
-  const next = !alert.followUp
-  busyChildId.value = alert.childId
+async function toggleFollowUp(child) {
+  const next = !child.followUp
+  busyChildId.value = child.id
   actionError.value = ''
   try {
-    await api.put(`/dashboard/follow-up/${alert.childId}`, { followUp: next })
-    // A child can have several alerts: update every row for that child.
-    alerts.value.forEach((a) => {
-      if (a.childId === alert.childId) a.followUp = next
-    })
+    await api.put(`/dashboard/follow-up/${child.id}`, { followUp: next })
+    child.followUp = next
   } catch (err) {
     actionError.value = errorMessage(err)
   } finally {
@@ -137,10 +164,6 @@ async function toggleFollowUp(alert) {
 }
 
 // ---------- Recent activity ----------
-
-const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
-const childNames = computed(() => nameById(children.value))
-const volunteerNames = computed(() => nameById(volunteers.value))
 
 const recentSessions = computed(() =>
   [...sessions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6),
@@ -157,7 +180,7 @@ function daysAgo(dateStr) {
 
 <template>
   <div class="container py-4 coordinatorpage">
-    <PageHeader title="Student Care Dashboard" subtitle="See who needs follow-up at a glance." />
+    <PageHeader title="Student Care Dashboard" subtitle="See who needs a volunteer at a glance." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -177,45 +200,45 @@ function daysAgo(dateStr) {
           <span class="tile-value">{{ summary.sessionsThisWeek }}</span>
           <span class="tile-label"><i class="bi bi-journal-check"></i>Sessions this week</span>
         </RouterLink>
-        <!-- there is no homework page for the coordinator, so this one shows the overdue homework in the list below -->
-        <button type="button" class="tile" data-test="tile-homework" @click="showOverdue">
+        <!-- there is no homework page for the coordinator, so this tile only shows the number -->
+        <div class="tile" data-test="tile-homework">
           <span class="tile-value">{{ summary.homeworkPending }}</span>
           <span class="tile-label"><i class="bi bi-hourglass-split"></i>Homework pending</span>
-        </button>
+        </div>
       </div>
 
-      <!-- the weekly schedule (read-only; editing is on the Schedule page) -->
+      <!-- today's sessions + the weekly schedule (editing is on the Schedule page) -->
       <WeekScheduleCard class="mb-4" :volunteers="volunteers" :children="children" />
 
       <!-- the sandy board: the filters and the white cards -->
-      <div id="needs-attention" class="board">
-        <div class="filters" role="group" aria-label="Show" data-test="alert-type-filter">
+      <div id="volunteer-assignment" class="board">
+        <div class="filters" role="group" aria-label="Show" data-test="assignment-filter">
           <button
             type="button"
             class="chip"
-            :aria-pressed="typeFilter === ''"
-            data-test="alert-filter-all"
-            @click="typeFilter = ''"
+            :aria-pressed="statusFilter === ''"
+            data-test="assignment-filter-all"
+            @click="statusFilter = ''"
           >
-            All<span class="chip-count">{{ alerts.length }}</span>
+            All<span class="chip-count">{{ assignments.length }}</span>
           </button>
           <button
-            v-for="(label, type) in ALERT_TYPES"
-            :key="type"
+            v-for="(info, status) in STATUS"
+            :key="status"
             type="button"
             class="chip"
-            :aria-pressed="typeFilter === type"
-            :data-test="`alert-filter-${type}`"
-            @click="typeFilter = type"
+            :aria-pressed="statusFilter === status"
+            :data-test="`assignment-filter-${status}`"
+            @click="statusFilter = status"
           >
-            {{ label }}<span class="chip-count">{{ countByType[type] || 0 }}</span>
+            {{ info.label }}<span class="chip-count">{{ countByStatus[status] }}</span>
           </button>
           <button
             type="button"
             class="chip"
-            :aria-pressed="typeFilter === 'followUp'"
-            data-test="alert-filter-followUp"
-            @click="typeFilter = 'followUp'"
+            :aria-pressed="statusFilter === 'followUp'"
+            data-test="assignment-filter-followUp"
+            @click="statusFilter = 'followUp'"
           >
             Flagged<span class="chip-count">{{ flaggedCount }}</span>
           </button>
@@ -224,59 +247,56 @@ function daysAgo(dateStr) {
         <div v-if="actionError" class="note note-bad">{{ actionError }}</div>
 
         <div class="cols">
-          <!-- Needs attention -->
+          <!-- Volunteer assignment -->
           <section class="t-card">
             <div class="card-head">
-              <h2>Needs Attention</h2>
-              <span class="tag">{{ filteredAlerts.length }} Shown</span>
+              <h2>Volunteer Assignment</h2>
+              <span class="tag">{{ filteredAssignments.length }} Shown</span>
             </div>
 
-            <div v-if="!alerts.length" class="empty" data-test="no-alerts">
-              <strong>All clear</strong>
-              Nothing needs attention right now. Every child has a volunteer and a recent session.
+            <div v-if="!assignments.length" class="empty" data-test="no-children">
+              <strong>No children yet</strong>
+              Children appear here once they are added.
             </div>
-            <div v-else-if="!filteredAlerts.length" class="empty">
+            <div v-else-if="!filteredAssignments.length" class="empty">
               <strong>Nothing of this kind</strong>
-              Choose "All" to see everything.
+              Choose "All" to see every child.
             </div>
 
-            <div v-else class="list" data-test="alerts-table">
+            <div v-else class="list" data-test="assignment-list">
               <div
-                v-for="a in filteredAlerts"
-                :key="a.id"
+                v-for="a in filteredAssignments"
+                :key="a.child.id"
                 class="alert-row"
-                data-test="alert-row"
-                @click="openChild(a)"
+                data-test="assignment-row"
+                @click="openMatchmaking(a.child)"
               >
-                <ChildInitial :child="{ name: a.childName || '?', avatar: a.avatar }" />
+                <ChildInitial :child="a.child" />
                 <div class="alert-body">
                   <span class="alert-who">
-                    <RouterLink
-                      :to="
-                        a.type === 'unassigned'
-                          ? { name: 'matchmaking', params: { childId: a.childId } }
-                          : { name: 'child-profile', params: { id: a.childId } }
-                      "
-                      @click.stop
-                    >
-                      {{ a.childName }}
+                    <RouterLink :to="{ name: 'matchmaking', params: { childId: a.child.id } }" @click.stop>
+                      {{ a.child.name }}
                     </RouterLink>
-                    <WeekdayDots :schedule="childById[a.childId]?.schedule" />
-                    <span class="tag" :class="TAG_CLASS[a.type]">{{ ALERT_TYPES[a.type] }}</span>
+                    <WeekdayDots :schedule="a.child.schedule" />
+                    <span class="tag" :class="STATUS[a.status].tag" data-test="assignment-status">
+                      {{ STATUS[a.status].label }}
+                    </span>
+                    <span v-if="a.hasPending" class="tag tag-pending" data-test="pending-tag">Pending</span>
                   </span>
                   <span class="alert-msg">{{ a.message }}</span>
                 </div>
                 <div class="alert-actions">
                   <button
+                    type="button"
                     class="flag-btn"
-                    :disabled="busyChildId === a.childId"
-                    :aria-pressed="a.followUp"
-                    :title="a.followUp ? 'Remove follow-up flag' : 'Flag for follow-up'"
+                    :disabled="busyChildId === a.child.id"
+                    :aria-pressed="Boolean(a.child.followUp)"
+                    :title="a.child.followUp ? 'Remove follow-up flag' : 'Flag for follow-up'"
                     data-test="follow-up-toggle"
-                    @click.stop="toggleFollowUp(a)"
+                    @click.stop="toggleFollowUp(a.child)"
                   >
-                    <i class="bi" :class="a.followUp ? 'bi-flag-fill' : 'bi-flag'"></i>
-                    <span class="visually-hidden">{{ a.followUp ? 'Flagged' : 'Flag for follow-up' }}</span>
+                    <i class="bi" :class="a.child.followUp ? 'bi-flag-fill' : 'bi-flag'"></i>
+                    <span class="visually-hidden">{{ a.child.followUp ? 'Flagged' : 'Flag for follow-up' }}</span>
                   </button>
                 </div>
               </div>
@@ -308,3 +328,12 @@ function daysAgo(dateStr) {
     </template>
   </div>
 </template>
+
+<style scoped>
+/* a request waiting for the volunteer to accept (same amber as the timetable) */
+.tag-pending {
+  background: #fbefd2;
+  color: #8a5a00;
+  box-shadow: inset 0 0 0 1px #e0b45a;
+}
+</style>

@@ -1,4 +1,4 @@
-import { test } from 'vitest'
+import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { findClash, overlaps } from '../utils/schedule.js'
 
@@ -35,4 +35,13 @@ test('changing the time of an existing slot does not clash with itself', () => {
 
 test('no time chosen means nothing to check', () => {
   assert.equal(findClash(children, booking({ time: undefined })), null)
+})
+
+test('a declined request does not hold its time; a pending one does', () => {
+  const kids = [
+    { id: 'c_1', name: 'Ethan Wong', schedule: [{ volunteerId: 'u_vol1', day: 'Tue', time: '16:00', status: 'declined' }] },
+    { id: 'c_4', name: 'Chloe Lee', schedule: [{ volunteerId: 'u_vol1', day: 'Thu', time: '16:00', status: 'pending' }] },
+  ]
+  assert.equal(findClash(kids, booking({ day: 'Tue', time: '16:00' })), null)
+  assert.match(findClash(kids, booking({ day: 'Thu', time: '16:30' })), /Aisha already has Chloe Lee on Thu at 16:00/)
 })

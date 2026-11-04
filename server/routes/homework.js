@@ -75,7 +75,7 @@ router.get('/leaderboard', async (req, res) => {
     // Sum points earned per child this week
     const weekPoints = {}
     for (const hw of recentVerified) {
-      weekPoints[hw.childId] = (weekPoints[hw.childId] || 0) + hw.points
+      weekPoints[hw.childId] = (weekPoints[hw.childId] || 0) + (hw.pointsAwarded ?? hw.points)
     }
 
     if (Object.keys(weekPoints).length === 0) return res.json([])
@@ -259,6 +259,7 @@ router.put('/:id/submit', requireRole('child'), async (req, res) => {
   hw.status = 'submitted'
   hw.completedAt = new Date().toISOString().slice(0, 10)
   hw.rejectedAt = null
+  hw.rejectMessage = ''
   await hw.save()
   await notifyVolunteersOf(req, hw.childId) // "Ethan handed in ..." appears on their bell
   res.json(hw)
@@ -297,7 +298,7 @@ router.put('/:id/verify', requireRole('volunteer', 'coordinator'), async (req, r
     return res.status(400).json({ message: 'Homework must be submitted before it can be verified.' })
   }
   const isLate = hw.completedAt && hw.dueDate && hw.completedAt > hw.dueDate
-  const pointsAwarded = isLate ? Math.floor(hw.points / 2) : hw.points
+  const pointsAwarded = isLate ? Math.ceil(hw.points / 2) : hw.points
   await Homework.findByIdAndUpdate(hw._id, { $set: { pointsAwarded } })
   const child = await Child.findByIdAndUpdate(
     hw.childId,
@@ -325,10 +326,12 @@ router.put('/:id/reject', requireRole('volunteer', 'coordinator'), async (req, r
   hw.status = 'assigned'
   hw.completedAt = null
   hw.rejectedAt = new Date().toISOString().slice(0, 10)
+  hw.rejectMessage = String(req.body.message || '').trim().slice(0, 300)
   await hw.save()
   await notifyVolunteersOf(req, hw.childId) // returned: gone from every volunteer's bell
+  const reason = hw.rejectMessage ? ` Reason: "${hw.rejectMessage}"` : ' Have another go!'
   await tellChild(req, hw.childId, {
-    text: `"${hw.title}" was returned. Have another go!`,
+    text: `"${hw.title}" was returned.${reason}`,
     icon: 'bi-arrow-counterclockwise',
     link: '/child',
   })

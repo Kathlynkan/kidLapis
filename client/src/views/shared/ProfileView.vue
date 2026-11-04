@@ -2,17 +2,17 @@
   Profile - every logged-in user can view and edit their own profile.
   All roles: name + password change.
   Volunteer:  + skills and available days (used by matchmaking).
-  Child:      avatar picker (name is managed by the coordinator).
+  Child:      name is managed by the coordinator.
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
 import PeelCard from '@/components/PeelCard.vue'
-import { SKILL_OPTIONS, DAYS, INTEREST_OPTIONS } from '@/utils/constants'
+import { SKILL_OPTIONS, DAYS } from '@/utils/constants'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -31,31 +31,6 @@ const loading = ref(false)
 const error = ref('')
 const activeCard = ref('account')
 
-// child only: interests stored on the Child document (not the User)
-const child = ref(null)
-const savingInterests = ref(false)
-
-onMounted(async () => {
-  if (auth.role === 'child' && auth.user?.childId) {
-    try {
-      const res = await api.get(`/children/${auth.user.childId}`)
-      child.value = res.data
-    } catch { /* silent — interests just won't show */ }
-  }
-})
-
-async function toggleInterest(tag) {
-  if (!child.value) return
-  const current = child.value.interests || []
-  const updated = current.includes(tag) ? current.filter((i) => i !== tag) : [...current, tag]
-  try {
-    savingInterests.value = true
-    const res = await api.put(`/children/${auth.user.childId}/interests`, { interests: updated })
-    child.value = res.data
-  } catch { /* silent */ } finally {
-    savingInterests.value = false
-  }
-}
 
 
 function cancel() {
@@ -148,8 +123,8 @@ async function save() {
             </div>
           </PeelCard>
 
-          <!-- Change password (not for child — coordinator manages child accounts) -->
-          <PeelCard v-if="auth.role !== 'child'" title="Change Password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
+          <!-- Change password -->
+          <PeelCard title="Change Password" icon="bi-shield-lock" :open="activeCard === 'password'" @toggle="activeCard = 'password'">
             <p class="small lapis-muted mb-3">Leave blank to keep your current password.</p>
 
             <div class="mb-3">
@@ -230,24 +205,6 @@ async function save() {
           </div>
 
         </form>
-
-        <!-- Interests: child only, saved immediately on tap (not part of the form above) -->
-        <div v-if="auth.role === 'child' && child" class="mt-3">
-          <PeelCard title="My Interests" icon="bi-heart" :initial-open="true">
-            <p class="small lapis-muted mb-3">Tap the things you like — your volunteer and parents can see them too!</p>
-            <div class="profile-interests-grid">
-              <button
-                v-for="tag in INTEREST_OPTIONS"
-                :key="tag"
-                type="button"
-                class="profile-interest-chip"
-                :class="{ 'profile-interest-chip-on': child.interests?.includes(tag) }"
-                :disabled="savingInterests"
-                @click="toggleInterest(tag)"
-              >{{ tag }}</button>
-            </div>
-          </PeelCard>
-        </div>
 
       </div>
     </div>
@@ -508,42 +465,4 @@ async function save() {
   background: var(--pf-error);
 }
 
-/* ---------- interests chips (child only) ---------- */
-
-.profilepage .profile-interests-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.profilepage .profile-interest-chip {
-  padding: 6px 14px;
-  border: 2px solid var(--pf-line);
-  border-radius: 999px;
-  background: #FFFFFF;
-  color: var(--pf-muted);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.profilepage .profile-interest-chip:hover:not(:disabled) {
-  border-color: var(--pf-focus);
-  color: var(--pf-text);
-}
-
-.profilepage .profile-interest-chip-on {
-  background: var(--pf-main);
-  border-color: var(--pf-main);
-  color: var(--pf-text);
-}
-
-.profilepage .profile-interest-chip-on:hover:not(:disabled) {
-  background: var(--pf-focus);
-  border-color: var(--pf-focus);
-}
-
-.profilepage .profile-interest-chip:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

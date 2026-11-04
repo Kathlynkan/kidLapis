@@ -11,6 +11,13 @@ import ChildAvatar from '@/components/ChildAvatar.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import { firstName } from '@/utils/format'
 
+// For a child not on the board: show how close they are to the last-place entry
+const chaseLine = computed(() => {
+  if (hasMe.value || !ranked.value.length) return null
+  const last = ranked.value[ranked.value.length - 1]
+  return { name: firstName(last.name), points: last.points }
+})
+
 const auth = useAuthStore()
 const entries  = ref([])
 const loading  = ref(true)
@@ -32,23 +39,12 @@ const slots = computed(() =>
   [1, 0, 2].map((i) => {
     const entry = ranked.value[i] || null
     const place = entry ? entry.place : i + 1
-    let note = 'Do a quest to join'
-    if (entry) {
-      note = (place === 1 || !entry.ahead)
-        ? 'Top of the week'
-        : `${entry.ahead.points - entry.points} ★ to catch ${firstName(entry.ahead.name)}`
-    }
-    return { entry, place, note }
+    return { entry, place }
   }),
 )
 
-const rest   = computed(() => ranked.value.slice(3))
-const hasMe  = computed(() => entries.value.some((entry) => entry.childId === myId.value))
-
-// what the child needs to move up a place
-function passNote(entry) {
-  return entry.ahead ? `${entry.ahead.points - entry.points + 1} more stars to pass ${firstName(entry.ahead.name)}` : ''
-}
+const rest  = computed(() => ranked.value.slice(3))
+const hasMe = computed(() => entries.value.some((entry) => entry.childId === myId.value))
 
 async function fetchLeaderboard() {
   try {
@@ -123,7 +119,6 @@ onUnmounted(() => {
                 <span v-if="slot.entry" class="lb-stars"><i class="bi bi-star-fill"></i>{{ slot.entry.points }}</span>
               </div>
 
-              <div class="pnote">{{ slot.note }}</div>
 
             </div>
           </div>
@@ -142,12 +137,14 @@ onUnmounted(() => {
             <span class="row-avatar"><ChildAvatar :avatar="entry.avatar" /></span>
             <span class="row-name">{{ firstName(entry.name) }}</span>
             <span v-if="entry.childId === myId" class="lb-you">You</span>
-            <span v-if="entry.childId === myId && passNote(entry)" class="row-hint">{{ passNote(entry) }}</span>
-            <span class="lb-stars"><i class="bi bi-star-fill"></i>{{ entry.points }}</span>
+<span class="lb-stars"><i class="bi bi-star-fill"></i>{{ entry.points }}</span>
           </div>
         </div>
 
-        <p v-if="!hasMe" class="lb-hint">You are not on the board yet. Do a quest to earn stars and join!</p>
+        <p v-if="chaseLine" class="lb-hint lb-chase">
+          <i class="bi bi-lightning-charge-fill me-1"></i>{{ chaseLine.points + 1 }} ★ this week puts you ahead of {{ chaseLine.name }} — do a quest!
+        </p>
+        <p v-else-if="!hasMe" class="lb-hint">You are not on the board yet. Do a quest to earn stars and join!</p>
 
         <div class="lb-foot">
           <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go do a quest</RouterLink>
@@ -302,12 +299,6 @@ onUnmounted(() => {
   color: #4A3F3A;
 }
 
-.leaderboardpage .pnote {
-  min-height: 26px;
-  padding-top: 6px;
-  font-size: 12.5px;
-  color: #8D7F77;
-}
 
 /* a free place: a faint dashed step */
 .leaderboardpage .pcol.free .pavatar {
@@ -369,13 +360,21 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-.leaderboardpage .row-hint,
 .leaderboardpage .lb-hint {
   font-size: 13px;
   color: #8D7F77;
+  margin: 0;
+  text-align: center;
 }
 
-.leaderboardpage .lb-hint { margin: 0; text-align: center; }
+.leaderboardpage .lb-chase {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #FFF0DC;
+  color: #B86A00;
+  font-weight: 700;
+  font-size: 13px;
+}
 
 /* ── The button: the shape of the Edit and Delete buttons, in pale pink ── */
 
@@ -404,6 +403,5 @@ onUnmounted(() => {
   .leaderboardpage .podium { gap: 6px; }
   .leaderboardpage .pavatar { width: 54px; height: 54px; font-size: 30px; }
   .leaderboardpage .pcol[data-rank='1'] .pavatar { width: 68px; height: 68px; font-size: 38px; }
-  .leaderboardpage .row-hint { display: none; }
 }
 </style>

@@ -1,12 +1,14 @@
 // =============================================================
 // /matchmaking  - suggest + assign volunteers    Owner: Yu Xuan
 // Used by the Matchmaking page AND the Schedule (timetable) page.
+// Slot statuses (models/Child.js): 'pending' until the volunteer accepts (routes/requests.js),
+// then 'accepted'; 'declined' if they say no. No status = accepted (seed / older data).
 // =============================================================
 import { Router } from 'express'
 import { Child, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { rankVolunteers } from '../utils/matchmaking.js'
-import { findClash, TIME_PATTERN } from '../utils/schedule.js'
+import { findClash, TIME_PATTERN, isActive, isConfirmed } from '../utils/schedule.js'
 import { notifyBell, addUpdate } from '../utils/notify.js'
 
 const router = Router()
@@ -52,15 +54,15 @@ router.put('/:childId/assign', async (req, res) => {
     const removed = child.schedule.filter(isRemoved) // remembered for the volunteer's update below
     child.schedule = child.schedule.filter((s) => !isRemoved(s))
     // Only drop the volunteer from the child once they have no ACCEPTED days left together
-    // (a day still waiting for them to accept doesn't make them assigned).
-    if (!child.schedule.some((s) => s.volunteerId === volunteerId && s.status !== 'pending')) {
+    // (a day still waiting for them, or one they declined, doesn't make them assigned).
+    if (!child.schedule.some((s) => s.volunteerId === volunteerId && isConfirmed(s))) {
       child.volunteerIds = child.volunteerIds.filter((id) => id !== volunteerId)
     }
     await child.save()
     notifyBell(req, [volunteerId]) // a cancelled request disappears from their bell straight away
 
     // Tell the volunteer in their bell's "Updates" (Kai Sen, utils/notify.js)
-    const confirmedDays = removed.filter((s) => s.status !== 'pending').map((s) => s.day)
+    const confirmedDays = removed.filter(isConfirmed).map((s) => s.day)
     const requestDays = removed.filter((s) => s.status === 'pending').map((s) => s.day)
     if (confirmedDays.length) {
       await addUpdate(req, [volunteerId], {
@@ -90,9 +92,15 @@ router.put('/:childId/assign', async (req, res) => {
     return res.status(400).json({ message: 'Time must look like 16:00.' })
   }
 
+  // A request this volunteer DECLINED for this day is just history: clear it, so the day can be
+  // requested (or moved to) again instead of getting stuck as 'declined'.
+  child.schedule = child.schedule.filter(
+    (s) => !(s.volunteerId === volunteerId && s.day === day && !isActive(s)),
+  )
+
   let slotToMove = null
   if (action === 'move') {
-    slotToMove = child.schedule.find((s) => s.volunteerId === volunteerId && s.day === fromDay)
+    slotToMove = child.schedule.find((s) => s.volunteerId === volunteerId && s.day === fromDay && isActive(s))
     if (!slotToMove) {
       return res.status(404).json({ message: 'That session no longer exists. Refresh the page.' })
     }
@@ -118,7 +126,7 @@ router.put('/:childId/assign', async (req, res) => {
     const before = `${slotToMove.day} ${slotToMove.time || ''}`.trim()
     slotToMove.day = day
     slotToMove.time = time
-    if (slotToMove.status !== 'pending') changedSession = { before, after: `${day} ${time}` }
+    if (isConfirmed(slotToMove)) changedSession = { before, after: `${day} ${time}` }
   } else {
     // The volunteer is NOT added to child.volunteerIds here: that happens when they accept
     // (routes/requests.js). Until then the child still counts as needing a volunteer, and
@@ -126,7 +134,7 @@ router.put('/:childId/assign', async (req, res) => {
     const existing = child.schedule.find((s) => s.volunteerId === volunteerId && s.day === day)
     if (existing) {
       // same volunteer + day again = change the time
-      if (time && time !== existing.time && existing.status !== 'pending') {
+      if (time && time !== existing.time && isConfirmed(existing)) {
         changedSession = { before: `${day} ${existing.time || ''}`.trim(), after: `${day} ${time}` }
       }
       if (time) existing.time = time

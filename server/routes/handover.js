@@ -457,16 +457,12 @@ Reply ONLY with JSON in exactly this shape:
   }
 
   // 5. put it all together (whole prompt)
-  const interestLine = child.interests?.length ? ` Interests: ${child.interests.join(', ')}.` : ''
-  const journalSection = child.journalEntries?.length
-    ? `Child's own words (recent journal entries, newest first):\n${child.journalEntries.slice(0, 3).map((e) => `- ${e.date}: "${e.text}"`).join('\n')}\n\n`
-    : ''
   return `You help a student-care centre keep track of each child's learning AND social life.
 ${style}
 
-Child: ${child.name}, ${child.level}.${interestLine}
+Child: ${child.name}, ${child.level}.
 
-${journalSection}Session notes${type === 'weekly' ? ' for ' + weekWords.toUpperCase() : ''} (newest first):
+Session notes${type === 'weekly' ? ' for ' + weekWords.toUpperCase() : ''} (newest first):
 ${notes}
 ${recurringLine}
 

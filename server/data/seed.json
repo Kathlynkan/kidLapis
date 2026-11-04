@@ -160,12 +160,7 @@
       ],
       "points": 120,
       "avatar": "/photos/ethan.jpg",
-      "followUp": false,
-      "interests": ["Football", "Video Games", "Dinosaurs"],
-      "journalEntries": [
-        { "id": "je_seed01", "date": "2026-10-08", "text": "I learned how to do long division today! It was hard at first but then I got it." },
-        { "id": "je_seed02", "date": "2026-10-03", "text": "We played a maths game with cards and I won! Games make it more fun." }
-      ]
+      "followUp": false
     },
     {
       "id": "c_2",
@@ -189,11 +184,7 @@
       ],
       "points": 210,
       "avatar": "/photos/meera.jpg",
-      "followUp": false,
-      "interests": ["Reading", "Drawing", "Science"],
-      "journalEntries": [
-        { "id": "je_seed03", "date": "2026-10-07", "text": "I really like science. We talked about plants and I want to grow one at home." }
-      ]
+      "followUp": false
     },
     {
       "id": "c_3",

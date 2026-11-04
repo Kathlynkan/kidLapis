@@ -16,6 +16,7 @@ const homeworkSchema = new mongoose.Schema(
     completedAt: { type: String, default: null },
     pointsAwarded: { type: Number, default: null }, // actual stars given (may be less due to late penalty)
     rejectedAt: { type: String, default: null },    // set when volunteer returns submission to child
+    rejectMessage: { type: String, default: '' },   // optional reason the volunteer gives when returning
   },
   { toJSON: jsonOptions },
 )

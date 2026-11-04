@@ -1,12 +1,15 @@
 <!-- The weekly timetable. ONE component for both pages, so they always look the same.   Owner: Yu Xuan
-  Dashboard (read-only):  <WeekGrid :volunteers="volunteers" :children="children" />
+  Dashboard (read-only, no buttons):  <WeekGrid :volunteers="volunteers" :children="children" />
   Schedule page (edit):   <WeekGrid editable :volunteers="..." :children="..." :busy-key="busyKey"
                                     @add="(volunteer, day) => ..." @remove="(volunteer, day, slot) => ..." />
   Rows = volunteers, columns = Mon-Fri (+ Sat/Sun only if someone works weekends).
+  Pending requests (waiting for the volunteer to accept) show with a dashed outline and a
+  "Pending" tag. Declined requests are not shown.
 -->
 <script setup>
 import { computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
+import { isActive, isPending } from '@/utils/slots'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -25,17 +28,19 @@ const days = computed(() => {
   const weekend = ['Sat', 'Sun'].filter(
     (d) =>
       props.volunteers.some((v) => (v.availability || []).includes(d)) ||
-      props.children.some((c) => (c.schedule || []).some((s) => s.day === d)),
+      props.children.some((c) => (c.schedule || []).some((s) => s.day === d && isActive(s))),
   )
   return [...WEEKDAYS, ...weekend]
 })
 
-// { 'u_vol1|Mon': [{ child, time }, ...] } built once, sorted by time (no time -> last).
+// { 'u_vol1|Mon': [{ child, time, pending }, ...] } built once, sorted by time (no time -> last).
+// Declined requests are left out: they aren't sessions and don't hold a time.
 const slotsByCell = computed(() => {
   const map = {}
   for (const child of props.children) {
     for (const s of child.schedule || []) {
-      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '' })
+      if (!isActive(s)) continue
+      ;(map[`${s.volunteerId}|${s.day}`] ??= []).push({ child, time: s.time || '', pending: isPending(s) })
     }
   }
   for (const list of Object.values(map)) {
@@ -89,16 +94,25 @@ const isFree = (v, day) => (v.availability || []).includes(day)
           >
             <template v-if="isFree(v, d)">
               <!-- a session: face, time, first name (click to open the child) -->
-              <div v-for="slot in slotsFor(v, d)" :key="slot.child.id" class="wg-pill" data-test="schedule-slot">
+              <div
+                v-for="slot in slotsFor(v, d)"
+                :key="slot.child.id"
+                class="wg-pill"
+                :class="{ 'is-pending': slot.pending }"
+                data-test="schedule-slot"
+              >
                 <RouterLink
                   :to="{ name: 'child-profile', params: { id: slot.child.id } }"
                   class="wg-pill-link"
-                  :title="`${slot.child.name}${slot.time ? ` at ${slot.time}` : ', no time set'}`"
+                  :title="`${slot.child.name}${slot.time ? ` at ${slot.time}` : ', no time set'}${
+                    slot.pending ? ` (waiting for ${firstName(v.name)} to accept)` : ''
+                  }`"
                 >
                   <MiniAvatar :person="slot.child" />
                   <span v-if="slot.time" class="wg-time">{{ slot.time }}</span>
                   <span v-else class="wg-time wg-no-time">No time</span>
                   <span class="wg-name">{{ firstName(slot.child.name) }}</span>
+                  <span v-if="slot.pending" class="wg-pending" data-test="pending-tag">Pending</span>
                 </RouterLink>
                 <button
                   v-if="editable"
@@ -113,7 +127,7 @@ const isFree = (v, day) => (v.availability || []).includes(day)
                 </button>
               </div>
 
-              <!-- add a session: a button on the Schedule page, a link to it on the dashboard -->
+              <!-- add a session: only on the Schedule page (the dashboard is read-only) -->
               <button
                 v-if="editable"
                 type="button"
@@ -124,14 +138,6 @@ const isFree = (v, day) => (v.availability || []).includes(day)
               >
                 <i class="bi bi-plus-lg"></i> Add
               </button>
-              <RouterLink
-                v-else-if="!slotsFor(v, d).length"
-                :to="{ name: 'schedule' }"
-                class="wg-add"
-                :aria-label="`Add a session for ${v.name} on ${d}`"
-              >
-                <i class="bi bi-plus-lg"></i> Add
-              </RouterLink>
             </template>
             <span v-else class="visually-hidden">Not available</span>
           </td>
@@ -281,6 +287,25 @@ const isFree = (v, day) => (v.availability || []).includes(day)
 }
 .wg-remove:hover:not(:disabled) {
   background: #fdf0ee;
+}
+
+/* a pending request: dashed outline instead of a shadow, until the volunteer accepts */
+.wg-pill.is-pending {
+  background: #fffaf0;
+  box-shadow: none;
+  outline: 1.5px dashed #e0b45a;
+  outline-offset: -1.5px;
+}
+.wg-pending {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fbefd2;
+  color: #8a5a00;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 /* "+ Add": dashed, so it reads as a space to fill rather than a session */

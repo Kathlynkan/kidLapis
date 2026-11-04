@@ -5,8 +5,8 @@
 import { ref, computed } from 'vue'
 import { formatDate, daysSince, subjectStyle } from '@/utils/format'
 import { HOMEWORK_STATUS } from '@/utils/constants'
-import '@/css/main/components.css' // the look of the small parts
-import '@/css/main/labels.css' // the capital-letter captions
+import '@/css/main/components.css'
+import '@/css/main/labels.css'
 
 const props = defineProps({
   homework: { type: Object, required: true },
@@ -15,7 +15,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
-const status = computed(() => HOMEWORK_STATUS[props.homework.status])
+const status    = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
 )
@@ -25,7 +25,6 @@ const isLateSubmission = computed(
         props.homework.completedAt > props.homework.dueDate,
 )
 
-// where the homework is now, for the volunteer's view: late, todo, waiting (to be checked) or done
 const state = computed(() => {
   if (props.homework.status === 'verified') return 'done'
   if (props.homework.status === 'submitted') return 'waiting'
@@ -33,9 +32,44 @@ const state = computed(() => {
 })
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
-const showDeleteModal = ref(false)
+// stars shown in the top-right chip for child assigned quests
+const chipStars = computed(() =>
+  isOverdue.value
+    ? Math.ceil(props.homework.points / 2)
+    : (props.homework.pointsAwarded ?? props.homework.points),
+)
 
-function handleDelete() { showDeleteModal.value = true }
+// relative due string for the child's card
+const dueLabel = computed(() => {
+  if (props.homework.status === 'submitted') return 'Being checked...'
+  if (props.homework.status === 'verified') {
+    const pts = props.homework.pointsAwarded ?? props.homework.points
+    return `Earned ${pts} ★`
+  }
+  const days = daysSince(props.homework.dueDate)
+  if (days < -1) return `${-days} days left`
+  if (days === -1) return 'Tomorrow'
+  if (days === 0) return 'Today!'
+  if (days === 1) return '1 day late'
+  return `${days} days late`
+})
+
+const dueUrgency = computed(() => {
+  if (props.homework.status === 'verified') return 'done'
+  if (props.homework.status !== 'assigned') return 'neutral'
+  const days = daysSince(props.homework.dueDate)
+  if (days > 0)  return 'overdue'
+  if (days === 0) return 'today'
+  if (days >= -2) return 'soon'
+  return 'ok'
+})
+
+// only show description when the child still needs to act on the quest
+const showDesc = computed(() => props.mode === 'volunteer' || props.homework.status === 'assigned')
+
+const expanded = ref(false)
+const showDeleteModal = ref(false)
+function handleDelete()  { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
 function cancelDelete()  { showDeleteModal.value = false }
 </script>
@@ -46,40 +80,22 @@ function cancelDelete()  { showDeleteModal.value = false }
     :class="`quest-${state}`"
     data-test="homework-card"
   >
-
-  <div class="d-flex justify-content-between align-items-start gap-2">
-    <div>
+    <!-- top row: subject left, reward/state chip right — both on the same baseline -->
+    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
       <span class="quest-subject" :style="subjectStyle(homework.subject)">{{ homework.subject }}</span>
-      <strong class="quest-title">{{ homework.title }}</strong>
 
-      <div class="small quest-meta mt-1">
-        due {{ formatDate(homework.dueDate) }}
-
-        <template v-if="mode === 'volunteer'">
-        · {{ homework.pointsAwarded ?? homework.points }}
-        <i class="bi bi-star-fill"></i>
-        <template v-if="isLateSubmission && homework.status !== 'verified'">
-          <span class="quest-late-penalty"> ({{ Math.floor(homework.points / 2) }}★ — submitted late)</span>
-        </template>
-        </template>
-      </div>
-    </div>
-
-      <span
-      v-if="state !== 'todo'"
-      class="badge quest-pill" :class="`quest-pill-${state}`">
-        {{ STATE_LABELS[state] }}
+      <!-- child: star chip only on assigned quests; color of the due line handles state for the rest -->
+      <span v-if="mode === 'child' && homework.status === 'assigned'" class="quest-star-chip" :class="`quest-star-${state}`">
+        <s v-if="isOverdue" class="quest-chip-original">{{ homework.points }}</s>
+        {{ chipStars }} <i class="bi bi-star-fill"></i>
       </span>
+      <!-- volunteer: always show the status pill -->
+      <span v-if="mode === 'volunteer'" class="badge quest-pill" :class="`quest-pill-${state}`">{{ STATE_LABELS[state] }}</span>
     </div>
 
-    <p class="small mb-3 quest-details">{{ homework.details }}</p>
+    <!-- title -->
+    <strong class="quest-title mb-1">{{ homework.title }}</strong>
 
-<<<<<<< Updated upstream
-    <div class="mt-auto d-flex flex-column gap-2">
-      <span
-        v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
-        class="badge quest-returned">
-=======
     <!-- child: relative due line -->
     <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">{{ dueLabel }}</div>
 
@@ -102,44 +118,59 @@ function cancelDelete()  { showDeleteModal.value = false }
     <!-- child actions -->
     <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
       <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
->>>>>>> Stashed changes
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
 
-      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
-        Late • Half ★
-      </span>
+    <!-- child: relative due line -->
+    <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">{{ dueLabel }}</div>
 
-      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
-        Submit earlier next time for full ★!
-      </span>
+    <!-- volunteer: exact date + points -->
+    <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
+      due {{ formatDate(homework.dueDate) }} &middot; {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
+      <span v-if="isLateSubmission && homework.status !== 'verified'" class="quest-late-penalty"> (submitted late)</span>
+    </div>
 
-      <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
-      <span v-if="mode === 'child' && homework.status !== 'assigned'" class="badge quest-status" :class="`quest-pill-${state}`">
-        {{ status?.label }}
+    <!-- description: only when the child still needs to read it (assigned); always for volunteer -->
+    <p v-if="showDesc" class="small quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
+    <div class="mb-2">
+      <button
+        v-if="mode === 'child' && homework.status === 'assigned' && homework.details && homework.details.length > 100"
+        class="quest-read-more"
+        @click="expanded = !expanded"
+      >{{ expanded ? 'Show less' : 'Read more' }}</button>
+    </div>
+
+    <!-- child actions -->
+    <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
+      <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
+        <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
+      <p v-if="homework.rejectMessage && homework.status === 'assigned'" class="quest-reject-message">
+        {{ homework.rejectMessage }}
+      </p>
 
       <button
-        v-if="mode === 'child' && homework.status === 'assigned'"
-        class="btn btn-primary btn-sm mt-1 quest-submit"
+        v-if="homework.status === 'assigned'"
+        class="btn btn-primary btn-sm quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>I'm done!
+        <i class="bi bi-check-lg me-1"></i>Submit · {{ chipStars }} ★
       </button>
 
       <button
-        v-if="mode === 'child' && homework.status === 'submitted'"
-        class="btn btn-sm mt-1 quest-undo"
+        v-if="homework.status === 'submitted'"
+        class="btn btn-sm quest-undo"
         data-test="undo-quest-btn"
         @click="emit('unsubmit', homework.id)"
       >
         <i class="bi bi-arrow-counterclockwise me-1"></i>Undo
       </button>
+    </div>
 
-      <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+    <!-- volunteer actions -->
+    <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
       class="mt-2 d-flex align-items-center gap-2">
-<<<<<<< Updated upstream
 
         <template v-if="homework.status === 'submitted'">
           <button
@@ -174,7 +205,6 @@ function cancelDelete()  { showDeleteModal.value = false }
             <i class="bi bi-trash"></i> Delete
           </button>
         </div>
-=======
       <template v-if="homework.status === 'submitted'">
         <button
           class="btn btn-sm btn-primary quest-check"
@@ -186,7 +216,7 @@ function cancelDelete()  { showDeleteModal.value = false }
           {{ busy ? 'Checking...' : 'Mark as Checked' }}
         </button>
         <button
-          class="btn btn-sm btn-outline-danger quest-delete"
+          class="btn btn-sm btn-outline-danger quest-return"
           data-test="reject-homework-btn"
           @click="emit('reject', homework.id)">
           <i class="bi bi-arrow-return-left"></i> Return
@@ -205,14 +235,13 @@ function cancelDelete()  { showDeleteModal.value = false }
           @click="handleDelete">
           <i class="bi bi-trash"></i> Delete
         </button>
->>>>>>> Stashed changes
       </div>
     </div>
   </div>
 
   <!-- Delete confirm modal -->
   <Teleport to="body">
-      <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
+    <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -235,6 +264,46 @@ function cancelDelete()  { showDeleteModal.value = false }
 </template>
 
 <style scoped>
+/* star reward chip — top-right for assigned quests in child mode */
+.quest-star-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.quest-star-todo { background: #FFF0DC; color: #B86A00; }
+.quest-star-late { background: #FBE3DF; color: #9A3F36; }
+
+.quest-chip-original { opacity: 0.55; margin-right: 2px; }
+
+/* relative due line */
+.quest-due {
+  font-size: 12px;
+  font-weight: 600;
+}
+.quest-due-ok      { color: #2E8B57; }
+.quest-due-done    { color: #2E8B57; }
+.quest-due-soon    { color: #B86A00; }
+.quest-due-today   { color: #D97706; }
+.quest-due-overdue { color: #9A3F36; }
+.quest-due-neutral { color: #8D7F77; }
+
+/* description: 2-line clamp in child mode */
+.quest-details-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* submit button: full width */
+.quest-submit { width: 100%; }
+
 .quest-undo {
   --bs-btn-color: #4A3F3A;
   --bs-btn-bg: #EDE8E0;
@@ -249,31 +318,32 @@ function cancelDelete()  { showDeleteModal.value = false }
   font-weight: 600;
 }
 
-/* the two notes sit on the left, as wide as their words */
-.quest-returned,
-.quest-late-warn {
-  align-self: flex-start;
-}
+.quest-returned { align-self: flex-start; }
 
-.quest-late-info {
-  background: #FFE082;
-  color: #5C3D00;
-  border: 1.5px solid #F5B840;
-  border-radius: 99px;
+.quest-reject-message {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #FEF0F0;
+  color: #7A3030;
   font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  align-self: flex-start;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
-.quest-late-penalty {
-  color: #e87a6e;
-  font-weight: 600;
+.quest-read-more {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8D7F77;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
-<<<<<<< Updated upstream
-</style>
-=======
 
 .quest-late-penalty { color: #e87a6e; font-weight: 700; }
 </style>
->>>>>>> Stashed changes
+
