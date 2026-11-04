@@ -339,6 +339,40 @@ onMounted(() => {
       </div>
     </template>
   </div>
+<<<<<<< Updated upstream
+=======
+
+  <!-- Return quest modal: volunteer optionally explains why -->
+  <Teleport to="body">
+    <div v-if="rejectPendingId" class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Return Homework</h5>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2" style="font-size:14px">The quest goes back to the child as "assigned". Leave a note so they know what to fix (optional).</p>
+            <textarea
+              v-model="rejectMsg"
+              class="form-control"
+              rows="3"
+              maxlength="300"
+              placeholder="e.g. Please write in full sentences."
+              style="font-size:14px; resize:none;"
+            ></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" @click="rejectPendingId = null">Cancel</button>
+            <button type="button" class="btn btn-danger btn-sm" @click="confirmReject">
+              <i class="bi bi-arrow-return-left me-1"></i>Return Quest
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="rejectPendingId" class="modal-backdrop fade show"></div>
+  </Teleport>
+>>>>>>> Stashed changes
 </template>
 
 <style>

@@ -74,10 +74,35 @@ function cancelDelete()  { showDeleteModal.value = false }
 
     <p class="small mb-3 quest-details">{{ homework.details }}</p>
 
+<<<<<<< Updated upstream
     <div class="mt-auto d-flex flex-column gap-2">
       <span
         v-if="mode === 'child' && homework.rejectedAt && homework.status === 'assigned'"
         class="badge quest-returned">
+=======
+    <!-- child: relative due line -->
+    <div v-if="mode === 'child'" class="quest-due mb-2" :class="`quest-due-${dueUrgency}`">{{ dueLabel }}</div>
+
+    <!-- volunteer: exact date + points -->
+    <div v-if="mode === 'volunteer'" class="small quest-meta mt-1 mb-1">
+      due {{ formatDate(homework.dueDate) }} &middot; {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
+      <span v-if="isLateSubmission && homework.status !== 'verified'" class="quest-late-penalty"> (Submitted late • half <i class="bi bi-star-fill"></i>)</span>
+    </div>
+
+    <!-- description: only when the child still needs to read it (assigned); always for volunteer -->
+    <p v-if="showDesc" class="small quest-details" :class="{ 'quest-details-clamp': mode === 'child' && !expanded }">{{ homework.details }}</p>
+    <div class="mb-2">
+      <button
+        v-if="mode === 'child' && homework.status === 'assigned' && homework.details && homework.details.length > 100"
+        class="quest-read-more"
+        @click="expanded = !expanded"
+      >{{ expanded ? 'Show less' : 'Read more' }}</button>
+    </div>
+
+    <!-- child actions -->
+    <div v-if="mode === 'child'" class="mt-auto d-flex flex-column gap-2">
+      <span v-if="homework.rejectedAt && homework.status === 'assigned'" class="badge quest-returned">
+>>>>>>> Stashed changes
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
 
@@ -114,6 +139,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
       <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
       class="mt-2 d-flex align-items-center gap-2">
+<<<<<<< Updated upstream
 
         <template v-if="homework.status === 'submitted'">
           <button
@@ -148,6 +174,38 @@ function cancelDelete()  { showDeleteModal.value = false }
             <i class="bi bi-trash"></i> Delete
           </button>
         </div>
+=======
+      <template v-if="homework.status === 'submitted'">
+        <button
+          class="btn btn-sm btn-primary quest-check"
+          data-test="verify-homework-btn"
+          :disabled="busy"
+          @click="emit('verify', homework.id)">
+          <span v-if="busy" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          <i v-else class="bi bi-check-circle"></i>
+          {{ busy ? 'Checking...' : 'Mark as Checked' }}
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger quest-delete"
+          data-test="reject-homework-btn"
+          @click="emit('reject', homework.id)">
+          <i class="bi bi-arrow-return-left"></i> Return
+        </button>
+      </template>
+      <div v-else>
+        <button
+          class="btn btn-sm btn-outline-primary quest-edit"
+          data-test="edit-homework-btn"
+          @click="emit('edit', homework.id)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger ms-2 quest-delete"
+          data-test="delete-homework-btn"
+          @click="handleDelete">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+>>>>>>> Stashed changes
       </div>
     </div>
   </div>
@@ -212,4 +270,10 @@ function cancelDelete()  { showDeleteModal.value = false }
   color: #e87a6e;
   font-weight: 600;
 }
+<<<<<<< Updated upstream
 </style>
+=======
+
+.quest-late-penalty { color: #e87a6e; font-weight: 700; }
+</style>
+>>>>>>> Stashed changes
