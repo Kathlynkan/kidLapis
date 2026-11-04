@@ -79,26 +79,15 @@ function cancelDelete()  { showDeleteModal.value = false }
         <i class="bi bi-arrow-return-left me-1"></i>Returned — please redo!
       </span>
 
-      <span v-if="mode === 'child' && isOverdue" class="badge quest-late-info">
-        Submit now to still earn {{ Math.ceil(homework.points / 2) }} ★!
-      </span>
-
-      <span v-if="mode === 'child' && isLateSubmission" class="badge quest-late-info">
-        Late hand-in — you'll earn {{ Math.ceil(homework.points / 2) }} ★
-      </span>
-
-      <!-- the status line is only for a quest that is waiting or checked: a quest to do already says so at the top right -->
-      <span v-if="mode === 'child' && homework.status !== 'assigned'" class="badge quest-status" :class="`quest-pill-${state}`">
-        {{ status?.label }}
-      </span>
-
       <button
         v-if="mode === 'child' && homework.status === 'assigned'"
         class="btn btn-primary btn-sm mt-1 quest-submit"
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>I'm done!
+        <i class="bi bi-check-lg me-1"></i>
+        <template v-if="isOverdue">Submit — earn {{ Math.ceil(homework.points / 2) }} ★</template>
+        <template v-else>I'm done!</template>
       </button>
 
       <button
@@ -195,16 +184,6 @@ function cancelDelete()  { showDeleteModal.value = false }
   align-self: flex-start;
 }
 
-.quest-late-info {
-  background: #FFE082;
-  color: #5C3D00;
-  border: 1.5px solid #F5B840;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  align-self: flex-start;
-}
 
 .quest-late-penalty {
   color: #e87a6e;

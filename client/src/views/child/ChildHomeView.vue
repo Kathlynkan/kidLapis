@@ -316,9 +316,6 @@ onUnmounted(() => {
             <div class="progress-bar" :style="{ width: level.progress + '%' }"></div>
           </div>
           <div class="small lapis-muted">{{ level.starsToNext }} ★ to Level {{ level.level + 1 }}</div>
-          <div v-if="nextBadge" class="small mt-2">
-            Next kueh: <strong>{{ nextBadge.badge.kueh }}</strong>. {{ nextBadge.badge.rule }}.
-          </div>
         </div>
 
         <!-- the kueh lapis: a layer for every level, the next one fills up -->
