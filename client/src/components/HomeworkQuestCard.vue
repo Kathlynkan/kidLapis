@@ -115,9 +115,7 @@ function cancelDelete()  { showDeleteModal.value = false }
         data-test="submit-quest-btn"
         @click="emit('submit', homework.id)"
       >
-        <i class="bi bi-check-lg me-1"></i>
-        <template v-if="isOverdue">Submit — earn {{ chipStars }} ★</template>
-        <template v-else>I'm done! · {{ chipStars }} ★</template>
+        <i class="bi bi-check-lg me-1"></i>Submit · {{ chipStars }} ★
       </button>
 
       <button
