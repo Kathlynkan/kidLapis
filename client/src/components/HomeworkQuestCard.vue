@@ -33,11 +33,6 @@ const state = computed(() => {
 })
 const STATE_LABELS = { late: 'Overdue', todo: 'To do', waiting: 'Being checked', done: 'Checked' }
 
-const starsToEarn = computed(() => {
-  if (props.homework.status === 'verified') return props.homework.pointsAwarded ?? props.homework.points
-  if (isOverdue.value || isLateSubmission.value) return Math.ceil(props.homework.points / 2)
-  return props.homework.points
-})
 
 const showDeleteModal = ref(false)
 
@@ -60,7 +55,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
       <div class="small quest-meta mt-1">
         due {{ formatDate(homework.dueDate) }}
-        · {{ starsToEarn }} <i class="bi bi-star-fill"></i>
+        · {{ homework.pointsAwarded ?? homework.points }} <i class="bi bi-star-fill"></i>
 
         <template v-if="mode === 'volunteer' && isLateSubmission && homework.status !== 'verified'">
           <span class="quest-late-penalty"> (submitted late)</span>
