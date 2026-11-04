@@ -394,15 +394,16 @@ onUnmounted(() => {
             <HomeworkQuestCard :homework="h" mode="child" @submit="submitQuest" />
           </div>
         </div>
+      </div>
 
-        <!-- My Kueh Tin: one kueh for every badge -->
+      <!-- ── Kueh Tin tab ───────────────────────────────────── -->
+      <div v-if="activeTab === 'tin'" class="board">
         <div class="d-flex align-items-center gap-3 mb-3">
           <h2 class="h4 mt-2">My Kueh Tin</h2>
           <span class="kueh-tin-count kueh-tin-title">{{ earned.length }} of {{ BADGES.length }} kueh</span>
         </div>
 
         <section class="kueh-tin">
-
           <div class="kueh-tin-body">
             <div class="kueh-grid">
               <button
