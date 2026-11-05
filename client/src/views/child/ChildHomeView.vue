@@ -799,6 +799,16 @@ onUnmounted(() => {
   font-weight: 700;
 }
 
+@media (max-width: 400px) {
+  .cake-tier-label {
+    position: static;
+    transform: none;
+    display: block;
+    text-align: center;
+    margin-top: 3px;
+  }
+}
+
 .cake-tier-basic   { color: #8D7F77; }
 .cake-tier-bronze  { color: #7A4A1E; }
 .cake-tier-silver  { color: #4A4A6A; }
