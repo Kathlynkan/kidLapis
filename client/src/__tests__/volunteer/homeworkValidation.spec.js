@@ -1,3 +1,6 @@
+// Verify that homework can only be assigned with
+// valid due dates (today or later)
+
 import { describe, test, expect } from 'vitest'
 
 describe('Homework validation', () => {
