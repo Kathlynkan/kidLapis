@@ -155,12 +155,12 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E:
 - E2E:
 
-**Kat**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+**Kathlyn**
+- Unit: `client/src/__tests__/parent/parentHelpers.spec.js` checks the parent page can always display what the child did at the student care
+- Component: `client/src/__tests__/parent/ParentSocialDay.spec.js` checks that the parent sees what the volunteer recorded
+- Component: `client/src/__tests__/parent/ChatThread.spec.js` checks the chat bubbles in Messages are displayed correctly 
+- E2E: `client/e2e/messages.spec.js` checks that the bell notifies messages sent between parent and coordinator and that each child has a separate chat 
+- E2E: `client/e2e/parent-viewed.spec.js` checks that one the parent views the page, the volunteer is unable to edit the session 
 
 **Ning Xuan**
 - Unit:
