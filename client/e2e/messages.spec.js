@@ -4,14 +4,12 @@
 //   parent@kidslapis.sg = Ms Grace, she has two kids, Ethan (c_1) and Mia (c_7)
 //   coordinator@kidslapis.sg = the coordinator, she can open the chat of every child
 //
-// these tests really send messages, so they only run on desktop and not the iphone size
+// these tests run twice, once on the desktop browser and once on the iphone size
+// they really send messages, but every message has the time in it, so the second run never mixes with the first
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
 test.describe('Sending messages', () => {
-  // skip on the iphone size, or the same message would get sent twice
-  test.skip(({ isMobile }) => isMobile, 'sends a real message, so it runs on Desktop Chrome only')
-
   // Test case 1: Verify that a message from the parent reaches the coordinator, the bell tells her, and the bell goes away once she reads it.
   test('a message from the parent reaches the coordinator', async ({ page, context }) => {
     const coordinatorPage = await context.newPage()

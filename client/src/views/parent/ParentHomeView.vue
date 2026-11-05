@@ -424,9 +424,6 @@ watch(
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
                     </div>
-                    <div v-if="resultSessions[item.id].photos && resultSessions[item.id].photos.length > 0" class="result-photos">
-                      <img v-for="(photo, number) in resultSessions[item.id].photos" :key="number" :src="photo" alt="Photo from the session" />
-                    </div>
                   </template>
                   <p v-else class="muted" data-test="no-result">No result recorded yet.</p>
                 </template>
@@ -704,7 +701,7 @@ watch(
 .parentpage .handover-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 14px;
   background: #FFFFFF;
   color: #414F67;
   font-size: 12px;
@@ -733,17 +730,19 @@ watch(
 /* the tabs: two pills in a pale track */
 .parentpage .tabs {
   display: flex;
+  flex-wrap: wrap; /* when the three tabs do not fit in one row the last ones drop to the next row */
   gap: 4px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: 26px;
   background: #DDF0EF;
 }
 
 .parentpage .tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: min-content; /* never narrower than its longest word, so the white always covers it */
   min-height: 40px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 22px;
   background: transparent;
   color: #414F67;
   font: inherit;
@@ -774,6 +773,7 @@ watch(
 .parentpage .group-heading {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   margin: 14px 0 6px;
   font-size: 14px;
   font-weight: 700;
@@ -803,7 +803,7 @@ watch(
   margin-bottom: 8px;
   padding: 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 22px;
   background: #DDF0EF;
   color: #414F67;
   font: inherit;
@@ -846,12 +846,17 @@ watch(
 
 .parentpage .row-top {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start; /* the tag keeps its own height when the title takes two lines */
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 6px; /* a gap between the late tag and the subject line under it */
 }
 
 .parentpage .row-title {
+  min-width: 0;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* the small pills: the tag of a homework, its score, the mood of a day and the topics (chip) */
@@ -859,8 +864,14 @@ watch(
 .parentpage .row-score,
 .parentpage .mood-chip,
 .parentpage .chip {
-  border-radius: 999px;
+  border-radius: 12px;
   background: #DDF0EF;
+}
+
+.parentpage .session-subject {
+  max-width: 100%;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
 }
 
 .parentpage .row-tag,
@@ -915,20 +926,6 @@ watch(
   content: 'Tap to close';
 }
 
-.parentpage .result-photos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.parentpage .result-photos img {
-  width: 96px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
 /* ---------- the social tab ---------- */
 
 .parentpage .day-card {
@@ -951,6 +948,7 @@ watch(
 
 .parentpage .day-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
@@ -966,6 +964,8 @@ watch(
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* an earlier day: a short card with a hint to open it */
@@ -1108,6 +1108,35 @@ watch(
 
   .parentpage .tile {
     flex-basis: 40%;
+  }
+}
+
+/* narrow screens: a tab can hold two lines of words, so it gets a softer corner and more room on the sides
+   (the words must not touch the round end) */
+@media (max-width: 480px) {
+  .parentpage .tabs {
+    border-radius: 20px;
+  }
+
+  .parentpage .tab {
+    padding: 4px 12px;
+    border-radius: 16px;
+  }
+}
+
+/* very narrow screens: the three tabs get smaller words, then wrap onto two lines instead of sticking out */
+@media (max-width: 360px) {
+  body .parentpage .tab {
+    font-size: 12px;
+    letter-spacing: 0.4px;
+  }
+}
+
+/* extremely narrow: the three summary tiles go one under the other and long words break */
+@media (max-width: 260px) {
+  .parentpage .tile {
+    flex-basis: 100%;
+    overflow-wrap: anywhere;
   }
 }
 </style>
