@@ -33,7 +33,9 @@
 .messagespage .child-button {
   padding: 5px 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 18px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   background: #DDF0EF;
   color: #414F67;
   font: inherit;

@@ -704,7 +704,7 @@ watch(
 .parentpage .handover-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 14px;
   background: #FFFFFF;
   color: #414F67;
   font-size: 12px;
@@ -735,15 +735,16 @@ watch(
   display: flex;
   gap: 4px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: 26px;
   background: #DDF0EF;
 }
 
 .parentpage .tab {
   flex: 1;
+  min-width: 0;
   min-height: 40px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 22px;
   background: transparent;
   color: #414F67;
   font: inherit;
@@ -774,6 +775,7 @@ watch(
 .parentpage .group-heading {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   margin: 14px 0 6px;
   font-size: 14px;
   font-weight: 700;
@@ -803,7 +805,7 @@ watch(
   margin-bottom: 8px;
   padding: 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 22px;
   background: #DDF0EF;
   color: #414F67;
   font: inherit;
@@ -846,12 +848,16 @@ watch(
 
 .parentpage .row-top {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start; /* the tag keeps its own height when the title takes two lines */
   justify-content: space-between;
   gap: 8px;
 }
 
 .parentpage .row-title {
+  min-width: 0;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* the small pills: the tag of a homework, its score, the mood of a day and the topics (chip) */
@@ -859,8 +865,14 @@ watch(
 .parentpage .row-score,
 .parentpage .mood-chip,
 .parentpage .chip {
-  border-radius: 999px;
+  border-radius: 12px;
   background: #DDF0EF;
+}
+
+.parentpage .session-subject {
+  max-width: 100%;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
 }
 
 .parentpage .row-tag,
@@ -951,6 +963,7 @@ watch(
 
 .parentpage .day-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
@@ -966,6 +979,8 @@ watch(
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* an earlier day: a short card with a hint to open it */
@@ -1108,6 +1123,46 @@ watch(
 
   .parentpage .tile {
     flex-basis: 40%;
+  }
+}
+
+/* narrow screens: a tab can hold two lines of words, so it gets a softer corner and more room on the sides
+   (the words must not touch the round end) */
+@media (max-width: 480px) {
+  .parentpage .tabs {
+    border-radius: 20px;
+  }
+
+  .parentpage .tab {
+    padding: 4px 12px;
+    border-radius: 16px;
+  }
+}
+
+/* very narrow screens: the three tabs get smaller words, then wrap onto two lines instead of sticking out */
+@media (max-width: 360px) {
+  body .parentpage .tab {
+    font-size: 12px;
+    letter-spacing: 0.4px;
+  }
+}
+
+@media (max-width: 300px) {
+  .parentpage .tabs {
+    flex-wrap: wrap;
+    border-radius: 22px;
+  }
+
+  .parentpage .tab {
+    flex: 1 1 45%;
+  }
+}
+
+/* extremely narrow: the three summary tiles go one under the other and long words break */
+@media (max-width: 260px) {
+  .parentpage .tile {
+    flex-basis: 100%;
+    overflow-wrap: anywhere;
   }
 }
 </style>
