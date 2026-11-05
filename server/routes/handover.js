@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Child, Session, Handover } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'
 import { canAccessChild } from '../utils/access.js'
+import { toDateText, formatStart } from '../utils/startDate.js'
 
 const router = Router()
 router.use(requireAuth) 
@@ -85,14 +86,6 @@ export function checkMood(sessions) {
   return `Settled and in a good mood in ${period}.`
 }
 
-// A date as 'YYYY-MM-DD' in OUR time zone
-// (toISOString() would use UTC, which is the day before in Singapore before 8am)
-function toDateText(date) {
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${month}-${day}`
-}
-
 // The Monday to Friday of the week that a date is in
 // e.g. getWeekOf(new Date('2026-10-28')) -> { start: '2026-10-26', end: '2026-10-30' }
 export function getWeekOf(date) {
@@ -153,12 +146,6 @@ export function weekTitleFor(week, today = new Date()) {
   if (weeksBack <= 0) return 'This week'
   if (weeksBack === 1) return 'Last week'
   return `${weeksBack} weeks ago`
-}
-
-// A date for people, e.g. 'Wed 14 Oct'
-function formatDay(dateText) {
-  const options = { weekday: 'short', day: 'numeric', month: 'short' }
-  return new Date(dateText + 'T00:00:00').toLocaleDateString('en-GB', options)
 }
 
 // Backup summary for VOLUNTEERS
@@ -555,7 +542,7 @@ router.post('/:childId', async (req, res) => {
       // tell the parent why they see an older week
       if (week.start < usualWeek.start) {
         const firstName = child.name.split(' ')[0]
-        awayNote = `No sessions since ${formatDay(allSessions[0].date)}. This is the last week ${firstName} came.`
+        awayNote = `No sessions since ${formatStart(allSessions[0].date)}. This is the last week ${firstName} came.`
       }
     }
     weekStart = week.start
