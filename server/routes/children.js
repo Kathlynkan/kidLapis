@@ -1,15 +1,10 @@
-// =============================================================
-// /children  - child profiles             Owner: Kai Sen
-// -------------------------------------------------------------
-// =============================================================
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { Child, User, Session, Homework, Message, Handover } from '../models/index.js'
-import { newLinkCode } from '../models/helpers.js'
+import { newLinkCode, EMAIL_PATTERN } from '../models/helpers.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild, childFilterFor } from '../utils/access.js'
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const router = Router()
 router.use(requireAuth)
@@ -94,7 +89,7 @@ router.post('/', requireRole('coordinator'), async (req, res) => {
   const wantsLogin = childEmail || childPassword
   if (wantsLogin) {
     const email = String(childEmail || '').trim().toLowerCase()
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_PATTERN.test(email)) {
       return res.status(400).json({ message: 'Child login email is not valid.' })
     }
     // Same minimum as every other account (MIN_PASSWORD_LENGTH in routes/auth.js)
@@ -142,7 +137,7 @@ router.post('/', requireRole('coordinator'), async (req, res) => {
 })
 
 // PUT /children/:id   body: { name, level, school, parentId, needs }
-// Edits the child's profile only. Volunteers (Yu Xuan), points (Jachin) and
+// Edits the child's profile only. Volunteers, points and
 // follow-up flags are changed by their own features, so they are not touched here.
 router.put('/:id', requireRole('coordinator'), async (req, res) => {
   // 1. Does this child exist? (+linkCode so the reply still has the child code for the table)
@@ -177,7 +172,7 @@ router.put('/:id', requireRole('coordinator'), async (req, res) => {
 })
 
 // DELETE /children/:id
-// Decision (Kai Sen): deleting a child also deletes everything that belongs to them,
+// Decision: deleting a child also deletes everything that belongs to them,
 // so no session, homework, message or login is left pointing to a child that no longer
 // exists. The page warns the coordinator before sending this request.
 router.delete('/:id', requireRole('coordinator'), async (req, res) => {

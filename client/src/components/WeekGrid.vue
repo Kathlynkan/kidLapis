@@ -1,11 +1,3 @@
-<!-- The weekly timetable. ONE component for both pages, so they always look the same.   Owner: Yu Xuan
-  Dashboard (read-only, no buttons):  <WeekGrid :volunteers="volunteers" :children="children" />
-  Schedule page (edit):   <WeekGrid editable :volunteers="..." :children="..." :busy-key="busyKey"
-                                    @add="(volunteer, day) => ..." @remove="(volunteer, day, slot) => ..." />
-  Rows = volunteers, columns = Mon-Fri (+ Sat/Sun only if someone works weekends).
-  Pending requests (waiting for the volunteer to accept) show with a dashed outline and a
-  "Pending" tag. Declined requests are not shown.
--->
 <script setup>
 import { computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'

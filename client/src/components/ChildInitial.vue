@@ -1,5 +1,3 @@
-<!-- The round picture of a child: their photo when they have one (an avatar like /photos/ethan.jpg),
-     or else the first letter of their name. The size and colour of the circle come from the page that uses it (.child-initial). -->
 <script setup>
 import { computed } from 'vue'
 import '@/css/main/components.css' // the look of the small parts

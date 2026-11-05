@@ -1,6 +1,3 @@
-// Verify that volunteer can assign homework and homework 
-// appears in child's quest dashboard
-
 import { test, expect } from '@playwright/test'
 
 test.describe('Assign Homework', () => {

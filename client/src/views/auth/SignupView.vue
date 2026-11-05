@@ -1,10 +1,3 @@
-<!-- =============================================================
-  Sign up page (volunteers and parents).              Owner: Kai Sen
-  Done: checks on the page (name, email format, password >= 8, passwords match)
-        with .is-invalid on the box and the problem written under it. The server checks again.
-        Volunteers pick their skills + available days (used by matchmaking).
-        Parents can enter the child code from the centre to link to their child.
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -259,7 +252,7 @@ async function handleSignup() {
   padding: 0;
 }
 
-/* ---------- I am a...: two big choices in the colour of the role ---------- */
+/* I am a...: two big choices in the colour of the role */
 
 .signuppage .choices {
   display: grid;
@@ -299,7 +292,7 @@ async function handleSignup() {
   box-shadow: inset 0 0 0 2px #7FBDBB;
 }
 
-/* ---------- skills and days: round chips, lavender when ticked ---------- */
+/* skills and days: round chips, lavender when ticked */
 
 .signuppage .chips {
   display: flex;
@@ -328,7 +321,7 @@ async function handleSignup() {
   outline-offset: 2px;
 }
 
-/* ---------- the child code ---------- */
+/* the child code */
 
 .signuppage .code-input {
   text-transform: uppercase;

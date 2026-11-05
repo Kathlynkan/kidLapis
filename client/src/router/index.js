@@ -1,9 +1,3 @@
-// =============================================================
-// All pages (routes) of the app.        Owner: Kai Sen (everyone may ADD routes)
-// -------------------------------------------------------------
-// meta.roles = which roles may open the page. Not logged in -> /login.
-// Wrong role -> sent to their own home page.
-// =============================================================
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth' // get Pinia auth store
 
@@ -13,7 +7,7 @@ import LoginView from '@/views/auth/LoginView.vue'
 // array of all pages
 // meta is extra information
 const routes = [
-  // ---------- Public (Kai Sen) ----------
+  // Public
   { path: '/', name: 'home', component: HomeView },
   { path: '/login', name: 'login', component: LoginView, meta: { guestOnly: true } },
   {
@@ -23,17 +17,17 @@ const routes = [
     meta: { guestOnly: true },
   },
 
-  // ---------- Volunteer (Yuqi + Ning Xuan) ----------
+  // Volunteer
   {
     path: '/volunteer',
     name: 'volunteer-home',
     // lazy loading: load volunteer page only when needed
     // wait until user visits /volunteer
-    component: () => import('@/views/volunteer/VolunteerHomeView.vue'), // Yuqi
+    component: () => import('@/views/volunteer/VolunteerHomeView.vue'),
     meta: { roles: ['volunteer'] }, // only volunteers allowed
   },
   {
-    path: '/volunteer/requests', // new sessions the coordinator assigned: Accept / Decline (Kai Sen)
+    path: '/volunteer/requests', // new sessions the coordinator assigned: Accept / Decline
     name: 'volunteer-requests',
     component: () => import('@/views/volunteer/RequestsView.vue'),
     meta: { roles: ['volunteer'] },
@@ -41,35 +35,35 @@ const routes = [
   {
     path: '/children/:id', // dynamic route
     name: 'child-profile',
-    component: () => import('@/views/volunteer/ChildProfileView.vue'), // Yuqi
+    component: () => import('@/views/volunteer/ChildProfileView.vue'),
     meta: { roles: ['volunteer', 'coordinator'] },
   },
   {
     path: '/children/:id/sessions/new', // record new session
     name: 'session-new',
-    component: () => import('@/views/volunteer/SessionFormView.vue'), // Ning Xuan
+    component: () => import('@/views/volunteer/SessionFormView.vue'),
     meta: { roles: ['volunteer'] },
   },
   {
     path: '/sessions/:sessionId/edit', // edit existing session
     name: 'session-edit',
-    component: () => import('@/views/volunteer/SessionFormView.vue'), // Ning Xuan (same form)
+    component: () => import('@/views/volunteer/SessionFormView.vue'), // same form
     meta: { roles: ['volunteer', 'coordinator'] },
   },
   {
     path: '/children/:id/homework/new', // assign new homework
     name: 'homework-new',
-    component: () => import('@/views/volunteer/HomeworkAssignView.vue'), // Ning Xuan
+    component: () => import('@/views/volunteer/HomeworkAssignView.vue'),
     meta: { roles: ['volunteer'] },
   },
   {
     path: '/children/:id/homework/:homeworkId/edit', // edit existing homework
     name: 'homework-edit',
-    component: () => import('@/views/volunteer/HomeworkAssignView.vue'), // Ning Xuan
+    component: () => import('@/views/volunteer/HomeworkAssignView.vue'),
     meta: { roles: ['volunteer'] },
   },
 
-  // ---------- Profile - all roles ----------
+  // Profile - all roles
   {
     path: '/profile',
     name: 'profile',
@@ -77,7 +71,7 @@ const routes = [
     meta: { roles: ['volunteer', 'coordinator', 'parent', 'child'] },
   },
 
-  // ---------- Messages (Kat) - shared by volunteer, parent, coordinator ----------
+  // Messages - shared by volunteer, parent, coordinator
   {
     path: '/messages/:childId?', // ?: childId parameter optional
     name: 'messages',
@@ -85,7 +79,7 @@ const routes = [
     meta: { roles: ['parent', 'coordinator'] },
   },
 
-  // ---------- Parent (Kat) ----------
+  // Parent
   {
     path: '/parent',
     name: 'parent-home',
@@ -93,7 +87,7 @@ const routes = [
     meta: { roles: ['parent'] },
   },
 
-  // ---------- Child (Jachin) ----------
+  // Child
   {
     path: '/child',
     name: 'child-home',
@@ -107,39 +101,39 @@ const routes = [
     meta: { roles: ['child'] },
   },
 
-  // ---------- Coordinator (Yu Xuan + Kai Sen) ----------
+  // Coordinator
   {
     path: '/coordinator',
     name: 'coordinator-home',
-    component: () => import('@/views/coordinator/CoordinatorDashboardView.vue'), // Yu Xuan
+    component: () => import('@/views/coordinator/CoordinatorDashboardView.vue'),
     meta: { roles: ['coordinator'] },
   },
   {
     path: '/coordinator/children',
     name: 'manage-children',
-    component: () => import('@/views/coordinator/ManageChildrenView.vue'), // Kai Sen
+    component: () => import('@/views/coordinator/ManageChildrenView.vue'),
     meta: { roles: ['coordinator'] },
   },
   {
     path: '/coordinator/volunteers',
     name: 'manage-volunteers',
-    component: () => import('@/views/coordinator/ManageVolunteersView.vue'), // Yu Xuan
+    component: () => import('@/views/coordinator/ManageVolunteersView.vue'),
     meta: { roles: ['coordinator'] },
   },
   {
     path: '/coordinator/matchmaking/:childId?',
     name: 'matchmaking',
-    component: () => import('@/views/coordinator/MatchmakingView.vue'), // Yu Xuan
+    component: () => import('@/views/coordinator/MatchmakingView.vue'),
     meta: { roles: ['coordinator'] },
   },
   {
     path: '/coordinator/schedule',
     name: 'schedule',
-    component: () => import('@/views/coordinator/ScheduleView.vue'), // Yu Xuan
+    component: () => import('@/views/coordinator/ScheduleView.vue'),
     meta: { roles: ['coordinator'] },
   },
 
-  // ---------- 404 ----------
+  // 404
   {
     path: '/:pathMatch(.*)*', // catch everything not matched earlier
     name: 'not-found',

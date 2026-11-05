@@ -1,9 +1,3 @@
-<!-- =============================================================
-  Volunteer home: "My Children"                       Owner: Yuqi
-  -------------------------------------------------------------
-  WORKING reference for "load data from the API and show it":
-    onMounted -> axios (api.get) -> ref -> computed -> v-for + component
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -58,7 +52,7 @@ const lastSessionByChild = computed(() => {
   return map
 })
 
-// ---------- My Schedule tab: this week's calendar ----------
+// My Schedule tab: this week's calendar
 // Past days        -> the sessions I actually recorded that day (what happened)
 // Today and later  -> the children scheduled with me (what is planned),
 //                     only from the day their sessions with me start (slot.startDate)
@@ -166,7 +160,7 @@ function startBadge(child) {
   return ''
 }
 
-// ---------- All my children tab ----------
+// All my children tab
 // search + level filter
 const filteredChildren = computed(() => {
   const search = searchText.value.toLowerCase()
@@ -247,7 +241,7 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <!-- ===== SCHEDULE TAB ===== -->
+        <!-- SCHEDULE TAB -->
         <div v-if="activeTab === 'today'">
           <!-- no children at all -->
           <div v-if="children.length === 0" class="empty-box">
@@ -314,7 +308,7 @@ onUnmounted(() => {
           </template>
         </div>
 
-        <!-- ===== ALL MY CHILDREN TAB ===== -->
+        <!-- ALL MY CHILDREN TAB -->
         <div v-else>
           <StateMessage
             v-if="children.length === 0"
@@ -391,7 +385,7 @@ onUnmounted(() => {
    Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (14px to 22px, round pills)
    and a very light shadow. */
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 .volunteerpage h1,
 .volunteerpage h2,
@@ -406,9 +400,9 @@ onUnmounted(() => {
   font-size: 13px;
 }
 
-/* ---------- the board: the sandy box that holds the tabs and the white cards (the same as on the parent page) ---------- */
+/* the board: the sandy box that holds the tabs and the white cards (the same as on the parent page) */
 
-/* ---------- the two tabs: two pills in a pale track ---------- */
+/* the two tabs: two pills in a pale track */
 
 .volunteerpage .tabs {
   display: flex;
@@ -451,7 +445,7 @@ onUnmounted(() => {
   line-height: 20px;
 }
 
-/* ---------- the week ---------- */
+/* the week */
 
 .volunteerpage .week {
   display: grid;
@@ -549,7 +543,7 @@ onUnmounted(() => {
   }
 }
 
-/* ---------- the heading of the chosen day ---------- */
+/* the heading of the chosen day */
 
 .volunteerpage .day-heading {
   display: flex;
@@ -585,7 +579,7 @@ onUnmounted(() => {
   color: #6B8177;
 }
 
-/* ---------- boxes with a message (nobody today, no children yet) ---------- */
+/* boxes with a message (nobody today, no children yet) */
 
 .volunteerpage .empty-box {
   padding: 28px 16px;
@@ -608,7 +602,7 @@ onUnmounted(() => {
   margin-bottom: 14px;
 }
 
-/* ---------- the buttons ---------- */
+/* the buttons */
 
 .volunteerpage .soft-button {
   padding: 7px 20px;
@@ -625,7 +619,7 @@ onUnmounted(() => {
   background: #9BD3B2;
 }
 
-/* ---------- the search box ---------- */
+/* the search box */
 
 .volunteerpage .filter-box {
   margin-bottom: 18px;
@@ -667,7 +661,7 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px #B7D8D7;
 }
 
-/* ---------- one child (ChildCard.vue) ---------- */
+/* one child (ChildCard.vue) */
 
 .volunteerpage .child-card {
   display: flex;

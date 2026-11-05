@@ -1,12 +1,3 @@
-// =============================================================
-// MongoDB connection (Mongoose)          Owner: Kai Sen
-// -------------------------------------------------------------
-// The connection string comes from server/config.env:
-//   DB=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/kidslapis_<yourname>?retryWrites=true&w=majority
-//
-// Each member should use THEIR OWN database name (the part after .net/)
-// so that `pnpm seed` and the E2E tests don't wipe each other's data.
-// =============================================================
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'

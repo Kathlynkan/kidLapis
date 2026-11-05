@@ -1,4 +1,3 @@
-// Shared bits for every Mongoose model.
 import crypto from 'node:crypto'
 
 // Short readable ids like "s_3f9a1c2b" instead of Mongo's default ObjectId.
@@ -7,6 +6,9 @@ import crypto from 'node:crypto'
 export function newId(prefix) {
   return `${prefix}_${crypto.randomBytes(4).toString('hex')}`
 }
+
+// An email is something@something.something, with no spaces (sign up and a child's login use this)
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Child codes like "K7P3QX" that the centre gives to a parent, so they can link their
 // account to their child when they sign up. No 0/O or 1/I, so they are easy to read out.

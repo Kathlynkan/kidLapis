@@ -1,6 +1,3 @@
-<!-- PeelCard — collapsible card using grid-template-rows: 0fr → 1fr.
-     Header has a kueh gradient surface. Arrow springs 180° when open.
-     Pass :open + @toggle for controlled (accordion) mode; omit for self-managed. -->
 <script setup>
 import { ref, computed } from 'vue'
 import '@/css/main/components.css' // the look of the small parts

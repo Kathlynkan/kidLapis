@@ -1,4 +1,3 @@
-// One tutoring session record - the core of the app.   Owner: Ning Xuan
 import mongoose from 'mongoose'
 import { newId, jsonOptions } from './helpers.js'
 

@@ -1,7 +1,7 @@
-// Component test: MiniAvatar (the small round picture in the timetable).   Owner: Yu Xuan
+// Owner: Yu Xuan
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import MiniAvatar from '../MiniAvatar.vue'
+import MiniAvatar from '@/components/MiniAvatar.vue'
 
 describe('MiniAvatar', () => {
   it('shows a photo when the avatar is a file path', () => {

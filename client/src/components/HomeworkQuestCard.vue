@@ -1,6 +1,3 @@
-<!-- HomeworkQuestCard - homework shown as a "quest".     Owner: Jachin
-     mode "child": the child's gamified view. mode "volunteer": the volunteer checks or removes it.
-     The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue -->
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, daysSince, subjectStyle } from '@/utils/format'

@@ -1,4 +1,3 @@
-<!-- Manage volunteers                                   Owner: Yu Xuan -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'

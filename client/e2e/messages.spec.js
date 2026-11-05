@@ -1,11 +1,4 @@
-// E2E tests for the messages: the parent and the coordinator send messages to each other   Owner: Kat
-//
-// logins from the seed data:
-//   parent@kidslapis.sg = Ms Grace, she has two kids, Ethan (c_1) and Mia (c_7)
-//   coordinator@kidslapis.sg = the coordinator, she can open the chat of every child
-//
-// these tests run twice, once on the desktop browser and once on the iphone size
-// they really send messages, but every message has the time in it, so the second run never mixes with the first
+// Owner: Kat
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 

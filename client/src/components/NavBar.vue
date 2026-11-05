@@ -1,14 +1,3 @@
-<!-- =============================================================
-  NavBar — shows different links for each role.      Owner: Kai Sen
-  The logo and the links are on the left, and the user is on the right (the name opens the profile page, where the user logs out).
-  On a small screen the links and the user hide behind a menu button.
-  The bell (volunteers and parents) stays outside the menu, so it is visible on a phone too.
-    Volunteer: - session requests: the coordinator assigned them a new day in Matchmaking -> the Session
-                 requests page, where they Accept / Decline (RequestsView, routes/requests.js)
-               - quests to check: their children pressed "I'm done!" on a quest
-    Parent:    - new updates: sessions the parent hasn't seen yet, so the weekly summary has changed
-                 -> opens that child on the parent page, which marks them seen
-============================================================= -->
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -131,7 +120,7 @@ async function fetchUnread() {
   }
 }
 
-// ---------- The bell (volunteers and parents) ----------
+// The bell (volunteers and parents)
 // Volunteer:
 //   1. Session requests: new days the coordinator assigned in Matchmaking (GET /requests).
 //   2. Quests a child pressed "I'm done!" on (status 'submitted'): the volunteer needs to check them.
@@ -830,22 +819,6 @@ watch(
   display: block;
   color: #8D97A6;
   font-size: 11px;
-}
-
-/* "Accept or decline ->" under the session requests */
-.lapis-bell-more {
-  display: block;
-  margin: 0 0 8px;
-  padding: 4px 8px 8px;
-  border-bottom: 1px solid #CFE0DE;
-  color: #2F6F5A;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.lapis-bell-more:hover {
-  text-decoration: underline;
 }
 
 /* the menu button: only shown on a small screen */

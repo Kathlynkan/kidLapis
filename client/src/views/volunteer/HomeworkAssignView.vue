@@ -1,5 +1,3 @@
-<!-- Give homework to a child                            Owner: Ning Xuan
-  Route: /children/:id/homework/new -->
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

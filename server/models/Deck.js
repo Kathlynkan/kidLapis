@@ -1,5 +1,3 @@
-// A "deck" of questions.  A volunteer picks a deck when giving homework to a child.
-// The quest then gets a copy of the questions of the deck.
 import mongoose from 'mongoose'
 import { newId, jsonOptions } from './helpers.js'
 

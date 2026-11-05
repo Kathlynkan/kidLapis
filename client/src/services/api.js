@@ -1,14 +1,3 @@
-// =============================================================
-// ONE axios instance for the whole app 
-// -------------------------------------------------------------
-// Always import this instead of plain axios, so that:
-//   - the API base URL is set in one place
-//   - the login token is sent automatically
-//
-//   import api from '@/services/api'
-//   const response = await api.get('/sessions', { params: { childId } })
-//   const sessions = response.data
-// =============================================================
 import axios from 'axios'
 
 // create customised axios instance

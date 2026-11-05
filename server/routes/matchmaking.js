@@ -1,9 +1,3 @@
-// =============================================================
-// /matchmaking  - suggest + assign volunteers    Owner: Yu Xuan
-// Used by the Matchmaking page AND the Schedule (timetable) page.
-// Slot statuses (models/Child.js): 'pending' until the volunteer accepts (routes/requests.js),
-// then 'accepted'; 'declined' if they say no. No status = accepted (seed / older data).
-// =============================================================
 import { Router } from 'express'
 import { Child, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
@@ -74,7 +68,7 @@ router.put('/:childId/assign', async (req, res) => {
     await child.save()
     notifyBell(req, [volunteerId]) // a cancelled request disappears from their bell straight away
 
-    // Tell the volunteer in their bell's "Updates" (Kai Sen, utils/notify.js)
+    // Tell the volunteer in their bell's "Updates" (utils/notify.js)
     const confirmedDays = removed.filter(isConfirmed).map((s) => s.day)
     const requestDays = removed.filter((s) => s.status === 'pending').map((s) => s.day)
     if (confirmedDays.length) {
@@ -94,7 +88,7 @@ router.put('/:childId/assign', async (req, res) => {
     return res.json(child)
   }
 
-  // ----- assign + move share the same checks. Never trust the browser: re-check everything. -----
+  // assign + move share the same checks. Never trust the browser: re-check everything.
   const volunteer = await User.findOne({ _id: volunteerId, role: 'volunteer' })
   if (!volunteer) return res.status(404).json({ message: 'Volunteer not found' })
   if (!day) return res.status(400).json({ message: 'Pick a day for the session.' })

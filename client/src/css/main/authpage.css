@@ -1,9 +1,3 @@
-/* EXTERNAL CSS: the log in page and the sign up page. It is imported at the top of each of those files. */
-
-/* The two pages where you type your details (LoginView.vue and SignupView.vue): a white card on the sandy board
-   (.board is in main.css), in the middle of the page. The title is .page-title and the sentence under it is
-   .page-subtitle (main.css), the error is .state-error (components.css). Every rule starts with .authpage. */
-
 .authpage {
   display: flex;
   justify-content: center;
@@ -53,7 +47,7 @@
   font-weight: 600;
 }
 
-/* ---------- the form: soft boxes with a lavender ring when you type ---------- */
+/* the form: soft boxes with a lavender ring when you type */
 
 .authpage form {
   display: flex;
@@ -115,19 +109,11 @@
   gap: 10px;
 }
 
-/* ---------- the buttons: small corners, in the colours of the app ---------- */
+/* the buttons: small corners, in the colours of the app */
 
+/* Show / Hide: the look comes from .lapis-button (NavBar.vue); this only stops it shrinking */
 .authpage .auth-show {
   flex-shrink: 0;
-  padding: 8px 16px;
-  border: 0;
-  border-radius: 6px;
-  background: #FFFFFF;
-  box-shadow: inset 0 0 0 2px #D5CBEA;
-  color: #4A3F3A;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
 }
 
 .authpage .auth-submit {
@@ -162,7 +148,7 @@
   font-weight: 700;
 }
 
-/* ---------- a small screen ---------- */
+/* a small screen */
 
 @media (max-width: 560px) {
   .authpage {

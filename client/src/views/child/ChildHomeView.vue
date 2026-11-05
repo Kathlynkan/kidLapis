@@ -1,4 +1,3 @@
-<!-- Child home: "My Quests" (gamified homework)         Owner: Jachin -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
@@ -75,7 +74,7 @@ const CONFETTI = [
   { color: '#D5CBEA', tx:   28, ty: -175 },
 ]
 
-// ── Computed ─────────────────────────────────────────────────
+// Computed
 const displayPoints = computed(() => me.value?.points || 0)
 const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
@@ -148,7 +147,7 @@ const nextBadge = computed(() => {
     )
 })
 
-// ── Tabs ──────────────────────────────────────────────────────
+// Tabs
 const activeTab = ref('quests') // 'quests' | 'tin'
 
 // the label under the tin shows the kueh you tapped, or else the next one to earn
@@ -156,7 +155,7 @@ const picked = ref(null)
 const shown = computed(() => picked.value || nextBadge.value?.badge || BADGES[0])
 const shownProgress = computed(() => badgeProgress(shown.value, me.value, homework.value))
 
-// ── Actions ──────────────────────────────────────────────────
+// Actions
 async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
@@ -330,6 +329,7 @@ onUnmounted(() => {
 
     <Transition name="celebrate">
       <div v-if="celebrating" :key="celebrateKey" class="celebrate-overlay" aria-hidden="true">
+        <div class="screen-flash"></div>
         <i class="bi bi-award-fill celebrate-main"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s1"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s2"></i>
@@ -337,6 +337,10 @@ onUnmounted(() => {
         <i class="bi bi-star-fill celebrate-spark celebrate-s4"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s5"></i>
         <i class="bi bi-star-fill celebrate-spark celebrate-s6"></i>
+        <i class="bi bi-star-fill celebrate-spark celebrate-s7"></i>
+        <i class="bi bi-star-fill celebrate-spark celebrate-s8"></i>
+        <i class="bi bi-star-fill celebrate-spark celebrate-s9"></i>
+        <i class="bi bi-star-fill celebrate-spark celebrate-s10"></i>
       </div>
     </Transition>
 
@@ -449,7 +453,7 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- ── Quests tab ──────────────────────────────────────── -->
+      <!-- Quests tab -->
       <div v-if="activeTab === 'quests'" class="board">
         <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
           <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
@@ -482,7 +486,7 @@ onUnmounted(() => {
         </template>
       </div>
 
-      <!-- ── Kueh Tin tab ───────────────────────────────────── -->
+      <!-- Kueh Tin tab -->
       <div v-if="activeTab === 'tin'" class="board">
         <div class="d-flex align-items-center gap-3 mb-3">
           <h2 class="h4 mt-2">My Kueh Tin</h2>
@@ -532,6 +536,12 @@ onUnmounted(() => {
 
 <style>
 /* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
+
+@property --ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
 
 /* The child home page: hero card with the kueh lapis, quests, the kueh tin (ChildHomeView.vue).
    The soft look of the parent and volunteer pages: a cream page, a sandy board with white cards on it,
@@ -591,6 +601,31 @@ onUnmounted(() => {
   background: #FFFFFF;
   border: 0;
   border-radius: 18px;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+
+@media (hover: hover) {
+  .childhomepage .quest-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(74, 63, 58, 0.16);
+  }
+}
+
+.childhomepage .quest-card:has(.quest-returned) {
+  animation: quest-wiggle 5s ease-in-out infinite;
+}
+
+.childhomepage .quest-card:has(.quest-returned):hover {
+  animation: none;
+}
+
+@keyframes quest-wiggle {
+  0%, 80%, 100% { transform: rotate(0deg); }
+  82%  { transform: rotate(-2.5deg); }
+  84%  { transform: rotate(2.5deg); }
+  86%  { transform: rotate(-2deg); }
+  88%  { transform: rotate(1.5deg); }
+  90%  { transform: rotate(0deg); }
 }
 
 /* pending (submitted, waiting for volunteer check): dotted border */
@@ -658,6 +693,12 @@ onUnmounted(() => {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
+  animation: float-bob 3.5s ease-in-out infinite;
+}
+
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
 }
 
 .kueh-cake {
@@ -910,6 +951,12 @@ onUnmounted(() => {
   color: #4A3F3A;
   font: inherit;
   text-align: center;
+  cursor: pointer;
+}
+
+.kueh-tile:hover {
+  position: relative;
+  z-index: 1;
 }
 
 /* the round white cup the kueh sits in */
@@ -922,7 +969,7 @@ onUnmounted(() => {
   border-radius: 50%;
   background: #FFFFFF;
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-  transition: transform 0.2s;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .kueh-cup img {
@@ -931,14 +978,28 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
-.kueh-tile:hover .kueh-cup { transform: translateY(-3px); }
+.kueh-tile:hover .kueh-cup { transform: translateY(-8px) scale(1.08); }
 
-/* earned: golden ring + soft glow */
+/* earned: spinning golden ring */
 .kueh-earned .kueh-cup {
-  box-shadow: 0 0 0 3px #E8C84A, 0 0 12px 3px rgba(232, 200, 74, 0.40);
+  border: 3px solid transparent;
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    conic-gradient(from var(--ring-angle), #F5DF98, #E8C84A, #DBA82A, #E8C84A, #F5DF98) border-box;
+  box-shadow: 0 0 14px 4px rgba(232, 200, 74, 0.45);
+  animation: ring-spin 3s linear infinite;
 }
+
+@keyframes ring-spin {
+  to { --ring-angle: 360deg; }
+}
+
 .kueh-earned[aria-pressed='true'] .kueh-cup {
-  box-shadow: 0 0 0 3px #A9577A, 0 0 10px 3px rgba(169, 87, 122, 0.30);
+  animation-play-state: paused;
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    linear-gradient(#A9577A, #A9577A) border-box;
+  box-shadow: 0 0 10px 3px rgba(169, 87, 122, 0.30);
 }
 
 /* locked: selected state only (no glow at rest) */
@@ -1033,23 +1094,37 @@ onUnmounted(() => {
   100% { opacity: 0; }
 }
 
+/* brief white flash at the moment of submit */
+.screen-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+  animation: screen-flash-out 0.5s ease forwards;
+}
+
+@keyframes screen-flash-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 /* central award icon: bounces in and out */
 .celebrate-main {
   position: absolute;
   left: 0; top: 0;
   transform: translate(-50%, -50%);
-  font-size: 64px;
+  font-size: 80px;
   color: #F5DF98;
-  filter: drop-shadow(0 0 18px rgba(245, 223, 152, 0.95));
+  filter: drop-shadow(0 0 24px rgba(245, 223, 152, 0.95));
   animation: celebrate-main-pop 2.2s ease forwards;
 }
 
 @keyframes celebrate-main-pop {
-  0%   { transform: translate(-50%, -50%) scale(0.2) rotate(-15deg); }
-  30%  { transform: translate(-50%, -50%) scale(1.45) rotate(6deg); }
-  50%  { transform: translate(-50%, -50%) scale(1.0) rotate(-2deg); }
-  70%  { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) scale(0.8); }
+  0%   { transform: translate(-50%, -50%) scale(0.1) rotate(-20deg); }
+  28%  { transform: translate(-50%, -50%) scale(1.7) rotate(8deg); }
+  50%  { transform: translate(-50%, -50%) scale(1.0) rotate(-3deg); }
+  70%  { transform: translate(-50%, -50%) scale(1.15) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(0.6); }
 }
 
 /* star sparks: shoot outward from center */
@@ -1065,8 +1140,12 @@ onUnmounted(() => {
 .celebrate-s2 { color: #E8A0B8;   --dx:  88px; --dx2: 132px; --dy2: -132px; --dy: -88px;  animation-delay: 0.15s; }
 .celebrate-s3 { color: #A8CC90;   --dx: -112px; --dx2: -168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.12s; }
 .celebrate-s4 { color: #F5B880; --dx:  112px; --dx2: 168px; --dy2: 0px; --dy:  0px;  animation-delay: 0.18s; }
-.celebrate-s5 { color: #C0A8D8; --dx: -50px; --dx2: -75px; --dy2: -168px; --dy: -112px; animation-delay: 0.08s; }
-.celebrate-s6 { color: #88C0D8;   --dx:  50px; --dx2: 75px; --dy2: -168px; --dy: -112px; animation-delay: 0.20s; }
+.celebrate-s5  { color: #C0A8D8; --dx: -50px;  --dx2:  -75px; --dy:  -112px; --dy2: -168px; animation-delay: 0.08s; }
+.celebrate-s6  { color: #88C0D8; --dx:  50px;  --dx2:   75px; --dy:  -112px; --dy2: -168px; animation-delay: 0.20s; }
+.celebrate-s7  { color: #F5DF98; --dx: -88px;  --dx2: -132px; --dy:    88px; --dy2:  132px; animation-delay: 0.09s; }
+.celebrate-s8  { color: #9BD3B2; --dx:  88px;  --dx2:  132px; --dy:    88px; --dy2:  132px; animation-delay: 0.14s; }
+.celebrate-s9  { color: #E8A0B8; --dx: -50px;  --dx2:  -75px; --dy:   112px; --dy2:  168px; animation-delay: 0.11s; }
+.celebrate-s10 { color: #D5CBEA; --dx:  50px;  --dx2:   75px; --dy:   112px; --dy2:  168px; animation-delay: 0.17s; }
 
 @keyframes celebrate-spark-fly {
   0%   { transform: translate(0, 0) scale(0)   rotate(0deg);   opacity: 0; }
@@ -1080,9 +1159,15 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .level-bar .progress-bar,
   .celebrate-main,
-  .celebrate-spark { animation: none; }
+  .celebrate-spark,
+  .screen-flash,
+  .cake-wrap,
+  .kueh-earned .kueh-cup,
+  .childhomepage .quest-card,
+  .childhomepage .quest-card:has(.quest-returned) { animation: none; }
   .level-bar .progress-bar { transform: scaleX(1); }
   .kueh-cup { transition: none; }
+  .childhomepage .quest-card { transition: none; }
 }
 
 /* ── Badge unlock overlay ────────────────────────────────── */

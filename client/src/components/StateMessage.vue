@@ -1,4 +1,3 @@
-<!-- Loading / error / empty states in one component -->
 <script setup>
 import '@/css/main/components.css' // the look of the small parts
 defineProps({

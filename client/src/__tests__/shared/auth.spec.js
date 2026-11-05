@@ -1,6 +1,4 @@
-// Unit tests for the auth store (login, sign up, log out, saved session).   Owner: Kai Sen
-// Run:  pnpm test:unit
-// The real API is replaced with a fake (vi.mock), so these tests need no server.
+// Owner: Kai Sen
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import api from '@/services/api'

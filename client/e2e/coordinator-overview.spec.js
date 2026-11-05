@@ -1,6 +1,4 @@
-/*
-  Owner: Yuqi
-*/
+// Owner: Yuqi
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 

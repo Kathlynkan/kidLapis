@@ -1,15 +1,3 @@
-<!-- =============================================================
-  Weekly schedule (timetable)                         Owner: Yu Xuan
-  Route: /coordinator/schedule
-  -------------------------------------------------------------
-  Rows = volunteers, columns = days. Shaded cells = volunteer not free.
-  The grid itself is components/WeekGrid.vue, shared with the dashboard, so both look the same.
-  "+ Add" -> pick child + start time -> PUT /matchmaking/:childId/assign
-  "x" on a session -> removes just that day (unassign with day)
-  The server blocks double-bookings (409) and days the volunteer isn't free.
-  A new session is a REQUEST: it shows as "Pending" until the volunteer accepts it
-  (Kai Sen, routes/requests.js). Declined requests are not shown.
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useScheduleChanged } from '@/composables/useScheduleChanged'
@@ -91,7 +79,7 @@ const unscheduled = computed(() => {
   return list
 })
 
-// ---------- Add a session ----------
+// Add a session
 
 // Children to offer: unassigned first, then best skill match for this volunteer.
 // Children already booked (or requested) with this volunteer on this day are left out;
@@ -165,7 +153,7 @@ async function submitAdd() {
   }
 }
 
-// ---------- Remove a session ----------
+// Remove a session
 
 // Removes one day (or cancels a pending request for it).
 async function removeSlot(volunteer, day, slot) {

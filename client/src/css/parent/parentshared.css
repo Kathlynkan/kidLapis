@@ -1,12 +1,4 @@
-/* EXTERNAL CSS: the parent home and Messages. It is imported at the top of each of those files. */
-/* What the parent pages have in common: the parent home and Messages.
-   Each of those pages also has its own file with the rules only that page needs.
-   Colours:
-     #414F67 navy       text
-     #DDF0EF pale aqua  the child buttons
-     #AED9D8 aqua       the chosen child button */
-
-/* ---------- the base text ---------- */
+/* the base text */
 
 .parentpage,
 .messagespage {
@@ -20,7 +12,7 @@
   color: #414F67;
 }
 
-/* ---------- the buttons with the children's names (parent home and Messages) ---------- */
+/* the buttons with the children's names (parent home and Messages) */
 
 .parentpage .child-buttons,
 .messagespage .child-buttons {

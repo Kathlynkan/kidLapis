@@ -39,7 +39,7 @@ describe('homework late-penalty formula', () => {
   })
 })
 
-// ── Leaderboard weekly ranking logic ──────────────────────────────────────────
+// Leaderboard weekly ranking logic
 // Extracted from GET /homework/leaderboard?period=week in routes/homework.js.
 // Tested as a pure function so the ranking rules are verified without a DB or server.
 function weeklyRanking(homeworkList, children) {

@@ -1,8 +1,3 @@
-// =============================================================
-// /notifications  - the "Updates" in the NavBar bell     Owner: Kai Sen
-// -------------------------------------------------------------
-// Saved one-off updates (models/Notification.js), created with addUpdate() in utils/notify.js.
-// =============================================================
 import { Router } from 'express'
 import { Notification } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'

@@ -1,13 +1,4 @@
-/*
-Component Test for ParentSocialDay.vue (one day on the parent's Social tab)   Owner: Kat
-
-    User behavior
-        ↓
-    Expected outcome
-        ↓
-    Test implementation
-
-*/
+// Owner: Kat
 
 import { mount } from '@vue/test-utils'
 import { describe, it, expect } from 'vitest'

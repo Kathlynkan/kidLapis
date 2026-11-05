@@ -1,7 +1,3 @@
-<!-- A small round picture for a child or volunteer.   Owner: Yu Xuan
-  <MiniAvatar :person="child" />          photo if avatar is a path, emoji if it's an emoji,
-  <MiniAvatar :person="volunteer" :size="28" />   otherwise the first letter of their name.
--->
 <script setup>
 import { computed } from 'vue'
 

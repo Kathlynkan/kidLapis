@@ -1,8 +1,7 @@
-// Component test: WeekdayDots (the Mo-Fr dots next to a child's name).   Owner: Yu Xuan
-// Mounts the real component with different schedules and checks what it shows.
+// Owner: Yu Xuan
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import WeekdayDots from '../WeekdayDots.vue'
+import WeekdayDots from '@/components/WeekdayDots.vue'
 
 describe('WeekdayDots', () => {
   it('shows five red days and 0/5 when the child has no sessions', () => {
