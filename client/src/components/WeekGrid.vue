@@ -160,7 +160,10 @@ const rowHeight = computed(() => {
 
 <style scoped>
 .wg-scroll {
+  position: relative; /* keeps the hidden "Not available" labels inside the scroll box */
   overflow-x: auto; /* scrolls sideways on small screens instead of squashing */
+  max-width: 100%;
+  min-width: 0; /* lets the grid shrink inside the card, so only the grid scrolls, not the whole page */
 }
 .wg {
   width: 100%;
