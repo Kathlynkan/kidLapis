@@ -518,13 +518,15 @@ router.post('/:childId', requireRole('volunteer', 'coordinator', 'parent'), asyn
   let weekStart = '' // weekly only: the Monday of the week shown, e.g. '2026-10-26'
   let awayNote = '' // weekly only: e.g. 'No sessions since Wed 14 Oct. This is the last week Mia came.'
   if (type === 'weekly') {
-    weeks = listWeeks(allSessions)
-
     // Fri - Sun: this week. Mon - Thu: last week
     const usualWeek = getWeekRange()
     let week = usualWeek
 
-    // the parent pressed Earlier / Later week 
+    // only finished weeks: the parent cannot go past the usual week (e.g. this week on Mon - Thu)
+    const finishedSessions = allSessions.filter((s) => s.date <= usualWeek.end)
+    weeks = listWeeks(finishedSessions)
+
+    // the parent pressed Previous Week / Next Week
     let askedWeek = ''
     if (req.body && req.body.week) {
       askedWeek = String(req.body.week)
