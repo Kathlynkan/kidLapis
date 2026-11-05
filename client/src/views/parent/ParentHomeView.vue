@@ -730,6 +730,7 @@ watch(
 /* the tabs: two pills in a pale track */
 .parentpage .tabs {
   display: flex;
+  flex-wrap: wrap; /* when the three tabs do not fit in one row the last ones drop to the next row */
   gap: 4px;
   padding: 4px;
   border-radius: 26px;
@@ -737,8 +738,8 @@ watch(
 }
 
 .parentpage .tab {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 0;
+  min-width: min-content; /* never narrower than its longest word, so the white always covers it */
   min-height: 40px;
   border: 0;
   border-radius: 22px;
@@ -849,6 +850,7 @@ watch(
   align-items: flex-start; /* the tag keeps its own height when the title takes two lines */
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 6px; /* a gap between the late tag and the subject line under it */
 }
 
 .parentpage .row-title {
@@ -1127,17 +1129,6 @@ watch(
   body .parentpage .tab {
     font-size: 12px;
     letter-spacing: 0.4px;
-  }
-}
-
-@media (max-width: 300px) {
-  .parentpage .tabs {
-    flex-wrap: wrap;
-    border-radius: 22px;
-  }
-
-  .parentpage .tab {
-    flex: 1 1 45%;
   }
 }
 
