@@ -380,8 +380,7 @@
    The same shape as the tags of the parent, volunteer and coordinator pages. A word is never broken in two. */
 .badge.quest-pill,
 .badge.quest-status,
-.badge.quest-returned,
-.badge.quest-late-warn {
+.badge.quest-returned {
   display: inline-flex;
   align-items: center;
   justify-content: center;
