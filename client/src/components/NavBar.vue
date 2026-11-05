@@ -151,6 +151,7 @@ const questsToCheck = ref([]) // [{ id, title, childId, childName }]
 const parentUpdates = ref([]) // [{ childId, childName, count, latestDate }], one per child
 const notices = ref([]) // [{ id, text, icon, link, createdAt, readAt }]
 const bellOpen = ref(false)
+const bellSeen = ref(false) // true once the user has opened the bell; resets when new items arrive
 const bellRef = ref(null) // the bell and its dropdown, to close it when clicking somewhere else
 
 const unreadNotices = computed(() => notices.value.filter((n) => !n.readAt).length)
@@ -163,14 +164,22 @@ const bellCount = computed(
     unreadTotal.value,
 )
 
+// Stop the ringing animation when bell is opened; restart it only when new items arrive.
+watch(bellCount, (newVal, oldVal) => {
+  if (newVal > oldVal) bellSeen.value = false
+})
+
 // Open/close the bell. Opening it marks the updates as read (the count drops, they stay listed
 // while the bell is open). Closing it - with the bell, a click elsewhere or a page change - removes them.
 async function toggleBell() {
   bellOpen.value = !bellOpen.value
-  if (bellOpen.value && unreadNotices.value) {
-    const now = new Date().toISOString()
-    notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
-    // server mark happens on close, not open — keeps items visible while bell is open
+  if (bellOpen.value) {
+    bellSeen.value = true
+    if (unreadNotices.value) {
+      const now = new Date().toISOString()
+      notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
+      // server mark happens on close, not open — keeps items visible while bell is open
+    }
   }
 }
 
@@ -328,7 +337,7 @@ watch(
           data-test="nav-bell"
           @click="toggleBell"
         >
-          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellCount > 0 }]"></i>
+          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellCount > 0 && !bellSeen }]"></i>
           <span v-if="bellCount" class="lapis-bell-count" data-test="nav-bell-count">
             {{ bellCount }}
           </span>
@@ -392,7 +401,7 @@ watch(
 
           <!-- PARENT -->
           <template v-else-if="auth.role === 'parent'">
-            <div class="lapis-bell-title">Updates</div>
+            <div class="lapis-bell-title">New Sessions</div>
             <p v-if="parentUpdates.length === 0" class="lapis-bell-empty">You're all caught up.</p>
             <RouterLink
               v-for="u in parentUpdates"
