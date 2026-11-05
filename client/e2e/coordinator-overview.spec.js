@@ -24,5 +24,3 @@ test('should show a coordinator the overview of a child, without the volunteer h
   await expect(page.getByRole('button', { name: 'Edit' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Delete' })).toHaveCount(0)
 })
-
-
