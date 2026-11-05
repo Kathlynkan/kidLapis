@@ -1,10 +1,3 @@
-<!-- =============================================================
-  Login page - WORKING, use it as the reference for forms.   Owner: Kai Sen
-  Pattern: v-model inputs -> async submit -> loading + error states -> router.push
-  TODO (Kai Sen):
-    [x] show/hide password toggle
-  The look: one white card on the sandy board, in the middle (css/main/authpage.css, shared with the sign up page).
-============================================================= -->
 <script setup>
 import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'

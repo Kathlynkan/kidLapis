@@ -1,6 +1,3 @@
-// Shared option lists so every form uses the same values.
-// Add to these lists instead of hard-coding options in your own page.
-
 export const SUBJECTS = ['English', 'Math', 'Science', 'Mother Tongue']
 
 // The colour of each subject (Kueh warm): the pills and the bars of the charts

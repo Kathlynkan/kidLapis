@@ -1,10 +1,3 @@
-<!-- =============================================================
-  HandoverCard - the AI summary box.                  Owner: Yuqi
-    volunteer / coordinator (ChildProfileView) -> "Handover Notes" for the next session
-    parent (ParentHomeView)                -> the weekly summary, with arrows to look at earlier weeks
-                                              (the card sends 'change-week' and ParentHomeView loads that week)
-  (the server also picks the summary by role, so both always match)
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
@@ -68,7 +61,7 @@ const emptyText = computed(() => (isParent.value ? 'No summary yet.' : 'No hando
 
 const open = ref(true)
 
-// ---------- parents: step through the weeks that have sessions ----------
+// parents: step through the weeks that have sessions
 // handover.weeks = ['2026-10-26', '2026-10-19', ...] (Mondays, newest first, at most 8)
 // handover.weekStart = the Monday of the week shown
 const weekList = computed(() => {

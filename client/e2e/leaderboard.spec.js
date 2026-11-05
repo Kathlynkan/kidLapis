@@ -1,6 +1,4 @@
-// Leaderboard journey.                                    Owner: Jachin
-// Seed data: multiple children have verified homework this week (Mia 1st, Chloe 2nd,
-// Ryan 3rd, Ethan 4th) — podium has at least 2 occupied places after seeding.
+// Owner: Jachin
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
@@ -11,7 +9,7 @@ test.describe('Leaderboard', () => {
     await expect(page.getByRole('heading', { name: /Leaderboard/i })).toBeVisible()
   })
 
-  // ── Test Case 1: ranking order ────────────────────────────────────────────────
+  // Test Case 1: ranking order
   // Feature: GET /homework/leaderboard sorts entries by weekly verified stars descending.
   // The view must display rank 1 with at least as many stars as rank 2 — if the sort
   // is ever broken, this assertion catches it without depending on specific star counts.
@@ -27,7 +25,7 @@ test.describe('Leaderboard', () => {
     expect(rank1Stars).toBeGreaterThanOrEqual(rank2Stars)
   })
 
-  // ── Test Case 2: logged-in child identification ──────────────────────────────
+  // Test Case 2: logged-in child identification
   // Feature: the view marks the logged-in child's entry with a "You" label
   //   so they can find themselves at a glance, regardless of rank.
   // The label appears either in the podium (top 3) or in the ranked rows below.
@@ -35,7 +33,7 @@ test.describe('Leaderboard', () => {
     await expect(page.locator('.lb-you')).toBeVisible()
   })
 
-  // ── Test Case 3: footer navigation ──────────────────────────────────────────
+  // Test Case 3: footer navigation
   // Feature: the footer always shows a link back to the child's home page
   //   so they can navigate to their quests without using the nav bar.
   test('footer link navigates back to the child home page', async ({ page }) => {

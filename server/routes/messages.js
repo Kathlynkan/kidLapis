@@ -1,10 +1,3 @@
-// =============================================================
-// /messages  - volunteer <-> parent chat about a child      Owner: Kat
-// -------------------------------------------------------------
-// Fields: see models/Message.js
-// One "conversation" per child, shared by the parent, the child's
-// assigned volunteers and the coordinator.
-// =============================================================
 import { Router } from 'express'
 import { Child, Message, User } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'

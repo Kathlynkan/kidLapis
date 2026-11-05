@@ -1,4 +1,3 @@
-<!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -20,7 +19,7 @@ import '@/css/parent/parenthome.css' // the styles of this page
 const auth = useAuthStore()
 const route = useRoute() // /parent?child=c_5 opens that child (the NavBar bell links here, Kai Sen)
 
-// ---------- the things this page remembers ----------
+// the things this page remembers
 const children = ref([]) // all the children of this parent
 const selectedId = ref(null) // the id of the child we are showing now
 const sessions = ref([]) // the sessions of that child, newest first
@@ -59,7 +58,7 @@ const MOOD_FACES = {
 // the number of each weekday, the way JavaScript counts them (Sunday is 0)
 const DAY_NUMBERS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 
-// ---------- values worked out from the things above ----------
+// values worked out from the things above
 // the child we are showing now (found in the list by its id)
 const selectedChild = computed(() => children.value.find((child) => child.id === selectedId.value))
 
@@ -208,7 +207,7 @@ async function showHomework() {
   document.getElementById('homework-board').scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
-// ---------- ask the server for the weekly AI summary ----------
+// ask the server for the weekly AI summary
 // Fri - Sun: this week (Mon - Fri). Mon - Thu: last week, because this week is not finished yet.
 // week = '' -> that usual week. week = '2026-10-19' -> the week the parent picked with the arrows (Yuqi)
 async function loadHandover(childId, week = '') {
@@ -239,7 +238,7 @@ function changeWeek(week) {
   loadHandover(selectedId.value, week)
 }
 
-// ---------- show one child: their summary, sessions and homework ----------
+// show one child: their summary, sessions and homework
 async function loadChild(childId) {
   selectedId.value = childId
   loadHandover(childId) // no "await": the page does not wait for the AI
@@ -259,7 +258,7 @@ async function loadChild(childId) {
   homework.value = homeworkResponse.data
 }
 
-// ---------- when the parent presses a child's button ----------
+// when the parent presses a child's button
 async function switchChild(childId) {
   if (childId === selectedId.value) return // already showing this child
   error.value = ''
@@ -270,7 +269,7 @@ async function switchChild(childId) {
   }
 }
 
-// ---------- when the page opens: get the children, then show the first one ----------
+// when the page opens: get the children, then show the first one
 // (or the one in the address, /parent?child=c_5, when the parent came from the NavBar bell)
 onMounted(async () => {
   try {

@@ -1,13 +1,3 @@
-// =============================================================
-// /dashboard  - coordinator overview & alerts     Owner: Yu Xuan
-// -------------------------------------------------------------
-// TODO (Yu Xuan):
-//   [ ] alerts: children with NO session in the last 7 days
-//   [ ] alerts: a struggle skill that appears in 3+ of the last 5 sessions
-//   [ ] alerts: homework overdue and not submitted
-//   [ ] alerts: children with no volunteer assigned  -> Child.find({ volunteerIds: { $size: 0 } })
-//   [ ] PUT /dashboard/follow-up/:childId  -> flag / unflag a child for follow-up
-// =============================================================
 import { Router } from 'express'
 import { Child, User, Session, Homework } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
@@ -34,7 +24,6 @@ router.get('/summary', async (req, res) => {
     totalVolunteers,
     sessionsThisWeek,
     homeworkPending,
-    // TODO (Yu Xuan): add averageAccuracy, childrenNeedingFollowUp, ...
   })
 })
 

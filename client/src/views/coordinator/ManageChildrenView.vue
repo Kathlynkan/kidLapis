@@ -1,12 +1,3 @@
-<!-- =============================================================
-  Manage children (CRUD)                              Owner: Kai Sen
-  -------------------------------------------------------------
-  Done: a card for every child on the sandy board
-        "Add child" / "Edit" modal -> POST /children, PUT /children/:id
-        "Delete" with a warning    -> DELETE /children/:id
-        Search box (name, level, school, needs) and a level filter
-        Each card shows the volunteers, the parent (or the code to give them) and the warnings
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useScheduleChanged } from '@/composables/useScheduleChanged'
@@ -18,7 +9,7 @@ import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
-// ---------- The children ----------
+// The children
 const children = ref([])
 const parents = ref([]) // parent accounts, for the "Parent" dropdown in the form
 const volunteers = ref([]) // volunteer accounts, to show the names on each card
@@ -83,7 +74,7 @@ const warningsOf = (child) => {
   return [...types].map((type) => ({ type, ...WARNING_TAGS[type] }))
 }
 
-// ---------- Search and level ----------
+// Search and level
 const search = ref('')
 const levelFilter = ref('') // '' = all levels
 
@@ -110,7 +101,7 @@ function clearFilters() {
   levelFilter.value = ''
 }
 
-// ---------- "Add child" / "Edit child" modal (one form for both) ----------
+// "Add child" / "Edit child" modal (one form for both)
 const emptyForm = () => ({
   name: '',
   level: '',
@@ -187,7 +178,7 @@ async function saveChild() {
   }
 }
 
-// ---------- "Delete child" confirmation ----------
+// "Delete child" confirmation
 const childToDelete = ref(null) // the child the coordinator clicked Delete on (null = box closed)
 const deleting = ref(false)
 const deleteError = ref('')

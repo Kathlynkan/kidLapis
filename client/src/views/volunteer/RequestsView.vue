@@ -1,12 +1,3 @@
-<!-- =============================================================
-  Session requests (volunteers)                      Owner: Kai Sen
-  Route: /volunteer/requests
-  -------------------------------------------------------------
-  When the coordinator assigns a volunteer to a child in Matchmaking, the new day is a
-  request ('pending', models/Child.js). The volunteer's bell links here, where they
-  Accept (the child joins My Children) or Decline (the coordinator sees the child needs
-  someone again). Uses GET /requests and PUT /requests/:childId (routes/requests.js).
-============================================================= -->
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 

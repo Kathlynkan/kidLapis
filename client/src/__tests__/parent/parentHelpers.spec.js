@@ -1,10 +1,4 @@
-/*
-Unit Test for activitiesOf in utils/format.js (what the child did in a session)   Owner: Kat
-
-    the parent page shows what the child did, like chess or soccer, and it needs that as a list.
-    but a session can have a list, just one word or nothing at all, so activitiesOf turns
-    all of those into a list and each test case below checks one of them
-*/
+// Owner: Kat
 
 import { describe, it, expect } from 'vitest'
 import { activitiesOf } from '@/utils/format'

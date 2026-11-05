@@ -1,4 +1,3 @@
-<!-- Child home: "My Quests" (gamified homework)         Owner: Jachin -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
@@ -75,7 +74,7 @@ const CONFETTI = [
   { color: '#D5CBEA', tx:   28, ty: -175 },
 ]
 
-// ── Computed ─────────────────────────────────────────────────
+// Computed
 const displayPoints = computed(() => me.value?.points || 0)
 const level     = computed(() => levelFor(displayPoints.value))
 const earned    = computed(() => me.value ? earnedBadges(me.value, homework.value) : [])
@@ -148,7 +147,7 @@ const nextBadge = computed(() => {
     )
 })
 
-// ── Tabs ──────────────────────────────────────────────────────
+// Tabs
 const activeTab = ref('quests') // 'quests' | 'tin'
 
 // the label under the tin shows the kueh you tapped, or else the next one to earn
@@ -156,7 +155,7 @@ const picked = ref(null)
 const shown = computed(() => picked.value || nextBadge.value?.badge || BADGES[0])
 const shownProgress = computed(() => badgeProgress(shown.value, me.value, homework.value))
 
-// ── Actions ──────────────────────────────────────────────────
+// Actions
 async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
@@ -449,7 +448,7 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- ── Quests tab ──────────────────────────────────────── -->
+      <!-- Quests tab -->
       <div v-if="activeTab === 'quests'" class="board">
         <div v-if="submitError" class="alert alert-danger py-2 mb-3" role="alert">
           <i class="bi bi-exclamation-circle me-2"></i>{{ submitError }}
@@ -482,7 +481,7 @@ onUnmounted(() => {
         </template>
       </div>
 
-      <!-- ── Kueh Tin tab ───────────────────────────────────── -->
+      <!-- Kueh Tin tab -->
       <div v-if="activeTab === 'tin'" class="board">
         <div class="d-flex align-items-center gap-3 mb-3">
           <h2 class="h4 mt-2">My Kueh Tin</h2>

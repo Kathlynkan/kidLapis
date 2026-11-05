@@ -1,7 +1,3 @@
-<!-- =============================================================
-  ChildCard - one child in a list.                 Owner: Yuqi
-  Its styles are in the style block of views/volunteer/VolunteerHomeView.vue
-============================================================= -->
 <script setup>
 import { computed } from 'vue'
 import { relativeDay, accuracy, subjectStyle } from '@/utils/format'

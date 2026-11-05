@@ -1,4 +1,3 @@
-<!-- Page not found: a white card on the sandy board, in the middle (css/main/authpage.css is shared with the log in page) -->
 <script setup>
 import { RouterLink } from 'vue-router'
 import '@/css/main/authpage.css' // the card on the board, the title and the sentence under it

@@ -1,18 +1,3 @@
-<!-- =============================================================
-  Child profile = the PRE-SESSION BRIEFING page.      Owner: Yuqi
-  (Session history list + homework section: Ning Xuan's components)
-  (Charts: Jachin's components)
-  -------------------------------------------------------------
-  Already loads: child, sessions, homework, handover (AI summary, cached, with fallback)
-  Each role sees what it needs:
-    volunteer   -> Handover Notes (AI): what to teach next session
-    coordinator -> Overview: volunteers, attendance, the latest note,
-                   wellbeing and homework at a glance, with a red "!" on anything to follow up
-  TODO (Yuqi):
-   [x] HandoverCard: POST /handover/:id (auto-updates, no refresh button)
-  TODO (Ning Xuan):
-    [done] wire SessionCard @edit / @delete (DELETE /sessions/:id, then reload)
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
@@ -81,7 +66,7 @@ async function loadHandover() {
   handoverLoading.value = false
 }
 
-// ---------- child overview for coordinator only ----------
+// child overview for coordinator only
 const volunteers = ref([]) // all the volunteers, so we can show their names
 
 async function loadVolunteers() {
@@ -159,7 +144,7 @@ const overviewRows = computed(() => {
   }
   const rows = []
 
-  // ----- Volunteers: who teaches the child, and when -----
+  // Volunteers: who teaches the child, and when
   const schedule = scheduleText()
   if (schedule === '') {
     rows.push({ label: 'Volunteers', icon: 'bi-people', text: 'No volunteer yet. Find one in Matchmaking.', alert: true, followUp: 'no volunteer yet' })
@@ -167,7 +152,7 @@ const overviewRows = computed(() => {
     rows.push({ label: 'Volunteers', icon: 'bi-people', text: schedule, alert: false })
   }
 
-  // ----- Attendance: when the child last came -----
+  // Attendance: when the child last came
   if (newestFirst.value.length === 0) {
     rows.push({ label: 'Attendance', icon: 'bi-calendar-check', text: 'No sessions recorded yet.', alert: false })
   } else {
@@ -194,7 +179,7 @@ const overviewRows = computed(() => {
     }
   }
 
-  // ----- Latest Note: what the volunteer wrote last time, so the coordinator sees the "why" -----
+  // Latest Note: what the volunteer wrote last time, so the coordinator sees the "why"
   for (const session of newestFirst.value) {
     const note = session.notes || session.socialNotes || ''
     if (note !== '') {
@@ -209,7 +194,7 @@ const overviewRows = computed(() => {
     }
   }
 
-  // ----- Wellbeing: mood and eating in the last 3 sessions -----
+  // Wellbeing: mood and eating in the last 3 sessions
   const lastThree = newestFirst.value.slice(0, 3)
   if (lastThree.length > 0) {
     let lowMoods = 0 // how many sessions they were tired or frustrated
@@ -244,7 +229,7 @@ const overviewRows = computed(() => {
     rows.push({ label: 'Wellbeing', icon: 'bi-emoji-smile', text: text, alert: lowMoods >= 2, followUp: 'tired or frustrated lately' })
   }
 
-  // ----- Homework -----
+  // Homework
   let overdue = 0
   let todo = 0
   let waiting = 0
@@ -626,7 +611,7 @@ onUnmounted(() => {
   color: #7D7690;
 }
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 /* the board: the sandy box that holds the sections */
 .childprofilepage .alert {
@@ -636,7 +621,7 @@ onUnmounted(() => {
   color: var(--cp-text);
 }
 
-/* ---------- the way back, the name and the buttons ---------- */
+/* the way back, the name and the buttons */
 
 .childprofilepage .back-link {
   display: inline-flex;
@@ -758,7 +743,7 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 
-/* ---------- the sections (the handover and the PeelCard sections) ---------- */
+/* the sections (the handover and the PeelCard sections) */
 
 .childprofilepage .peel-card,
 .childprofilepage .handover-card {
@@ -848,7 +833,7 @@ onUnmounted(() => {
   background: var(--cp-bar);
 }
 
-/* ---------- the handover ---------- */
+/* the handover */
 
 .childprofilepage .handover-key {
   font-size: 14px;
@@ -879,7 +864,7 @@ onUnmounted(() => {
   color: var(--cp-text);
 }
 
-/* ---------- the Overview (coordinator)---------- */
+/* the Overview (coordinator) */
 
 .childprofilepage .care-card {
   padding: 16px 20px 20px;
@@ -917,7 +902,7 @@ onUnmounted(() => {
   color: #C0574B;
 }
 
-/* ---------- a session ---------- */
+/* a session */
 
 .childprofilepage .session-card,
 .childprofilepage .quest-card {
@@ -986,7 +971,7 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-/* ---------- a homework: its edge and its tag show where it is ---------- */
+/* a homework: its edge and its tag show where it is */
 
 .childprofilepage .quest-card {
   border-left: 5px solid #CFC9BC;

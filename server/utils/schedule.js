@@ -1,6 +1,3 @@
-// Weekly timetable rules.   Owner: Yu Xuan
-// PURE functions (data in, answer out) so they're easy to unit test.
-
 export const SESSION_MINUTES = 60 // every session is assumed to last one hour
 export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/ // 'HH:MM', 24-hour
 

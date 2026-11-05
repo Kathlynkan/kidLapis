@@ -1,8 +1,3 @@
-<!-- The schedule on the dashboard: today's sessions first, the full week one click away.   Owner: Yu Xuan
-  <WeekScheduleCard :volunteers="volunteers" :children="children" />
-  The full week uses the same WeekGrid as the Schedule page, so both always look the same.
-  Pending requests show a "Pending" tag; declined ones are left out.
--->
 <script setup>
 import { ref, computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'

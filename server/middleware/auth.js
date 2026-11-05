@@ -1,14 +1,3 @@
-// =============================================================
-// Auth middleware (owner: Kai Sen)
-// -------------------------------------------------------------
-// Demo version: tokens are random strings kept in memory.
-// Restarting the server logs everyone out (the client handles 401).
-// Passwords are hashed with bcryptjs in routes/auth.js.
-//
-// TODO (Kai Sen):
-//   [ ] (Optional) Replace in-memory tokens with JWT (jsonwebtoken),
-//       which also survives server restarts on Render
-// =============================================================
 import crypto from 'node:crypto'
 import { User } from '../models/index.js'
 

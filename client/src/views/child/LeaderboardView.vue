@@ -1,6 +1,3 @@
-<!-- Leaderboard                                          Owner: Jachin
-     A podium for the first three places, then a white row for everyone else, on the sandy board.
-     Children with the same stars share a place (1, 2, 2, 4). -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'

@@ -1,10 +1,3 @@
-<!-- SkillProgressChart - accuracy over time, one subject at a time.   Owner: Jachin
-     Subject picker defaults to the subject with the most sessions.
-     Props: sessions (Array) - from GET /sessions?childId=...
-            calm (Boolean) - the quiet look for volunteer/coordinator (teal/lavender axis ticks)
-            tone ('teal' | 'lavender') - axis tick colour in calm mode
-            explain (Boolean) - says that the line is the share of questions answered correctly
-     Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { Line } from 'vue-chartjs'

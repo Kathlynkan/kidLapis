@@ -1,25 +1,3 @@
-/* EXTERNAL CSS: the parent home page (ParentHomeView.vue) and its day card (ParentSocialDay.vue). It is imported at the top of ParentHomeView.vue. */
-
-/* Every rule starts with .parentpage so it only affects that page.
-   Colours:
-     #414F67 navy       text
-     #AED9D8 aqua       the main colour (selected tab and button)
-     #DDF0EF pale aqua  tiles, tags and small areas
-     #EAF6F5 lightest   note boxes
-     #CDE8D2 green      done
-     #B7D8D7 teal       being checked
-     #F5B8B0 soft red   late
-     #FBE7A1 soft yellow still to do (due)
-     #F6D1AA peach      the star icon
-     #F9F1E6 cream      the board
-     #5E6C80 grey       small text
-     #CFE0DE            thin borders
-   Look: no dark outlines, soft corners (16px boxes, round pills) and a very light shadow.
-   The colours used most, the shadow and the card corner are variables (see the top of the page below). */
-
-/* ---------- the whole page ---------- */
-
-/* the values used again and again, written once here */
 .parentpage {
   --parent-navy: #414F67;
   --parent-grey: #5E6C80;
@@ -55,7 +33,7 @@
   font-weight: 700;
 }
 
-/* ---------- the child and the child buttons ---------- */
+/* the child and the child buttons */
 
 .parentpage .child-row {
   display: flex;
@@ -126,7 +104,7 @@
   align-self: center;
 }
 
-/* ---------- the three tiles ---------- */
+/* the three tiles */
 
 .parentpage .summary-tiles {
   display: flex;
@@ -188,7 +166,7 @@
   background: #EDA39A;
 }
 
-/* ---------- the weekly AI summary (HandoverCard.vue, parent rows) ---------- */
+/* the weekly AI summary (HandoverCard.vue, parent rows) */
 /* Same sizes as the volunteer's Handover Notes (ChildProfileView.vue), only the colours are the parent's */
 
 .parentpage .handover-card {
@@ -253,7 +231,7 @@
   font-size: 16px; /* bold like the volunteer card (the fw-semibold class in HandoverCard.vue) */
 }
 
-/* ---------- the board and its tabs ---------- */
+/* the board and its tabs */
 
 .parentpage .board {
   scroll-margin-top: 12px; /* when we scroll to the board it stops a little below the top of the screen */
@@ -370,7 +348,7 @@
   background: #EAF6F5;
 }
 
-/* ---------- the homework rows ---------- */
+/* the homework rows */
 
 .parentpage .homework-row {
   padding: 12px 16px;
@@ -475,7 +453,7 @@
   content: 'Tap to close';
 }
 
-/* ---------- the social tab ---------- */
+/* the social tab */
 
 .parentpage .day-card {
   padding: 14px 16px;
@@ -622,7 +600,7 @@
   }
 }
 
-/* ---------- small screens ---------- */
+/* small screens */
 
 @media (max-width: 420px) {
   .parentpage .summary-tiles {

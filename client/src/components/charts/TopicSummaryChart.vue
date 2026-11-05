@@ -1,7 +1,3 @@
-<!-- TopicSummaryChart - average accuracy per subject (bar chart)  Owner: Jachin
-     Used on: Child profile (Yuqi), Coordinator dashboard (Yu Xuan)
-     Props: sessions (Array), title (String),
-            calm (Boolean) - the quiet look for a volunteer: plain teal bars with the percentage -->
 <script setup>
 import { computed } from 'vue'
 import { Bar } from 'vue-chartjs'

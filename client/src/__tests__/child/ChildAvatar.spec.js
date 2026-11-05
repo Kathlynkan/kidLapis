@@ -1,3 +1,4 @@
+// Owner: Jachin
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ChildAvatar from '@/components/ChildAvatar.vue'

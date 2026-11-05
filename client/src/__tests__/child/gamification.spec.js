@@ -1,3 +1,4 @@
+// Owner: Jachin
 import { describe, it, expect } from 'vitest'
 import { earnedBadges, badgeProgress, levelFor, BADGES } from '@/utils/gamification'
 

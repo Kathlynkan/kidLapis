@@ -1,9 +1,3 @@
-<!-- =============================================================
-  Profile - every logged-in user can view and edit their own profile.
-  All roles: name + password change.
-  Volunteer:  + skills and available days (used by matchmaking).
-  Child:      name is managed by the coordinator.
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -220,7 +214,7 @@ async function save() {
    Look: no dark outlines, soft corners, bold small captions, and buttons with small corners (Cancel is the light colour, Save is the main colour).
    To change a colour for one role, change it in that role's block. To change the look, change the rules after the blocks. */
 
-/* ---------- the colours of each role ---------- */
+/* the colours of each role */
 
 /* child: the accent of the role on warm brown text */
 .profilepage {
@@ -299,7 +293,7 @@ async function save() {
   --pf-error: #EE9F96;
 }
 
-/* ---------- the base text and the title ---------- */
+/* the base text and the title */
 
 /* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
 .profilepage .lapis-page-header .page-title {
@@ -333,7 +327,7 @@ async function save() {
   color: var(--pf-muted);
 }
 
-/* ---------- the sections (PeelCard.vue) ---------- */
+/* the sections (PeelCard.vue) */
 
 .profilepage .peel-card {
   border: 0;
@@ -369,7 +363,7 @@ async function save() {
   color: var(--pf-text);
 }
 
-/* ---------- the boxes you type in ---------- */
+/* the boxes you type in */
 
 .profilepage .form-label {
   color: var(--pf-text);
@@ -395,7 +389,7 @@ async function save() {
   color: var(--pf-text);
 }
 
-/* ---------- the skills and the days: separate choices in black text, the chosen ones have the main colour ---------- */
+/* the skills and the days: separate choices in black text, the chosen ones have the main colour */
 
 .profilepage .btn-check + .btn {
   padding: 4px 14px;
@@ -417,7 +411,7 @@ async function save() {
   color: #000000;
 }
 
-/* ---------- the buttons: Save and Cancel ---------- */
+/* the buttons: Save and Cancel */
 
 .profilepage .btn {
   border: 0;
@@ -449,7 +443,7 @@ async function save() {
 }
 
 
-/* ---------- the messages after you save ---------- */
+/* the messages after you save */
 
 .profilepage .alert {
   border: 0;
