@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import axios from 'axios'
 import { Child, Session, Handover } from '../models/index.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild } from '../utils/access.js'
 import { toDateText, formatStart } from '../utils/startDate.js'
 
@@ -488,7 +488,8 @@ async function callLLM(prompt) {
 
 // POST /handover/:childId
 // No body needed: the summary type comes from the logged-in user's role (req.user.role)
-router.post('/:childId', async (req, res) => {
+// Children are blocked: the volunteer-type handover contains teaching notes not meant for the child.
+router.post('/:childId', requireRole('volunteer', 'coordinator', 'parent'), async (req, res) => {
   // get the child from MongoDB
   const child = await Child.findById(req.params.childId)
 
@@ -517,13 +518,15 @@ router.post('/:childId', async (req, res) => {
   let weekStart = '' // weekly only: the Monday of the week shown, e.g. '2026-10-26'
   let awayNote = '' // weekly only: e.g. 'No sessions since Wed 14 Oct. This is the last week Mia came.'
   if (type === 'weekly') {
-    weeks = listWeeks(allSessions)
-
     // Fri - Sun: this week. Mon - Thu: last week
     const usualWeek = getWeekRange()
     let week = usualWeek
 
-    // the parent pressed Earlier / Later week 
+    // only finished weeks: the parent cannot go past the usual week (e.g. this week on Mon - Thu)
+    const finishedSessions = allSessions.filter((s) => s.date <= usualWeek.end)
+    weeks = listWeeks(finishedSessions)
+
+    // the parent pressed Previous Week / Next Week
     let askedWeek = ''
     if (req.body && req.body.week) {
       askedWeek = String(req.body.week)

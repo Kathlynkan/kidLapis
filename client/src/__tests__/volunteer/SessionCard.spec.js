@@ -1,3 +1,6 @@
+// Verify that SessionCard displays or hides Edit and Delete buttons
+// correctly based on user permissions and session status
+
 import { describe, test, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SessionCard from '@/components/SessionCard.vue'

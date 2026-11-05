@@ -42,6 +42,7 @@ router.put('/:id', async (req, res) => {
   if (skills) user.skills = [...new Set(skills)] // Set removes accidental duplicates
   if (availability) user.availability = [...new Set(availability)]
   await user.save()
+  res.json(user)
 })
 
 // DELETE /users/:id   (coordinator only)

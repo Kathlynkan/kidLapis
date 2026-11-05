@@ -245,17 +245,24 @@ async function loadChild(childId) {
   const sessionResponse = await api.get('/sessions', { params: { childId } })
   sessions.value = sessionResponse.data
 
-  await Promise.all(
-    sessions.value
-      .filter(session => !session.parentViewed)
-      .map(session =>
-          api.put(`/sessions/${session.id}/viewed`)
-      )
-  )
-  window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell drops these "new updates" (Kai Sen)
-
   const homeworkResponse = await api.get('/homework', { params: { childId } })
   homework.value = homeworkResponse.data
+
+  markViewed(sessions.value) // no "await": the page shows now, the sessions are marked as read in the background
+}
+
+// tell the server the parent has seen these sessions
+async function markViewed(list) {
+  try {
+    await Promise.all(
+      list
+        .filter(session => !session.parentViewed)
+        .map(session => api.put(`/sessions/${session.id}/viewed`))
+    )
+  } catch {
+    // the page is already showing, so a failed mark is not shown as an error
+  }
+  window.dispatchEvent(new Event('bell-refresh')) // the NavBar bell drops these "new updates" (Kai Sen)
 }
 
 // when the parent presses a child's button

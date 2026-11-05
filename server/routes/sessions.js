@@ -214,6 +214,14 @@ router.put('/:id/viewed', requireRole('parent'), async (req, res) => {
       })
     }
 
+    // verify this session belongs to the authenticated parent's child
+    const child = await Child.findById(session.childId)
+    if (!canAccessChild(req.user, child)) {
+      return res.status(403).json({
+        message: 'No access'
+      })
+    }
+
     // only mark once
     if (!session.parentViewed) {
       session.parentViewed = new Date()
