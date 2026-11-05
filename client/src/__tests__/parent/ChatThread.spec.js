@@ -13,15 +13,15 @@ import { mount } from '@vue/test-utils'
 import { describe, it, expect } from 'vitest'
 import ChatThread from '@/components/ChatThread.vue'
 
-// pretend messages so we dont need the real server. same fields as the real ones
-// (one from the parent u_par1, one from the coordinator)
+// fake messages so we dont need the real server, they have the same fields as the real ones
+// the first one is from the parent (u_par1) and the second one is from the coordinator
 const messages = [
     { id: 'm1', fromId: 'u_par1', fromName: 'Ms Grace', text: 'Hello', sentAt: '2026-10-21T12:00:00.000Z' },
     { id: 'm2', fromId: 'u_coord', fromName: 'Coordinator', text: 'Hi there', sentAt: '2026-10-21T12:30:00.000Z' },
 ]
 
-// every test does the same 3 things: build the chat box with mount, do something to it if needed, then check it
-// "wrapper" is the whole chat box we just built
+// every test is the same 3 steps: mount the chat box, type or click something if we need to, then check what shows up
+// wrapper = the whole chat box we just mounted
 describe('ChatThread', () => {
 
     // Test case (1): Verify that the component displays a bubble for each message.
@@ -30,7 +30,7 @@ describe('ChatThread', () => {
             props: { messages, currentUserId: 'u_par1' },
         })
 
-        // each message is one .message-row in the component, we gave it 2 messages so we should find 2
+        // each message is one .message-row, (in css message views) we gave it 2 messages so there should be 2 rows
         expect(
             wrapper.findAll('.message-row')
         ).toHaveLength(2)
@@ -38,21 +38,21 @@ describe('ChatThread', () => {
 
     // Test case (2): Verify that my own message goes on my side and the other person's message does not.
     it('puts my message on my side of the chat', () => {
-        // the logged in person is the parent (u_par1), so the first message is mine and the second is the coordinator's
+        // the one logged in is the parent (u_par1), so message 1 is the parent's and message 2 is the coordinator's
         const wrapper = mount(ChatThread, {
             props: { messages, currentUserId: 'u_par1' },
         })
 
         const rows = wrapper.findAll('.message-row')
 
-        // the component adds the class from-me to the rows of my own messages
+        // the chat adds the class from-me (in css message views) to my own messages, thats what puts them on the parent's side
         expect(rows[0].classes('from-me')).toBe(true)
         expect(rows[1].classes('from-me')).toBe(false)
     })
 
     // Test case (3): Verify that the component says there are no messages yet when the chat is empty.
     it('says there are no messages yet', () => {
-        // empty list this time
+        // no messages this time
         const wrapper = mount(ChatThread, {
             props: { messages: [], currentUserId: 'u_par1' },
         })
@@ -62,19 +62,19 @@ describe('ChatThread', () => {
     })
 
     // Test case (4): Verify that pressing send emits a "send" event with the text that was typed.
-    // async because typing and clicking take a moment to show, so we await them
+    // async because typing and clicking take some time, so we have to await them
     it('emits the text when send is pressed', async () => {
         const wrapper = mount(ChatThread, {
             props: { messages: [], currentUserId: 'u_par1' },
         })
 
-        // type in the box then press send, like a real user
+        // type in the box and press send, just like a real person would
         await wrapper.find('[data-test="chat-input"]')
             .setValue('Thank you')
         await wrapper.find('form')
             .trigger('submit')
 
-        // the chat box doesnt send anything itself, it just tells the page "send this"
+        // the chat box doesnt send anything by itself, it just tells the page "please send this"
         // emitted('send') is what it told the page
         expect(
             wrapper.emitted('send')
@@ -91,13 +91,13 @@ describe('ChatThread', () => {
             props: { messages: [], currentUserId: 'u_par1' },
         })
 
-        // only spaces in the box
+        // just spaces in the box, no real words
         await wrapper.find('[data-test="chat-input"]')
             .setValue('   ')
         await wrapper.find('form')
             .trigger('submit')
 
-        // nothing real to send so it shouldnt tell the page anything
+        // theres nothing to send so it shouldnt tell the page anything
         expect(
             wrapper.emitted('send')
         ).toBe(undefined)
