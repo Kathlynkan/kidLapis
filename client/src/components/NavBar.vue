@@ -151,7 +151,6 @@ const questsToCheck = ref([]) // [{ id, title, childId, childName }]
 const parentUpdates = ref([]) // [{ childId, childName, count, latestDate }], one per child
 const notices = ref([]) // [{ id, text, icon, link, createdAt, readAt }]
 const bellOpen = ref(false)
-const bellSeen = ref(false) // true once the user has opened the bell; resets when new items arrive
 const bellRef = ref(null) // the bell and its dropdown, to close it when clicking somewhere else
 
 const unreadNotices = computed(() => notices.value.filter((n) => !n.readAt).length)
@@ -159,27 +158,52 @@ const bellCount = computed(
   () =>
     requests.value.length +
     questsToCheck.value.length +
-    parentUpdates.value.reduce((n, u) => n + u.count, 0) +
+    parentUpdates.value.length + // one per child ("Ethan: 9 new sessions" counts as 1)
     unreadNotices.value +
     unreadTotal.value,
 )
 
-// Stop the ringing animation when bell is opened; restart it only when new items arrive.
-watch(bellCount, (newVal, oldVal) => {
-  if (newVal > oldVal) bellSeen.value = false
+// The bell rings until the user opens it once. After that it only shows the number,
+// and rings again only when something new arrives (the count goes above what they saw).
+// Saved in sessionStorage so a page refresh doesn't start the ringing again.
+const seenKey = computed(() => `bellSeen:${auth.user?.id || auth.user?.email || ''}`)
+const bellLoaded = ref(false) // the count is 0 while the page loads, so only compare once it has loaded
+function readSeen() {
+  try {
+    return Number(sessionStorage.getItem(seenKey.value)) || 0
+  } catch {
+    return 0
+  }
+}
+const seenCount = ref(readSeen())
+watch(seenKey, () => {
+  // a different user logged in
+  seenCount.value = readSeen()
+  bellLoaded.value = false
 })
+function saveSeen(n) {
+  seenCount.value = n
+  try {
+    sessionStorage.setItem(seenKey.value, String(n))
+  } catch {
+    // storage blocked: the bell just rings again after a refresh
+  }
+}
+// items were dealt with (count went down): remember the lower number, so the next new one rings
+watch(bellCount, (n) => {
+  if (bellLoaded.value && n < seenCount.value) saveSeen(n)
+})
+const bellRinging = computed(() => bellLoaded.value && bellCount.value > seenCount.value)
 
 // Open/close the bell. Opening it marks the updates as read (the count drops, they stay listed
 // while the bell is open). Closing it - with the bell, a click elsewhere or a page change - removes them.
 async function toggleBell() {
   bellOpen.value = !bellOpen.value
-  if (bellOpen.value) {
-    bellSeen.value = true
-    if (unreadNotices.value) {
-      const now = new Date().toISOString()
-      notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
-      // server mark happens on close, not open — keeps items visible while bell is open
-    }
+  if (bellOpen.value) saveSeen(bellCount.value) // checked once: stop ringing, keep the number
+  if (bellOpen.value && unreadNotices.value) {
+    const now = new Date().toISOString()
+    notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
+    // server mark happens on close, not open — keeps items visible while bell is open
   }
 }
 
@@ -195,7 +219,7 @@ const noticeTime = (iso) =>
   new Date(iso).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 async function fetchBell() {
-  fetchUnread() // the unread messages are part of the bell
+  const unreadDone = fetchUnread() // the unread messages are part of the bell
   if (!hasBell.value) {
     requests.value = []
     questsToCheck.value = []
@@ -203,6 +227,12 @@ async function fetchBell() {
     notices.value = []
     return
   }
+  await loadBellLists()
+  await unreadDone
+  bellLoaded.value = true // everything is in, so the ringing can be worked out
+}
+
+async function loadBellLists() {
   try {
     const unread = (await api.get('/notifications')).data
     if (bellOpen.value) {
@@ -337,7 +367,7 @@ watch(
           data-test="nav-bell"
           @click="toggleBell"
         >
-          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellCount > 0 && !bellSeen }]"></i>
+          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellRinging }]"></i>
           <span v-if="bellCount" class="lapis-bell-count" data-test="nav-bell-count">
             {{ bellCount }}
           </span>
