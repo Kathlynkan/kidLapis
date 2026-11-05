@@ -170,11 +170,11 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E:
 
 **Yu Xuan**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+- Unit: server/tests/matchmaking.test.js checks the child being matched doesn't count towards workload
+- Component: client/src/components/__tests__/WeekdayDots.spec.js checks five red days and 0/5 with no sessions
+- Component: client/src/components/__tests__/MiniAvatar.spec.js checks it shows a photo when the avatar is a file path, the emoji when it's an emoji, the first letter of the name when there is no avatar, and that it uses the size it is given
+- E2E: client/e2e/coordinator.spec.js checks Children, Volunteer, and Sessions week tiles appear
+- E2E: client/e2e/schedule.spec.js checks that volunteer booking logic works, all volunteers appear, can't overbook, and pending requests
 
 ## Folders
 
