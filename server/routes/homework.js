@@ -266,14 +266,20 @@ router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
 // preventing double-award if two requests race on the same homework.
 // Late penalty: if the child submitted after the due date, they earn half the points.
 router.put('/:id/verify', requireRole('volunteer', 'coordinator'), async (req, res) => {
+  // access check before the atomic update so an unauthorised caller never changes state
+  const existing = await Homework.findById(req.params.id)
+  if (!existing) return res.status(404).json({ message: 'Homework not found.' })
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(existing.childId)) {
+    return res.status(403).json({ message: 'You do not have access to this homework.' })
+  }
+
   const hw = await Homework.findOneAndUpdate(
     { _id: req.params.id, status: 'submitted' },
     { $set: { status: 'verified' } },
     { new: true },
   )
   if (!hw) {
-    const exists = await Homework.exists({ _id: req.params.id })
-    if (!exists) return res.status(404).json({ message: 'Homework not found.' })
     return res.status(400).json({ message: 'Homework must be submitted before it can be verified.' })
   }
   const isLate = hw.completedAt && hw.dueDate && hw.completedAt > hw.dueDate

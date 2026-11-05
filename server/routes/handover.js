@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import axios from 'axios'
 import { Child, Session, Handover } from '../models/index.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild } from '../utils/access.js'
 import { toDateText, formatStart } from '../utils/startDate.js'
 
@@ -488,7 +488,8 @@ async function callLLM(prompt) {
 
 // POST /handover/:childId
 // No body needed: the summary type comes from the logged-in user's role (req.user.role)
-router.post('/:childId', async (req, res) => {
+// Children are blocked: the volunteer-type handover contains teaching notes not meant for the child.
+router.post('/:childId', requireRole('volunteer', 'coordinator', 'parent'), async (req, res) => {
   // get the child from MongoDB
   const child = await Child.findById(req.params.childId)
 
