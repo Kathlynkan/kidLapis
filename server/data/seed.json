@@ -158,7 +158,7 @@
       "needs": [
         "Math"
       ],
-      "points": 160,
+      "points": 190,
       "avatar": "/photos/ethan.jpg",
       "followUp": false
     },
@@ -1847,7 +1847,7 @@
       "title": "Fraction addition worksheet",
       "subject": "Math",
       "details": "Question book p.42, Q1-10. Draw a diagram for each!",
-      "dueDate": "2026-10-11",
+      "dueDate": "2026-10-10",
       "points": 20,
       "status": "assigned",
       "completedAt": null,
@@ -1882,10 +1882,10 @@
       "title": "7 times table",
       "subject": "Math",
       "details": "Say the 7 times table out loud three times.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-15",
       "points": 10,
       "status": "verified",
-      "completedAt": "2026-11-01T10:30:00.000Z",
+      "completedAt": "2026-11-01",
       "questions": [
         {
           "text": "7 x 3 = ?",
@@ -1917,10 +1917,10 @@
       "title": "Read one story",
       "subject": "English",
       "details": "Read any story book for 15 minutes and tell me what happened.",
-      "dueDate": "2026-10-08",
+      "dueDate": "2026-10-20",
       "points": 10,
-      "status": "submitted",
-      "completedAt": "2026-10-08T11:00:00.000Z",
+      "status": "assigned",
+      "completedAt": null,
       "questions": []
     },
     {
@@ -2034,7 +2034,7 @@
       "title": "Spelling list 3",
       "subject": "English",
       "details": "Write each word 3 times, then cover the list and test yourself.",
-      "dueDate": "2026-10-12",
+      "dueDate": "2026-10-07",
       "points": 10,
       "status": "assigned",
       "completedAt": null,
@@ -2069,7 +2069,7 @@
       "title": "6 and 8 times tables",
       "subject": "Math",
       "details": "Say the 6 and 8 times tables out loud, then write them out.",
-      "dueDate": "2026-10-13",
+      "dueDate": "2026-10-21",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -2104,7 +2104,7 @@
       "title": "Parts of a plant",
       "subject": "Science",
       "details": "Draw a plant and label the roots, stem, leaves and flower.",
-      "dueDate": "2026-10-14",
+      "dueDate": "2026-10-22",
       "points": 15,
       "status": "assigned",
       "completedAt": null,
@@ -2183,10 +2183,10 @@
       "title": "Mixed numbers practice",
       "subject": "Math",
       "details": "Do the mixed numbers sheet, questions 1 to 8.",
-      "dueDate": "2026-10-05",
+      "dueDate": "2026-10-16",
       "points": 15,
       "status": "verified",
-      "completedAt": "2026-11-02T10:30:00.000Z"
+      "completedAt": "2026-11-02"
     },
     {
       "id": "h_16",
@@ -2331,6 +2331,39 @@
       "points": 10,
       "status": "verified",
       "completedAt": "2026-10-06T09:45:00.000Z"
+    },
+    {
+      "id": "h_28",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "title": "Reading comprehension",
+      "subject": "English",
+      "details": "Read the passage and answer the 5 questions in full sentences.",
+      "dueDate": "2026-10-16",
+      "points": 15,
+      "status": "verified",
+      "completedAt": "2026-11-02",
+      "questions": [
+        { "text": "Which word rhymes with cat? (hat, dog or cup)", "answer": "hat" },
+        { "text": "Which word rhymes with light? (night, sun or tree)", "answer": "night" },
+        { "text": "Which word rhymes with moon? (spoon, star or cake)", "answer": "spoon" },
+        { "text": "Which word rhymes with king? (ring, queen or crown)", "answer": "ring" }
+      ],
+      "deckId": "d_10"
+    },
+    {
+      "id": "h_29",
+      "childId": "c_1",
+      "volunteerId": "u_vol1",
+      "title": "Creative writing",
+      "subject": "English",
+      "details": "Write a short story about your favourite place.",
+      "dueDate": "2026-10-20",
+      "points": 10,
+      "status": "assigned",
+      "completedAt": null,
+      "rejectedAt": "2026-10-10",
+      "rejectMessage": "Great try! Please add more details about what you can see and hear."
     }
   ],
   "messages": [
