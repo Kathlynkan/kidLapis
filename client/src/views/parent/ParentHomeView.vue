@@ -424,9 +424,6 @@ watch(
                       <span class="small-label">{{ note.label }}</span>
                       {{ note.text }}
                     </div>
-                    <div v-if="resultSessions[item.id].photos && resultSessions[item.id].photos.length > 0" class="result-photos">
-                      <img v-for="(photo, number) in resultSessions[item.id].photos" :key="number" :src="photo" alt="Photo from the session" />
-                    </div>
                   </template>
                   <p v-else class="muted" data-test="no-result">No result recorded yet.</p>
                 </template>
@@ -925,20 +922,6 @@ watch(
 
 .parentpage .row-done[open] summary::after {
   content: 'Tap to close';
-}
-
-.parentpage .result-photos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.parentpage .result-photos img {
-  width: 96px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 12px;
 }
 
 /* ---------- the social tab ---------- */
