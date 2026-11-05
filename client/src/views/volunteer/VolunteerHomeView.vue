@@ -719,11 +719,12 @@ onMounted(loadData)
 }
 
 .volunteerpage .fact-topic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 23px; /* Last topic (with its tag) and Last result (no tag) are the same height */
   margin-bottom: 6px;
-}
-
-.volunteerpage .fact-topic .session-subject {
-  margin-left: 6px;
 }
 
 .volunteerpage .child-bottom {
