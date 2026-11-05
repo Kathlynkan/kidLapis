@@ -170,12 +170,15 @@ async function toggleBell() {
   if (bellOpen.value && unreadNotices.value) {
     const now = new Date().toISOString()
     notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
-    api.put('/notifications/read').catch(() => {})
+    // server mark happens on close, not open — keeps items visible while bell is open
   }
 }
 
 watch(bellOpen, (open) => {
-  if (!open) notices.value = notices.value.filter((n) => !n.readAt)
+  if (!open) {
+    if (notices.value.some((n) => n.readAt)) api.put('/notifications/read').catch(() => {})
+    notices.value = notices.value.filter((n) => !n.readAt)
+  }
 })
 
 // "3 Nov, 14:05" for an update
@@ -193,9 +196,13 @@ async function fetchBell() {
   }
   try {
     const unread = (await api.get('/notifications')).data
-    // While the bell is open, keep showing the ones just read (they disappear when it closes)
-    const justRead = bellOpen.value ? notices.value.filter((n) => n.readAt && !unread.some((u) => u.id === n.id)) : []
-    notices.value = [...unread, ...justRead]
+    if (bellOpen.value) {
+      // Bell is open and server hasn't been marked yet — preserve local readAt so items stay visible
+      const readMap = new Map(notices.value.filter((n) => n.readAt).map((n) => [n.id, n.readAt]))
+      notices.value = unread.map((n) => (readMap.has(n.id) ? { ...n, readAt: readMap.get(n.id) } : n))
+    } else {
+      notices.value = unread
+    }
   } catch {
     // keep the old list
   }

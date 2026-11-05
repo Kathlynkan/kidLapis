@@ -5,7 +5,7 @@
     onMounted -> axios (api.get) -> ref -> computed -> v-for + component
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // get auth sotre from Pinia
@@ -197,7 +197,28 @@ function openChild(childId) {
   router.push({ name: 'child-profile', params: { id: childId } })
 }
 
-onMounted(loadData)
+async function reloadSilently() {
+  if (loading.value) return
+  try {
+    const [childResponse, sessionResponse] = await Promise.all([
+      api.get('/children'),
+      api.get('/sessions'),
+    ])
+    children.value = childResponse.data
+    sessions.value = sessionResponse.data
+  } catch {}
+}
+
+onMounted(() => {
+  loadData()
+  window.addEventListener('bell-refresh', reloadSilently)
+  window.addEventListener('schedule-changed', reloadSilently)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('bell-refresh', reloadSilently)
+  window.removeEventListener('schedule-changed', reloadSilently)
+})
 </script>
 
 <template>

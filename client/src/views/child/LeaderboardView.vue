@@ -65,10 +65,12 @@ function onVisible() { if (!document.hidden) fetchLeaderboard() }
 onMounted(() => {
   fetchLeaderboard()
   document.addEventListener('visibilitychange', onVisible)
+  window.addEventListener('bell-refresh', fetchLeaderboard)
 })
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisible)
+  window.removeEventListener('bell-refresh', fetchLeaderboard)
 })
 </script>
 

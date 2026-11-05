@@ -1,6 +1,6 @@
 <!-- Parent home: "What did my child do today?"          Owner: Kat -->
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
@@ -283,7 +283,22 @@ onMounted(async () => {
     error.value = errorMessage(err)
   }
   loading.value = false
+  window.addEventListener('bell-refresh', reloadSilently)
 })
+
+async function reloadSilently() {
+  if (!selectedId.value || loading.value) return
+  try {
+    const [sRes, hRes] = await Promise.all([
+      api.get('/sessions', { params: { childId: selectedId.value } }),
+      api.get('/homework', { params: { childId: selectedId.value } }),
+    ])
+    sessions.value = sRes.data
+    homework.value = hRes.data
+  } catch {}
+}
+
+onUnmounted(() => window.removeEventListener('bell-refresh', reloadSilently))
 
 // already on this page and the bell opens another child: switch to it
 watch(

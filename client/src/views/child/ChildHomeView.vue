@@ -161,11 +161,14 @@ async function submitQuest(homeworkId) {
   submitError.value = ''
   try {
     await api.put(`/homework/${homeworkId}/submit`)
-    const h = homework.value.find((hw) => hw.id === homeworkId)
-    if (h) {
-      h.status      = 'submitted'
-      h.completedAt = new Date().toISOString().slice(0, 10)
-      h.rejectedAt  = null
+    const idx = homework.value.findIndex((hw) => hw.id === homeworkId)
+    if (idx !== -1) {
+      homework.value.splice(idx, 1, {
+        ...homework.value[idx],
+        status: 'submitted',
+        completedAt: new Date().toISOString().slice(0, 10),
+        rejectedAt: null,
+      })
     }
     clearTimeout(celebrateTimer)
     celebrating.value = true
@@ -180,10 +183,13 @@ async function unsubmitQuest(homeworkId) {
   submitError.value = ''
   try {
     await api.put(`/homework/${homeworkId}/unsubmit`)
-    const h = homework.value.find((hw) => hw.id === homeworkId)
-    if (h) {
-      h.status = 'assigned'
-      h.completedAt = null
+    const idx = homework.value.findIndex((hw) => hw.id === homeworkId)
+    if (idx !== -1) {
+      homework.value.splice(idx, 1, {
+        ...homework.value[idx],
+        status: 'assigned',
+        completedAt: null,
+      })
     }
   } catch (err) {
     submitError.value = errorMessage(err)

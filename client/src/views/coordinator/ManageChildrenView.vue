@@ -8,7 +8,7 @@
         Each card shows the volunteers, the parent (or the code to give them) and the warnings
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
@@ -27,6 +27,18 @@ const loading = ref(true)
 const error = ref('')
 const successMessage = ref('')
 
+async function reloadSilently() {
+  if (loading.value) return
+  try {
+    const [childRes, alertRes] = await Promise.all([
+      api.get('/children'),
+      api.get('/dashboard/alerts'),
+    ])
+    children.value = childRes.data
+    alerts.value = alertRes.data
+  } catch {}
+}
+
 onMounted(async () => {
   try {
     const [childRes, parentRes, volunteerRes, alertRes] = await Promise.all([
@@ -44,7 +56,10 @@ onMounted(async () => {
     error.value = errorMessage(err)
     loading.value = false // stop the spinner (error)
   }
+  window.addEventListener('schedule-changed', reloadSilently)
 })
+
+onUnmounted(() => window.removeEventListener('schedule-changed', reloadSilently))
 
 // Keep the cards in A-Z order, like the server's list
 const sortByName = (list) => list.sort((a, b) => a.name.localeCompare(b.name))

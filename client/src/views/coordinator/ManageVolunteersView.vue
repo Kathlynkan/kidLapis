@@ -1,6 +1,6 @@
 <!-- Manage volunteers                                   Owner: Yu Xuan -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
@@ -102,6 +102,18 @@ async function save(v) {
   }
 }
 
+async function reloadSilently() {
+  if (loading.value) return
+  try {
+    const [volRes, childRes] = await Promise.all([
+      api.get('/users', { params: { role: 'volunteer' } }),
+      api.get('/children'),
+    ])
+    volunteers.value = volRes.data
+    children.value = childRes.data
+  } catch {}
+}
+
 onMounted(async () => {
   try {
     const [vol_Result, child_Result] = await Promise.all([
@@ -115,7 +127,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  window.addEventListener('schedule-changed', reloadSilently)
 })
+
+onUnmounted(() => window.removeEventListener('schedule-changed', reloadSilently))
 </script>
 
 <template>
