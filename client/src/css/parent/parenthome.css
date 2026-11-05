@@ -1,27 +1,18 @@
-.parentpage {
-  --parent-navy: #414F67;
-  --parent-grey: #5E6C80;
-  --parent-aqua-pale: #DDF0EF;
-  --parent-shadow: 0 1px 6px rgba(65, 79, 103, 0.1); /* the very light shadow under the white boxes */
-  --parent-card-radius: 18px;
-}
-
-
 .parentpage h1,
 .parentpage h2,
 .parentpage h3 {
   font-family: inherit;
-  color: var(--parent-navy);
+  color: #414F67;
   text-shadow: none;
 }
 
 /* the sentence under the title is navy too */
 .parentpage .lapis-page-header .page-subtitle {
-  color: var(--parent-navy);
+  color: #414F67;
 }
 
 .parentpage .muted {
-  color: var(--parent-grey);
+  color: #5E6C80;
   font-size: 13px;
 }
 
@@ -87,7 +78,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: contain;
-  background: var(--parent-aqua-pale);
+  background: #DDF0EF;
   padding: 4px;
 }
 
@@ -99,7 +90,7 @@
 .parentpage .kueh-row-label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--parent-grey);
+  color: #5E6C80;
   margin-left: 4px;
   align-self: center;
 }
@@ -117,7 +108,7 @@
   min-width: 0;
   padding: 10px 12px;
   border-radius: 16px;
-  background: var(--parent-aqua-pale);
+  background: #DDF0EF;
 }
 
 .parentpage .tile strong {
@@ -141,13 +132,13 @@
 
 .parentpage .tile-next {
   background: #FFFFFF;
-  box-shadow: var(--parent-shadow);
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
 /* the tiles you can press (they take you to the homework) */
 .parentpage .tile-link {
   border: 0;
-  color: var(--parent-navy);
+  color: #414F67;
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -173,9 +164,9 @@
   margin-bottom: 16px;
   border: 0;
   border-radius: 22px;
-  background: var(--parent-aqua-pale);
+  background: #DDF0EF;
   box-shadow: none;
-  color: var(--parent-navy);
+  color: #414F67;
 }
 
 /* the top line you can press to open and close it */
@@ -203,7 +194,7 @@
 
 .parentpage .handover-period {
   margin-top: 2px;
-  color: var(--parent-grey);
+  color: #5E6C80;
   font-size: 14px;
 }
 
@@ -213,7 +204,7 @@
   align-items: center;
   border-radius: 14px;
   background: #FFFFFF;
-  color: var(--parent-navy);
+  color: #414F67;
   font-size: 12px;
   font-weight: 700;
 }
@@ -224,7 +215,7 @@
 
 .parentpage .handover-key {
   font-size: 14px;
-  color: var(--parent-grey);
+  color: #5E6C80;
 }
 
 .parentpage .handover-value {
@@ -244,7 +235,7 @@
   gap: 4px;
   padding: 4px;
   border-radius: 26px;
-  background: var(--parent-aqua-pale);
+  background: #DDF0EF;
 }
 
 .parentpage .tab {
@@ -254,7 +245,7 @@
   border: 0;
   border-radius: 22px;
   background: transparent;
-  color: var(--parent-navy);
+  color: #414F67;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -270,7 +261,7 @@
   margin-left: 6px;
   padding: 0 7px;
   border-radius: 999px;
-  background: var(--parent-navy);
+  background: #414F67;
   color: #F9F1E6;
   font-size: 12px;
   line-height: 20px;
@@ -293,17 +284,17 @@
 .parentpage .homework-row,
 .parentpage .day-card {
   margin-bottom: 10px;
-  border-radius: var(--parent-card-radius);
+  border-radius: 18px;
   background: #FFFFFF;
-  box-shadow: var(--parent-shadow);
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
 /* the progress chart: a white card like the rows of the homework and social tabs */
 .parentpage [data-test='skill-progress-chart'] {
   border: 0;
-  border-radius: var(--parent-card-radius);
+  border-radius: 18px;
   background: #FFFFFF;
-  box-shadow: var(--parent-shadow);
+  box-shadow: 0 1px 6px rgba(65, 79, 103, 0.1);
 }
 
 .parentpage .show-more {
@@ -314,8 +305,8 @@
   padding: 10px;
   border: 0;
   border-radius: 22px;
-  background: var(--parent-aqua-pale);
-  color: var(--parent-navy);
+  background: #DDF0EF;
+  color: #414F67;
   font: inherit;
   font-weight: 700;
 }
@@ -375,7 +366,7 @@
 .parentpage .mood-chip,
 .parentpage .chip {
   border-radius: 12px;
-  background: var(--parent-aqua-pale);
+  background: #DDF0EF;
 }
 
 .parentpage .session-subject {
@@ -446,7 +437,7 @@
   content: 'Tap to open';
   display: block;
   font-size: 12px;
-  color: var(--parent-grey);
+  color: #5E6C80;
 }
 
 .parentpage .row-done[open] summary::after {
@@ -488,7 +479,7 @@
   display: block;
   margin-top: 2px;
   font-size: 12px;
-  color: var(--parent-grey);
+  color: #5E6C80;
 }
 
 .parentpage .day-card-small[open] summary::after {
@@ -590,7 +581,7 @@
   border: 0;
   border-radius: 50%;
   background: #FFFFFF;
-  color: var(--parent-navy);
+  color: #414F67;
   font-size: 16px;
 }
 
