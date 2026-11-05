@@ -85,7 +85,7 @@ Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
 
 | Role | Email | Notes |
 |---|---|---|
-| Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe |
+| Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe, Mia |
 | Volunteer | `volunteer2@kidslapis.sg` | Daniel — Ethan, Meera, Ryan |
 | Volunteer | `volunteer3@kidslapis.sg` | Priya — Arjun |
 | Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
@@ -124,9 +124,11 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 |---|---|---|
 | `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email, parent with a child code) | Kai Sen |
 | `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
-| `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
+| `e2e/child.spec.js` | Child quests (submit, badge shelf, volunteer verifies, API failure) | Jachin |
+| `e2e/leaderboard.spec.js` | Leaderboard: podium order, "You" label on the logged-in child, link back home | Jachin |
 | `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, session timeline with mood labels, SkillProgressChart (Progress tab), child switcher, switching children | Jachin |
 | `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
+| `e2e/parent-viewed.spec.js` | Once the parent has read a session, the volunteer sees it as locked | Kat |
 | `e2e/messages.spec.js` | A parent's message reaches the coordinator (and the bell shows it), the coordinator's reply reaches the parent, each child has a separate chat | Kat |
 | `e2e/parent-viewed.spec.js` | When the parent opens her page, the volunteer sees the child's sessions as "Seen by parent" and can no longer edit or delete them; the volunteer cannot save a change to a read session, even through its edit page | Kat |
 

@@ -31,7 +31,7 @@ test.describe('Authentication', () => {
   test('child lands on My Quests', async ({ page }) => {
     await loginAs(page, 'child')
     await expect(page).toHaveURL(/\/child$/)
-    await expect(page.getByText('Quests to do')).toBeVisible()
+    await expect(page.getByRole('tab', { name: /Quests/ })).toHaveAttribute('aria-selected', 'true') // opens on the Quests tab
   })
 
   test('wrong password shows an error', async ({ page }) => {
