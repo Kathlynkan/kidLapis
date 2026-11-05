@@ -32,7 +32,6 @@ const roles = [
     name: "Coordinators",
     short: "Run the centre",
     text: "Spot children who need attention and match them with the right volunteer.",
-    note: "Coordinator accounts are set up by the centre.",
     logIn: "Coordinator log in",
     colour: "purple",
   },
@@ -49,7 +48,6 @@ const roles = [
     name: "Children",
     short: "Earn stars",
     text: "Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.",
-    note: "The centre gives each child their own login.",
     logIn: "Child log in",
     colour: "pink",
   },
@@ -117,12 +115,9 @@ const steps = [
             >
               {{ r.signUp.label }}
             </RouterLink>
-            <template v-else>
-              <span class="role-note">{{ r.note }}</span>
-              <RouterLink to="/login" class="home-button" :class="`colour-${r.colour}`" data-test="role-login">
-                {{ r.logIn }}
-              </RouterLink>
-            </template>
+            <RouterLink v-else to="/login" class="home-button" :class="`colour-${r.colour}`" data-test="role-login">
+              {{ r.logIn }}
+            </RouterLink>
           </div>
         </article>
       </div>
@@ -284,13 +279,6 @@ const steps = [
   justify-content: flex-end;
   gap: 8px 12px;
   margin-top: auto;
-}
-
-/* "Coordinator accounts are set up by the centre." where the other cards have a sign up button */
-.homepage .role-note {
-  color: #8D7F77;
-  font-size: 13px;
-  font-style: italic;
 }
 
 /* ---------- the steps: white rows, like the rows on the parent page ---------- */
