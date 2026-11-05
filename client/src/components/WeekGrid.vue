@@ -10,6 +10,7 @@
 import { computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
 import { isActive, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -21,7 +22,6 @@ const emit = defineEmits(['add', 'remove'])
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Tue'
-const firstName = (name) => (name || '').split(' ')[0]
 
 // Sat/Sun only appear when a volunteer is free or booked then.
 const days = computed(() => {

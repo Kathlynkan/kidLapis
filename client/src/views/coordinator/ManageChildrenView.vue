@@ -8,8 +8,8 @@
         Each card shows the volunteers, the parent (or the code to give them) and the warnings
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-
+import { ref, computed, onMounted } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
 import { firstName, subjectStyle } from '@/utils/format'
@@ -27,17 +27,6 @@ const loading = ref(true)
 const error = ref('')
 const successMessage = ref('')
 
-async function reloadSilently() {
-  if (loading.value) return
-  try {
-    const [childRes, alertRes] = await Promise.all([
-      api.get('/children'),
-      api.get('/dashboard/alerts'),
-    ])
-    children.value = childRes.data
-    alerts.value = alertRes.data
-  } catch {}
-}
 
 onMounted(async () => {
   try {
@@ -56,10 +45,14 @@ onMounted(async () => {
     error.value = errorMessage(err)
     loading.value = false // stop the spinner (error)
   }
-  window.addEventListener('schedule-changed', reloadSilently)
 })
 
-onUnmounted(() => window.removeEventListener('schedule-changed', reloadSilently))
+// A volunteer accepted/declined a request: reload the cards quietly (volunteers and warnings change)
+useScheduleChanged(async () => {
+  const [childRes, alertRes] = await Promise.all([api.get('/children'), api.get('/dashboard/alerts')])
+  children.value = childRes.data
+  alerts.value = alertRes.data
+}, { isLoading: loading })
 
 // Keep the cards in A-Z order, like the server's list
 const sortByName = (list) => list.sort((a, b) => a.name.localeCompare(b.name))

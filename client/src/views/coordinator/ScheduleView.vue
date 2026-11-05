@@ -12,12 +12,14 @@
 ============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 // Start times every 30 minutes from 09:00 to 19:30.
 const TIMES = []
@@ -57,22 +59,15 @@ onMounted(async () => {
     loading.value = false
   }
   window.addEventListener('keydown', onKeydown)
-  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('schedule-changed', onScheduleChanged)
-})
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
-function onScheduleChanged() {
-  loadData().catch(() => {})
-}
+useScheduleChanged(loadData, { isLoading: loading })
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()
 }
 
-const firstName = (name) => name.split(' ')[0]
 
 // Accepted weekly sessions, and requests still waiting for the volunteer.
 const countSlots = (test) => children.value.reduce((n, c) => n + (c.schedule || []).filter(test).length, 0)

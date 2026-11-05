@@ -8,6 +8,7 @@ import { ref, computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -16,7 +17,6 @@ const props = defineProps({
 
 const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Tue'
 const TODAY_LONG = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) // 'Tuesday 3 Nov'
-const firstName = (name) => (name || '').split(' ')[0]
 
 const showWeek = ref(false)
 

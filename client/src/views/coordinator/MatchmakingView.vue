@@ -13,14 +13,15 @@
   bell (Kai Sen, routes/requests.js). Until then the child still counts as unassigned.
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture
-import { subjectStyle } from '@/utils/format'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
+import { firstName, subjectStyle } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,7 +55,6 @@ const editing = ref(null)
 
 const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
-const firstName = (name) => name.split(' ')[0]
 
 // ---------- Waiting for a volunteer to accept ----------
 const volunteerNames = ref({}) // { volunteerId: 'Aisha Rahman' }, for "Waiting for Aisha"
@@ -100,14 +100,9 @@ async function loadChildren() {
 
 // A volunteer accepted/declined a request (live, via the NavBar): "waiting" changes to the
 // answer without a refresh. The open child's suggestions reload too. (Kai Sen)
-function onScheduleChanged() {
-  loadChildren().catch(() => {})
-  if (openId.value) loadSuggestions(openId.value)
-}
-onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
+useScheduleChanged(() => Promise.all([loadChildren(), openId.value && loadSuggestions(openId.value)]))
 
 onMounted(async () => {
-  window.addEventListener('schedule-changed', onScheduleChanged)
   try {
     await loadChildren()
   } catch (err) {

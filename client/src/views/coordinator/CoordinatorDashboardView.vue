@@ -13,7 +13,8 @@
     [x] reloads quietly when a volunteer accepts/declines a session (schedule-changed, Kai Sen)
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
@@ -61,10 +62,6 @@ async function loadDashboard() {
   volunteers.value = v.data
 }
 
-// A volunteer accepted/declined a session (live, via the NavBar): reload quietly (Kai Sen)
-function onScheduleChanged() {
-  loadDashboard().catch(() => {}) // keep showing the old numbers if this fails
-}
 
 onMounted(async () => {
   try {
@@ -74,9 +71,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
+
+// A volunteer accepted/declined a session (live, via the NavBar): reload quietly (Kai Sen)
+useScheduleChanged(loadDashboard, { isLoading: loading })
 
 const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
 const childNames = computed(() => nameById(children.value))
