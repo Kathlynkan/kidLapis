@@ -34,7 +34,7 @@ All accounts use the password `password123`.
 | Child | child@kidslapis.sg | Ethan |
 | Child | child2@kidslapis.sg | Meera |
 
-To sign up as a new parent, you need the child's 6-letter child code. The coordinator can find it on the Manage Children page.
+To sign up as a new parent, you need the child's 6-character child code (letters and numbers). The coordinator can find it on the Manage Children page.
 
 ## Setting up
 
@@ -149,11 +149,11 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E: `client/e2e/leaderboard.spec.js` checks the leaderboard order, the "You" label and the link back home
 
 **Kai Sen**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+- Unit: `client/src/__tests__/shared/validation.spec.js` checks `isValidChildCode`, the 6-character code a parent uses to link to their child
+- Component: `client/src/__tests__/shared/LoginView.spec.js` checks the Show / Hide password button and the link to sign up
+- Component: `client/src/__tests__/shared/SignupView.spec.js` checks that the form changes with the role (skills for volunteers, child code for parents) and shows errors when empty
+- E2E: `client/e2e/auth.spec.js` checks that a wrong password shows an error
+- E2E: `client/e2e/auth.spec.js` checks that a parent who opens `/coordinator` is sent back to their own page
 
 **Kathlyn**
 - Unit: `client/src/__tests__/parent/parentHelpers.spec.js` checks the parent page can always display what the child did at the student care

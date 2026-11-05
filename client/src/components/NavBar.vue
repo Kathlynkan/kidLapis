@@ -821,22 +821,6 @@ watch(
   font-size: 11px;
 }
 
-/* "Accept or decline ->" under the session requests */
-.lapis-bell-more {
-  display: block;
-  margin: 0 0 8px;
-  padding: 4px 8px 8px;
-  border-bottom: 1px solid #CFE0DE;
-  color: #2F6F5A;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.lapis-bell-more:hover {
-  text-decoration: underline;
-}
-
 /* the menu button: only shown on a small screen */
 .lapis-burger {
   display: none;
