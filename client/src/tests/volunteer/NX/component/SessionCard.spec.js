@@ -1,5 +1,10 @@
+<<<<<<< Updated upstream:client/src/tests/volunteer/NX/component/SessionCard.spec.js
 // Verify that SessionCard displays or hides Edit and Delete buttons
 // correctly based on user permissions and session status
+=======
+// Verify that the SessionCard displays or hides Edit and Delete buttons
+// correctly  based on user permissions and session status
+>>>>>>> Stashed changes:client/src/__tests__/volunteer/SessionCard.spec.js
 
 import { describe, test, expect } from 'vitest'
 import { mount } from '@vue/test-utils'

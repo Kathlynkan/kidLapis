@@ -112,78 +112,71 @@ pnpm test:e2e                          # Playwright E2E - starts API + Vue for y
 pnpm exec playwright show-report       # open the HTML report
 ```
 
-The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsive check). They use `data-test="..."` attributes as stable selectors.
+The first line is only needed the first time. Playwright starts the server and the website by itself. Each test runs twice, once on a desktop screen and once on an iPhone 6 sized screen.
 
-| Spec | Covers | Owner |
-|---|---|---|
-| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email) | Kai Sen |
-| `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
-| `e2e/child.spec.js` | Child quests (submit, verify, API failure), leaderboard (loads, tab switch) | Jachin |
-| `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, recurring badge, session timeline with mood labels, SkillProgressChart, child switcher, switching children | Jachin |
-| `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
-| `e2e/messages.spec.js` | Parent child list, chat thread visible, switch child, send message + real-time delivery, coordinator sees same thread | Kat |
-
----
-
-## Project structure
-
+To run one file:
 ```
-kids-lapis/
-├── WORKLOAD.md            <- who does what
-├── CONTRIBUTING.md        <- git workflow
-├── server/                <- Express API (port 8000)
-│   ├── server.js          <- mounts all routes
-│   ├── config.env.example <- copy to config.env (git-ignored)
-│   ├── middleware/auth.js <- requireAuth, requireRole
-│   ├── models/            <- Mongoose schemas: User, Child, Session, Homework, Message, Handover, Deck
-│   ├── utils/db.js        <- MongoDB connection (DB= in config.env)
-│   ├── utils/seed.js      <- `pnpm seed`: reset your database with the demo data
-│   ├── utils/access.js    <- who can see which child (+ the same rule as a Mongo filter)
-│   ├── data/seed.json     <- demo data
-│   └── routes/            <- one file per feature, each with an owner + TODO list
-└── client/                <- Vue 3 + Vite app (port 5173)
-    ├── e2e/               <- Playwright tests
-    └── src/
-        ├── main.js        <- Bootstrap, Pinia, Router
-        ├── App.vue        <- NavBar + <RouterView />
-        ├── router/        <- all routes + role guard
-        ├── stores/auth.js <- logged-in user (Pinia + sessionStorage)
-        ├── services/api.js<- shared axios instance (adds the token)
-        ├── utils/         <- format, constants, gamification (+ unit tests)
-        ├── components/    <- reusable pieces (cards, charts, chat...)
-        └── views/         <- one folder per role: auth, volunteer, parent, child, coordinator, shared
+pnpm exec playwright test e2e/volunteer-handover.spec.js
 ```
 
----
+### Test files
 
-## API reference
+Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 
-All routes except `/auth/signup` and `/auth/login` need `Authorization: Bearer <token>`. The client adds it automatically.
+**Yuqi**
+- Unit: `server/tests/handover.test.js` checks `checkMood`, the mood note for volunteers based on the last 3 sessions
+- Component: `client/src/__tests__/volunteer/HandoverCard.spec.js` checks the summary card for volunteers and parents, including the week buttons
+- Component: `client/src/__tests__/volunteer/ChildCard.spec.js` checks a child's card on the volunteer home page
+- E2E: `client/e2e/volunteer-handover.spec.js` checks that a volunteer can search for a child and read the handover notes
+- E2E: `client/e2e/coordinator-overview.spec.js` checks that a coordinator sees a child's overview, without the handover or edit buttons
 
-| Method & path | What it does | Status | Owner |
-|---|---|---|---|
-| `POST /auth/signup`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | Accounts | ✅ done | Kai Sen |
-| `GET /children`, `GET /children/:id` | Children visible to me | ✅ done | Kai Sen |
-| `POST / PUT / DELETE /children` | Manage children | ✅ done | Kai Sen |
-| `GET /users?role=volunteer`, `GET /users/:id`, `PUT /users/:id` | Volunteers & profiles | ✅ done | Yu Xuan |
-| `GET /sessions?childId=`, `GET /sessions/:id` | Session history | ✅ done | Ning Xuan |
-| `POST / PUT / DELETE /sessions` | Record / edit / delete | ✅ done | Ning Xuan |
-| `GET /homework?childId=` | Homework list | ✅ done | Ning Xuan |
-| `POST /homework` | Assign homework (with optional question deck) | ✅ done | Ning Xuan / Jachin |
-| `PUT /homework/:id/submit`, `PUT /homework/:id/verify` | Child submits; volunteer verifies and awards stars | ✅ done | Jachin |
-| `GET /homework/leaderboard` | Berry leaderboard (all-time + weekly) | ✅ done | Jachin |
-| `GET /decks` | Question bank decks for homework | ✅ done | Jachin |
-| `POST /handover/:childId` | AI summary (Gemini + fallback), audience: volunteer or parent | ✅ done | Yuqi |
-| `GET /messages?childId=` | Conversation history | ✅ done | Kat |
-| `POST /messages`, `PUT /messages/read`, `GET /messages/unread` | Send message, mark read, unread counts | ✅ done | Kat |
-| `GET /dashboard/summary` | KPI numbers | ✅ done | Yu Xuan |
-| `GET /dashboard/alerts` | Needs-attention list | ✅ done | Yu Xuan |
-| `PUT /dashboard/follow-up/:childId` | Toggle follow-up flag | ✅ done | Yu Xuan |
-| `GET /matchmaking/:childId`, `PUT /matchmaking/:childId/assign` | Skills-based volunteer matching | ✅ done | Yu Xuan |
-| `GET /progress/:childId`, `GET /progress/overview` | Per-topic accuracy, trends, recurring struggles | ✅ done | Jachin |
+**Jachin**
+- Unit: `client/src/__tests__/child/gamification.spec.js` checks the badge and level rules
+- Component: `client/src/__tests__/volunteer/HomeworkQuestCard.spec.js` checks the quest card buttons for children and volunteers
+- Component: `client/src/__tests__/child/ChildAvatar.spec.js` checks the child's avatar (photo, emoji or empty)
+- E2E: `client/e2e/child.spec.js` checks that a child can submit a quest and a volunteer can verify it
+- E2E: `client/e2e/leaderboard.spec.js` checks the leaderboard order, the "You" label and the link back home
 
----
+**Kai Sen**
+- Unit: `client/src/__tests__/shared/validation.spec.js` checks `isValidChildCode`, the 6-character code a parent uses to link to their child
+- Component: `client/src/__tests__/shared/LoginView.spec.js` checks the Show / Hide password button and the link to sign up
+- Component: `client/src/__tests__/shared/SignupView.spec.js` checks that the form changes with the role (skills for volunteers, child code for parents) and shows errors when empty
+- E2E: `client/e2e/auth.spec.js` checks that a wrong password shows an error
+- E2E: `client/e2e/auth.spec.js` checks that a parent who opens `/coordinator` is sent back to their own page
 
-## Third-party code & credits
+**Kathlyn**
+- Unit: `client/src/__tests__/parent/parentHelpers.spec.js` checks the parent page can always display what the child did at the student care
+- Component: `client/src/__tests__/parent/ParentSocialDay.spec.js` checks that the parent sees what the volunteer recorded
+- Component: `client/src/__tests__/parent/ChatThread.spec.js` checks the chat bubbles in Messages are displayed correctly 
+- E2E: `client/e2e/messages.spec.js` checks that the bell notifies messages sent between parent and coordinator and that each child has a separate chat 
+- E2E: `client/e2e/parent-viewed.spec.js` checks that one the parent views the page, the volunteer is unable to edit the session 
 
-Bootstrap, Bootstrap Icons, Vue, Vue Router, Pinia, Axios, Chart.js, vue-chartjs, Express, Mongoose, Playwright, Vitest (all free/open-source). Fonts: Nunito (Google Fonts); the child pages use Arial and Georgia. The child pages (stars, Bounty Board leaderboard) are a fan-inspired nod to the One Piece series and use only emoji and our own CSS, no original artwork. The project skeleton was generated with AI assistance as boilerplate starter code, which the module allows. Each feature is implemented by its owner as listed in WORKLOAD.md.
+**Ning Xuan**
+- Unit:
+- Component:
+- Component:
+- E2E:
+- E2E:
+
+**Yu Xuan**
+- Unit: server/tests/matchmaking.test.js checks the child being matched doesn't count towards workload
+- Component: client/src/components/__tests__/WeekdayDots.spec.js checks five red days and 0/5 with no sessions
+- Component: client/src/components/__tests__/MiniAvatar.spec.js checks it shows a photo when the avatar is a file path, the emoji when it's an emoji, the first letter of the name when there is no avatar, and that it uses the size it is given
+- E2E: client/e2e/coordinator.spec.js checks Children, Volunteer, and Sessions week tiles appear
+- E2E: client/e2e/schedule.spec.js checks that volunteer booking logic works, all volunteers appear, can't overbook, and pending requests
+
+## Folders
+
+```
+kidLapis/
+  server/          Express API
+    routes/        one file per feature
+    models/        Mongoose schemas
+    data/          demo data (seed.json)
+    tests/         server tests
+  client/          Vue app
+    e2e/           Playwright tests
+    src/views/     pages, one folder per role
+    src/components/  reusable components
+    src/__tests__/   unit and component tests
+```

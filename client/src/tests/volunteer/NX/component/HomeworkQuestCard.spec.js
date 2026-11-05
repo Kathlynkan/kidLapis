@@ -1,5 +1,10 @@
+<<<<<<< Updated upstream:client/src/tests/volunteer/NX/component/HomeworkQuestCard.spec.js
 // Verify that HomeWorkQuestCard displays correct volunteer
 // actions according to the homework status and componenet state
+=======
+// Verify that HomeworkQuestCard displays the correct volunteer
+// actions according to the homework status
+>>>>>>> Stashed changes:client/src/__tests__/volunteer/HomeworkQuestCardActions.spec.js
 
 import { describe, test, expect } from 'vitest'
 import { mount } from '@vue/test-utils'

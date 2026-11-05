@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream:client/src/tests/volunteer/NX/unit/homeworkValidation.spec.js
 // Verify that homework can only be assigned with 
+=======
+// Verify that homework can only be assigned with
+>>>>>>> Stashed changes:client/src/__tests__/volunteer/homeworkValidation.spec.js
 // valid due dates (today or later)
 
 import { describe, test, expect } from 'vitest'
