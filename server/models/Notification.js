@@ -1,8 +1,3 @@
-// One-off updates shown in the NavBar bell's "Updates" list.   Owner: Kai Sen
-// e.g. a coordinator sees "Aisha accepted Sofia Ong, every Mon at 11:00",
-//      a volunteer sees "You no longer see Sofia Ong on Mon".
-// (Requests, quests to check and new sessions are NOT saved here: the bell works those out
-//  from the current data. These are events that leave nothing else behind.)
 import mongoose from 'mongoose'
 import { newId, jsonOptions, nowIso } from './helpers.js'
 

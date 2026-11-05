@@ -1,15 +1,6 @@
-<!-- =============================================================
-  Manage children (CRUD)                              Owner: Kai Sen
-  -------------------------------------------------------------
-  Done: a card for every child on the sandy board
-        "Add child" / "Edit" modal -> POST /children, PUT /children/:id
-        "Delete" with a warning    -> DELETE /children/:id
-        Search box (name, level, school, needs) and a level filter
-        Each card shows the volunteers, the parent (or the code to give them) and the warnings
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
 import { firstName, subjectStyle } from '@/utils/format'
@@ -18,7 +9,7 @@ import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
-// ---------- The children ----------
+// The children
 const children = ref([])
 const parents = ref([]) // parent accounts, for the "Parent" dropdown in the form
 const volunteers = ref([]) // volunteer accounts, to show the names on each card
@@ -26,6 +17,7 @@ const alerts = ref([]) // the dashboard's warnings, to show the tags on each car
 const loading = ref(true)
 const error = ref('')
 const successMessage = ref('')
+
 
 onMounted(async () => {
   try {
@@ -45,6 +37,13 @@ onMounted(async () => {
     loading.value = false // stop the spinner (error)
   }
 })
+
+// A volunteer accepted/declined a request: reload the cards quietly (volunteers and warnings change)
+useScheduleChanged(async () => {
+  const [childRes, alertRes] = await Promise.all([api.get('/children'), api.get('/dashboard/alerts')])
+  children.value = childRes.data
+  alerts.value = alertRes.data
+}, { isLoading: loading })
 
 // Keep the cards in A-Z order, like the server's list
 const sortByName = (list) => list.sort((a, b) => a.name.localeCompare(b.name))
@@ -75,7 +74,7 @@ const warningsOf = (child) => {
   return [...types].map((type) => ({ type, ...WARNING_TAGS[type] }))
 }
 
-// ---------- Search and level ----------
+// Search and level
 const search = ref('')
 const levelFilter = ref('') // '' = all levels
 
@@ -102,7 +101,7 @@ function clearFilters() {
   levelFilter.value = ''
 }
 
-// ---------- "Add child" / "Edit child" modal (one form for both) ----------
+// "Add child" / "Edit child" modal (one form for both)
 const emptyForm = () => ({
   name: '',
   level: '',
@@ -179,7 +178,7 @@ async function saveChild() {
   }
 }
 
-// ---------- "Delete child" confirmation ----------
+// "Delete child" confirmation
 const childToDelete = ref(null) // the child the coordinator clicked Delete on (null = box closed)
 const deleting = ref(false)
 const deleteError = ref('')
@@ -263,13 +262,13 @@ async function confirmDelete() {
 
       <div v-if="children.length === 0" class="t-card empty">
         <strong>No children yet</strong>
-        Click "Add child" to enrol the first one.
+        Click "Add Child" to enrol the first one.
       </div>
       <div v-else-if="filteredChildren.length === 0" class="t-card empty">
         <strong>No children found</strong>
         Try another name or level.
         <div class="mt-2">
-          <button type="button" class="t-btn t-btn-soft" @click="clearFilters">Clear search</button>
+          <button type="button" class="t-btn t-btn-soft" @click="clearFilters">Clear Search</button>
         </div>
       </div>
 
@@ -343,7 +342,7 @@ async function confirmDelete() {
           <form class="modal-content" novalidate data-test="child-form" @submit.prevent="saveChild">
             <div class="modal-header">
               <h2 id="childFormTitle" class="modal-title h5">
-                {{ editingId ? 'Edit child' : 'Add a child' }}
+                {{ editingId ? 'Edit Child' : 'Add a Child' }}
               </h2>
               <button
                 type="button"
@@ -466,12 +465,12 @@ async function confirmDelete() {
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="closeModal">
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="closeModal">
                 Cancel
               </button>
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-child">
                 <span v-if="saving" class="spinner-border spinner-border-sm"></span>
-                {{ editingId ? 'Save Changes' : 'Save child' }}
+                {{ editingId ? 'Save Changes' : 'Save Child' }}
               </button>
             </div>
           </form>
@@ -516,7 +515,7 @@ async function confirmDelete() {
               </p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="t-btn t-btn-soft" :disabled="deleting" @click="closeDelete">
+              <button type="button" class="t-btn t-btn-red" :disabled="deleting" @click="closeDelete">
                 Cancel
               </button>
               <button

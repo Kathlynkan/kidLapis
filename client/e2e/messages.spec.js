@@ -1,67 +1,76 @@
-// Messages journey: parent and coordinator exchange messages about a child.
 // Owner: Kat
-//
-// Seed data used:
-//   parent@kidslapis.sg = Ms Grace, parent of Ethan (c_1) and Mia (c_7)
-//   coordinator@kidslapis.sg = centre coordinator, can see all children
-//
-// The send test is chromium-only (state-mutating). The read-only structure
-// tests run on both desktop and mobile.
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
-test.describe('Messages — parent', () => {
-  test.beforeEach(async ({ page }) => {
+test.describe('Sending messages', () => {
+  // Test case 1: Verify that a message from the parent reaches the coordinator, the bell tells her, and the bell goes away once she reads it.
+  test('a message from the parent reaches the coordinator', async ({ page, context }) => {
+    const coordinatorPage = await context.newPage()
+
+    // the parent sends a message in Ethan's chat
     await loginAs(page, 'parent')
-    await page.goto('/messages')
-    // MessagesView auto-navigates to the first child's thread
-    await expect(page).toHaveURL(/\/messages\/c_/)
+    await page.goto('/messages/c_1')
+    const message = `Hello from the parent ${Date.now()}`
+    await page.locator('[data-test="chat-input"]').pressSequentially(message)
+    await page.locator('[data-test="chat-send"]').click()
+    await expect(page.locator('[data-test="chat-messages"]')).toContainText(message)
+
+    // now the coordinator logs in, her bell should say there is a new message about Ethan
+    await loginAs(coordinatorPage, 'coordinator')
+    await coordinatorPage.locator('[data-test="nav-bell"]').click()
+    const bellLine = coordinatorPage.locator('[data-test="nav-message"][href="/messages/c_1"]')
+    await expect(bellLine).toBeVisible()
+
+    // click it, the chat opens and the message is in there
+    await bellLine.click()
+    await expect(coordinatorPage.locator('[data-test="chat-messages"]')).toContainText(message)
+
+    // she has read it now, so the bell shouldnt show it anymore
+    await coordinatorPage.locator('[data-test="nav-bell"]').click()
+    await expect(bellLine).toHaveCount(0)
   })
 
-  test('child list loads and shows the parent\'s children', async ({ page }) => {
-    // Ms Grace has Ethan and Mia — both should appear in the sidebar
-    const items = page.locator('[data-test="child-item"]')
-    await expect(items).toHaveCount(2)
+  // Test case 2: Verify that a reply from the coordinator reaches the parent and the bell tells her.
+  test('a reply from the coordinator reaches the parent', async ({ page, context }) => {
+    const parentPage = await context.newPage()
+
+    // the coordinator replies in Ethan's chat
+    await loginAs(page, 'coordinator')
+    await page.goto('/messages/c_1')
+    const reply = `Reply from the coordinator ${Date.now()}`
+    await page.locator('[data-test="chat-input"]').pressSequentially(reply)
+    await page.locator('[data-test="chat-send"]').click()
+    await expect(page.locator('[data-test="chat-messages"]')).toContainText(reply)
+
+    // then the parent logs in and her bell should show a new message about Ethan
+    await loginAs(parentPage, 'parent')
+    await parentPage.locator('[data-test="nav-bell"]').click()
+    const bellLine = parentPage.locator('[data-test="nav-message"][href="/messages/c_1"]')
+    await expect(bellLine).toBeVisible()
+
+    // click it, the chat opens and the reply is there
+    await bellLine.click()
+    await expect(parentPage.locator('[data-test="chat-messages"]')).toContainText(reply)
   })
 
-  test('chat thread area is visible', async ({ page }) => {
-    await expect(page.locator('[data-test="chat-messages"]')).toBeVisible()
-  })
+  // Test case 3: Verify that each child has their own chat, so a message about Ethan doesnt show up in Mia's chat.
+  test('each child has a separate chat', async ({ page }) => {
+    // the parent sends a message in Ethan's chat
+    await loginAs(page, 'parent')
+    await page.goto('/messages/c_1')
+    const message = `Only about Ethan ${Date.now()}`
+    await page.locator('[data-test="chat-input"]').pressSequentially(message)
+    await page.locator('[data-test="chat-send"]').click()
+    await expect(page.locator('[data-test="chat-messages"]')).toContainText(message)
 
-  test('switching children updates the active thread', async ({ page }) => {
-    // Click the second child in the list (Mia)
+    // Mia is the second child, her chat shouldnt have it
     await page.locator('[data-test="child-item"]').nth(1).click()
     await expect(page).toHaveURL(/\/messages\/c_7/)
-    await expect(page.locator('[data-test="chat-messages"]')).toBeVisible()
-  })
+    await expect(page.locator('[data-test="chat-messages"]')).not.toContainText(message)
 
-  // Mutates DB: writes a Message document via POST /messages.
-  test('parent can send a message and it appears in the thread', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === 'mobile', 'state-mutating — runs on chromium only')
-
-    const msg = `Parent test message ${Date.now()}`
-    // pressSequentially fires real keyboard events, ensuring Vue v-model updates draft
-    await page.locator('[data-test="chat-input"]').click()
-    await page.locator('[data-test="chat-input"]').pressSequentially(msg)
-    await expect(page.locator('[data-test="chat-send"]')).toBeEnabled()
-    await page.locator('[data-test="chat-send"]').click()
-
-    // The message must appear in the thread immediately after sending
-    await expect(page.locator('[data-test="chat-messages"]')).toContainText(msg)
-  })
-})
-
-test.describe('Messages — coordinator', () => {
-  test('coordinator sees the same thread as the parent', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === 'mobile', 'state-mutating — runs on chromium only')
-
-    // The parent send test ran first; the coordinator should now see that message
-    await loginAs(page, 'coordinator')
-    await page.goto('/messages')
-    await expect(page).toHaveURL(/\/messages\/c_/)
-    await expect(page.locator('[data-test="chat-messages"]')).toBeVisible()
-    // Thread contains at least one message (from seed data or the parent send test)
-    const msgs = page.locator('[data-test="chat-messages"]')
-    await expect(msgs).toBeVisible()
+    // go back to Ethan's chat and the message is still there
+    await page.locator('[data-test="child-item"]').nth(0).click()
+    await expect(page).toHaveURL(/\/messages\/c_1/)
+    await expect(page.locator('[data-test="chat-messages"]')).toContainText(message)
   })
 })

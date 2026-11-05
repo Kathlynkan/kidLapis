@@ -1,12 +1,3 @@
-// =============================================================
-// Reset MongoDB to the demo data:   pnpm seed
-// -------------------------------------------------------------
-// Deletes everything in YOUR database (from DB= in config.env) and loads
-// data/seed.json. Run it before demos; the E2E tests run it automatically.
-//
-// Dates in seed.json are shifted so the demo data is always "recent"
-// (otherwise every child would trigger "no session in 7 days").
-// =============================================================
 import { readFile } from 'node:fs/promises'
 import bcrypt from 'bcryptjs'
 import { connectDb, disconnectDb } from './db.js'

@@ -1,5 +1,3 @@
-<!-- Give homework to a child                            Owner: Ning Xuan
-  Route: /children/:id/homework/new -->
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -204,7 +202,7 @@ onMounted(() => { // autofill form if edit form
           </div>
           
           <div class="d-flex justify-content-end gap-2 mt-4">
-            <button type="button" class="btn btn-outline-secondary" @click="router.back()">Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="router.back()">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="saving" data-test="hw-submit">
               {{ isEdit ? 'Save Changes' : 'Assign Homework' }}
             </button>

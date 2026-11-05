@@ -1,7 +1,3 @@
-// =============================================================
-// Gamification rules                          Owner: Jachin
-// =============================================================
-
 // Each badge is a kueh. The picture is in public/child_badges_images/<image>.webp
 export const BADGES = [
   { id: 'first-quest',    kueh: 'Kueh Bingka',  image: 'kueh-bingka',  name: 'First Quest',    rule: 'Complete your first quest',           fact: 'A golden baked cake with a soft, bouncy bite. A treat for a first try!' },

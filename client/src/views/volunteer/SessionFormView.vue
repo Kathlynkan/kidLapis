@@ -1,9 +1,3 @@
-<!-- =============================================================
-  Record / edit a session                              Owner: Ning Xuan
-  Routes:  /children/:id/sessions/new     (create)
-           /sessions/:sessionId/edit      (edit - same form)
-  -------------------------------------------------------------
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -495,7 +489,7 @@ onMounted(() => { // autofill form if edit form
 
           <div class="d-flex justify-content-end gap-2 mt-4">
             <!-- right-aligned buttons with gap in between and top margin -->
-            <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="saving" data-test="session-submit">
               {{ isEdit ? 'Save Changes' : 'Save Session' }}
             </button>

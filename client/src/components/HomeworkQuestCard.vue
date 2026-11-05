@@ -1,26 +1,22 @@
-<!-- HomeworkQuestCard - homework shown as a "quest".     Owner: Jachin
-     mode "child": the child's gamified view. mode "volunteer": the volunteer checks or removes it.
-     The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue -->
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, daysSince, subjectStyle } from '@/utils/format'
-import { HOMEWORK_STATUS } from '@/utils/constants'
-import '@/css/main/components.css' // the look of the small parts
-import '@/css/main/labels.css' // the capital-letter captions
+
+import '@/css/main/components.css'
+import '@/css/main/labels.css'
 
 const props = defineProps({
   homework: { type: Object, required: true },
   mode:     { type: String, default: 'child' },
   busy:     { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false }, // true = no Mark as Checked / Return / Edit / Delete buttons
 })
 const emit = defineEmits(['submit', 'unsubmit', 'verify', 'reject', 'edit', 'delete'])
 
-const status = computed(() => HOMEWORK_STATUS[props.homework.status])
 const isOverdue = computed(
   () => props.homework.status === 'assigned' && daysSince(props.homework.dueDate) > 0,
 )
 
-// where the homework is now, for the volunteer's view: late, todo, waiting (to be checked) or done
 const state = computed(() => {
   if (props.homework.status === 'verified') return 'done'
   if (props.homework.status === 'submitted') return 'waiting'
@@ -74,8 +70,7 @@ const showDesc = computed(() => props.mode === 'volunteer' || props.homework.sta
 
 const expanded = ref(false)
 const showDeleteModal = ref(false)
-
-function handleDelete() { showDeleteModal.value = true }
+function handleDelete()  { showDeleteModal.value = true }
 function confirmDelete() { emit('delete', props.homework.id); showDeleteModal.value = false }
 function cancelDelete()  { showDeleteModal.value = false }
 </script>
@@ -151,7 +146,7 @@ function cancelDelete()  { showDeleteModal.value = false }
     </div>
 
     <!-- volunteer actions -->
-    <div v-if="mode === 'volunteer' && homework.status !== 'verified'"
+    <div v-if="mode === 'volunteer' && !readonly && homework.status !== 'verified'"
       class="mt-2 d-flex align-items-center gap-2">
       <template v-if="homework.status === 'submitted'">
         <button
@@ -189,7 +184,7 @@ function cancelDelete()  { showDeleteModal.value = false }
 
   <!-- Delete confirm modal -->
   <Teleport to="body">
-      <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
+    <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -199,8 +194,8 @@ function cancelDelete()  { showDeleteModal.value = false }
             <p>Are you sure you want to delete this homework?</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="cancelDelete">
-              <i class="bi bi-x-circle"></i> Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="cancelDelete">
+              Cancel</button>
             <button type="button" class="btn btn-danger btn-sm" @click="confirmDelete">
               <i class="bi bi-trash"></i> Delete</button>
           </div>
@@ -275,26 +270,30 @@ function cancelDelete()  { showDeleteModal.value = false }
   font-weight: 600;
 }
 
-/* the two notes sit on the left, as wide as their words */
-.quest-returned,
-.quest-late-warn {
-  align-self: flex-start;
-}
+.quest-returned { align-self: flex-start; }
 
-.quest-late-info {
-  background: #FFE082;
-  color: #5C3D00;
-  border: 1.5px solid #F5B840;
-  border-radius: 99px;
+.quest-reject-message {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #FEF0F0;
+  color: #7A3030;
   font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  align-self: flex-start;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
-.quest-late-penalty {
-  color: #e87a6e;
-  font-weight: 600;
+.quest-read-more {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8D7F77;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 </style>

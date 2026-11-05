@@ -1,22 +1,13 @@
-<!-- =============================================================
-  Weekly schedule (timetable)                         Owner: Yu Xuan
-  Route: /coordinator/schedule
-  -------------------------------------------------------------
-  Rows = volunteers, columns = days. Shaded cells = volunteer not free.
-  The grid itself is components/WeekGrid.vue, shared with the dashboard, so both look the same.
-  "+ Add" -> pick child + start time -> PUT /matchmaking/:childId/assign
-  "x" on a session -> removes just that day (unassign with day)
-  The server blocks double-bookings (409) and days the volunteer isn't free.
-  A new session is a REQUEST: it shows as "Pending" until the volunteer accepts it
-  (Kai Sen, routes/requests.js). Declined requests are not shown.
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
+import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 // Start times every 30 minutes from 09:00 to 19:30.
 const TIMES = []
@@ -57,13 +48,17 @@ onMounted(async () => {
   }
   window.addEventListener('keydown', onKeydown)
 })
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
+
+useScheduleChanged(loadData, { isLoading: loading })
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()
 }
 
-const firstName = (name) => name.split(' ')[0]
 
 // Accepted weekly sessions, and requests still waiting for the volunteer.
 const countSlots = (test) => children.value.reduce((n, c) => n + (c.schedule || []).filter(test).length, 0)
@@ -84,7 +79,7 @@ const unscheduled = computed(() => {
   return list
 })
 
-// ---------- Add a session ----------
+// Add a session
 
 // Children to offer: unassigned first, then best skill match for this volunteer.
 // Children already booked (or requested) with this volunteer on this day are left out;
@@ -129,6 +124,12 @@ function openAdd(volunteer, day) {
   formError.value = ''
 }
 
+// Like Bootstrap's own dialogs: the page behind the dialog doesn't scroll while it's open.
+// (On a phone, a page that moves underneath also moves the dialog away from where you tap.)
+watch(adding, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+
 function closeAdd() {
   adding.value = null
 }
@@ -152,7 +153,7 @@ async function submitAdd() {
   }
 }
 
-// ---------- Remove a session ----------
+// Remove a session
 
 // Removes one day (or cancels a pending request for it).
 async function removeSlot(volunteer, day, slot) {
@@ -174,8 +175,8 @@ async function removeSlot(volunteer, day, slot) {
 </script>
 
 <template>
-  <div class="container py-4">
-    <PageHeader title="Weekly schedule" subtitle="Who sees which child, on which day, at what time." />
+  <div class="container py-4 coordinatorpage">
+    <PageHeader title="Weekly Schedule" subtitle="Who sees which child, on which day, at what time." />
 
     <StateMessage v-if="loading" type="loading" />
     <StateMessage v-else-if="error" type="error" :message="error" />
@@ -193,7 +194,7 @@ async function removeSlot(volunteer, day, slot) {
 
       <div v-if="actionError" class="alert alert-danger py-2 small">{{ actionError }}</div>
 
-      <div class="cb-card p-2">
+      <div class="t-card p-2">
         <WeekGrid
           editable
           :volunteers="volunteers"
@@ -205,8 +206,8 @@ async function removeSlot(volunteer, day, slot) {
       </div>
 
       <!-- Assigned but not on the timetable yet -->
-      <div v-if="unscheduled.length" class="cb-card p-3 mt-3" data-test="unscheduled">
-        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned without a day</h2>
+      <div v-if="unscheduled.length" class="t-card p-3 mt-3" data-test="unscheduled">
+        <h2 class="h6"><i class="bi bi-calendar-x me-2"></i>Assigned Without a Day</h2>
         <p class="small text-muted-cb mb-2">
           These pairs are assigned but have no session on the timetable. Use "+ Add" to give them a day and time.
         </p>
@@ -216,7 +217,9 @@ async function removeSlot(volunteer, day, slot) {
       </div>
     </template>
 
-    <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue) -->
+    <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue).
+         Teleport puts it at the end of <body>, so no wrapper on the page can move it. -->
+    <Teleport to="body">
     <template v-if="adding">
       <div
         class="modal d-block"
@@ -230,7 +233,7 @@ async function removeSlot(volunteer, day, slot) {
           <form class="modal-content" data-test="add-slot-form" @submit.prevent="submitAdd">
             <div class="modal-header">
               <h2 id="add-title" class="modal-title h6">
-                Add a session · {{ adding.volunteer.name }} · {{ adding.day }}
+                Add a Session · {{ adding.volunteer.name }} · {{ adding.day }}
               </h2>
               <button type="button" class="btn-close" aria-label="Close" :disabled="saving" @click="closeAdd"></button>
             </div>
@@ -259,12 +262,12 @@ async function removeSlot(volunteer, day, slot) {
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" :disabled="saving" @click="closeAdd">
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="closeAdd">
                 Cancel
               </button>
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="t-btn"
                 :disabled="!form.childId || !form.time || saving"
                 data-test="add-submit"
               >
@@ -276,9 +279,9 @@ async function removeSlot(volunteer, day, slot) {
       </div>
       <div class="modal-backdrop show"></div>
     </template>
+    </Teleport>
   </div>
 </template>
-
 <style scoped>
 .legend {
   display: inline-flex;

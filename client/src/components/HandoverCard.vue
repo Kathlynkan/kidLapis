@@ -1,10 +1,3 @@
-<!-- =============================================================
-  HandoverCard - the AI summary box.                  Owner: Yuqi
-    volunteer / coordinator (ChildProfileView) -> "Handover Notes" for the next session
-    parent (ParentHomeView)                -> the weekly summary, with arrows to look at earlier weeks
-                                              (the card sends 'change-week' and ParentHomeView loads that week)
-  (the server also picks the summary by role, so both always match)
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth' // the logged-in user
@@ -43,12 +36,16 @@ const isParent = computed(() => auth.role === 'parent')
 // the rows to show
 const rows = computed(() => (isParent.value ? PARENT_ROWS : VOLUNTEER_ROWS))
 
+// label and text widths: the parent card is full width, the volunteer card is half width (next to the chart)
+const keyClass = computed(() => (isParent.value ? 'col-sm-3 col-lg-2' : 'col-sm-4'))
+const valueClass = computed(() => (isParent.value ? 'col-sm-9 col-lg-10' : 'col-sm-8'))
+
 // the title: 'Handover Notes', or e.g. 'Last week at student care'
 const title = computed(() => {
   if (!isParent.value) return 'Handover Notes'
   let week = 'This Week'
   if (props.handover && props.handover.weekTitle) {
-    week = props.handover.weekTitle // 'This week', 'Last week' or 'Latest week'
+    week = props.handover.weekTitle // e.g. 'This week', 'Last week', '2 weeks ago'
   }
   return `${week} at Student Care`
 })
@@ -56,7 +53,7 @@ const title = computed(() => {
 // the small badge next to the title
 const sourceText = computed(() => {
   if (props.handover && props.handover.source === 'ai') return 'AI summary'
-  return isParent.value ? 'From the session notes' : 'From last session'
+  return isParent.value ? 'From the Session Notes' : 'From Last Session'
 })
 
 const loadingText = computed(() => (isParent.value ? 'Getting the update...' : 'Preparing handover...'))
@@ -64,7 +61,7 @@ const emptyText = computed(() => (isParent.value ? 'No summary yet.' : 'No hando
 
 const open = ref(true)
 
-// ---------- parents: step through the weeks that have sessions ----------
+// parents: step through the weeks that have sessions
 // handover.weeks = ['2026-10-26', '2026-10-19', ...] (Mondays, newest first, at most 8)
 // handover.weekStart = the Monday of the week shown
 const weekList = computed(() => {
@@ -152,10 +149,10 @@ const laterWeek = computed(() => {
           <template v-for="row in rows" :key="row.key">
             <!-- skip a row with nothing to say -->
             <template v-if="handover[row.key] && handover[row.key] !== '-'">
-              <dt class="col-12 col-sm-3 col-lg-2 small handover-key">
+              <dt class="col-12 small handover-key" :class="keyClass">
                 <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
               </dt>
-              <dd class="col-12 col-sm-9 col-lg-10 fw-semibold handover-value">
+              <dd class="col-12 fw-semibold handover-value" :class="valueClass">
                 {{ handover[row.key] }}
               </dd>
             </template>

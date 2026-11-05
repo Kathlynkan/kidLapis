@@ -1,12 +1,4 @@
-// Child journey: quests and leaderboard.              Owner: Jachin
-// Seed data used:
-//   child@kidslapis.sg = Ethan (c_1)
-//   h_1 "Fraction addition worksheet" is status='assigned' at the start of each run
-//   h_2 is status='verified' (Ethan has 120 points in seed)
-//
-// Note: tests run sequentially across projects (chromium then mobile) against one
-// shared database. The submit test mutates h_1, so it is marked chromium-only.
-// Mobile tests check structure and read-only behaviour only.
+// Owner: Jachin
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
@@ -16,17 +8,41 @@ test.describe('Child quests', () => {
     await expect(page).toHaveURL(/\/child$/)
   })
 
-  test('My Quests page shows the tab bar, quests and completed toggle', async ({ page }) => {
-    await expect(page.getByRole('tab', { name: /Quests/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Completed quests/i })).toBeVisible()
-    // Ethan always has homework in some state regardless of prior test mutations
-    await expect(page.locator('[data-test="homework-card"]').first()).toBeVisible()
+  // The submit button is status-driven: assigned homework shows it, verified never does.
+  // Clicking "Past quests" reveals verified cards so both statuses are on screen at once.
+  test('submit button only appears on assigned homework — verified homework never shows it', async ({ page }) => {
+    await page.locator('[data-test="homework-card"]').first().waitFor({ state: 'visible' })
+
+    // Reveal verified (past) quests so the page has cards in multiple statuses
+    await page.getByRole('button', { name: /Past quests/i }).click()
+
+    const cards = page.locator('[data-test="homework-card"]')
+    const btns  = page.locator('[data-test="submit-quest-btn"]')
+
+    await expect(btns.first()).toBeVisible()       // at least one assigned quest exists
+    const cardCount = await cards.count()
+    const btnCount  = await btns.count()
+    expect(btnCount).toBeLessThan(cardCount)       // verified cards carry no submit button
   })
 
   // Mutates h_1 from 'assigned' -> 'submitted'; only run once on chromium so the
   // mobile project (which runs after) is not left with zero assigned quests.
-  test('clicking I\'m done! submits the quest and shows it as waiting for check', async ({ page }, testInfo) => {
+  test('submitting a quest decrements the submit count and shows the undo button', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'state-mutating test runs on chromium only')
+
+    // Seed gives Ethan pre-existing earned badges. With empty localStorage the app
+    // queues all as "newly unlocked" on mount, blocking the submit button.
+    // Set both localStorage keys so the cross-session detection skips all popups:
+    //   seen-badges-v2-c_1  — tells queueUnseen every badge is already dismissed
+    //   earned-badges-c_1   — tells cross-session logic no badges are "newly earned"
+    //                         (without this key the app strips seenBadgeIds on reload)
+    const ALL_BADGE_IDS = ['first-quest', 'streak-3', 'quest-champion', 'bookworm', 'century', 'rising-star']
+    await page.evaluate((ids) => {
+      localStorage.setItem('seen-badges-v2-c_1', JSON.stringify(ids))
+      localStorage.setItem('earned-badges-c_1',  JSON.stringify(ids))
+    }, ALL_BADGE_IDS)
+    await page.reload()
+    await page.locator('[data-test="homework-card"]').first().waitFor({ state: 'visible' })
 
     await expect(page.locator('[data-test="submit-quest-btn"]').first()).toBeVisible()
     const todoBefore = await page.locator('[data-test="submit-quest-btn"]').count()
@@ -34,7 +50,7 @@ test.describe('Child quests', () => {
     await page.locator('[data-test="submit-quest-btn"]').first().click()
 
     await expect(page.locator('[data-test="submit-quest-btn"]')).toHaveCount(todoBefore - 1)
-    await expect(page.getByText('Done - waiting for check').first()).toBeVisible()
+    await expect(page.locator('[data-test="undo-quest-btn"]').first()).toBeVisible()
   })
 
   test('badge shelf renders all expected badges', async ({ page }) => {
@@ -44,7 +60,7 @@ test.describe('Child quests', () => {
   })
 })
 
-// ── Test Case 1: Quest verification ──────────────────────────────────────────
+// Test Case 1: Quest verification
 // Feature: volunteer verifies a submitted quest (PUT /homework/:id/verify).
 // DB involvement: writes homework.status → 'verified' and awards berry points to the child.
 // Depends on the 'clicking I\'m done!' test above having run first on chromium,
@@ -71,7 +87,7 @@ test.describe('Quest verification (volunteer)', () => {
   })
 })
 
-// ── Test Case 2: API failure on ChildHomeView ─────────────────────────────────
+// Test Case 2: API failure on ChildHomeView
 // Feature: the child's "My Quests" page handles a server error gracefully.
 // DB involvement: the page normally reads from MongoDB via GET /homework and
 //   GET /children/:id. Here we simulate the server being down (500) to verify

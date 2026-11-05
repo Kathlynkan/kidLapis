@@ -1,15 +1,8 @@
-<!-- The weekly timetable. ONE component for both pages, so they always look the same.   Owner: Yu Xuan
-  Dashboard (read-only, no buttons):  <WeekGrid :volunteers="volunteers" :children="children" />
-  Schedule page (edit):   <WeekGrid editable :volunteers="..." :children="..." :busy-key="busyKey"
-                                    @add="(volunteer, day) => ..." @remove="(volunteer, day, slot) => ..." />
-  Rows = volunteers, columns = Mon-Fri (+ Sat/Sun only if someone works weekends).
-  Pending requests (waiting for the volunteer to accept) show with a dashed outline and a
-  "Pending" tag. Declined requests are not shown.
--->
 <script setup>
 import { computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
 import { isActive, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -21,7 +14,6 @@ const emit = defineEmits(['add', 'remove'])
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Tue'
-const firstName = (name) => (name || '').split(' ')[0]
 
 // Sat/Sun only appear when a volunteer is free or booked then.
 const days = computed(() => {
@@ -51,6 +43,17 @@ const slotsByCell = computed(() => {
 
 const slotsFor = (v, day) => slotsByCell.value[`${v.id}|${day}`] || []
 const isFree = (v, day) => (v.availability || []).includes(day)
+
+// every row is as tall as the fullest day, so all the boxes are the same size
+const PILL_HEIGHT = 36 // one session pill and the space under it
+const ADD_HEIGHT = 34 // the "+ Add" button (Schedule page only)
+const rowHeight = computed(() => {
+  let most = 0
+  for (const v of props.volunteers) {
+    for (const d of days.value) most = Math.max(most, isFree(v, d) ? slotsFor(v, d).length : 0)
+  }
+  return Math.max(84, 18 + most * PILL_HEIGHT + (props.editable ? ADD_HEIGHT : 0))
+})
 </script>
 
 <template>
@@ -66,7 +69,7 @@ const isFree = (v, day) => (v.availability || []).includes(day)
         </tr>
       </thead>
       <tbody>
-        <tr v-for="v in volunteers" :key="v.id" data-test="schedule-row">
+        <tr v-for="v in volunteers" :key="v.id" :style="{ height: rowHeight + 'px' }" data-test="schedule-row">
           <!-- the volunteer: photo, name, subjects -->
           <th scope="row" class="wg-vol-col">
             <span class="wg-vol">
@@ -149,7 +152,10 @@ const isFree = (v, day) => (v.availability || []).includes(day)
 
 <style scoped>
 .wg-scroll {
+  position: relative; /* keeps the hidden "Not available" labels inside the scroll box */
   overflow-x: auto; /* scrolls sideways on small screens instead of squashing */
+  max-width: 100%;
+  min-width: 0; /* lets the grid shrink inside the card, so only the grid scrolls, not the whole page */
 }
 .wg {
   width: 100%;

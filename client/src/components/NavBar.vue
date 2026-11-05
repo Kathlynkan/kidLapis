@@ -1,14 +1,3 @@
-<!-- =============================================================
-  NavBar — shows different links for each role.      Owner: Kai Sen
-  The logo and the links are on the left, and the user is on the right (the name opens the profile page, where the user logs out).
-  On a small screen the links and the user hide behind a menu button.
-  The bell (volunteers and parents) stays outside the menu, so it is visible on a phone too.
-    Volunteer: - session requests: the coordinator assigned them a new day in Matchmaking -> the Session
-                 requests page, where they Accept / Decline (RequestsView, routes/requests.js)
-               - quests to check: their children pressed "I'm done!" on a quest
-    Parent:    - new updates: sessions the parent hasn't seen yet, so the weekly summary has changed
-                 -> opens that child on the parent page, which marks them seen
-============================================================= -->
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -32,7 +21,6 @@ const menuOpen = ref(false) // on a small screen the menu is hidden until this i
 watch(() => route.fullPath, () => {
   menuOpen.value = false
   bellOpen.value = false
-  fetchUnread()
   fetchPhoto()
   fetchBell()
 })
@@ -108,20 +96,31 @@ async function fetchPhoto() {
   }
 }
 
-// how many messages the user has not read yet (shown next to Messages)
-const unreadTotal = ref(0)
+// the messages the user has not read yet, one line for each child (shown in the bell)
+const messageUpdates = ref([]) // [{ childId, childName, count }]
+const unreadTotal = computed(() => messageUpdates.value.reduce((n, m) => n + m.count, 0))
 
 async function fetchUnread() {
-  if (!auth.isLoggedIn || !['coordinator', 'parent'].includes(auth.role)) return
+  if (!auth.isLoggedIn || !['coordinator', 'parent'].includes(auth.role)) {
+    messageUpdates.value = []
+    return
+  }
   try {
-    const res = await api.get('/messages/unread')
-    unreadTotal.value = Object.values(res.data).reduce((a, b) => a + b, 0)
+    const counts = (await api.get('/messages/unread')).data
+    const childIds = Object.keys(counts).filter((id) => counts[id] > 0)
+    if (childIds.length === 0) {
+      messageUpdates.value = []
+      return
+    }
+    const children = (await api.get('/children')).data
+    const nameOf = Object.fromEntries(children.map((c) => [c.id, c.name]))
+    messageUpdates.value = childIds.map((id) => ({ childId: id, childName: nameOf[id] || 'a child', count: counts[id] }))
   } catch {
-    // the number is not important, so we ignore errors
+    // the messages are not important here, so we ignore errors and keep the old list
   }
 }
 
-// ---------- The bell (volunteers and parents) ----------
+// The bell (volunteers and parents)
 // Volunteer:
 //   1. Session requests: new days the coordinator assigned in Matchmaking (GET /requests).
 //   2. Quests a child pressed "I'm done!" on (status 'submitted'): the volunteer needs to check them.
@@ -148,23 +147,60 @@ const bellCount = computed(
   () =>
     requests.value.length +
     questsToCheck.value.length +
-    parentUpdates.value.reduce((n, u) => n + u.count, 0) +
-    unreadNotices.value,
+    parentUpdates.value.length + // one per child ("Ethan: 9 new sessions" counts as 1)
+    unreadNotices.value +
+    unreadTotal.value,
 )
+
+// The bell rings until the user opens it once. After that it only shows the number,
+// and rings again only when something new arrives (the count goes above what they saw).
+// Saved in sessionStorage so a page refresh doesn't start the ringing again.
+const seenKey = computed(() => `bellSeen:${auth.user?.id || auth.user?.email || ''}`)
+const bellLoaded = ref(false) // the count is 0 while the page loads, so only compare once it has loaded
+function readSeen() {
+  try {
+    return Number(sessionStorage.getItem(seenKey.value)) || 0
+  } catch {
+    return 0
+  }
+}
+const seenCount = ref(readSeen())
+watch(seenKey, () => {
+  // a different user logged in
+  seenCount.value = readSeen()
+  bellLoaded.value = false
+})
+function saveSeen(n) {
+  seenCount.value = n
+  try {
+    sessionStorage.setItem(seenKey.value, String(n))
+  } catch {
+    // storage blocked: the bell just rings again after a refresh
+  }
+}
+// items were dealt with (count went down): remember the lower number, so the next new one rings
+watch(bellCount, (n) => {
+  if (bellLoaded.value && n < seenCount.value) saveSeen(n)
+})
+const bellRinging = computed(() => bellLoaded.value && bellCount.value > seenCount.value)
 
 // Open/close the bell. Opening it marks the updates as read (the count drops, they stay listed
 // while the bell is open). Closing it - with the bell, a click elsewhere or a page change - removes them.
 async function toggleBell() {
   bellOpen.value = !bellOpen.value
+  if (bellOpen.value) saveSeen(bellCount.value) // checked once: stop ringing, keep the number
   if (bellOpen.value && unreadNotices.value) {
     const now = new Date().toISOString()
     notices.value = notices.value.map((n) => (n.readAt ? n : { ...n, readAt: now }))
-    api.put('/notifications/read').catch(() => {})
+    // server mark happens on close, not open — keeps items visible while bell is open
   }
 }
 
 watch(bellOpen, (open) => {
-  if (!open) notices.value = notices.value.filter((n) => !n.readAt)
+  if (!open) {
+    if (notices.value.some((n) => n.readAt)) api.put('/notifications/read').catch(() => {})
+    notices.value = notices.value.filter((n) => !n.readAt)
+  }
 })
 
 // "3 Nov, 14:05" for an update
@@ -172,6 +208,7 @@ const noticeTime = (iso) =>
   new Date(iso).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 async function fetchBell() {
+  const unreadDone = fetchUnread() // the unread messages are part of the bell
   if (!hasBell.value) {
     requests.value = []
     questsToCheck.value = []
@@ -179,11 +216,21 @@ async function fetchBell() {
     notices.value = []
     return
   }
+  await loadBellLists()
+  await unreadDone
+  bellLoaded.value = true // everything is in, so the ringing can be worked out
+}
+
+async function loadBellLists() {
   try {
     const unread = (await api.get('/notifications')).data
-    // While the bell is open, keep showing the ones just read (they disappear when it closes)
-    const justRead = bellOpen.value ? notices.value.filter((n) => n.readAt && !unread.some((u) => u.id === n.id)) : []
-    notices.value = [...unread, ...justRead]
+    if (bellOpen.value) {
+      // Bell is open and server hasn't been marked yet — preserve local readAt so items stay visible
+      const readMap = new Map(notices.value.filter((n) => n.readAt).map((n) => [n.id, n.readAt]))
+      notices.value = unread.map((n) => (readMap.has(n.id) ? { ...n, readAt: readMap.get(n.id) } : n))
+    } else {
+      notices.value = unread
+    }
   } catch {
     // keep the old list
   }
@@ -240,6 +287,17 @@ function closeBellOnOutsideClick(event) {
 let bellTimer = null
 let bellSocket = null
 
+function refreshEverywhere() {
+  window.dispatchEvent(new Event('bell-refresh'))
+}
+
+// Clicking a request in the bell: close the bell and reload the Requests page. If the volunteer is
+// already on that page, the link does not change the address, so without this nothing would happen
+function openRequest() {
+  bellOpen.value = false
+  refreshEverywhere()
+}
+
 // Coordinators have no bell, but use the same live connection: when a volunteer accepts or
 // declines a session, the server sends 'schedule-changed', and the open coordinator page
 // (Dashboard, Matchmaking, Schedule) reloads its data (they listen for the window event).
@@ -250,16 +308,15 @@ function connectBellSocket() {
   if ((!hasBell.value && !isCoordinator) || !auth.token) return
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000'
   bellSocket = io(apiBase, { auth: { token: auth.token }, transports: ['websocket', 'polling'] })
-  bellSocket.on('bell-refresh', fetchBell)
+  bellSocket.on('bell-refresh', refreshEverywhere) 
   bellSocket.on('schedule-changed', () => window.dispatchEvent(new Event('schedule-changed')))
 }
 
 onMounted(() => {
-  fetchUnread()
   fetchPhoto()
   fetchBell()
   connectBellSocket()
-  bellTimer = setInterval(fetchBell, 60000)
+  bellTimer = setInterval(refreshEverywhere, 60000)
   document.addEventListener('click', closeBellOnOutsideClick)
   window.addEventListener('bell-refresh', fetchBell)
 })
@@ -299,7 +356,7 @@ watch(
           data-test="nav-bell"
           @click="toggleBell"
         >
-          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellCount > 0 }]"></i>
+          <i class="bi" :class="[bellCount ? 'bi-bell-fill' : 'bi-bell', { 'bell-ringing': bellRinging }]"></i>
           <span v-if="bellCount" class="lapis-bell-count" data-test="nav-bell-count">
             {{ bellCount }}
           </span>
@@ -336,11 +393,12 @@ watch(
                 :to="{ name: 'volunteer-requests' }"
                 class="lapis-bell-item"
                 data-test="nav-request"
+                @click="openRequest"
               >
                 <i class="bi bi-calendar-plus"></i>
                 <span>
-                  <b>{{ r.childName }}</b> ({{ r.level }})<br>
-                  Every <b>{{ r.day }}</b>
+                  <b>{{ r.changedFrom ? 'Change request:' : 'Pending request:' }}</b> {{ r.childName }} ({{ r.level }})<br>
+                  <template v-if="r.changedFrom">{{ r.changedFrom }} → </template>Every <b>{{ r.day }}</b>
                   <template v-if="r.time"> at {{ r.time }}</template>
                 </span>
               </RouterLink>
@@ -362,7 +420,7 @@ watch(
 
           <!-- PARENT -->
           <template v-else-if="auth.role === 'parent'">
-            <div class="lapis-bell-title">Updates</div>
+            <div class="lapis-bell-title">New Sessions</div>
             <p v-if="parentUpdates.length === 0" class="lapis-bell-empty">You're all caught up.</p>
             <RouterLink
               v-for="u in parentUpdates"
@@ -379,6 +437,22 @@ watch(
               </span>
             </RouterLink>
           </template>
+
+          <!-- COORDINATOR AND PARENT: the messages nobody has read yet (after the updates) -->
+          <template v-if="['coordinator', 'parent'].includes(auth.role)">
+            <div class="lapis-bell-title">Messages</div>
+            <p v-if="messageUpdates.length === 0" class="lapis-bell-empty">No new messages.</p>
+            <RouterLink
+              v-for="m in messageUpdates"
+              :key="m.childId"
+              :to="{ name: 'messages', params: { childId: m.childId } }"
+              class="lapis-bell-item"
+              data-test="nav-message"
+            >
+              <i class="bi bi-chat-dots"></i>
+              <span>{{ m.count }} new message{{ m.count === 1 ? '' : 's' }} about <b>{{ m.childName }}</b></span>
+            </RouterLink>
+          </template>
         </div>
       </div>
 
@@ -393,7 +467,6 @@ watch(
         <div class="lapis-links">
           <RouterLink v-for="link in links" :key="link.to" class="lapis-nav-link" :class="{ open: isOpen(link) }" :to="link.to">
             {{ link.label }}
-            <span v-if="link.to === '/messages' && unreadTotal > 0" class="lapis-badge">{{ unreadTotal }}</span>
             <span
               v-if="link.to === '/volunteer/requests' && requests.filter(r => r.status === 'pending').length > 0"
               class="lapis-badge"
@@ -421,7 +494,7 @@ watch(
 
         <div v-else class="lapis-user">
           <RouterLink class="lapis-button" to="/login">Log in</RouterLink>
-          <RouterLink class="lapis-button lapis-button-filled" to="/signup">Sign up</RouterLink>
+          <RouterLink class="lapis-button lapis-button-filled" to="/signup">Sign Up</RouterLink>
         </div>
       </div>
     </div>
@@ -746,22 +819,6 @@ watch(
   display: block;
   color: #8D97A6;
   font-size: 11px;
-}
-
-/* "Accept or decline ->" under the session requests */
-.lapis-bell-more {
-  display: block;
-  margin: 0 0 8px;
-  padding: 4px 8px 8px;
-  border-bottom: 1px solid #CFE0DE;
-  color: #2F6F5A;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.lapis-bell-more:hover {
-  text-decoration: underline;
 }
 
 /* the menu button: only shown on a small screen */

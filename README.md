@@ -1,115 +1,110 @@
-# Kids Lapis — Student Care Development & Progress Tracking
+# Kids Lapis
 
-IS216 Web Application Development II — Group Project
+IS216 Web Application Development II, Group Project
 
-Parents whose children attend student care centres often have limited visibility into what actually happens during each session. The volunteers who work with children hold valuable observations — what the child is working on, how they are feeling, what approaches help — but this information rarely reaches parents in any useful form. Kids Lapis collects structured observations from volunteers and turns them into a clear, regularly-updated picture of each child's development that parents can actually read and act on.
+Kids Lapis is a web app for a student care centre, with a different view for coordinators, volunteers, parents and children.
 
-**Core flow:** Volunteer records session (academic progress, mood, struggles, what worked) → App stores history → Gemini AI summarises it in plain language → Parent sees a personalised update, charts, and mood timeline → Next volunteer is briefed and continues without losing context
+- Coordinators manage the children and volunteers, match volunteers to children based on their skills, set the weekly schedule, and see alerts for children who need attention.
+- Volunteers see their schedule, record each session (learning, scores, mood and social notes such as meals and activities), and assign homework.
+- Parents see how their child is doing through progress charts, the sessions and social notes, and an AI weekly summary. They can also message the coordinator.
+- Children complete homework as quests, earn stars and badges, and see a leaderboard.
 
-> 👉 **Team members: read [WORKLOAD.md](WORKLOAD.md) first.** It says who owns what. Then read [CONTRIBUTING.md](CONTRIBUTING.md) for the git workflow.
+The app uses Gemini to turn the session notes into a handover note for the next volunteer and a weekly update for parents.
 
-- **Deployed app:** _TODO (Kai Sen)_
-- **Video:** _TODO_
-- **Git repo:** _TODO (must be public)_
+Live app: https://kidlapis-2.onrender.com
 
----
+Git repo: https://github.com/Kathlynkan/kidLapis
 
-## Tech stack
+The live app is on Render's free plan, so the server goes to sleep when it is not used. The first log in may take up to a minute.
 
-| Layer | Tech (as taught in class) |
-|---|---|
-| Frontend | Vue 3 (`<script setup>`, Composition API), Vue Router, Pinia, Vite, pnpm |
-| Styling | Bootstrap 5 + Bootstrap Icons + our own `assets/main.css` design tokens |
-| HTTP | Axios (one shared instance in `src/services/api.js`) |
-| Backend | Node.js + Express (REST API, same style as the Week 5 blog service) |
-| Data store | MongoDB Atlas via Mongoose (models in `server/models/`). Demo data is loaded from `server/data/seed.json` with `pnpm seed`. |
-| External API | Google Gemini API (LLM handover and parent summaries), called from the server so the API key stays secret |
-| Charts | Chart.js + vue-chartjs |
-| Testing | Playwright (end-to-end, desktop + iPhone 6 viewport), Vitest (unit) |
+## Accounts
 
----
+All accounts use the password `password123`.
 
-## Set up and run (local)
-
-**You need:** Node.js **22.12 or newer** (`node -v`) and pnpm (`npm install -g pnpm`).
-
-Use **two terminals**: one for the API, one for the Vue app.
-
-### Step 0 — MongoDB Atlas (one-time)
-
-The team shares **one free Atlas cluster**, but each member uses **their own database name** for development.
-That way `pnpm seed` and the E2E tests (which reset the data) don't wipe each other's work.
-
-**Kai Sen does this once for the team:**
-1. Create a free **M0** cluster at https://cloud.mongodb.com. This is the same flow as `mongodb_guide.pptx` from class.
-2. **Database Access** → add a database user (username + password). One shared user for the team is fine.
-3. **Network Access** → *Add IP Address* → *Allow access from anywhere* (`0.0.0.0/0`). This is needed for the deployed server on Render, and for teammates on different Wi-Fi.
-4. **Connect → Drivers** → copy the connection string. Send it to the team **privately**, not in the repo.
-
-**Everyone:** put the string in `server/config.env` as `DB=...`.
-- Replace `<password>`.
-- Add your own database name after `.net/`, e.g. `...mongodb.net/kidslapis_yuqi?retryWrites=true&w=majority`.
-
-MongoDB creates the database the first time you run `pnpm seed`.
-
-### Terminal 1 — API server (http://localhost:8000)
-
-```bash
-cd server
-pnpm install
-cp config.env.example config.env     # Windows: copy config.env.example config.env
-#  -> edit config.env and set DB=... (Step 0)
-pnpm seed                            # loads the demo data into YOUR database
-pnpm dev
-```
-
-You should see `Connected to MongoDB database "kidslapis_<yourname>"`. Run `pnpm seed` again any time to reset the demo data.
-
-To look at the data, use **Atlas → Browse Collections** or **MongoDB Compass**: `users`, `children`, `sessions`, `homeworks`, `messages`, `handovers`, `decks`.
-
-To turn on the AI summary, paste a free Gemini key into `server/config.env` (`GEMINI_API_KEY=...`, get one at https://aistudio.google.com/apikey). Without a key the app still works: it falls back to a rule-based summary.
-
-### Terminal 2 — Vue app (http://localhost:5173)
-
-```bash
-cd client
-pnpm install
-pnpm dev
-```
-
-Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
-
-### Demo accounts (password for all: `password123`)
-
-| Role | Email | Notes |
+| Role | Email | Name |
 |---|---|---|
-| Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe |
-| Volunteer | `volunteer2@kidslapis.sg` | Daniel — Ethan, Meera, Ryan |
-| Volunteer | `volunteer3@kidslapis.sg` | Priya — Arjun |
-| Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
-| Parent | `parent@kidslapis.sg` | Ms Grace — parent of Ethan **and** Mia |
-| Parent | `parent2@kidslapis.sg` | Ravi — parent of Meera **and** Arjun |
-| Child | `child@kidslapis.sg` | Ethan |
-| Child | `child2@kidslapis.sg` | Meera |
+| Coordinator | coordinator@kidslapis.sg | Tan Mei Ling |
+| Volunteer | volunteer@kidslapis.sg | Aisha Rahman |
+| Volunteer | volunteer2@kidslapis.sg | Daniel Lim |
+| Volunteer | volunteer3@kidslapis.sg | Priya Nair |
+| Parent | parent@kidslapis.sg | Ms Grace Wong (Ethan and Mia) |
+| Parent | parent2@kidslapis.sg | Ravi Kumar (Meera and Arjun) |
+| Parent | parent3@kidslapis.sg | Linda Lee (Chloe) |
+| Parent | parent4@kidslapis.sg | Marcus Ong (Ryan and Sofia) |
+| Child | child@kidslapis.sg | Ethan |
+| Child | child2@kidslapis.sg | Meera |
 
-The demo data is built to trigger interesting cases:
+To sign up as a new parent, you need the child's 6-character child code (letters and numbers). The coordinator can find it on the Manage Children page.
 
-- Ethan's fractions improve from 1/5 to 4/5, but "common denominators" keeps coming back as a recurring struggle.
-- Ethan's mood has varied — parents can see the emotional trend alongside the academic one.
-- Chloe has had no session for 11 days — triggers a coordinator alert.
-- Sofia has no volunteer assigned — triggers an "unassigned child" alert.
-- Chloe also has overdue homework.
+## Setting up
 
----
+You need:
+- Node.js 22.12 or newer
+- pnpm (`npm install -g pnpm`)
+- A MongoDB Atlas connection string. You can create a free cluster at https://cloud.mongodb.com, add a database user, allow access from anywhere (0.0.0.0/0) under Network Access, then copy the connection string from Connect > Drivers.
+- A Gemini API key from https://aistudio.google.com/apikey. This is needed for the AI summaries, which are a main part of the app. If the key is missing or Gemini is not available, the app shows a simpler backup summary made from the last session instead.
+
+1. Clone the repo (or unzip the submitted folder):
+   ```
+   git clone https://github.com/Kathlynkan/kidLapis.git
+   cd kidLapis
+   ```
+
+2. Install the packages for the server and the client:
+   ```
+   cd server
+   pnpm install
+   cd ../client
+   pnpm install
+   ```
+
+3. Create a file called `config.env` in the `server` folder. It is not in the repo because it has passwords in it.
+   ```
+   DB=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/kidslapis?retryWrites=true&w=majority
+   GEMINI_API_KEY=<your Gemini API key>
+   ```
+   Fill in your own connection string and Gemini key. `kidslapis` after `.net/` is the database name, and MongoDB creates it when you seed.
+
+4. Load the demo data:
+   ```
+   cd server
+   pnpm seed
+   ```
+   You can run this again any time to reset the data. Note that it deletes everything in the database first.
+
+   The seed shifts the dates so the data always looks recent. The dates move forward on Fridays, so if you seed from Monday to Thursday, the latest sessions are from the week before.
+
+## Running the app
+
+Open two terminals.
+
+Terminal 1 (server, http://localhost:8000):
+```
+cd server
+pnpm dev
+```
+
+Terminal 2 (website, http://localhost:5173):
+```
+cd client
+pnpm dev
+```
+
+Then go to http://localhost:5173 and log in with one of the accounts above.
 
 ## Testing
 
-```bash
+### Unit and component tests (Vitest)
+
+These don't need the database or the servers.
+
+```
 cd client
-pnpm test:unit                         # Vitest unit + component tests (src/tests/<parent|child|volunteer|coordinator|shared>)
-pnpm exec playwright install chromium  # first time only
-pnpm test:e2e                          # Playwright E2E - starts API + Vue for you, re-seeds YOUR database
-pnpm exec playwright show-report       # open the HTML report
+pnpm exec vitest run
+```
+```
+cd server
+pnpm exec vitest run
 ```
 
 The first line is only needed the first time. Playwright starts the server and the website by itself. Each test runs twice, once on a desktop screen and once on an iPhone 6 sized screen.

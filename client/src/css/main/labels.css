@@ -1,9 +1,3 @@
-/* EXTERNAL CSS: the parent home, Messages, the volunteer home, one child's page and the coordinator pages. It is imported at the top of each of those files. */
-/* The small captions of the parent, Messages, volunteer and child pages: capital letters with a little space between the letters.
-   It is the same style as the form labels and the tags in main.css, so every page of the app reads the same.
-   The size and the weight of each caption stay in the file of its page.
-   The selectors start with body, so these rules win whatever order the css files load in. */
-
 body .parentpage .group-heading,
 body .parentpage .tile span,
 body .parentpage .row-tag,
@@ -16,12 +10,12 @@ body .messagespage .child-button,
 body .messagespage .unread-badge,
 body .messagespage .date-pill,
 body .coordinatorpage .chip,
+body .coordinatorpage .tag,
 body .coordinatorpage .tile-label,
 body .coordinatorpage .kv-key,
 body .coordinatorpage .fact-key,
 body .volunteerpage .tab,
 body .volunteerpage .pill,
-body .volunteerpage .needs-attention,
 body .volunteerpage .soft-button,
 body .role-volunteer .childprofilepage .back-link,
 body .role-coordinator .childprofilepage .back-link,
@@ -29,7 +23,6 @@ body .session-subject,
 body .quest-pill,
 body .quest-status,
 body .kueh-state,
-body .cake-season-badge,
 body .kueh-detail-badge {
   text-transform: uppercase;
   letter-spacing: 0.8px;

@@ -1,23 +1,4 @@
-/* EXTERNAL CSS: the Record / Edit a session form and the Give homework form. It is imported at the top of each of those files. */
-/* Styles for the forms a volunteer fills in: the Record / Edit a session form (SessionFormView.vue) and the Give homework form
-   (HomeworkAssignView.vue). Both pages have the class volunteerformpage.
-   The photo previews and the mood buttons just below are for everyone. Every other rule starts with .volunteerformpage
-   or .role-coordinator .volunteerformpage (a coordinator can edit a session). The colours are the variables (--cp-...) in volunteershared.css.
-   Only the look changes here: the fields, the layout and the buttons work as before.
-   Colours of the volunteer:
-     #213C31 dark green       text
-     #446C59 green            the title and the line under it
-     #4A735F deep green       the line of a box you are typing in, the Cancel link
-     #3E6B6A dark teal        the chosen mood
-     #B7D8D7 muted teal       the Save button, Choose Files, the chosen mood, the message at the top
-     #A3CAC8 deeper teal      the same buttons when you point at them
-     #EEDFA6 muted yellow     the skills the child struggled with
-     #C3D2CA                  the line around a box
-     #9BD3B2 mint             the lines between Academic and Social and above Cancel and Save
-     #8FA39A                  the grey of the example text in a box
-   Look: no card around the form, thin lines, small corners, a teal button. */
-
-/* ---------- the photo previews (for everyone who opens the form) ---------- */
+/* the photo previews (for everyone who opens the form) */
 
 .volunteerformpage .photo-thumb {
   width: 100px;
@@ -34,7 +15,7 @@
   opacity: 1;
 }
 
-/* ---------- the mood buttons: the face icon and the word on one line (for everyone who opens the form) ---------- */
+/* the mood buttons: the face icon and the word on one line (for everyone who opens the form) */
 
 .volunteerformpage .mood-option,
 .volunteerformpage .portion-option {
@@ -43,7 +24,7 @@
   gap: 6px;
 }
 
-/* ---------- the page: no card around the form ---------- */
+/* the page: no card around the form */
 
 .volunteerformpage form {
   border: 0;
@@ -71,7 +52,7 @@
   opacity: 1;
 }
 
-/* ---------- the boxes you type in ---------- */
+/* the boxes you type in */
 
 .volunteerformpage .form-label {
   color: var(--cp-text);
@@ -97,7 +78,7 @@
   box-shadow: 0 0 0 3px var(--cp-fill);
 }
 
-/* ---------- the mood: separate choices, the chosen one is teal ---------- */
+/* the mood: separate choices, the chosen one is teal */
 
 .volunteerformpage .btn-group {
   gap: 8px;
@@ -132,7 +113,7 @@
   font-weight: 700;
 }
 
-/* ---------- the plus and minus ---------- */
+/* the plus and minus */
 
 .volunteerformpage .input-group > .btn {
   font-size: 18px;
@@ -154,7 +135,7 @@
   margin: 0;
 }
 
-/* ---------- the skills and the activities that are added ---------- */
+/* the skills and the activities that are added */
 
 .volunteerformpage .badge-danger-soft {
   display: inline-flex;
@@ -189,7 +170,7 @@
   background: rgba(0, 0, 0, 0.08);
 }
 
-/* ---------- the photos: Choose Files is a teal, bold section of the bar ---------- */
+/* the photos: Choose Files is a teal, bold section of the bar */
 
 .volunteerformpage input[type='file'].form-control {
   padding: 0 12px 0 0;
@@ -213,7 +194,7 @@
   background: var(--cp-fill-hover);
 }
 
-/* ---------- Cancel is a link, Save is the teal button ---------- */
+/* Cancel is a link, Save is the teal button */
 
 .volunteerformpage .justify-content-end {
   align-items: center;
@@ -259,7 +240,7 @@
   box-shadow: none;
 }
 
-/* ---------- Back button ---------- */
+/* Back button */
 
 .back-link {
   display: inline-flex; 
@@ -281,7 +262,7 @@
   background: var(--cp-soft);
 }
 
-/* ---------- Reward point slider and badge ---------- */
+/* Reward point slider and badge */
 .form-range::-webkit-slider-thumb {
   /* remove browser default slider styling */
   -webkit-appearance: none;

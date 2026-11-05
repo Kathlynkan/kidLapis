@@ -1,20 +1,3 @@
-// =============================================================
-// /homework  - homework "quests"
-// Owners: Ning Xuan (volunteer assigns) [done]  +  Jachin (child hands in, berries, leaderboard)
-// =============================================================
-// How a quest travels (its "status" changes step by step):
-//
-//   'assigned'   the volunteer gave the quest to the child
-//        |  the child presses DONE!        -> PUT /homework/:id/submit
-//        v
-//   'submitted'  the child handed it in, now it waits for the volunteer (the "Captain")
-//        |  the volunteer checks it         -> PUT /homework/:id/verify
-//        v
-//   'verified'   checked! The child is paid the berries now.
-//
-// Berries (the pirate money) are saved on the child as child.points.
-// The ranks and badges are worked out in the browser: client/src/utils/gamification.js
-// =============================================================
 import { Router } from 'express'
 import { Homework, Child, Deck, User } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
@@ -23,13 +6,13 @@ import { notifyBell, addUpdate } from '../utils/notify.js'
 
 const router = Router()
 
-// The child's volunteers see "quests to check" on their NavBar bell: update it straight away (Kai Sen)
+// The child's volunteers see "quests to check" on their NavBar bell: update it straight away
 async function notifyVolunteersOf(req, childId) {
   const child = await Child.findById(childId).select('volunteerIds')
   if (child) notifyBell(req, child.volunteerIds)
 }
 
-// The child's own login gets an update in their bell, e.g. "'Read one story' was approved! +10 stars" (Kai Sen)
+// The child's own login gets an update in their bell, e.g. "'Read one story' was approved! +10 stars"
 async function tellChild(req, childId, update) {
   const logins = await User.find({ role: 'child', childId }).select('_id')
   await addUpdate(req, logins.map((u) => u.id), update)
@@ -38,10 +21,8 @@ async function tellChild(req, childId, update) {
 // Everything in this file needs a logged-in user.
 router.use(requireAuth)
 
-// ---------------------------------------------------------------
 // GET /homework?childId=c_1
 // Returns the quests of a child (or of all the children this user may see).
-// ---------------------------------------------------------------
 router.get('/', async (req, res) => {
   const visible = await visibleChildIds(req.user) // the ids of the children this user is allowed to see
   const { childId } = req.query
@@ -57,7 +38,7 @@ router.get('/', async (req, res) => {
   res.json(list)
 })
 
-// GET /homework/leaderboard                     (Jachin)
+// GET /homework/leaderboard
 // ?period=week  -> stars earned this week (points from verified homework completed in the last 7 days)
 // default       -> all-time (total child points, top 10)
 router.get('/leaderboard', async (req, res) => {
@@ -102,7 +83,7 @@ router.get('/leaderboard', async (req, res) => {
   )
 })
 
-// GET /homework/:id                              (Ning Xuan: loads one homework into the edit form)
+// GET /homework/:id                              loads one homework into the edit form
 router.get('/:id', async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
@@ -115,9 +96,7 @@ router.get('/:id', async (req, res) => {
   res.json(hw)
 })
 
-// ---------------------------------------------------------------
-// POST /homework      (Ning Xuan: assign homework, done  +  Jachin: the questions come from a deck)
-// ---------------------------------------------------------------
+// POST /homework      assign homework; the questions can come from a deck
 router.post('/', requireRole('volunteer', 'coordinator'), async (req, res) => {
   // only volunteers and coordinators can assign homework
   try {
@@ -206,7 +185,7 @@ router.post('/', requireRole('volunteer', 'coordinator'), async (req, res) => {
   }
 })
 
-// PUT /homework/:id         (Ning Xuan) -> volunteer or coordinator edits the homework
+// PUT /homework/:id         -> volunteer or coordinator edits the homework
 //   body = { title, subject, details, dueDate, points }  (the child and the status cannot be changed here)
 //   Not allowed once verified: the child already earned the stars.
 router.put('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => {
@@ -246,7 +225,7 @@ router.put('/:id', requireRole('volunteer', 'coordinator'), async (req, res) => 
   res.json(hw)
 })
 
-// PUT /homework/:id/submit  (Jachin) -> child marks homework as done
+// PUT /homework/:id/submit  -> child marks homework as done
 router.put('/:id/submit', requireRole('child'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
@@ -265,7 +244,7 @@ router.put('/:id/submit', requireRole('child'), async (req, res) => {
   res.json(hw)
 })
 
-// PUT /homework/:id/unsubmit  (Jachin) -> child retracts a submission before it is verified
+// PUT /homework/:id/unsubmit  -> child retracts a submission before it is verified
 router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })
@@ -282,19 +261,25 @@ router.put('/:id/unsubmit', requireRole('child'), async (req, res) => {
   res.json(hw)
 })
 
-// PUT /homework/:id/verify  (Jachin) -> volunteer confirms, child earns points
+// PUT /homework/:id/verify  -> volunteer confirms, child earns points
 // findOneAndUpdate with status condition makes the submitted→verified transition atomic,
 // preventing double-award if two requests race on the same homework.
 // Late penalty: if the child submitted after the due date, they earn half the points.
 router.put('/:id/verify', requireRole('volunteer', 'coordinator'), async (req, res) => {
+  // access check before the atomic update so an unauthorised caller never changes state
+  const existing = await Homework.findById(req.params.id)
+  if (!existing) return res.status(404).json({ message: 'Homework not found.' })
+  const visible = await visibleChildIds(req.user)
+  if (!visible.includes(existing.childId)) {
+    return res.status(403).json({ message: 'You do not have access to this homework.' })
+  }
+
   const hw = await Homework.findOneAndUpdate(
     { _id: req.params.id, status: 'submitted' },
     { $set: { status: 'verified' } },
     { new: true },
   )
   if (!hw) {
-    const exists = await Homework.exists({ _id: req.params.id })
-    if (!exists) return res.status(404).json({ message: 'Homework not found.' })
     return res.status(400).json({ message: 'Homework must be submitted before it can be verified.' })
   }
   const isLate = hw.completedAt && hw.dueDate && hw.completedAt > hw.dueDate
@@ -314,7 +299,7 @@ router.put('/:id/verify', requireRole('volunteer', 'coordinator'), async (req, r
   res.json({ homework: { ...hw.toJSON(), pointsAwarded }, points: child.points, pointsAwarded })
 })
 
-// PUT /homework/:id/reject  (Jachin) -> volunteer returns a submitted quest back to the child
+// PUT /homework/:id/reject  -> volunteer returns a submitted quest back to the child
 router.put('/:id/reject', requireRole('volunteer', 'coordinator'), async (req, res) => {
   const hw = await Homework.findById(req.params.id)
   if (!hw) return res.status(404).json({ message: 'Homework not found.' })

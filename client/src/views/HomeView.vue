@@ -1,12 +1,4 @@
-﻿<!-- =============================================================
-  Landing page (public).                              Owner: Kai Sen
-  Done: the title, "One app, four views" (a card for each role: volunteers and parents can sign up
-        from their card, coordinator and child accounts are made by the centre, so their cards have Log in)
-        and "How it works" (record -> summarise -> share -> continue).
-        It is made of the same parts as the other pages: the page title, a sandy board with white cards,
-        and the four layer colours (purple, green, aqua, pink) for the four roles.
-============================================================= -->
-<script setup>
+﻿<script setup>
 /* eslint-disable */
 import { RouterLink } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
@@ -24,7 +16,7 @@ const roles = [
     name: "Volunteers",
     short: "Record and hand over",
     text: "Get a briefing before each session, record it after, and set homework quests.",
-    signUp: { role: "volunteer", label: "Volunteer sign up" },
+    signUp: { role: "volunteer", label: "Volunteer Sign Up" },
     colour: "green",
   },
   {
@@ -32,7 +24,6 @@ const roles = [
     name: "Coordinators",
     short: "Run the centre",
     text: "Spot children who need attention and match them with the right volunteer.",
-    note: "Coordinator accounts are set up by the centre.",
     logIn: "Coordinator log in",
     colour: "purple",
   },
@@ -41,7 +32,7 @@ const roles = [
     name: "Parents",
     short: "Follow progress",
     text: "Get a clear, regular picture of your child's progress and mood, even when you work late.",
-    signUp: { role: "parent", label: "Parent sign up" },
+    signUp: { role: "parent", label: "Parent Sign Up" },
     colour: "aqua",
   },
   {
@@ -49,7 +40,6 @@ const roles = [
     name: "Children",
     short: "Earn stars",
     text: "Answer homework quests to earn stars, level up, collect badges and climb the leaderboard.",
-    note: "The centre gives each child their own login.",
     logIn: "Child log in",
     colour: "pink",
   },
@@ -96,7 +86,7 @@ const steps = [
 
     <!-- the sandy board with a white card for each role -->
     <section class="board" aria-labelledby="roles-title">
-      <h2 id="roles-title">One app, four views</h2>
+      <h2 id="roles-title">One App, Four Views</h2>
       <div class="role-grid">
         <article v-for="r in roles" :key="r.name" class="role-card" data-test="role-card">
           <div class="role-top">
@@ -117,12 +107,9 @@ const steps = [
             >
               {{ r.signUp.label }}
             </RouterLink>
-            <template v-else>
-              <span class="role-note">{{ r.note }}</span>
-              <RouterLink to="/login" class="home-button" :class="`colour-${r.colour}`" data-test="role-login">
-                {{ r.logIn }}
-              </RouterLink>
-            </template>
+            <RouterLink v-else to="/login" class="home-button" :class="`colour-${r.colour}`" data-test="role-login">
+              {{ r.logIn }}
+            </RouterLink>
           </div>
         </article>
       </div>
@@ -130,7 +117,7 @@ const steps = [
 
     <!-- the four steps, as white rows -->
     <section class="board" aria-labelledby="steps-title">
-      <h2 id="steps-title">How it works</h2>
+      <h2 id="steps-title">How It Works</h2>
       <div class="step-grid">
         <div v-for="(s, i) in steps" :key="s.name" class="step-row" data-test="how-step">
           <span class="step-num" :class="`colour-${s.colour}`">{{ i + 1 }}</span>
@@ -151,14 +138,14 @@ const steps = [
    The title and the sentence under it are .page-title and .page-subtitle (main.css), the sandy box is .board (main.css).
    The four colours are the layer colours of the roles: purple coordinator, green volunteer, aqua parent, pink child. */
 
-/* ---------- the colours of the roles ---------- */
+/* the colours of the roles */
 
 .homepage .colour-green  { background: #9BD3B2; }
 .homepage .colour-purple { background: #D5CBEA; }
 .homepage .colour-aqua   { background: #AED9D8; }
 .homepage .colour-pink   { background: #E8A0B8; }
 
-/* ---------- the title ---------- */
+/* the title */
 
 .homepage .home-header {
   display: flex;
@@ -191,7 +178,7 @@ const steps = [
   text-transform: uppercase;
 }
 
-/* ---------- the boards ---------- */
+/* the boards */
 
 .homepage .board {
   display: flex;
@@ -206,7 +193,7 @@ const steps = [
   font-weight: 600;
 }
 
-/* ---------- a button: small, with 5px corners, in the colour of the role ---------- */
+/* a button: small, with 5px corners, in the colour of the role */
 
 .homepage .home-button {
   display: inline-block;
@@ -223,7 +210,7 @@ const steps = [
   filter: brightness(0.95);
 }
 
-/* ---------- the role cards ---------- */
+/* the role cards */
 
 .homepage .role-grid,
 .homepage .step-grid {
@@ -286,14 +273,7 @@ const steps = [
   margin-top: auto;
 }
 
-/* "Coordinator accounts are set up by the centre." where the other cards have a sign up button */
-.homepage .role-note {
-  color: #8D7F77;
-  font-size: 13px;
-  font-style: italic;
-}
-
-/* ---------- the steps: white rows, like the rows on the parent page ---------- */
+/* the steps: white rows, like the rows on the parent page */
 
 .homepage .step-row {
   display: flex;
@@ -322,7 +302,7 @@ const steps = [
   font-weight: 600;
 }
 
-/* ---------- a phone ---------- */
+/* a phone */
 
 @media (max-width: 560px) {
   .homepage .role-grid,

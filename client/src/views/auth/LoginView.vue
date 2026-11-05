@@ -1,10 +1,3 @@
-<!-- =============================================================
-  Login page - WORKING, use it as the reference for forms.   Owner: Kai Sen
-  Pattern: v-model inputs -> async submit -> loading + error states -> router.push
-  TODO (Kai Sen):
-    [x] show/hide password toggle
-  The look: one white card on the sandy board, in the middle (css/main/authpage.css, shared with the sign up page).
-============================================================= -->
 <script setup>
 import { ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -44,7 +37,7 @@ async function handleLogin() {
       <div class="board">
         <div class="auth-card">
           <header>
-            <h1 class="page-title">Welcome back</h1>
+            <h1 class="page-title">Welcome Back</h1>
             <p class="page-subtitle">Log in to continue to Kids Lapis.</p>
           </header>
 
@@ -105,27 +98,4 @@ async function handleLogin() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.lapis-button {
-  padding: 4px 10px;
-  border: 0;
-  border-radius: 6px;
-  background: #FFFFFF;
-  box-shadow: inset 0 0 0 1.5px var(--role-accent, #D5CBEA);
-  color: #4A3F3A;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.lapis-button:hover {
-  background: var(--role-accent-soft, #EAF6F5);
-}
-
-.lapis-button-filled {
-  background: #E8A0B8;
-  box-shadow: none;
-}
-</style>
+<!-- The Show / Hide button uses .lapis-button from NavBar.vue (the same style as Log in / Sign up), so no copy here -->

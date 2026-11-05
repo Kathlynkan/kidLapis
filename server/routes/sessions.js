@@ -1,8 +1,3 @@
-// =============================================================
-// /sessions  - session records (the core of the app)   Owner: Ning Xuan
-// -------------------------------------------------------------
-// Fields: see models/Session.jsn
-// =============================================================
 import { Router } from 'express'
 import { Child, Session, User, Handover } from '../models/index.js' // import mongoDB collections
 import { requireAuth, requireRole } from '../middleware/auth.js'
@@ -195,7 +190,7 @@ router.post('/', requireRole('volunteer', 'coordinator'), async (req, res) => {
     })
 
     // return new session
-    // the parent's NavBar bell shows "summary updated" straight away (Kai Sen, utils/notify.js)
+    // the parent's NavBar bell shows "summary updated" straight away (utils/notify.js)
     notifyBell(req, [child.parentId])
 
     return res.status(201).json(session)
@@ -216,6 +211,14 @@ router.put('/:id/viewed', requireRole('parent'), async (req, res) => {
     if (!session) {
       return res.status(404).json({
         message: 'Session not found'
+      })
+    }
+
+    // verify this session belongs to the authenticated parent's child
+    const child = await Child.findById(session.childId)
+    if (!canAccessChild(req.user, child)) {
+      return res.status(403).json({
+        message: 'No access'
       })
     }
 

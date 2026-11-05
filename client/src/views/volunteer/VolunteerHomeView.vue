@@ -1,11 +1,5 @@
-<!-- =============================================================
-  Volunteer home: "My Children"                       Owner: Yuqi
-  -------------------------------------------------------------
-  WORKING reference for "load data from the API and show it":
-    onMounted -> axios (api.get) -> ref -> computed -> v-for + component
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { useAuthStore } from '@/stores/auth' // get auth sotre from Pinia
@@ -58,7 +52,7 @@ const lastSessionByChild = computed(() => {
   return map
 })
 
-// ---------- My Schedule tab: this week's calendar ----------
+// My Schedule tab: this week's calendar
 // Past days        -> the sessions I actually recorded that day (what happened)
 // Today and later  -> the children scheduled with me (what is planned),
 //                     only from the day their sessions with me start (slot.startDate)
@@ -159,14 +153,14 @@ function scheduleBadge(child) {
 function startBadge(child) {
   const schedule = child.schedule || []
   for (const slot of schedule) {
-    if (slot.volunteerId === auth.user?.id && slot.status !== 'pending' && slot.startDate && slot.startDate > todayDate) {
+    if (slot.volunteerId === auth.user?.id && slot.status === 'accepted' && slot.startDate && slot.startDate > todayDate) {
       return `Starts ${formatDate(slot.startDate)}`
     }
   }
   return ''
 }
 
-// ---------- All my children tab ----------
+// All my children tab
 // search + level filter
 const filteredChildren = computed(() => {
   const search = searchText.value.toLowerCase()
@@ -197,7 +191,28 @@ function openChild(childId) {
   router.push({ name: 'child-profile', params: { id: childId } })
 }
 
-onMounted(loadData)
+async function reloadSilently() {
+  if (loading.value) return
+  try {
+    const [childResponse, sessionResponse] = await Promise.all([
+      api.get('/children'),
+      api.get('/sessions'),
+    ])
+    children.value = childResponse.data
+    sessions.value = sessionResponse.data
+  } catch {}
+}
+
+onMounted(() => {
+  loadData()
+  window.addEventListener('bell-refresh', reloadSilently)
+  window.addEventListener('schedule-changed', reloadSilently)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('bell-refresh', reloadSilently)
+  window.removeEventListener('schedule-changed', reloadSilently)
+})
 </script>
 
 <template>
@@ -226,7 +241,7 @@ onMounted(loadData)
           </button>
         </div>
 
-        <!-- ===== SCHEDULE TAB ===== -->
+        <!-- SCHEDULE TAB -->
         <div v-if="activeTab === 'today'">
           <!-- no children at all -->
           <div v-if="children.length === 0" class="empty-box">
@@ -246,7 +261,7 @@ onMounted(loadData)
                 data-test="cal-day"
                 @click="selectedDay = day"
               >
-                <span class="week-name">{{ day }} {{ Number(weekDates[day].slice(8)) }}</span>
+                <span class="week-name">{{ formatDate(weekDates[day]) }}</span>
                 <span class="week-today">{{ day === today ? 'Today' : '' }}</span>
                 <span class="week-count">{{ childrenOnDay(day).length }}</span>
               </button>
@@ -293,7 +308,7 @@ onMounted(loadData)
           </template>
         </div>
 
-        <!-- ===== ALL MY CHILDREN TAB ===== -->
+        <!-- ALL MY CHILDREN TAB -->
         <div v-else>
           <StateMessage
             v-if="children.length === 0"
@@ -370,7 +385,7 @@ onMounted(loadData)
    Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (14px to 22px, round pills)
    and a very light shadow. */
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 .volunteerpage h1,
 .volunteerpage h2,
@@ -385,9 +400,9 @@ onMounted(loadData)
   font-size: 13px;
 }
 
-/* ---------- the board: the sandy box that holds the tabs and the white cards (the same as on the parent page) ---------- */
+/* the board: the sandy box that holds the tabs and the white cards (the same as on the parent page) */
 
-/* ---------- the two tabs: two pills in a pale track ---------- */
+/* the two tabs: two pills in a pale track */
 
 .volunteerpage .tabs {
   display: flex;
@@ -430,7 +445,7 @@ onMounted(loadData)
   line-height: 20px;
 }
 
-/* ---------- the week ---------- */
+/* the week */
 
 .volunteerpage .week {
   display: grid;
@@ -481,6 +496,11 @@ onMounted(loadData)
   color: #FFFFFF;
 }
 
+.volunteerpage .week-name {
+  padding: 0 4px;
+  line-height: 1.25; /* on a small screen the date wraps onto two lines instead of overflowing */
+}
+
 .volunteerpage .week-name,
 .volunteerpage .week-today,
 .volunteerpage .week-count {
@@ -516,7 +536,14 @@ onMounted(loadData)
   color: #213C31;
 }
 
-/* ---------- the heading of the chosen day ---------- */
+/* small screens: a smaller date so the 7 days still fit */
+@media (max-width: 768px) {
+  .volunteerpage .week-day {
+    font-size: 12px;
+  }
+}
+
+/* the heading of the chosen day */
 
 .volunteerpage .day-heading {
   display: flex;
@@ -552,7 +579,7 @@ onMounted(loadData)
   color: #6B8177;
 }
 
-/* ---------- boxes with a message (nobody today, no children yet) ---------- */
+/* boxes with a message (nobody today, no children yet) */
 
 .volunteerpage .empty-box {
   padding: 28px 16px;
@@ -575,7 +602,7 @@ onMounted(loadData)
   margin-bottom: 14px;
 }
 
-/* ---------- the buttons ---------- */
+/* the buttons */
 
 .volunteerpage .soft-button {
   padding: 7px 20px;
@@ -592,7 +619,7 @@ onMounted(loadData)
   background: #9BD3B2;
 }
 
-/* ---------- the search box ---------- */
+/* the search box */
 
 .volunteerpage .filter-box {
   margin-bottom: 18px;
@@ -634,7 +661,7 @@ onMounted(loadData)
   box-shadow: 0 0 0 3px #B7D8D7;
 }
 
-/* ---------- one child (ChildCard.vue) ---------- */
+/* one child (ChildCard.vue) */
 
 .volunteerpage .child-card {
   display: flex;
@@ -697,9 +724,22 @@ onMounted(loadData)
   font-size: 14px;
 }
 
-.volunteerpage .child-facts i {
-  margin-right: 5px;
-  color: #3E6B6A;
+/* the small caption above the topic, then the topic with its subject tag right next to it */
+.volunteerpage .fact-caption {
+  color: #5E7473;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.volunteerpage .fact-topic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 23px; /* Last topic (with its tag) and Last result (no tag) are the same height */
+  margin-bottom: 6px;
 }
 
 .volunteerpage .child-bottom {

@@ -1,9 +1,3 @@
-<!-- =============================================================
-  Profile - every logged-in user can view and edit their own profile.
-  All roles: name + password change.
-  Volunteer:  + skills and available days (used by matchmaking).
-  Child:      name is managed by the coordinator.
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -198,7 +192,7 @@ async function save() {
 
           <div class="d-flex justify-content-end gap-2 mt-4">
             <!-- right-aligned buttons with gap in between and top margin -->
-            <button type="button" class="btn btn-outline-secondary" @click="cancel">Cancel</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" @click="cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="loading" data-test="profile-save">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span> Save Changes
             </button>
@@ -220,7 +214,7 @@ async function save() {
    Look: no dark outlines, soft corners, bold small captions, and buttons with small corners (Cancel is the light colour, Save is the main colour).
    To change a colour for one role, change it in that role's block. To change the look, change the rules after the blocks. */
 
-/* ---------- the colours of each role ---------- */
+/* the colours of each role */
 
 /* child: the accent of the role on warm brown text */
 .profilepage {
@@ -254,7 +248,6 @@ async function save() {
   --pf-text: #414F67;
   --pf-title: #414F67;
   --pf-muted: #5E6C80;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(65, 79, 103, 0.1);
   --pf-line: #CFE0DE;
   --pf-focus: #AED9D8;
@@ -270,7 +263,6 @@ async function save() {
   --pf-text: #213C31;
   --pf-title: #446C59;
   --pf-muted: #6B8177;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(33, 60, 49, 0.1);
   --pf-line: #C3D2CA;
   --pf-focus: #4A735F;
@@ -287,7 +279,6 @@ async function save() {
   --pf-text: #3D3454;
   --pf-title: #5B4B8A;
   --pf-muted: #7D7690;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(61, 52, 84, 0.1);
   --pf-line: #E3DBF0;
   --pf-focus: #6B5CA5;
@@ -299,7 +290,7 @@ async function save() {
   --pf-error: #EE9F96;
 }
 
-/* ---------- the base text and the title ---------- */
+/* the base text and the title */
 
 /* the page title (PageHeader.vue is shared, so only its colour and font are set here) */
 .profilepage .lapis-page-header .page-title {
@@ -333,7 +324,7 @@ async function save() {
   color: var(--pf-muted);
 }
 
-/* ---------- the sections (PeelCard.vue) ---------- */
+/* the sections (PeelCard.vue) */
 
 .profilepage .peel-card {
   border: 0;
@@ -369,7 +360,7 @@ async function save() {
   color: var(--pf-text);
 }
 
-/* ---------- the boxes you type in ---------- */
+/* the boxes you type in */
 
 .profilepage .form-label {
   color: var(--pf-text);
@@ -377,7 +368,7 @@ async function save() {
 
 .profilepage .form-control {
   border: 1px solid var(--pf-line);
-  border-radius: 14px;
+  border-radius: 6px;
   background: #FFFFFF;
   color: var(--pf-text);
   box-shadow: none;
@@ -395,7 +386,7 @@ async function save() {
   color: var(--pf-text);
 }
 
-/* ---------- the skills and the days: separate choices in black text, the chosen ones have the main colour ---------- */
+/* the skills and the days: separate choices in black text, the chosen ones have the main colour */
 
 .profilepage .btn-check + .btn {
   padding: 4px 14px;
@@ -417,7 +408,7 @@ async function save() {
   color: #000000;
 }
 
-/* ---------- the buttons: Save and Cancel ---------- */
+/* the buttons: Save and Cancel */
 
 .profilepage .btn {
   border: 0;
@@ -449,7 +440,7 @@ async function save() {
 }
 
 
-/* ---------- the messages after you save ---------- */
+/* the messages after you save */
 
 .profilepage .alert {
   border: 0;

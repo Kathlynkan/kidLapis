@@ -1,6 +1,3 @@
-<!-- Leaderboard                                          Owner: Jachin
-     A podium for the first three places, then a white row for everyone else, on the sandy board.
-     Children with the same stars share a place (1, 2, 2, 4). -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -65,10 +62,12 @@ function onVisible() { if (!document.hidden) fetchLeaderboard() }
 onMounted(() => {
   fetchLeaderboard()
   document.addEventListener('visibilitychange', onVisible)
+  window.addEventListener('bell-refresh', fetchLeaderboard)
 })
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisible)
+  window.removeEventListener('bell-refresh', fetchLeaderboard)
 })
 </script>
 
@@ -83,7 +82,7 @@ onUnmounted(() => {
       <template v-if="entries.length === 0">
         <StateMessage message="No quests verified this week yet — complete one to appear!" />
         <div class="lb-foot">
-          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go do a quest</RouterLink>
+          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go Do a Quest</RouterLink>
         </div>
       </template>
 
@@ -150,7 +149,7 @@ onUnmounted(() => {
         <p v-else-if="!hasMe" class="lb-hint">You are not on the board yet. Do a quest to earn stars and join!</p>
 
         <div class="lb-foot">
-          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go do a quest</RouterLink>
+          <RouterLink :to="{ name: 'child-home' }" class="lb-go"><i class="bi bi-map"></i>Go Do a Quest</RouterLink>
         </div>
       </template>
     </div>

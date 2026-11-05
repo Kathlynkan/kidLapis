@@ -27,7 +27,7 @@ watch(
   <NavBar />
   <main class="app-main">
     <RouterView v-slot="{ Component }">
-      <Transition name="page-peel">
+      <Transition name="page-peel" mode="out-in">
         <component :is="Component" :key="route.path" />
       </Transition>
     </RouterView>

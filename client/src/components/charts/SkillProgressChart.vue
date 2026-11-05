@@ -1,9 +1,3 @@
-<!-- SkillProgressChart - accuracy over time, one subject at a time.   Owner: Jachin
-     Subject picker defaults to the subject with the most sessions.
-     Props: sessions (Array) - from GET /sessions?childId=...
-            calm (Boolean) - the quiet look for volunteer/coordinator (teal/lavender axis ticks)
-            tone ('teal' | 'lavender') - axis tick colour in calm mode
-     Used on: Child profile (Yuqi), Parent page (Kat) -->
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { Line } from 'vue-chartjs'
@@ -28,6 +22,7 @@ const props = defineProps({
   sessions: { type: Array, default: () => [] },
   calm: { type: Boolean, default: false },
   tone: { type: String, default: 'teal' },
+  explain: { type: Boolean, default: false },
 })
 
 const FALLBACK_COLORS = ['#C0A8D8', '#A8CC90', '#F5B880', '#E8A0B8']
@@ -85,19 +80,24 @@ const chartData = computed(() => {
   }
 })
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   layout: { padding: { top: 8, right: 8 } },
   scales: {
-    y: { min: 0, max: 100, ticks: { callback: (v) => v + '%' } },
+    y: {
+      min: 0,
+      max: 100,
+      ticks: { callback: (v) => v + '%' },
+      title: { display: props.explain, text: 'Questions correct', font: { size: 12, weight: 'bold' } },
+    },
     x: { grid: { display: false } },
   },
   plugins: {
-    tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+    tooltip: { callbacks: { label: (ctx) => (props.explain ? questionsLabel(ctx) : `${ctx.raw}%`) } },
     legend: { display: false },
   },
-}
+}))
 
 const TONES = {
   teal:     { text: '#6B8177', grid: '#E4E9E6' },
@@ -139,15 +139,22 @@ const calmOptions = computed(() => {
         ticks: { ...text, stepSize: 50, callback: (v) => v + '%' },
         grid: { color: tone.value.grid },
         border: { display: false },
+        title: { display: props.explain, text: 'Questions correct', ...text, font: { family: ChartJS.defaults.font.family, size: 12, weight: 'bold' } },
       },
       x: { ticks: text, grid: { display: false }, border: { display: false } },
     },
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } },
+      tooltip: { callbacks: { label: (ctx) => (props.explain ? questionsLabel(ctx) : `${ctx.raw}%`) } },
     },
   }
 })
+
+// "80% correct (8 of 10 questions)" for the dot that is touched
+function questionsLabel(ctx) {
+  const session = selectedSessions.value[ctx.dataIndex]
+  return `${ctx.raw}% correct (${session.correct} of ${session.attempted} questions)`
+}
 
 const selectedSummary = computed(() => {
   const list = selectedSessions.value
@@ -174,6 +181,9 @@ function trendLabel(sorted) {
 <template>
   <div class="lapis-card p-3" data-test="skill-progress-chart">
     <h2 class="h6 mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Progress over time</h2>
+    <p v-if="explain && sessions.length > 0" class="small lapis-muted mb-3" data-test="chart-note">
+      Each dot is one session: the share of the questions answered correctly.
+    </p>
     <p v-if="sessions.length === 0" class="small lapis-muted mb-0">No data yet.</p>
     <template v-else>
       <div class="spc-picker mb-3" data-test="subject-picker">

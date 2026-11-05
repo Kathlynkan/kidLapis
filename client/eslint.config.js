@@ -22,12 +22,21 @@ export default defineConfig([
     },
   },
 
+  {
+    files: ['playwright.config.js', 'e2e/global-setup.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
 
   {
     ...pluginVitest.configs.recommended,
-    files: ['src/tests/**/*.{test,spec}.js'],
+    files: ['src/__tests__/**/*.{test,spec}.js'],
   },
 
   {

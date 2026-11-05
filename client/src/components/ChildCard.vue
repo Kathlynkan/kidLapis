@@ -1,7 +1,3 @@
-<!-- =============================================================
-  ChildCard - one child in a list.                 Owner: Yuqi
-  Its styles are in the style block of views/volunteer/VolunteerHomeView.vue
-============================================================= -->
 <script setup>
 import { computed } from 'vue'
 import { relativeDay, accuracy, subjectStyle } from '@/utils/format'
@@ -32,14 +28,14 @@ const lastSeen = computed(() =>
     </div>
 
     <div v-if="lastSession" class="child-facts">
-      <div>
-        <i class="bi bi-bookmark"></i>Last topic:
-        <span class="session-subject" :style="subjectStyle(lastSession.subject)">{{ lastSession.subject }}</span>
+      <div class="fact-caption">Last topic</div>
+      <div class="fact-topic">
         <strong>{{ lastSession.topic }}</strong>
+        <span class="session-subject" :style="subjectStyle(lastSession.subject)">{{ lastSession.subject }}</span>
       </div>
-      <div>
-        <i class="bi bi-check2-circle"></i>Last result:
-        {{ lastSession.correct }}/{{ lastSession.attempted }} ({{ accuracy(lastSession) }}%)
+      <div class="fact-caption">Last result</div>
+      <div class="fact-topic">
+        <strong>{{ lastSession.correct }}/{{ lastSession.attempted }} ({{ accuracy(lastSession) }}%)</strong>
       </div>
     </div>
     <div v-else class="child-facts muted">No sessions recorded yet.</div>

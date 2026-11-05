@@ -1,9 +1,3 @@
-/* EXTERNAL CSS: the small parts (components) that many pages use. It is imported at the top of each of those files. */
-/* The small parts that many pages use. Each part is a component in src/components, and the section says which.
-   The look of the same parts for a parent or a volunteer is in the parent and volunteer folders.
-   Sections: icon with words, page header, state message, accordion (PeelCard and HandoverCard),
-   handover, session card, homework card, charts. */
-
 /* an icon and a few words on one line (the star and the points, a face and the mood) */
 .with-icon {
   display: inline-flex;
@@ -11,7 +5,7 @@
   gap: 5px;
 }
 
-/* ---------- ChildAvatar.vue ---------- */
+/* ChildAvatar.vue */
 
 /* a photo avatar takes the place of an emoji: as big as the text round it, and round.
    This is the one place that uses em: it has to grow and shrink with the size of the text it sits in (a name or a big heading). */
@@ -23,7 +17,7 @@
   vertical-align: -0.2em;
 }
 
-/* ---------- ChildInitial.vue ---------- */
+/* ChildInitial.vue */
 
 /* the round picture of a child (the size and colour are set by each page): a photo fills the circle */
 .child-initial {
@@ -40,13 +34,13 @@
   object-fit: cover;
 }
 
-/* ---------- PageHeader.vue ---------- */
+/* PageHeader.vue */
 
 .lapis-page-header {
   padding: 20px 0 8px;
 }
 
-/* ---------- StateMessage.vue ---------- */
+/* StateMessage.vue */
 
 .lapis-state { color: #4A3F3A; }
 
@@ -115,7 +109,7 @@
   letter-spacing: 1px;
 }
 
-/* ---------- the accordion: PeelCard.vue and HandoverCard.vue open and close the same way ---------- */
+/* the accordion: PeelCard.vue and HandoverCard.vue open and close the same way */
 
 .peel-card {
   overflow: hidden;
@@ -203,7 +197,7 @@
   opacity: 1;
 }
 
-/* ---------- HandoverCard.vue ---------- */
+/* HandoverCard.vue */
 
 .handover-card {
   border-left: 6px solid #A8CC90;
@@ -226,10 +220,6 @@
 
 .handover-source-last {
   background: #A8CC90;
-}
-
-.handover-tag {
-  background: #F5DF98;
 }
 
 .handover-value {
@@ -259,7 +249,7 @@
   font-size: 14px;
 }
 
-/* ---------- SessionCard.vue ---------- */
+/* SessionCard.vue */
 
 /* "MATH": the subject is a small round tag in front of the title (SessionCard.vue and HomeworkQuestCard.vue).
    Its colour comes from the subject and is set in the template. */
@@ -343,7 +333,7 @@
   font-weight: 500;
 }
 
-/* ---------- HomeworkQuestCard.vue ---------- */
+/* HomeworkQuestCard.vue */
 
 /* subject pill — a small rounded tag above the title */
 .quest-subject {
@@ -380,8 +370,7 @@
    The same shape as the tags of the parent, volunteer and coordinator pages. A word is never broken in two. */
 .badge.quest-pill,
 .badge.quest-status,
-.badge.quest-returned,
-.badge.quest-late-warn {
+.badge.quest-returned {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -439,7 +428,7 @@
   color: #7A6420;
 }
 
-/* ---------- the charts (SkillProgressChart.vue and TopicSummaryChart.vue) ---------- */
+/* the charts (SkillProgressChart.vue and TopicSummaryChart.vue) */
 
 /* the box the chart is drawn in; the bar chart's height is set by the number of subjects */
 .chart-box {

@@ -1,13 +1,13 @@
-<!-- Manage volunteers                                   Owner: Yu Xuan -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import ChildInitial from '@/components/ChildInitial.vue'
-import { subjectStyle } from '@/utils/format'
+import { firstName, subjectStyle } from '@/utils/format'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 const Days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 
 const volunteers = ref([])
 const loading = ref(true)
@@ -102,20 +102,27 @@ async function save(v) {
   }
 }
 
+async function loadData() {
+  const [volRes, childRes] = await Promise.all([
+    api.get('/users', { params: { role: 'volunteer' } }),
+    api.get('/children'),
+  ])
+  volunteers.value = volRes.data
+  children.value = childRes.data
+}
+
 onMounted(async () => {
   try {
-    const [vol_Result, child_Result] = await Promise.all([
-      api.get('/users', { params: { role: 'volunteer' } }),
-      api.get('/children')
-    ])
-    volunteers.value = vol_Result.data
-    children.value = child_Result.data
+    await loadData()
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
     loading.value = false
   }
 })
+
+// A volunteer accepted/declined a request: reload quietly so workloads stay up to date
+useScheduleChanged(loadData, { isLoading: loading })
 </script>
 
 <template>
@@ -155,7 +162,7 @@ onMounted(async () => {
             <template v-if="workloadOf(v).length">
               <strong>{{ workloadOf(v).length }}</strong>
               {{ workloadOf(v).length === 1 ? 'child' : 'children' }}:
-              {{ workloadOf(v).map((c) => c.name.split(' ')[0]).join(', ') }}
+              {{ workloadOf(v).map((c) => firstName(c.name)).join(', ') }}
             </template>
             <span v-else>No assigned children</span>
           </div>
@@ -174,7 +181,7 @@ onMounted(async () => {
               >
                 {{ deleting ? 'Removing...' : 'Yes, remove' }}
               </button>
-              <button type="button" class="t-btn t-btn-soft" :disabled="deleting" @click="cancelDelete">Cancel</button>
+              <button type="button" class="t-btn t-btn-red" :disabled="deleting" @click="cancelDelete">Cancel</button>
             </div>
           </div>
 
@@ -217,7 +224,7 @@ onMounted(async () => {
               <button type="submit" class="t-btn" :disabled="saving" data-test="save-volunteer">
                 {{ saving ? 'Saving...' : 'Save Changes' }}
               </button>
-              <button type="button" class="t-btn t-btn-soft" :disabled="saving" @click="cancelEdit">Cancel</button>
+              <button type="button" class="t-btn t-btn-red" :disabled="saving" @click="cancelEdit">Cancel</button>
             </div>
           </form>
 

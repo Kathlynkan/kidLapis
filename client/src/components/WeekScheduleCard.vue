@@ -1,13 +1,9 @@
-<!-- The schedule on the dashboard: today's sessions first, the full week one click away.   Owner: Yu Xuan
-  <WeekScheduleCard :volunteers="volunteers" :children="children" />
-  The full week uses the same WeekGrid as the Schedule page, so both always look the same.
-  Pending requests show a "Pending" tag; declined ones are left out.
--->
 <script setup>
 import { ref, computed } from 'vue'
 import MiniAvatar from '@/components/MiniAvatar.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 const props = defineProps({
   volunteers: { type: Array, default: () => [] },
@@ -16,7 +12,6 @@ const props = defineProps({
 
 const TODAY = new Date().toLocaleDateString('en-US', { weekday: 'short' }) // 'Tue'
 const TODAY_LONG = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) // 'Tuesday 3 Nov'
-const firstName = (name) => (name || '').split(' ')[0]
 
 const showWeek = ref(false)
 
@@ -92,7 +87,7 @@ const pendingSlots = computed(() => countSlots(isPending))
       data-test="toggle-week"
       @click="showWeek = !showWeek"
     >
-      {{ showWeek ? 'Hide full week' : 'Show full week' }}
+      {{ showWeek ? 'Hide Full Week' : 'Show Full Week' }}
       <i class="bi bi-chevron-down chevron" :class="{ 'is-open': showWeek }" aria-hidden="true"></i>
     </button>
 
@@ -131,7 +126,7 @@ const pendingSlots = computed(() => countSlots(isPending))
   flex-wrap: wrap;
   gap: 10px;
   margin: 0;
-  padding: 0;
+  padding: 0 16px; 
   list-style: none;
 }
 .today-item {
@@ -174,6 +169,7 @@ const pendingSlots = computed(() => countSlots(isPending))
 }
 .empty-today {
   margin: 0;
+  padding: 0 16px;
   color: #7d7690;
 }
 
@@ -209,7 +205,7 @@ const pendingSlots = computed(() => countSlots(isPending))
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 14px;
+  margin: 14px 0 6px 14px; 
   padding: 6px 2px;
   border: 0;
   background: transparent;

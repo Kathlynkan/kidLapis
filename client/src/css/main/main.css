@@ -1,40 +1,8 @@
-/* =============================================================
-   Kids Lapis — Kueh Lapis design system.
-   EXTERNAL CSS: the whole app uses it (loaded once in main.js).
-   What is in it: the palette (as a comment), the Bootstrap overrides, the classes every page shares,
-   and the colours of the volunteer's and the coordinator's pages (--cp-...).
-   ============================================================= */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* ── The palette ────────────────────────────────────────────────
-   Every colour is written as a hex code in the css. These are the names, so you can talk about them.
-
-   The layers of the cake (the stripes under the navbar, and the colour of each role):
-     child #E8A0B8 rose pink (the top layer)   parent #AED9D8 aqua   volunteer #9BD3B2 mint   coordinator #D5CBEA purple (the bottom layer)
-   Text and background:
-     plum #4A3F3A (text, never black)   muted #8D7F77 (small text)   cream #FBF8F3 (the page)   shadow #B9A99B (drop shadows only)
-   The colours of the old cards, and their darker border tones:
-     pink #E8A0B8 / #C07090    lime #A8CC90 / #68A048    yellow #F5DF98 / #C8A028
-     blue #88C0D8 / #4890B8    orange #F5B880 / #C07838  purple #C0A8D8   cream border #C8B8A8
-   The four subjects (pills and charts; the colours are in utils/constants.js):
-     English #A3CDE6   Math #F4D08A   Science #B2D8A6   Mother Tongue #F3B397   (deeper tones for chart lines: #5E9FC9 #DBA645 #6BAE63 #E0805D)
-   Success #A8CC90 (pale #E8F5DC)   Messages #88C0D8   Alert #E8A0B8
-   The quiet colours (a pale fill, a thin line, dark words):
-     pink #FBE3DF / #F2B8B0 / #9A3F36 (an error, not seen, overdue)     yellow #FAF4D8 / #EEDFA6 / #7A6420 (struggling, a note)
-   The coordinator pages (coordinator/coordinatorpage.css):  text #3D3454   title #5B4B8A   small text #7D7690   purple #D5CBEA   pale purple #F0EAF8
-     mid purple #B8A9DD   deep purple #6B5CA5   button hover #C7BBE0   line #EFE9F7
-   The font is Inter. The corners of a card are 12px. */
 
 :root {
   /* Bootstrap colour overrides */
-  --bs-primary:           #E8A0B8;
-  --bs-primary-rgb:       232, 160, 184;
-  --bs-success:           #A8CC90;
   --bs-success-rgb:       168, 204, 144;
-  --bs-warning:           #F5DF98;
-  --bs-warning-rgb:       245, 223, 152;
-  --bs-danger:            #E8A0B8;
   --bs-danger-rgb:        255, 138, 128;
   --bs-link-color:        #7A4FB8;
   --bs-link-hover-color:  #C93A74;
@@ -43,10 +11,9 @@
   --bs-body-bg:           #FBF8F3;
   --bs-border-color:      #C8B8A8;
   --bs-border-radius:     12px;
-  --bs-border-width: 1px;
 }
 
-/* ── Base ───────────────────────────────────────────────────── */
+/* Base */
 html, body {
   min-height: 100%;
   background-color: #FBF8F3;
@@ -56,7 +23,7 @@ html, body {
   color: #4A3F3A;
 }
 
-/* ── App shell ──────────────────────────────────────────────── */
+/* App shell */
 #app {
   min-height: 100vh;
   display: flex;
@@ -78,7 +45,7 @@ html, body {
   background: transparent !important;
 }
 
-/* ── The board ─────────────────────────────────────────────────
+/* The board
    The sandy box that holds the white cards on every restyled page (child, parent, volunteer and coordinator).
    A page only adds what is its own, for example the gap between the cards inside it. */
 .board {
@@ -88,7 +55,7 @@ html, body {
   box-shadow: 0 1px 6px rgba(74, 63, 58, 0.1);
 }
 
-/* ── Role accent colours ────────────────────────────────────── */
+/* Role accent colours */
 .role-child,
 .role-guest     { --role-accent: #E8A0B8;   --role-accent-soft: #FAE8F0; --role-accent-dark: #C07090; }
 
@@ -96,7 +63,7 @@ html, body {
 .role-volunteer { --role-accent: #9BD3B2; --role-accent-soft: #E1F2E9; --role-accent-dark: #4A735F; }
 .role-coordinator   { --role-accent: #D5CBEA;   --role-accent-soft: #F0EAF8; --role-accent-dark: #5B4B8A; }
 
-/* ── Colours of the volunteer's and the coordinator's pages ─────────
+/* Colours of the volunteer's and the coordinator's pages
    Used by one child's page, its pop-ups and the forms (volunteer and coordinator).
    The volunteer is the default. The coordinator has the lavender of the other coordinator pages (coordinatorpage.css).
    The coordinator's are set on the body, so the pop-ups (which are moved to the end of the body) have them too. */
@@ -151,7 +118,7 @@ body.role-coordinator {
   --cp-waiting-text: #3D3454;
 }
 
-/* ── Typography ─────────────────────────────────────────────── */
+/* Typography */
 h1, h2, h3, .fw-heavy {
   font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
   font-weight: 600;
@@ -187,7 +154,7 @@ h4, h5, h6 {
 
 .lapis-muted { color: #8D7F77; }
 
-/* ── Cards ──────────────────────────────────────────────────── */
+/* Cards */
 .lapis-card {
   position: relative;
   background: #FBF8F3;
@@ -205,7 +172,7 @@ h4, h5, h6 {
 /* Extra top padding utility — used on cards whose header sits flush at the top */
 .lapis-card-top { padding-top: 20px !important; }
 
-/* ── Buttons ────────────────────────────────────────────────── */
+/* Buttons */
 .btn {
   --bs-btn-font-size: 14px;
   font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
@@ -245,18 +212,6 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-/* Cancel in a pop-up: the soft colour of the role */
-.btn-secondary {
-  background: var(--cp-soft);
-  color: var(--cp-text);
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
-}
-
-.btn-secondary:hover {
-  background: var(--cp-letter);
-  color: var(--cp-text);
-}
-
 .btn-outline-secondary {
   --bs-btn-color:               #4A3F3A;
   --bs-btn-border-color:        #C8B8A8;
@@ -267,32 +222,25 @@ h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-/* Delete in a pop-up: the same soft red as the Delete on a session */
-.btn-danger {
+/* Delete in a pop-up, and every Cancel button: the same soft red as the Delete on a session, a little darker on hover */
+.btn-danger,
+.btn-outline-danger {
+  --bs-btn-border-color:        #EE9F96;
+  --bs-btn-hover-border-color:  #E68C81;
   background: #EE9F96;
   color: var(--cp-text);
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
-.btn-danger:hover {
+.btn-danger:hover,
+.btn-outline-danger:hover {
   background: #E68C81;
   color: var(--cp-text);
-}
-
-.btn-outline-danger {
-  --bs-btn-color:               #C07090;
-  --bs-btn-border-color:        #C07090;
-  --bs-btn-hover-bg:            #E8A0B8;
-  --bs-btn-hover-border-color:  #C07090;
-  --bs-btn-hover-color:         #FBF8F3;
-  background: #FBF8F3;
-  box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10);
 }
 
 /* every button lifts a little on hover ... */
 .btn-primary:hover,
 .btn-outline-primary:hover,
-.btn-secondary:hover,
 .btn-outline-secondary:hover,
 .btn-danger:hover {
   box-shadow: 0 6px 16px rgba(74, 63, 58, 0.12);
@@ -301,7 +249,6 @@ h4, h5, h6 {
 /* ... and sit back down when pressed */
 .btn-primary:active,
 .btn-outline-primary:active,
-.btn-secondary:active,
 .btn-danger:active {
   box-shadow: 0 1px 3px rgba(74, 63, 58, 0.10) !important;
 }
@@ -317,7 +264,7 @@ h4, h5, h6 {
 
 .btn-link:hover { color: #E8A0B8; }
 
-/* ── Forms ──────────────────────────────────────────────────── */
+/* Forms */
 .form-label {
   font-weight: 700;
   font-size: 13px;
@@ -363,7 +310,7 @@ h4, h5, h6 {
   font-weight: 700;
 }
 
-/* ── Badges / pills ─────────────────────────────────────────── */
+/* Badges / pills */
 .badge {
   font-size: 12px;
   font-weight: 700;
@@ -384,7 +331,7 @@ h4, h5, h6 {
 /* Bootstrap semantic badge overrides */
 .text-bg-success   { background-color: #A8CC90   !important; color: #4A3F3A  !important; }
 
-/* ── Alerts ─────────────────────────────────────────────────── */
+/* Alerts */
 /* The soft look of the newer pages: no outline, soft corners, a pale colour and dark text */
 .alert {
   border: 0;
@@ -398,7 +345,7 @@ h4, h5, h6 {
 .alert-warning { background: #FBE7A1; } /* soft yellow */
 .alert-success { background: #CDE8D2; } /* soft green */
 
-/* ── Progress bars ──────────────────────────────────────────── */
+/* Progress bars */
 .progress {
   background: #FBF8F3;
   border: 1px solid #C8B8A8;
@@ -412,7 +359,7 @@ h4, h5, h6 {
   color: #4A3F3A;
 }
 
-/* ── Modals (pop-up boxes) ───────────────────────────────────
+/* Modals (pop-up boxes)
    The pop-ups are moved to the end of the body, so their colours come from the --cp-... variables above. */
 .modal-content {
   border: 0;
@@ -457,7 +404,7 @@ h4, h5, h6 {
   opacity: 0.45 !important;
 }
 
-/* ── Footer ─────────────────────────────────────────────────── */
+/* Footer */
 .app-footer {
   background: var(--role-accent-soft, #FBF8F3);
   border-top: 3px solid var(--role-accent-dark, #C8B8A8);
@@ -468,14 +415,14 @@ h4, h5, h6 {
   font-size: 12px;
 }
 
-/* ── Spinner ─────────────────────────────────────────────────── */
+/* Spinner */
 .spinner-border {
   --bs-spinner-border-width: 3px;
   border-color: #E8A0B8;
   border-right-color: transparent;
 }
 
-/* ── Scrollbar (webkit) ──────────────────────────────────────── */
+/* Scrollbar (webkit) */
 ::-webkit-scrollbar              { width: 10px; }
 ::-webkit-scrollbar-track        { background: #FBF8F3; }
 ::-webkit-scrollbar-thumb {
@@ -485,13 +432,13 @@ h4, h5, h6 {
 }
 ::-webkit-scrollbar-thumb:hover  { border-color: #B9A99B; }
 
-/* ── Page transition ────────────────────────────────────────── */
+/* Page transition */
 .page-peel-enter-from  { opacity: 0; transform: translateY(14px) scale(0.99); }
 .page-peel-enter-active { transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .page-peel-leave-to    { opacity: 0; transform: translateY(-8px); }
 .page-peel-leave-active { transition: all 0.18s ease-in; }
 
-/* ── Chips ──────────────────────────────────────────────────── */
+/* Chips */
 .chip { display: inline-block; padding: 2px 10px; font-size: 12px; font-weight: 700; color: #4A3F3A; }
 
 .chip-social   { background: #88C0D8; }

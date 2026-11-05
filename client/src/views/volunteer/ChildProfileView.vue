@@ -1,19 +1,8 @@
-<!-- =============================================================
-  Child profile = the PRE-SESSION BRIEFING page.      Owner: Yuqi
-  (Session history list + homework section: Ning Xuan's components)
-  (Charts: Jachin's components)
-  -------------------------------------------------------------
-  Already loads: child, sessions, homework, handover (AI summary, cached, with fallback)
-  TODO (Yuqi):
-   [x] HandoverCard: POST /handover/:id (auto-updates, no refresh button)
-  TODO (Ning Xuan):
-    [done] wire SessionCard @edit / @delete (DELETE /sessions/:id, then reload)
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
-import { daysSince, firstName } from '@/utils/format'
+import { daysSince, firstName, formatDate } from '@/utils/format'
 import { levelFor, earnedBadges } from '@/utils/gamification'
 import { useAuthStore } from '@/stores/auth'
 import PageHeader from '@/components/PageHeader.vue'
@@ -69,12 +58,231 @@ const completedHomework = computed(() =>
 async function loadHandover() {
   handoverLoading.value = true
   try {
-    const response = await api.post(`/handover/${childId}`, { audience: 'volunteer' })
+    const response = await api.post(`/handover/${childId}`)
     handover.value = response.data
   } catch {
     handover.value = null // the rest of the page still works without the summary
   }
   handoverLoading.value = false
+}
+
+// child overview for coordinator only
+const volunteers = ref([]) // all the volunteers, so we can show their names
+
+async function loadVolunteers() {
+  try {
+    const response = await api.get('/users', { params: { role: 'volunteer' } })
+    volunteers.value = response.data
+  } catch {
+    volunteers.value = [] // the names show as 'A volunteer' instead
+  }
+}
+
+// a volunteer's first name from their id, e.g. 'u_vol1' -> 'Aisha'
+function volunteerName(volunteerId) {
+  for (const volunteer of volunteers.value) {
+    if (volunteer.id === volunteerId) {
+      return firstName(volunteer.name)
+    }
+  }
+  return 'A volunteer' // not found
+}
+
+function plural(count, word) {
+  if (count === 1) {
+    return `1 ${word}`
+  }
+  return `${count} ${word}s`
+}
+
+// the sessions, newest first
+const newestFirst = computed(() => {
+  const list = [...sessions.value] // a copy, so the list on the page is not changed
+  list.sort((a, b) => b.date.localeCompare(a.date))
+  return list
+})
+
+// Who sees this child, and when.
+// e.g. 'Aisha: Mon 16:00, Wed 12:00. Daniel: Tue 16:00 (waiting to accept).'
+function scheduleText() {
+  // 1. put the days of each volunteer together, e.g. { u_vol1: ['Mon 16:00', 'Wed 12:00'] }
+  const daysByVolunteer = {}
+  const schedule = child.value.schedule || []
+  for (const slot of schedule) {
+    if (slot.status === 'declined') {
+      continue // the volunteer said no, so skip it
+    }
+
+    let text = slot.day // e.g. 'Mon'
+    if (slot.time) {
+      text = `${slot.day} ${slot.time}` // e.g. 'Mon 16:00'
+    }
+    if (slot.status === 'pending') {
+      text = text + ' (waiting to accept)'
+    }
+
+    if (!daysByVolunteer[slot.volunteerId]) {
+      daysByVolunteer[slot.volunteerId] = [] // first day of this volunteer: start an empty list
+    }
+    daysByVolunteer[slot.volunteerId].push(text)
+  }
+
+  // 2. one sentence for each volunteer, e.g. 'Aisha: Mon 16:00, Wed 12:00.'
+  const sentences = []
+  for (const volunteerId of Object.keys(daysByVolunteer)) {
+    const days = daysByVolunteer[volunteerId].join(', ')
+    sentences.push(`${volunteerName(volunteerId)}: ${days}.`)
+  }
+  return sentences.join(' ') // '' if there is no volunteer yet
+}
+
+// alert = true when the coordinator should do something (shown with a red "!" in front).
+// followUp = a few words for the summary line at the top
+const overviewRows = computed(() => {
+  if (!child.value) {
+    return [] // the child has not loaded yet
+  }
+  const rows = []
+
+  // Volunteers: who teaches the child, and when
+  const schedule = scheduleText()
+  if (schedule === '') {
+    rows.push({ label: 'Volunteers', icon: 'bi-people', text: 'No volunteer yet. Find one in Matchmaking.', alert: true, followUp: 'no volunteer yet' })
+  } else {
+    rows.push({ label: 'Volunteers', icon: 'bi-people', text: schedule, alert: false })
+  }
+
+  // Attendance: when the child last came
+  if (newestFirst.value.length === 0) {
+    rows.push({ label: 'Attendance', icon: 'bi-calendar-check', text: 'No sessions recorded yet.', alert: false })
+  } else {
+    const lastSession = newestFirst.value[0]
+    const days = daysSince(lastSession.date)
+    if (days > 7) {
+      // more than a week: worth following up (same rule as "Not seen" on the dashboard)
+      rows.push({
+        label: 'Attendance',
+        icon: 'bi-calendar-check',
+        text: `Not seen for ${days} days (last on ${formatDate(lastSession.date)}).`,
+        alert: true,
+        followUp: `not seen for ${days} days`,
+      })
+    } else {
+      let when = `${days} days ago`
+      if (days === 0) {
+        when = 'today'
+      }
+      if (days === 1) {
+        when = 'yesterday'
+      }
+      rows.push({ label: 'Attendance', icon: 'bi-calendar-check', text: `Last session ${when} (${formatDate(lastSession.date)}).`, alert: false })
+    }
+  }
+
+  // Latest Note: what the volunteer wrote last time, so the coordinator sees the "why"
+  for (const session of newestFirst.value) {
+    const note = session.notes || session.socialNotes || ''
+    if (note !== '') {
+      const writer = firstName(session.volunteerName || 'A volunteer')
+      rows.push({
+        label: 'Latest Note',
+        icon: 'bi-chat-quote',
+        text: `"${note}" (${writer}, ${formatDate(session.date)})`,
+        alert: false,
+      })
+      break // only the newest one
+    }
+  }
+
+  // Wellbeing: mood and eating in the last 3 sessions
+  const lastThree = newestFirst.value.slice(0, 3)
+  if (lastThree.length > 0) {
+    let lowMoods = 0 // how many sessions they were tired or frustrated
+    let happy = 0 // how many sessions they were happy
+    const ateLittleOn = [] // the dates they ate little or nothing
+    for (const session of lastThree) {
+      if (session.mood === 'tired' || session.mood === 'frustrated') {
+        lowMoods = lowMoods + 1
+      }
+      if (session.mood === 'happy') {
+        happy = happy + 1
+      }
+      if (session.portion === 'Little' || session.portion === 'None') {
+        ateLittleOn.push(formatDate(session.date))
+      }
+    }
+
+    // no low moods: say what the volunteers saw, e.g. 'Happy in the last 3 sessions.'
+    let text = `Happy or okay in the last ${plural(lastThree.length, 'session')}.`
+    if (happy === lastThree.length) {
+      text = `Happy in the last ${plural(lastThree.length, 'session')}.`
+    }
+    if (lowMoods === 1) {
+      text = `Tired or frustrated once in the last ${plural(lastThree.length, 'session')}.`
+    }
+    if (lowMoods >= 2) {
+      text = `Tired or frustrated in ${lowMoods} of the last ${plural(lastThree.length, 'session')}. Worth a check-in with the parent.`
+    }
+    if (ateLittleOn.length > 0) {
+      text = text + ` Ate little on ${ateLittleOn.join(' and ')}.`
+    }
+    rows.push({ label: 'Wellbeing', icon: 'bi-emoji-smile', text: text, alert: lowMoods >= 2, followUp: 'tired or frustrated lately' })
+  }
+
+  // Homework
+  let overdue = 0
+  let todo = 0
+  let waiting = 0
+  for (const item of homework.value) {
+    if (item.status === 'submitted') {
+      waiting = waiting + 1 // the child handed it in, the volunteer has not checked it yet
+    } else if (item.status === 'assigned' && daysSince(item.dueDate) > 0) {
+      overdue = overdue + 1 // not done, and the due date has passed
+    } else if (item.status === 'assigned') {
+      todo = todo + 1 // not done, but there is still time
+    }
+  }
+  const parts = []
+  if (overdue > 0) {
+    parts.push(`${overdue} overdue`)
+  }
+  if (todo > 0) {
+    parts.push(`${todo} to do`)
+  }
+  if (waiting > 0) {
+    parts.push(`${waiting} waiting to be checked`)
+  }
+  let homeworkText = 'Nothing pending.'
+  if (parts.length > 0) {
+    homeworkText = parts.join(', ') + '.' // e.g. '1 overdue, 2 to do.'
+  }
+  rows.push({ label: 'Homework', icon: 'bi-journal-check', text: homeworkText, alert: overdue > 0, followUp: 'overdue homework' })
+
+  return rows
+})
+
+// at the top of the card
+// e.g. '2 things to follow up: not seen for 17 days, overdue homework.'  or  'Nothing to follow up.'
+const followUpText = computed(() => {
+  const things = []
+  for (const row of overviewRows.value) {
+    if (row.alert) {
+      things.push(row.followUp)
+    }
+  }
+  if (things.length === 0) {
+    return 'Nothing to follow up.'
+  }
+  return `${plural(things.length, 'thing')} to follow up: ${things.join(', ')}.`
+})
+
+async function loadHomework() {
+  try {
+    const h = await api.get('/homework', { params: { childId } })
+    homework.value = h.data
+  } catch {
+    // silent — background refresh
+  }
 }
 
 async function loadData() {
@@ -169,7 +377,7 @@ async function deleteSession(sessionId) {
     success.value = 'Session deleted successfully'
 
     await loadData() // reload data after successful deletion
-    loadHandover() // the summary changes when a session is deleted
+    if (auth.role === 'volunteer') loadHandover() // the summary changes when a session is deleted
   } catch (err) {
     error.value = errorMessage(err)
   }
@@ -189,7 +397,16 @@ onMounted(() => {
   // start both at the same time: the summary only needs childId,
   // so it does not have to wait for the child, sessions and homework
   loadData()
-  loadHandover()
+  if (auth.role === 'volunteer') {
+    loadHandover() // the AI handover is a note for the next volunteer
+  } else if (auth.role === 'coordinator') {
+    loadVolunteers() // for the names in the Overview
+  }
+  window.addEventListener('bell-refresh', loadHomework)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('bell-refresh', loadHomework)
 })
 </script>
 
@@ -249,7 +466,31 @@ onMounted(() => {
       <div class="board">
         <div class="row g-4">
           <div class="col-lg-7">
-            <HandoverCard :handover="handover" :loading="handoverLoading" class="mb-4" />
+            <!-- volunteer: what to teach next session (AI) -->
+            <HandoverCard v-if="auth.role === 'volunteer'" :handover="handover" :loading="handoverLoading" class="mb-4" />
+
+            <!-- coordinator: how the child is doing overall -->
+            <div v-else-if="auth.role === 'coordinator'" class="care-card mb-4" data-test="care-overview">
+              <h2 class="handover-title care-title"><i class="bi bi-clipboard2-pulse me-2"></i>Overview</h2>
+              <!-- the one line that answers "does this child need me?" -->
+              <p class="care-summary" :class="{ 'care-summary-alert': followUpText !== 'Nothing to follow up.' }" data-test="care-summary">
+                <i
+                  class="bi me-1"
+                  :class="followUpText === 'Nothing to follow up.' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"
+                ></i>{{ followUpText }}
+              </p>
+              <dl class="row mb-0">
+                <template v-for="row in overviewRows" :key="row.label">
+                  <dt class="col-12 col-sm-4 small handover-key">
+                    <i class="bi me-1" :class="row.icon"></i>{{ row.label }}
+                  </dt>
+                  <dd class="col-12 col-sm-8 fw-semibold handover-value">
+                    <!-- something to follow up: a red "!" in front -->
+                    <i v-if="row.alert" class="bi bi-exclamation-circle-fill care-alert me-1" aria-label="Needs follow-up"></i>{{ row.text }}
+                  </dd>
+                </template>
+              </dl>
+            </div>
 
               <StateMessage v-if="sessions.length === 0" message="No sessions recorded yet." />
               <div class="d-flex flex-column gap-3">
@@ -257,7 +498,7 @@ onMounted(() => {
                   v-for="s in sessions"
                   :key="s.id"
                   :session="s"
-                  :can-edit="s.volunteerId === auth.user?.id || auth.role === 'coordinator'"
+                  :can-edit="s.volunteerId === auth.user?.id"
                   @edit="editSession"
                   @delete="deleteSession"
                 />
@@ -266,7 +507,7 @@ onMounted(() => {
 
           <div class="col-lg-5 d-flex flex-column gap-4">
             <PeelCard title="Skill Progress" icon="bi-graph-up-arrow" :initial-open="true">
-              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" />
+              <SkillProgressChart :sessions="sessions" :calm="auth.role === 'volunteer'" explain />
             </PeelCard>
 
             <PeelCard title="Subject Summary" icon="bi-pie-chart" :initial-open="true">
@@ -284,6 +525,7 @@ onMounted(() => {
                   :key="h.id"
                   :homework="h"
                   mode="volunteer"
+                  :readonly="auth.role !== 'volunteer'"
                   :busy="checkingQuestId !== null"
                   @verify="verifyQuest"
                   @reject="rejectQuest"
@@ -305,6 +547,7 @@ onMounted(() => {
               :key="h.id"
               :homework="h"
               mode="volunteer"
+              :readonly="auth.role !== 'volunteer'"
               />
               </div>
             </PeelCard>
@@ -312,66 +555,40 @@ onMounted(() => {
         </div>
       </div>
     </template>
-  </div>
 
-  <!-- Return quest modal: volunteer optionally explains why -->
-  <Teleport to="body">
-    <div v-if="rejectPendingId" class="modal fade show d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Return Quest</h5>
-          </div>
-          <div class="modal-body">
-            <p class="mb-2" style="font-size:14px">The quest goes back to the child as "assigned". Leave a note so they know what to fix (optional).</p>
-            <textarea
-              v-model="rejectMsg"
-              class="form-control"
-              rows="3"
-              maxlength="300"
-              placeholder="e.g. Please write in full sentences."
-              style="font-size:14px; resize:none;"
-            ></textarea>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="rejectPendingId = null">Cancel</button>
-            <button type="button" class="btn btn-danger btn-sm" @click="confirmReject">
-              <i class="bi bi-arrow-return-left me-1"></i>Return Quest
-            </button>
+    <Teleport to="body">
+      <div v-if="rejectPendingId" class="modal fade show d-block" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Return Quest</h5>
+            </div>
+            <div class="modal-body">
+              <p class="mb-2" style="font-size:14px">The quest goes back to the child as "assigned". Leave a note so they know what to fix (optional).</p>
+              <textarea
+                v-model="rejectMsg"
+                class="form-control"
+                rows="3"
+                maxlength="300"
+                placeholder="e.g. Please write in full sentences."
+                style="font-size:14px; resize:none;"
+              ></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-danger btn-sm" @click="rejectPendingId = null">Cancel</button>
+              <button type="button" class="btn btn-danger btn-sm" @click="confirmReject">
+                <i class="bi bi-arrow-return-left me-1"></i>Return Quest
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div v-if="rejectPendingId" class="modal-backdrop fade show"></div>
-  </Teleport>
+      <div v-if="rejectPendingId" class="modal-backdrop fade show"></div>
+    </Teleport>
+  </div>
 </template>
 
 <style>
-/* INTERNAL CSS: only this page uses these styles, so they live here in the .vue file. (CSS shared by several pages is in src/css/.) */
-
-/* Styles for one child's page as a volunteer or a coordinator sees it (ChildProfileView.vue, SessionCard.vue,
-   HomeworkQuestCard.vue, HandoverCard.vue and PeelCard.vue).
-   Every rule starts with .childprofilepage, so the other pages that use the same cards (the child's quests) are not changed.
-   The colours of each role are the variables (--cp-...) in main.css.
-   The colours of the volunteer:
-     #213C31 dark green       text
-     #446C59 green            the name, the line under it and the labels
-     #4A735F deep green       main buttons, icons and arrows
-     #9BD3B2 mint             the child's letter
-     #CDE9D8 pale mint        soft buttons
-     #E1F2E9 lightest mint    the back button
-     #B7D8D7 muted teal       the handover box, the subject and score pills, "waiting to be checked"
-                              (the same as "Being checked" on the parent page)
-     #E4F0EF pale teal        small tags on the teal box
-     #F7F4EE warm cream       the cards inside a section
-     #EEDFA6 muted yellow     "struggled with" and the topics that keep coming back
-     #EE9F96 soft red         overdue and delete (the same soft red for both)
-     #2E8B57 / #E6F4EC        checked homework (the only strong green)
-     #CFC9BC                  the edge of a card with nothing special about it
-     #F9F1E6 sand             the board that holds the sections (the same as on the parent page)
-   Look: a cream page, a sandy board with white cards on it, no outlines, soft corners (18px to 22px, round pills)
-   and a very light shadow. */
-
 /* the text of the page: the same size and weight as a volunteer sees (volunteershared.css), in the coordinator's colours */
 .role-coordinator .childprofilepage {
   color: var(--cp-text);
@@ -394,7 +611,7 @@ onMounted(() => {
   color: #7D7690;
 }
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 /* the board: the sandy box that holds the sections */
 .childprofilepage .alert {
@@ -404,7 +621,7 @@ onMounted(() => {
   color: var(--cp-text);
 }
 
-/* ---------- the way back, the name and the buttons ---------- */
+/* the way back, the name and the buttons */
 
 .childprofilepage .back-link {
   display: inline-flex;
@@ -526,7 +743,7 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-/* ---------- the sections (the handover and the PeelCard sections) ---------- */
+/* the sections (the handover and the PeelCard sections) */
 
 .childprofilepage .peel-card,
 .childprofilepage .handover-card {
@@ -616,7 +833,7 @@ onMounted(() => {
   background: var(--cp-bar);
 }
 
-/* ---------- the handover ---------- */
+/* the handover */
 
 .childprofilepage .handover-key {
   font-size: 14px;
@@ -647,13 +864,45 @@ onMounted(() => {
   color: var(--cp-text);
 }
 
-/* the topics that keep coming back are struggles too: the same muted yellow as "struggled with" */
-.childprofilepage .handover-tag {
-  background: #EEDFA6;
-  color: var(--cp-text);
+/* the Overview (coordinator) */
+
+.childprofilepage .care-card {
+  padding: 16px 20px 20px;
+  border-radius: 22px;
+  background: var(--cp-teal);
 }
 
-/* ---------- a session ---------- */
+.childprofilepage .care-title {
+  margin-bottom: 14px; /* the size and weight come from .handover-title, so it matches the Handover Notes */
+}
+
+.childprofilepage .care-title i {
+  color: var(--cp-deep);
+}
+
+/* the summary line at the top: green tick when all is fine, soft red when something needs following up */
+.childprofilepage .care-summary {
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.65);
+  font-weight: 600;
+}
+
+.childprofilepage .care-summary i {
+  color: #2E8B57;
+}
+
+.childprofilepage .care-summary-alert i {
+  color: #C0574B;
+}
+
+/* the red "!" in front of a row the coordinator should follow up (the same soft red as overdue) */
+.childprofilepage .care-alert {
+  color: #C0574B;
+}
+
+/* a session */
 
 .childprofilepage .session-card,
 .childprofilepage .quest-card {
@@ -722,7 +971,7 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* ---------- a homework: its edge and its tag show where it is ---------- */
+/* a homework: its edge and its tag show where it is */
 
 .childprofilepage .quest-card {
   border-left: 5px solid #CFC9BC;

@@ -1,7 +1,3 @@
-// =============================================================
-// Kids Lapis API server  (Express + MongoDB/Mongoose, like the IS113 / Week 5 blog-with-mongodb service)
-// Run:  pnpm dev   ->  http://localhost:8000
-// =============================================================
 import { createServer } from 'http'
 import express from 'express'
 import cors from 'cors'
@@ -40,7 +36,7 @@ app.set('io', io)
 // Each connected client joins a room named after the childId it is viewing,
 // so the server can push new messages only to the relevant browsers.
 //
-// Security (Kai Sen): the live connection follows the same rules as GET /messages.
+// Security: the live connection follows the same rules as GET /messages.
 //   1. No valid login token -> the connection is refused.
 //   2. You can only join the room of a child whose chat you may read
 //      (parents: their own children, coordinators: every child; volunteers and children: none).
@@ -84,19 +80,19 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', app: 'Kids Lapis API' })
 })
 
-//          URL prefix        Owner
-app.use('/auth', authRoutes) // Kai Sen
-app.use('/users', userRoutes) // Kai Sen / Yu Xuan
-app.use('/children', childRoutes) // Kai Sen
-app.use('/matchmaking', matchmakingRoutes) // Yu Xuan
-app.use('/requests', requestRoutes) // Kai Sen (volunteers accept / decline new sessions)
-app.use('/notifications', notificationRoutes) // Kai Sen (the "Updates" in the bell)
-app.use('/dashboard', dashboardRoutes) // Yu Xuan
-app.use('/sessions', sessionRoutes) // Ning Xuan
-app.use('/homework', homeworkRoutes) // Ning Xuan (assign) + Jachin (complete / rewards)
-app.use('/decks', deckRoutes) // Jachin (the decks of questions)
-app.use('/handover', handoverRoutes) // Yuqi
-app.use('/messages', messageRoutes) // Kat
+// The routes: one file for each URL prefix
+app.use('/auth', authRoutes)
+app.use('/users', userRoutes)
+app.use('/children', childRoutes)
+app.use('/matchmaking', matchmakingRoutes)
+app.use('/requests', requestRoutes) // volunteers accept / decline new sessions
+app.use('/notifications', notificationRoutes) // the "Updates" in the bell
+app.use('/dashboard', dashboardRoutes)
+app.use('/sessions', sessionRoutes)
+app.use('/homework', homeworkRoutes) // assign, complete and rewards
+app.use('/decks', deckRoutes) // the decks of questions
+app.use('/handover', handoverRoutes)
+app.use('/messages', messageRoutes)
 
 // Fallback error handler so the server never crashes on a bad request
 // eslint-disable-next-line no-unused-vars

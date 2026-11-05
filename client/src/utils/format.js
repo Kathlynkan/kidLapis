@@ -1,5 +1,3 @@
-// Small helper functions shared by everyone (Week 4: utils/ folder)
-
 import { SUBJECT_COLORS } from '@/utils/constants'
 
 // the background of a subject tag: <span :style="subjectStyle('Math')">Math</span>

@@ -1,10 +1,3 @@
-<!-- =============================================================
-  ParentSocialDay - one day at student care, the social side.   Owner: Kat
-  Shows (only what the volunteer filled in): photos, what the child did, the meal,
-  getting along with others, something positive and a note from the volunteer.
-  Props:  session (Object), childName (String)
-  Its styles are in the style block of views/parent/ParentHomeView.vue
-============================================================= -->
 <script setup>
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { firstName, activitiesOf } from '@/utils/format' // small helpers for names and activities
