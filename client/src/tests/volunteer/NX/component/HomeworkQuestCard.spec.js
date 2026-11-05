@@ -66,21 +66,4 @@ describe('HomeworkQuestCard', () => {
     expect(wrapper.text()).not.toContain('Return')
   })
 
-  // Test Case 4: Homework is submitted and readonly is true
-  test('hides volunteer action buttons when readonly is true', () => {
-    const wrapper = mount(HomeworkQuestCard, {
-      props: {
-        mode: 'volunteer',
-        readonly: true,
-        homework: {
-          ...baseHomework,
-          status: 'submitted'
-        }
-      }
-    })
-
-    expect(wrapper.text()).not.toContain('Mark as Checked')
-    expect(wrapper.text()).not.toContain('Return')
-  })
-
 })

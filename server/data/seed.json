@@ -301,6 +301,90 @@
       "points": 30,
       "avatar": "/photos/mia.jpg",
       "followUp": false
+    },
+    {
+      "id": "c_8",
+      "name": "Noah Tan",
+      "level": "P3",
+      "school": "Riverside Primary",
+      "parentId": "u_par1",
+      "volunteerIds": [],
+      "schedule": [
+        {
+          "volunteerId": "u_vol1",
+          "day": "Tue",
+          "time": "15:00",
+          "status": "pending",
+          "requestedAt": "2026-10-10T09:00:00.000Z"
+        }
+      ],
+      "needs": ["Math"],
+      "points": 0,
+      "avatar": "/photos/noah.jpg",
+      "followUp": false
+    },
+    {
+      "id": "c_9",
+      "name": "Amelia Goh",
+      "level": "P4",
+      "school": "Hillview Primary",
+      "parentId": "u_par3",
+      "volunteerIds": [],
+      "schedule": [
+        {
+          "volunteerId": "u_vol1",
+          "day": "Thu",
+          "time": "16:00",
+          "status": "pending",
+          "requestedAt": "2026-10-11T09:00:00.000Z"
+        }
+      ],
+      "needs": ["English"],
+      "points": 0,
+      "avatar": "/photos/amelia.jpg",
+      "followUp": false
+    },
+    {
+      "id": "c_10",
+      "name": "Lucas Teo",
+      "level": "P5",
+      "school": "Riverside Primary",
+      "parentId": "u_par4",
+      "volunteerIds": [],
+      "schedule": [
+        {
+          "volunteerId": "u_vol1",
+          "day": "Fri",
+          "time": "17:00",
+          "status": "pending",
+          "requestedAt": "2026-10-12T09:00:00.000Z"
+        }
+      ],
+      "needs": ["Science", "Math"],
+      "points": 0,
+      "avatar": "/photos/lucas.jpg",
+      "followUp": false
+    },
+    {
+      "id": "c_11",
+      "name": "Sarah Lim",
+      "level": "P2",
+      "school": "Hillview Primary",
+      "parentId": "u_par2",
+      "volunteerIds": [],
+      "schedule": [
+        {
+          "volunteerId": "u_vol1",
+          "day": "Mon",
+          "time": "14:00",
+          "status": "pending",
+          "requestedAt": "2026-10-13T09:00:00.000Z"
+        }
+      ],
+      "needs": ["English", "Math"],
+      "points": 0,
+      "avatar": "/photos/sarah.jpg",
+      "followUp": false
     }
   ],
   "decks": [
