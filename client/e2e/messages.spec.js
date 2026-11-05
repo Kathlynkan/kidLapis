@@ -12,7 +12,7 @@ test.describe('Sending messages', () => {
   // skip on the iphone size, or the same message would get sent twice
   test.skip(({ isMobile }) => isMobile, 'sends a real message, so it runs on Desktop Chrome only')
 
-  // Test case (1): Verify that a message from the parent reaches the coordinator, the bell tells her, and the bell goes away once she reads it.
+  // Test case 1: Verify that a message from the parent reaches the coordinator, the bell tells her, and the bell goes away once she reads it.
   test('a message from the parent reaches the coordinator', async ({ page, context }) => {
     const coordinatorPage = await context.newPage()
 
@@ -39,7 +39,7 @@ test.describe('Sending messages', () => {
     await expect(bellLine).toHaveCount(0)
   })
 
-  // Test case (2): Verify that a reply from the coordinator reaches the parent and the bell tells her.
+  // Test case 2: Verify that a reply from the coordinator reaches the parent and the bell tells her.
   test('a reply from the coordinator reaches the parent', async ({ page, context }) => {
     const parentPage = await context.newPage()
 
@@ -62,7 +62,7 @@ test.describe('Sending messages', () => {
     await expect(parentPage.locator('[data-test="chat-messages"]')).toContainText(reply)
   })
 
-  // Test case (3): Verify that each child has their own chat, so a message about Ethan doesnt show up in Mia's chat.
+  // Test case 3: Verify that each child has their own chat, so a message about Ethan doesnt show up in Mia's chat.
   test('each child has a separate chat', async ({ page }) => {
     // the parent sends a message in Ethan's chat
     await loginAs(page, 'parent')
