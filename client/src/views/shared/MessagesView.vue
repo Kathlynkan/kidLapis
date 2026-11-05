@@ -230,9 +230,10 @@ onUnmounted(() => {
 /* the date in the middle of the chat, like Telegram */
 .messagespage .date-pill {
   width: fit-content;
+  max-width: 100%;
   margin: 8px auto 12px;
   padding: 2px 12px;
-  border-radius: 999px;
+  border-radius: 14px;
   background: #414F67;
   color: #F9F1E6;
   font-size: 12px;

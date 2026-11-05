@@ -1,214 +1,193 @@
-# Kids Lapis — Student Care Development & Progress Tracking
+# Kids Lapis
 
-IS216 Web Application Development II — Group Project
+IS216 Web Application Development II, Group Project
 
-Parents whose children attend student care centres often have limited visibility into what actually happens during each session. The volunteers who work with children hold valuable observations — what the child is working on, how they are feeling, what approaches help — but this information rarely reaches parents in any useful form. Kids Lapis collects structured observations from volunteers and turns them into a clear, regularly-updated picture of each child's development that parents can actually read and act on.
+Kids Lapis is a web app for a student care centre, with a different view for coordinators, volunteers, parents and children.
 
-**Core flow:** Volunteer records session (academic progress, mood, struggles, what worked) → App stores history → Gemini AI summarises it in plain language → Parent sees a personalised update, charts, and mood timeline → Next volunteer is briefed and continues without losing context
+- Coordinators manage the children and volunteers, match volunteers to children based on their skills, set the weekly schedule, and see alerts for children who need attention.
+- Volunteers see their schedule, record each session (learning, scores, mood and social notes such as meals and activities), and assign homework.
+- Parents see how their child is doing through progress charts, the sessions and social notes, and an AI weekly summary. They can also message the coordinator.
+- Children complete homework as quests, earn stars and badges, and see a leaderboard.
 
-> 👉 **Team members: read [WORKLOAD.md](WORKLOAD.md) first.** It says who owns what. Then read [CONTRIBUTING.md](CONTRIBUTING.md) for the git workflow.
+The app uses Gemini to turn the session notes into a handover note for the next volunteer and a weekly update for parents.
 
-- **Deployed app:** https://kidlapis-2.onrender.com (API: https://kidlapis-api.onrender.com). The free server sleeps when unused, so the first log in can take up to a minute.
-- **Video:** _TODO_
-- **Git repo:** https://github.com/Kathlynkan/kidLapis
+Live app: https://kidlapis-2.onrender.com
 
----
+Git repo: https://github.com/Kathlynkan/kidLapis
 
-## Tech stack
+The live app is on Render's free plan, so the server goes to sleep when it is not used. The first log in may take up to a minute.
 
-| Layer | Tech (as taught in class) |
-|---|---|
-| Frontend | Vue 3 (`<script setup>`, Composition API), Vue Router, Pinia, Vite, pnpm |
-| Styling | Bootstrap 5 + Bootstrap Icons + our own `assets/main.css` design tokens |
-| HTTP | Axios (one shared instance in `src/services/api.js`) |
-| Backend | Node.js + Express (REST API, same style as the Week 5 blog service) |
-| Data store | MongoDB Atlas via Mongoose (models in `server/models/`). Demo data is loaded from `server/data/seed.json` with `pnpm seed`. |
-| External API | Google Gemini API (LLM handover and parent summaries), called from the server so the API key stays secret |
-| Charts | Chart.js + vue-chartjs |
-| Live updates | socket.io (chat, the NavBar bell, schedule changes). Each user joins a private room after their login is checked. |
-| Hosting | Render (Web Service for the API, Static Site for the Vue app) |
-| Testing | Playwright (end-to-end, desktop + iPhone 6 viewport), Vitest + Vue Test Utils (unit + component) |
+## Accounts
 
----
+All accounts use the password `password123`.
 
-## Set up and run (local)
-
-**You need:** Node.js **22.12 or newer** (`node -v`) and pnpm (`npm install -g pnpm`).
-
-Use **two terminals**: one for the API, one for the Vue app.
-
-### Step 0 — MongoDB Atlas (one-time)
-
-The team shares **one free Atlas cluster**, but each member uses **their own database name** for development.
-That way `pnpm seed` and the E2E tests (which reset the data) don't wipe each other's work.
-
-**Kai Sen does this once for the team:**
-1. Create a free **M0** cluster at https://cloud.mongodb.com. This is the same flow as `mongodb_guide.pptx` from class.
-2. **Database Access** → add a database user (username + password). One shared user for the team is fine.
-3. **Network Access** → *Add IP Address* → *Allow access from anywhere* (`0.0.0.0/0`). This is needed for the deployed server on Render, and for teammates on different Wi-Fi.
-4. **Connect → Drivers** → copy the connection string. Send it to the team **privately**, not in the repo.
-
-**Everyone:** put the string in `server/config.env` as `DB=...`.
-- Replace `<password>`.
-- Add your own database name after `.net/`, e.g. `...mongodb.net/kidslapis_yuqi?retryWrites=true&w=majority`.
-
-MongoDB creates the database the first time you run `pnpm seed`.
-
-### Terminal 1 — API server (http://localhost:8000)
-
-```bash
-cd server
-pnpm install
-cp config.env.example config.env     # Windows: copy config.env.example config.env
-#  -> edit config.env and set DB=... (Step 0)
-pnpm seed                            # loads the demo data into YOUR database
-pnpm dev
-```
-
-You should see `Connected to MongoDB database "kidslapis_<yourname>"`. Run `pnpm seed` again any time to reset the demo data.
-
-To look at the data, use **Atlas → Browse Collections** or **MongoDB Compass**: `users`, `children`, `sessions`, `homeworks`, `messages`, `handovers`, `decks`.
-
-To turn on the AI summary, paste a free Gemini key into `server/config.env` (`GEMINI_API_KEY=...`, get one at https://aistudio.google.com/apikey). Without a key the app still works: it falls back to a rule-based summary.
-
-### Terminal 2 — Vue app (http://localhost:5173)
-
-```bash
-cd client
-pnpm install
-pnpm dev
-```
-
-Open http://localhost:5173. The URL with `/__devtools__/` opens Vue DevTools.
-
-### Demo accounts (password for all: `password123`)
-
-| Role | Email | Notes |
+| Role | Email | Name |
 |---|---|---|
-| Volunteer | `volunteer@kidslapis.sg` | Aisha — assigned to Ethan, Arjun, Chloe, Mia |
-| Volunteer | `volunteer2@kidslapis.sg` | Daniel — Ethan, Meera, Ryan |
-| Volunteer | `volunteer3@kidslapis.sg` | Priya — Arjun |
-| Coordinator | `coordinator@kidslapis.sg` | Sees the whole centre |
-| Parent | `parent@kidslapis.sg` | Ms Grace — parent of Ethan **and** Mia |
-| Parent | `parent2@kidslapis.sg` | Ravi — parent of Meera **and** Arjun |
-| Parent | `parent3@kidslapis.sg` | Linda — parent of Chloe |
-| Parent | `parent4@kidslapis.sg` | Marcus — parent of Ryan **and** Sofia |
-| Child | `child@kidslapis.sg` | Ethan |
-| Child | `child2@kidslapis.sg` | Meera |
+| Coordinator | coordinator@kidslapis.sg | Tan Mei Ling |
+| Volunteer | volunteer@kidslapis.sg | Aisha Rahman |
+| Volunteer | volunteer2@kidslapis.sg | Daniel Lim |
+| Volunteer | volunteer3@kidslapis.sg | Priya Nair |
+| Parent | parent@kidslapis.sg | Ms Grace Wong (Ethan and Mia) |
+| Parent | parent2@kidslapis.sg | Ravi Kumar (Meera and Arjun) |
+| Parent | parent3@kidslapis.sg | Linda Lee (Chloe) |
+| Parent | parent4@kidslapis.sg | Marcus Ong (Ryan and Sofia) |
+| Child | child@kidslapis.sg | Ethan |
+| Child | child2@kidslapis.sg | Meera |
 
-**New parent accounts:** each child has a 6-character **child code** (e.g. `K7P3QX`). The coordinator sees it on Manage Children. A parent types it when signing up and is linked to that child straight away. Each code works once, then a new one is made.
+To sign up as a new parent, you need the child's 6-letter child code. The coordinator can find it on the Manage Children page.
 
-The demo data is built to trigger interesting cases:
+## Setting up
 
-- Ethan's fractions improve from 1/5 to 4/5, but "common denominators" keeps coming back as a recurring struggle.
-- Ethan's mood has varied — parents can see the emotional trend alongside the academic one.
-- Chloe has had no session for 11 days — triggers a coordinator alert.
-- Sofia has no volunteer assigned — triggers an "unassigned child" alert.
-- Chloe also has overdue homework.
+You need:
+- Node.js 22.12 or newer
+- pnpm (`npm install -g pnpm`)
+- A MongoDB Atlas connection string. You can create a free cluster at https://cloud.mongodb.com, add a database user, allow access from anywhere (0.0.0.0/0) under Network Access, then copy the connection string from Connect > Drivers.
+- A Gemini API key from https://aistudio.google.com/apikey. This is needed for the AI summaries, which are a main part of the app. If the key is missing or Gemini is not available, the app shows a simpler backup summary made from the last session instead.
 
----
+1. Clone the repo (or unzip the submitted folder):
+   ```
+   git clone https://github.com/Kathlynkan/kidLapis.git
+   cd kidLapis
+   ```
+
+2. Install the packages for the server and the client:
+   ```
+   cd server
+   pnpm install
+   cd ../client
+   pnpm install
+   ```
+
+3. Create a file called `config.env` in the `server` folder. It is not in the repo because it has passwords in it.
+   ```
+   DB=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/kidslapis?retryWrites=true&w=majority
+   GEMINI_API_KEY=<your Gemini API key>
+   ```
+   Fill in your own connection string and Gemini key. `kidslapis` after `.net/` is the database name, and MongoDB creates it when you seed.
+
+4. Load the demo data:
+   ```
+   cd server
+   pnpm seed
+   ```
+   You can run this again any time to reset the data. Note that it deletes everything in the database first.
+
+   The seed shifts the dates so the data always looks recent. The dates move forward on Fridays, so if you seed from Monday to Thursday, the latest sessions are from the week before.
+
+## Running the app
+
+Open two terminals.
+
+Terminal 1 (server, http://localhost:8000):
+```
+cd server
+pnpm dev
+```
+
+Terminal 2 (website, http://localhost:5173):
+```
+cd client
+pnpm dev
+```
+
+Then go to http://localhost:5173 and log in with one of the accounts above.
 
 ## Testing
 
-```bash
+### Unit and component tests (Vitest)
+
+These don't need the database or the servers.
+
+```
 cd client
-pnpm test:unit                         # Vitest unit + component tests (src/__tests__/<parent|child|volunteer|coordinator|shared>)
-pnpm exec playwright install chromium  # first time only
-pnpm test:e2e                          # Playwright E2E - starts API + Vue for you, re-seeds YOUR database
-pnpm exec playwright show-report       # open the HTML report
+pnpm exec vitest run
+```
+```
+cd server
+pnpm exec vitest run
 ```
 
-The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsive check). They use `data-test="..."` attributes as stable selectors.
-
-| Spec | Covers | Owner |
-|---|---|---|
-| `e2e/auth.spec.js` | Landing page, login for all 4 roles, wrong password, route guards, sign-up (new volunteer, validation errors, duplicate email, parent with a child code) | Kai Sen |
-| `e2e/volunteer.spec.js` | Assigned children only, handover + history on profile, open/submit session form, assign homework | Yuqi / Ning Xuan / Jachin |
-| `e2e/child.spec.js` | Child quests (submit, badge shelf, volunteer verifies, API failure) | Jachin |
-| `e2e/leaderboard.spec.js` | Leaderboard: podium order, "You" label on the logged-in child, link back home | Jachin |
-| `e2e/parent.spec.js` | Parent home: greeting, child info, handover card, session timeline with mood labels, SkillProgressChart (Progress tab), child switcher, switching children | Jachin |
-| `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
-| `e2e/parent-viewed.spec.js` | Once the parent has read a session, the volunteer sees it as locked | Kat |
-| `e2e/messages.spec.js` | A parent's message reaches the coordinator (and the bell shows it), the coordinator's reply reaches the parent, each child has a separate chat | Kat |
-| `e2e/parent-viewed.spec.js` | When the parent opens her page, the volunteer sees the child's sessions as "Seen by parent" and can no longer edit or delete them; the volunteer cannot save a change to a read session, even through its edit page | Kat |
-
-The unit and component tests (Vitest, no database or browser needed) are in `client/src/__tests__/`, one folder for each role:
-
-| Test | Type | Covers |
-|---|---|---|
-| `parent/parentHelpers.spec.js` | unit | `activitiesOf`: a session's activities as a list (list, one word, none, empty, null) |
-| `parent/ParentSocialDay.spec.js` | component | one day on the Social tab: meal, what the child did, volunteer note, photo pop-up, empty day |
-| `parent/ChatThread.spec.js` | component | the chat: a bubble for each message, empty chat, sending a message, an empty message is not sent |
-| `child/ChildAvatar.spec.js`, `child/gamification.spec.js` | component, unit | the avatar (image, emoji, empty) and the badge and level rules |
-| `volunteer/HomeworkQuestCard.spec.js` | component | the quest card in child and volunteer mode: submit, verify, undo, busy |
-| `shared/LoginView.spec.js`, `shared/SignupView.spec.js` | component | the login and sign-up pages |
-| `shared/auth.spec.js`, `shared/format.spec.js`, `shared/validation.spec.js` | unit | the login store, the format helpers and the form rules |
-
-To run only one folder, for example the parent's: `pnpm exec vitest run src/__tests__/parent`. To run only one E2E file: `pnpm exec playwright test e2e/messages.spec.js --project=chromium`.
-
----
-
-## Project structure
-
+To run one file, add the path at the end, for example:
 ```
-kids-lapis/
-├── WORKLOAD.md            <- who does what
-├── CONTRIBUTING.md        <- git workflow
-├── server/                <- Express API (port 8000)
-│   ├── server.js          <- mounts all routes
-│   ├── config.env.example <- copy to config.env (git-ignored)
-│   ├── middleware/auth.js <- requireAuth, requireRole
-│   ├── models/            <- Mongoose schemas: User, Child, Session, Homework, Message, Handover, Deck, Notification
-│   ├── utils/db.js        <- MongoDB connection (DB= in config.env)
-│   ├── utils/seed.js      <- `pnpm seed`: reset your database with the demo data
-│   ├── utils/access.js    <- who can see which child (+ the same rule as a Mongo filter)
-│   ├── data/seed.json     <- demo data
-│   └── routes/            <- one file per feature, each with an owner + TODO list
-└── client/                <- Vue 3 + Vite app (port 5173)
-    ├── e2e/               <- Playwright tests
-    └── src/
-        ├── main.js        <- Bootstrap, Pinia, Router
-        ├── App.vue        <- NavBar + <RouterView />
-        ├── router/        <- all routes + role guard
-        ├── stores/auth.js <- logged-in user (Pinia + sessionStorage)
-        ├── services/api.js<- shared axios instance (adds the token)
-        ├── utils/         <- format, constants, gamification (+ unit tests)
-        ├── components/    <- reusable pieces (cards, charts, chat...)
-        └── views/         <- one folder per role: auth, volunteer, parent, child, coordinator, shared
+pnpm exec vitest run src/__tests__/volunteer/HandoverCard.spec.js
 ```
 
----
+### End-to-end tests (Playwright)
 
-## API reference
+The E2E tests reset the database in your `config.env` before they start, so don't point it at a database you want to keep.
 
-All routes except `/auth/signup` and `/auth/login` need `Authorization: Bearer <token>`. The client adds it automatically.
+```
+cd client
+pnpm exec playwright install chromium
+pnpm exec playwright test
+pnpm exec playwright show-report
+```
 
-| Method & path | What it does | Status | Owner |
-|---|---|---|---|
-| `POST /auth/signup`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | Accounts | ✅ done | Kai Sen |
-| `GET /children`, `GET /children/:id` | Children visible to me | ✅ done | Kai Sen |
-| `POST / PUT / DELETE /children` | Manage children | ✅ done | Kai Sen |
-| `GET /requests`, `PUT /requests/:childId` | Volunteer's session requests: accept or decline | ✅ done | Kai Sen |
-| `GET /notifications`, `PUT /notifications/read` | The bell's updates, marked read once seen | ✅ done | Kai Sen |
-| `GET /users?role=volunteer`, `GET /users/:id`, `PUT /users/:id` | Volunteers & profiles | ✅ done | Yu Xuan |
-| `GET /sessions?childId=`, `GET /sessions/:id` | Session history | ✅ done | Ning Xuan |
-| `POST / PUT / DELETE /sessions` | Record / edit / delete | ✅ done | Ning Xuan |
-| `GET /homework?childId=` | Homework list | ✅ done | Ning Xuan |
-| `POST /homework` | Assign homework (with optional question deck) | ✅ done | Ning Xuan / Jachin |
-| `PUT /homework/:id/submit`, `PUT /homework/:id/verify` | Child submits; volunteer verifies and awards stars | ✅ done | Jachin |
-| `GET /homework/leaderboard` | Berry leaderboard (all-time + weekly) | ✅ done | Jachin |
-| `GET /decks` | Question bank decks for homework | ✅ done | Jachin |
-| `POST /handover/:childId` | AI summary (Gemini + fallback), audience: volunteer or parent | ✅ done | Yuqi |
-| `GET /messages?childId=` | Conversation history | ✅ done | Kat |
-| `POST /messages`, `PUT /messages/read`, `GET /messages/unread` | Send message, mark read, unread counts | ✅ done | Kat |
-| `GET /dashboard/summary` | KPI numbers | ✅ done | Yu Xuan |
-| `GET /dashboard/alerts` | Needs-attention list | ✅ done | Yu Xuan |
-| `PUT /dashboard/follow-up/:childId` | Toggle follow-up flag | ✅ done | Yu Xuan |
-| `GET /matchmaking/:childId`, `PUT /matchmaking/:childId/assign` | Skills-based volunteer matching | ✅ done | Yu Xuan |
-| `GET /progress/:childId`, `GET /progress/overview` | Per-topic accuracy, trends, recurring struggles | ✅ done | Jachin |
+The first line is only needed the first time. Playwright starts the server and the website by itself. Each test runs twice, once on a desktop screen and once on an iPhone 6 sized screen.
 
----
+To run one file:
+```
+pnpm exec playwright test e2e/volunteer-handover.spec.js
+```
 
-## Third-party code & credits
+### Test files
 
-Bootstrap, Bootstrap Icons, Vue, Vue Router, Pinia, Axios, Chart.js, vue-chartjs, Express, Mongoose, Playwright, Vitest (all free/open-source). Fonts: Nunito (Google Fonts); the child pages use Arial and Georgia. The child pages (stars, Bounty Board leaderboard) are a fan-inspired nod to the One Piece series and use only emoji and our own CSS, no original artwork. The project skeleton was generated with AI assistance as boilerplate starter code, which the module allows. Each feature is implemented by its owner as listed in WORKLOAD.md.
+Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
+
+**Yuqi**
+- Unit: `server/tests/handover.test.js` checks `checkMood`, the mood note for volunteers based on the last 3 sessions
+- Component: `client/src/__tests__/volunteer/HandoverCard.spec.js` checks the summary card for volunteers and parents, including the week buttons
+- Component: `client/src/__tests__/volunteer/ChildCard.spec.js` checks a child's card on the volunteer home page
+- E2E: `client/e2e/volunteer-handover.spec.js` checks that a volunteer can search for a child and read the handover notes
+- E2E: `client/e2e/coordinator-overview.spec.js` checks that a coordinator sees a child's overview, without the handover or edit buttons
+
+**Jachin**
+- Unit: `client/src/__tests__/child/gamification.spec.js` checks the badge and level rules
+- Component: `client/src/__tests__/volunteer/HomeworkQuestCard.spec.js` checks the quest card buttons for children and volunteers
+- Component: `client/src/__tests__/child/ChildAvatar.spec.js` checks the child's avatar (photo, emoji or empty)
+- E2E: `client/e2e/child.spec.js` checks that a child can submit a quest and a volunteer can verify it
+- E2E: `client/e2e/leaderboard.spec.js` checks the leaderboard order, the "You" label and the link back home
+
+**Kai Sen**
+- Unit:
+- Component:
+- Component:
+- E2E:
+- E2E:
+
+**Kat**
+- Unit:
+- Component:
+- Component:
+- E2E:
+- E2E:
+
+**Ning Xuan**
+- Unit:
+- Component:
+- Component:
+- E2E:
+- E2E:
+
+**Yu Xuan**
+- Unit:
+- Component:
+- Component:
+- E2E:
+- E2E:
+
+## Folders
+
+```
+kidLapis/
+  server/          Express API
+    routes/        one file per feature
+    models/        Mongoose schemas
+    data/          demo data (seed.json)
+    tests/         server tests
+  client/          Vue app
+    e2e/           Playwright tests
+    src/views/     pages, one folder per role
+    src/components/  reusable components
+    src/__tests__/   unit and component tests
+```
