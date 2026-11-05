@@ -130,7 +130,7 @@ The E2E tests run on two projects: **Desktop Chrome** and **iPhone 6** (responsi
 | `e2e/coordinator.spec.js` | Dashboard KPI cards, alerts table + type filter, follow-up toggle, unassigned alert → matchmaking, matchmaking suggestions, manage children, manage volunteers | Yu Xuan |
 | `e2e/parent-viewed.spec.js` | Once the parent has read a session, the volunteer sees it as locked | Kat |
 | `e2e/messages.spec.js` | A parent's message reaches the coordinator (and the bell shows it), the coordinator's reply reaches the parent, each child has a separate chat | Kat |
-| `e2e/parent-viewed.spec.js` | When the parent opens her page, the volunteer sees the child's sessions as "Seen by parent" and can no longer edit or delete them | Kat |
+| `e2e/parent-viewed.spec.js` | When the parent opens her page, the volunteer sees the child's sessions as "Seen by parent" and can no longer edit or delete them; the volunteer cannot save a change to a read session, even through its edit page | Kat |
 
 The unit and component tests (Vitest, no database or browser needed) are in `client/src/__tests__/`, one folder for each role:
 

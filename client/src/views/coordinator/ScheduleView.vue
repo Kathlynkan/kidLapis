@@ -57,8 +57,16 @@ onMounted(async () => {
     loading.value = false
   }
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('schedule-changed', onScheduleChanged)
+})
+
+function onScheduleChanged() {
+  loadData().catch(() => {})
+}
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()

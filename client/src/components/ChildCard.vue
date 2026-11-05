@@ -37,8 +37,9 @@ const lastSeen = computed(() =>
         <strong>{{ lastSession.topic }}</strong>
         <span class="session-subject" :style="subjectStyle(lastSession.subject)">{{ lastSession.subject }}</span>
       </div>
-      <div>
-        Last result: {{ lastSession.correct }}/{{ lastSession.attempted }} ({{ accuracy(lastSession) }}%)
+      <div class="fact-caption">Last result</div>
+      <div class="fact-topic">
+        <strong>{{ lastSession.correct }}/{{ lastSession.attempted }} ({{ accuracy(lastSession) }}%)</strong>
       </div>
     </div>
     <div v-else class="child-facts muted">No sessions recorded yet.</div>

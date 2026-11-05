@@ -14,7 +14,7 @@
     [done] wire SessionCard @edit / @delete (DELETE /sessions/:id, then reload)
 ============================================================= -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import { daysSince, firstName, formatDate } from '@/utils/format'
@@ -291,6 +291,15 @@ const followUpText = computed(() => {
   return `${plural(things.length, 'thing')} to follow up: ${things.join(', ')}.`
 })
 
+async function loadHomework() {
+  try {
+    const h = await api.get('/homework', { params: { childId } })
+    homework.value = h.data
+  } catch {
+    // silent — background refresh
+  }
+}
+
 async function loadData() {
   try {
     const [c, s, h] = await Promise.all([
@@ -408,6 +417,11 @@ onMounted(() => {
   } else if (auth.role === 'coordinator') {
     loadVolunteers() // for the names in the Overview
   }
+  window.addEventListener('bell-refresh', loadHomework)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('bell-refresh', loadHomework)
 })
 </script>
 
