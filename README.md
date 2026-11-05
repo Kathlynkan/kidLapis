@@ -152,11 +152,11 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E: `client/e2e/parent-viewed.spec.js` checks that one the parent views the page, the volunteer is unable to edit the session 
 
 **Ning Xuan**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+- Unit: `client/src/__tests__/volunteer/homeworkValidation.spec.js` checks that homework can only be assigned with valid due dates and rejects invalid inputs.
+- Component: `client/src/__tests__/volunteer/HomeworkQuestCard.spec.js` checks that the correct volunteer actions are displayed based on the homework status.
+- Component: `client/src/__tests__/volunteer/SessionCard.spec.js` checks that session editing controls are displayed correctly according to volunteer permissions and whether the session has been viewed by a parent.
+- E2E: `client/e2e/nx/assignHomework.spec.js` checks that volunteers can assign homework successfully and that homework validation rules are enforced.
+- E2E: `client/e2e/nx/assignmentRequests.spec.js` checks that volunteers can accept or decline assignment requests and that completed requests remain visible in the request history after a page refresh.
 
 **Yu Xuan**
 - Unit: server/tests/matchmaking.test.js checks the child being matched doesn't count towards workload
