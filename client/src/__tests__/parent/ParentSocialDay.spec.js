@@ -16,7 +16,7 @@ import ParentSocialDay from '@/components/ParentSocialDay.vue'
 // wrapper = the whole day card, mounted
 describe('ParentSocialDay', () => {
 
-    // Test case (1): Verify that the component shows the meal that the volunteer wrote down.
+    // Test case 1: Verify that the component shows the meal that the volunteer wrote down.
     it('shows the meal', () => {
         const wrapper = mount(ParentSocialDay, {
             props: { childName: 'Ethan', session: { meal: 'Chicken rice' } },
@@ -27,7 +27,7 @@ describe('ParentSocialDay', () => {
             .toContain('Chicken rice')
     })
 
-    // Test case (2): Verify that the component shows what the child did.
+    // Test case 2: Verify that the component shows what the child did.
     it('shows what the child did', () => {
         const wrapper = mount(ParentSocialDay, {
             props: { childName: 'Ethan', session: { activity: ['Chess'] } },
@@ -39,7 +39,7 @@ describe('ParentSocialDay', () => {
             .toContain('Chess')
     })
 
-    // Test case (3): Verify that the component shows the note from the volunteer.
+    // Test case 3: Verify that the component shows the note from the volunteer.
     it('shows the note from the volunteer', () => {
         const wrapper = mount(ParentSocialDay, {
             props: { childName: 'Ethan', session: { volunteerName: 'Aisha Rahman', socialNotes: 'Played chess today' } },
@@ -52,7 +52,7 @@ describe('ParentSocialDay', () => {
             .toContain('Played chess today')
     })
 
-    // Test case (4): Verify that pressing a photo opens it big.
+    // Test case 4: Verify that pressing a photo opens it big.
     it('opens the big photo when a photo is pressed', async () => {
         const wrapper = mount(ParentSocialDay, {
             props: { childName: 'Ethan', session: { photos: ['/photos/chess.jpg'] } },
@@ -73,7 +73,7 @@ describe('ParentSocialDay', () => {
         ).toBeTruthy()
     })
 
-    // Test case (5): Verify that the component says nothing extra was noted when the volunteer didnt write anything.
+    // Test case 5: Verify that the component says nothing extra was noted when the volunteer didnt write anything.
     it('says nothing extra was noted for an empty day', () => {
         // empty session, the volunteer didnt fill in anything
         const wrapper = mount(ParentSocialDay, {

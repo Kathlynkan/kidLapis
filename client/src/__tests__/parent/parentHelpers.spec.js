@@ -11,7 +11,7 @@ import { activitiesOf } from '@/utils/format'
 
 describe('activitiesOf', () => {
 
-    // Test case (1): Verify that a session with a list of activities gives the same list back.
+    // Test case 1: Verify that a session with a list of activities gives the same list back.
     it('returns the list when the session has a list of activities', () => {
         const result = activitiesOf({ activity: ['Chess', 'Drawing'] })
 
@@ -20,7 +20,7 @@ describe('activitiesOf', () => {
         expect(result[0]).toBe('Chess')
     })
 
-    // Test case (2): Verify that a session with just one word turns into a list of one.
+    // Test case 2: Verify that a session with just one word turns into a list of one.
     it('puts a single word into a list of one', () => {
         const result = activitiesOf({ activity: 'Soccer' })
 
@@ -29,18 +29,18 @@ describe('activitiesOf', () => {
         expect(result[0]).toBe('Soccer')
     })
 
-    // Test case (3): Verify that a session with no activity gives an empty list, so the page just shows nothing.
+    // Test case 3: Verify that a session with no activity gives an empty list, so the page just shows nothing.
     it('returns an empty list when the session has no activity', () => {
         // the session has no activity field at all
         expect(activitiesOf({})).toHaveLength(0)
     })
 
-    // Test case (4): Verify that empty text gives an empty list, not a list with a blank in it.
+    // Test case 4: Verify that empty text gives an empty list, not a list with a blank in it.
     it('returns an empty list when the activity is empty text', () => {
         expect(activitiesOf({ activity: '' })).toHaveLength(0)
     })
 
-    // Test case (5): Verify that null gives an empty list and doesnt crash.
+    // Test case 5: Verify that null gives an empty list and doesnt crash.
     it('returns an empty list when the activity is null', () => {
         expect(activitiesOf({ activity: null })).toHaveLength(0)
     })

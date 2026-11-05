@@ -24,7 +24,7 @@ const messages = [
 // wrapper = the whole chat box we just mounted
 describe('ChatThread', () => {
 
-    // Test case (1): Verify that the component displays a bubble for each message.
+    // Test case 1: Verify that the component displays a bubble for each message.
     it('shows a bubble for each message', () => {
         const wrapper = mount(ChatThread, {
             props: { messages, currentUserId: 'u_par1' },
@@ -36,7 +36,7 @@ describe('ChatThread', () => {
         ).toHaveLength(2)
     })
 
-    // Test case (2): Verify that my own message goes on my side and the other person's message does not.
+    // Test case 2: Verify that my own message goes on my side and the other person's message does not.
     it('puts my message on my side of the chat', () => {
         // the one logged in is the parent (u_par1), so message 1 is the parent's and message 2 is the coordinator's
         const wrapper = mount(ChatThread, {
@@ -50,7 +50,7 @@ describe('ChatThread', () => {
         expect(rows[1].classes('from-me')).toBe(false)
     })
 
-    // Test case (3): Verify that the component says there are no messages yet when the chat is empty.
+    // Test case 3: Verify that the component says there are no messages yet when the chat is empty.
     it('says there are no messages yet', () => {
         // no messages this time
         const wrapper = mount(ChatThread, {
@@ -61,7 +61,7 @@ describe('ChatThread', () => {
             .toContain('No messages yet')
     })
 
-    // Test case (4): Verify that pressing send emits a "send" event with the text that was typed.
+    // Test case 4: Verify that pressing send emits a "send" event with the text that was typed.
     // async because typing and clicking take some time, so we have to await them
     it('emits the text when send is pressed', async () => {
         const wrapper = mount(ChatThread, {
@@ -85,7 +85,7 @@ describe('ChatThread', () => {
         ).toEqual(['Thank you'])
     })
 
-    // Test case (5): Verify that an empty message is not sent.
+    // Test case 5: Verify that an empty message is not sent.
     it('does not emit an empty message', async () => {
         const wrapper = mount(ChatThread, {
             props: { messages: [], currentUserId: 'u_par1' },
