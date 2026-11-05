@@ -248,7 +248,6 @@ async function save() {
   --pf-text: #414F67;
   --pf-title: #414F67;
   --pf-muted: #5E6C80;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(65, 79, 103, 0.1);
   --pf-line: #CFE0DE;
   --pf-focus: #AED9D8;
@@ -264,7 +263,6 @@ async function save() {
   --pf-text: #213C31;
   --pf-title: #446C59;
   --pf-muted: #6B8177;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(33, 60, 49, 0.1);
   --pf-line: #C3D2CA;
   --pf-focus: #4A735F;
@@ -281,7 +279,6 @@ async function save() {
   --pf-text: #3D3454;
   --pf-title: #5B4B8A;
   --pf-muted: #7D7690;
-  --pf-card: #FFFFFF;
   --pf-shadow: rgba(61, 52, 84, 0.1);
   --pf-line: #E3DBF0;
   --pf-focus: #6B5CA5;

@@ -1,13 +1,12 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { User, Child } from '../models/index.js'
-import { newLinkCode } from '../models/helpers.js'
+import { newLinkCode, EMAIL_PATTERN } from '../models/helpers.js'
 import { issueToken, revokeToken, requireAuth } from '../middleware/auth.js'
 
 const router = Router()
 const SIGNUP_ROLES = ['volunteer', 'parent'] // coordinators & child accounts are created by the centre
 const MIN_PASSWORD_LENGTH = 8 // same rule as client/src/utils/validation.js
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // something@something.something, no spaces
 
 // Tidy an email the same way everywhere, so " Ann@X.com " and "ann@x.com" count as the same account.
 // String(...) also stops a crash if someone sends a number instead of text.

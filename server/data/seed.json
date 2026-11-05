@@ -953,7 +953,11 @@
         "Reading"
       ],
       "interaction": "Good",
-      "socialNotes": "Chatted with her brother Arjun at lunch."
+      "socialNotes": "Chatted with her brother Arjun at lunch.",
+      "photos": [
+        "/photos/meera-arjun-lunch.jpg",
+        "/photos/meera-reading-book.jpg"
+      ]
     },
     {
       "id": "s_37",
@@ -975,6 +979,9 @@
         "Drawing"
       ],
       "photos": [
+        "/photos/water-cycle-poster.jpg",
+        "/photos/meera-chicken-rice.jpg",
+        "/photos/save-our-oceans.jpg",
         "/photos/comics.jpg"
       ],
       "interaction": "Excellent",
@@ -1003,7 +1010,11 @@
         "Board games"
       ],
       "interaction": "Fair",
-      "socialNotes": "Was quieter than usual until a board game with friends at break."
+      "socialNotes": "Was quieter than usual until a board game with friends at break.",
+      "photos": [
+        "/photos/fish-soup-lunch.jpg",
+        "/photos/board-game-friends.jpg"
+      ]
     },
     {
       "id": "s_39",
@@ -1027,7 +1038,8 @@
         "Reading"
       ],
       "photos": [
-        "/photos/reading-book.jpg"
+        "/photos/nasi-lemak-lunch.jpg",
+        "/photos/curious-bear-reading.jpg"
       ],
       "interaction": "Good",
       "socialNotes": "Read her story to a friend, who asked to read it again."
@@ -1054,7 +1066,8 @@
         "Reading"
       ],
       "photos": [
-        "/photos/reading-corner.jpg"
+        "/photos/nasi-lemak-friends.jpg",
+        "/photos/science-today-magazine.jpg"
       ],
       "interaction": "Good",
       "socialNotes": "Read a science magazine with a friend after her work."
@@ -1081,7 +1094,11 @@
         "Drawing"
       ],
       "interaction": "Fair",
-      "socialNotes": "Quiet at break, but cheered up after her snack."
+      "socialNotes": "Quiet at break, but cheered up after her snack.",
+      "photos": [
+        "/photos/meera-drawing.jpg",
+        "/photos/meera-fried-rice-lunch.jpg"
+      ]
     },
     {
       "id": "s_7",
@@ -1105,7 +1122,11 @@
         "Board games"
       ],
       "interaction": "Good",
-      "socialNotes": "Taught two younger children how to play Snakes and Ladders."
+      "socialNotes": "Taught two younger children how to play Snakes and Ladders.",
+      "photos": [
+        "/photos/meera-teaching-snakes-ladders.jpg",
+        "/photos/meera-chicken-rice-soup.jpg"
+      ]
     },
     {
       "id": "s_8",
@@ -1129,7 +1150,8 @@
         "Outdoor play"
       ],
       "photos": [
-        "/photos/outdoor-play.jpg"
+        "/photos/meera-catching-teams.jpg",
+        "/photos/noodles-lunch.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Explained a bar model to a P4 friend",
@@ -1155,7 +1177,9 @@
         "Reading"
       ],
       "photos": [
-        "/photos/lunch-girls.jpg"
+        "/photos/science-project-chat.jpg",
+        "/photos/nasi-lemak-canteen.jpg",
+        "/photos/meera-turtle-book.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Volunteered to tidy the science corner",
@@ -1219,7 +1243,11 @@
         "Soccer"
       ],
       "interaction": "Excellent",
-      "socialNotes": "Played soccer with Ethan at break and scored twice."
+      "socialNotes": "Played soccer with Ethan at break and scored twice.",
+      "photos": [
+        "/photos/arjun-fried-rice.jpg",
+        "/photos/soccer-goal.jpg"
+      ]
     },
     {
       "id": "s_12",
@@ -1258,7 +1286,10 @@
         "Drawing"
       ],
       "interaction": "Good",
-      "socialNotes": "Drew comics with Ethan after his work - they made up a superhero together."
+      "socialNotes": "Drew comics with Ethan after his work - they made up a superhero together.",
+      "photos": [
+        "/photos/star-guardian-comic.jpg"
+      ]
     },
     {
       "id": "s_13",
@@ -1299,7 +1330,11 @@
         "Board games"
       ],
       "interaction": "Good",
-      "socialNotes": "Joined Ethan's Snakes and Ladders game after lessons."
+      "socialNotes": "Joined Ethan's Snakes and Ladders game after lessons.",
+      "photos": [
+        "/photos/chicken-rice-lunch.jpg",
+        "/photos/snakes-and-ladders.jpg"
+      ]
     },
     {
       "id": "s_112",
@@ -1323,7 +1358,11 @@
         "Drawing"
       ],
       "interaction": "Good",
-      "socialNotes": "Drew a comic of the story at break and proudly showed it around."
+      "socialNotes": "Drew a comic of the story at break and proudly showed it around.",
+      "photos": [
+        "/photos/mee-goreng.jpg",
+        "/photos/lost-bag-comic.jpg"
+      ]
     },
     {
       "id": "s_33",
@@ -1347,7 +1386,11 @@
         "Reading"
       ],
       "interaction": "Fair",
-      "socialNotes": "Polite but quiet. Read by herself at break."
+      "socialNotes": "Polite but quiet. Read by herself at break.",
+      "photos": [
+        "/photos/chloe-reading-rabbit-book.jpg",
+        "/photos/chloe-fish-soup.jpg"
+      ]
     },
     {
       "id": "s_34",
@@ -1371,7 +1414,11 @@
         "Board games"
       ],
       "interaction": "Good",
-      "socialNotes": "Joined a card game with two P4 girls and learned their names."
+      "socialNotes": "Joined a card game with two P4 girls and learned their names.",
+      "photos": [
+        "/photos/chloe-card-game.jpg",
+        "/photos/chloe-chicken-rice.jpg"
+      ]
     },
     {
       "id": "s_35",
@@ -1393,6 +1440,8 @@
         "Drawing"
       ],
       "photos": [
+        "/photos/chloe-clearing-table.jpg",
+        "/photos/chloe-noodles-lunch.jpg",
         "/photos/colouring.jpg"
       ],
       "interaction": "Good",
@@ -1421,7 +1470,8 @@
         "Chess"
       ],
       "photos": [
-        "/photos/chicken-rice-2.jpg"
+        "/photos/chloe-chicken-rice-friends.jpg",
+        "/photos/chloe-watching-chess.jpg"
       ],
       "interaction": "Good",
       "socialNotes": "Watched the older children play chess at break and asked to learn."
@@ -1448,7 +1498,8 @@
         "Reading"
       ],
       "photos": [
-        "/photos/reading-book.jpg"
+        "/photos/chloe-beanbag-reading.jpg",
+        "/photos/chloe-fish-soup-lunch.jpg"
       ],
       "interaction": "Fair",
       "socialNotes": "Wanted some quiet time after the session and read by herself."
@@ -1475,7 +1526,11 @@
         "Board games"
       ],
       "interaction": "Good",
-      "socialNotes": "Played Snakes and Ladders with two P4 girls at break."
+      "socialNotes": "Played Snakes and Ladders with two P4 girls at break.",
+      "photos": [
+        "/photos/chloe-snakes-ladders.jpg",
+        "/photos/chloe-noodles-lunch.jpg"
+      ]
     },
     {
       "id": "s_15",
@@ -1499,7 +1554,9 @@
         "Drawing"
       ],
       "photos": [
-        "/photos/comics.jpg"
+        "/photos/chloe-fried-rice-lunch.jpg",
+        "/photos/chloe-story-sharing.jpg",
+        "/photos/chloe-cat-comic.jpg"
       ],
       "interaction": "Excellent",
       "behaviour": "Read her story out to the group and clapped for everyone else's",
@@ -1529,6 +1586,7 @@
       "meal": "Chicken rice",
       "portion": "Half",
       "photos": [
+        "/photos/chloe-chicken-rice-group.jpg",
         "/photos/chess-chloe.jpg"
       ]
     },

@@ -34,7 +34,7 @@ All accounts use the password `password123`.
 | Child | child@kidslapis.sg | Ethan |
 | Child | child2@kidslapis.sg | Meera |
 
-To sign up as a new parent, you need the child's 6-letter child code. The coordinator can find it on the Manage Children page.
+To sign up as a new parent, you need the child's 6-character child code (letters and numbers). The coordinator can find it on the Manage Children page.
 
 ## Setting up
 
@@ -149,18 +149,18 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E: `client/e2e/leaderboard.spec.js` checks the leaderboard order, the "You" label and the link back home
 
 **Kai Sen**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+- Unit: `client/src/__tests__/shared/validation.spec.js` checks `isValidChildCode`, the 6-character code a parent uses to link to their child
+- Component: `client/src/__tests__/shared/LoginView.spec.js` checks the Show / Hide password button and the link to sign up
+- Component: `client/src/__tests__/shared/SignupView.spec.js` checks that the form changes with the role (skills for volunteers, child code for parents) and shows errors when empty
+- E2E: `client/e2e/auth.spec.js` checks that a wrong password shows an error
+- E2E: `client/e2e/auth.spec.js` checks that a parent who opens `/coordinator` is sent back to their own page
 
-**Kat**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+**Kathlyn**
+- Unit: `client/src/__tests__/parent/parentHelpers.spec.js` checks the parent page can always display what the child did at the student care
+- Component: `client/src/__tests__/parent/ParentSocialDay.spec.js` checks that the parent sees what the volunteer recorded
+- Component: `client/src/__tests__/parent/ChatThread.spec.js` checks the chat bubbles in Messages are displayed correctly 
+- E2E: `client/e2e/messages.spec.js` checks that the bell notifies messages sent between parent and coordinator and that each child has a separate chat 
+- E2E: `client/e2e/parent-viewed.spec.js` checks that one the parent views the page, the volunteer is unable to edit the session 
 
 **Ning Xuan**
 - Unit:
@@ -170,11 +170,11 @@ Each of us wrote our own tests: 1 unit test, 2 component tests and 2 E2E tests.
 - E2E:
 
 **Yu Xuan**
-- Unit:
-- Component:
-- Component:
-- E2E:
-- E2E:
+- Unit: server/tests/matchmaking.test.js checks the child being matched doesn't count towards workload
+- Component: client/src/components/__tests__/WeekdayDots.spec.js checks five red days and 0/5 with no sessions
+- Component: client/src/components/__tests__/MiniAvatar.spec.js checks it shows a photo when the avatar is a file path, the emoji when it's an emoji, the first letter of the name when there is no avatar, and that it uses the size it is given
+- E2E: client/e2e/coordinator.spec.js checks Children, Volunteer, and Sessions week tiles appear
+- E2E: client/e2e/schedule.spec.js checks that volunteer booking logic works, all volunteers appear, can't overbook, and pending requests
 
 ## Folders
 

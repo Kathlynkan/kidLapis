@@ -1,11 +1,10 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { Child, User, Session, Homework, Message, Handover } from '../models/index.js'
-import { newLinkCode } from '../models/helpers.js'
+import { newLinkCode, EMAIL_PATTERN } from '../models/helpers.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import { canAccessChild, childFilterFor } from '../utils/access.js'
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const router = Router()
 router.use(requireAuth)
@@ -90,7 +89,7 @@ router.post('/', requireRole('coordinator'), async (req, res) => {
   const wantsLogin = childEmail || childPassword
   if (wantsLogin) {
     const email = String(childEmail || '').trim().toLowerCase()
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_PATTERN.test(email)) {
       return res.status(400).json({ message: 'Child login email is not valid.' })
     }
     // Same minimum as every other account (MIN_PASSWORD_LENGTH in routes/auth.js)

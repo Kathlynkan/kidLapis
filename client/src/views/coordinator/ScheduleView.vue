@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
@@ -48,7 +48,10 @@ onMounted(async () => {
   }
   window.addEventListener('keydown', onKeydown)
 })
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
 
 useScheduleChanged(loadData, { isLoading: loading })
 
@@ -120,6 +123,12 @@ function openAdd(volunteer, day) {
   form.value = { childId: '', time: '' }
   formError.value = ''
 }
+
+// Like Bootstrap's own dialogs: the page behind the dialog doesn't scroll while it's open.
+// (On a phone, a page that moves underneath also moves the dialog away from where you tap.)
+watch(adding, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
 
 function closeAdd() {
   adding.value = null
@@ -208,7 +217,9 @@ async function removeSlot(volunteer, day, slot) {
       </div>
     </template>
 
-    <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue) -->
+    <!-- Add a session dialog (Bootstrap modal styles, opened/closed by Vue).
+         Teleport puts it at the end of <body>, so no wrapper on the page can move it. -->
+    <Teleport to="body">
     <template v-if="adding">
       <div
         class="modal d-block"
@@ -268,9 +279,9 @@ async function removeSlot(volunteer, day, slot) {
       </div>
       <div class="modal-backdrop show"></div>
     </template>
+    </Teleport>
   </div>
 </template>
-
 <style scoped>
 .legend {
   display: inline-flex;

@@ -205,8 +205,7 @@ async function answer(r, action) {
   background: #FBE7A1; /* the same yellow as "waiting" */
 }
 
-/* The mint pill buttons of the volunteer pages (same as "View all my children" on My Children).
-   Repeated here because that page's styles only load when it is opened. */
+/* Accept (mint) and Decline (coral), the same colours as Edit / Delete on a child's page */
 .volunteerpage .btn {
   border: 0;
   border-radius: 5px;
@@ -240,10 +239,6 @@ async function answer(r, action) {
 .volunteerpage .quest-delete {
   padding: 3px 9px;
 }
-
-
-
-
 
 /* "You'll see Sofia every Mon at 11:00.  [OPEN PROFILE]" */
 .volunteerpage .request-list {
