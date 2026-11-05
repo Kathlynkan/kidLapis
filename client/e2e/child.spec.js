@@ -1,12 +1,4 @@
-// Child journey: quests and leaderboard.              Owner: Jachin
-// Seed data used:
-//   child@kidslapis.sg = Ethan (c_1)
-//   h_1 "Fraction addition worksheet" is status='assigned' at the start of each run
-//   h_2 is status='verified' (Ethan has 160 points in seed)
-//
-// Note: tests run sequentially across projects (chromium then mobile) against one
-// shared database. The submit test mutates h_1, so it is marked chromium-only.
-// Mobile tests check structure and read-only behaviour only.
+// Owner: Jachin
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
@@ -68,7 +60,7 @@ test.describe('Child quests', () => {
   })
 })
 
-// ── Test Case 1: Quest verification ──────────────────────────────────────────
+// Test Case 1: Quest verification
 // Feature: volunteer verifies a submitted quest (PUT /homework/:id/verify).
 // DB involvement: writes homework.status → 'verified' and awards berry points to the child.
 // Depends on the 'clicking I\'m done!' test above having run first on chromium,
@@ -95,7 +87,7 @@ test.describe('Quest verification (volunteer)', () => {
   })
 })
 
-// ── Test Case 2: API failure on ChildHomeView ─────────────────────────────────
+// Test Case 2: API failure on ChildHomeView
 // Feature: the child's "My Quests" page handles a server error gracefully.
 // DB involvement: the page normally reads from MongoDB via GET /homework and
 //   GET /children/:id. Here we simulate the server being down (500) to verify

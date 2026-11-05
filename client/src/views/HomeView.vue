@@ -1,12 +1,4 @@
-﻿<!-- =============================================================
-  Landing page (public).                              Owner: Kai Sen
-  Done: the title, "One app, four views" (a card for each role: volunteers and parents can sign up
-        from their card, coordinator and child accounts are made by the centre, so their cards have Log in)
-        and "How it works" (record -> summarise -> share -> continue).
-        It is made of the same parts as the other pages: the page title, a sandy board with white cards,
-        and the four layer colours (purple, green, aqua, pink) for the four roles.
-============================================================= -->
-<script setup>
+﻿<script setup>
 /* eslint-disable */
 import { RouterLink } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
@@ -146,14 +138,14 @@ const steps = [
    The title and the sentence under it are .page-title and .page-subtitle (main.css), the sandy box is .board (main.css).
    The four colours are the layer colours of the roles: purple coordinator, green volunteer, aqua parent, pink child. */
 
-/* ---------- the colours of the roles ---------- */
+/* the colours of the roles */
 
 .homepage .colour-green  { background: #9BD3B2; }
 .homepage .colour-purple { background: #D5CBEA; }
 .homepage .colour-aqua   { background: #AED9D8; }
 .homepage .colour-pink   { background: #E8A0B8; }
 
-/* ---------- the title ---------- */
+/* the title */
 
 .homepage .home-header {
   display: flex;
@@ -186,7 +178,7 @@ const steps = [
   text-transform: uppercase;
 }
 
-/* ---------- the boards ---------- */
+/* the boards */
 
 .homepage .board {
   display: flex;
@@ -201,7 +193,7 @@ const steps = [
   font-weight: 600;
 }
 
-/* ---------- a button: small, with 5px corners, in the colour of the role ---------- */
+/* a button: small, with 5px corners, in the colour of the role */
 
 .homepage .home-button {
   display: inline-block;
@@ -218,7 +210,7 @@ const steps = [
   filter: brightness(0.95);
 }
 
-/* ---------- the role cards ---------- */
+/* the role cards */
 
 .homepage .role-grid,
 .homepage .step-grid {
@@ -281,7 +273,7 @@ const steps = [
   margin-top: auto;
 }
 
-/* ---------- the steps: white rows, like the rows on the parent page ---------- */
+/* the steps: white rows, like the rows on the parent page */
 
 .homepage .step-row {
   display: flex;
@@ -310,7 +302,7 @@ const steps = [
   font-weight: 600;
 }
 
-/* ---------- a phone ---------- */
+/* a phone */
 
 @media (max-width: 560px) {
   .homepage .role-grid,

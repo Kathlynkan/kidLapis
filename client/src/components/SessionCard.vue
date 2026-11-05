@@ -1,9 +1,3 @@
-<!-- =============================================================
-  SessionCard - one past session in the history list.   Owner: Ning Xuan
-  Shows the learning part first, then the social part (lunch, play, friends) under a thin line,
-  so a volunteer can see everything they wrote before editing it (social part added by Yuqi).
-  The look for a volunteer is in the style block of views/volunteer/ChildProfileView.vue
-============================================================= -->
 <script setup>
 import { ref, computed } from 'vue'
 import { formatDate, accuracy, subjectStyle, activitiesOf } from '@/utils/format'

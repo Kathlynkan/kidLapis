@@ -1,6 +1,3 @@
-// Verify that volunteer can assign homework and homework 
-// appears in child's quest dashboard
-
 import { test, expect } from '@playwright/test'
 
 test.describe('Assign Homework', () => {
@@ -14,7 +11,7 @@ test.describe('Assign Homework', () => {
         await page.click('[data-test="login-submit"]')
 
         await expect(page).toHaveURL(/volunteer/)
-        console.log('After login:', await page.url())
+        console.log('After login:', page.url())
     })
 
     // Test Case 1: Valid homework assignment
@@ -22,7 +19,7 @@ test.describe('Assign Homework', () => {
     await page.goto('/children/c_1/homework/new')
 
 
-    console.log('Current page:', await page.url())
+    console.log('Current page:', page.url())
     await page.screenshot({ path: 'homework-page.png' })
     await expect(page.locator('[data-test="hw-title"]')).toBeVisible()
 

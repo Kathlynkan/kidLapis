@@ -1,6 +1,3 @@
-// Verify that HomeWorkQuestCard displays correct volunteer
-// actions according to the homework status and componenet state
-
 import { describe, test, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import HomeworkQuestCard from '@/components/HomeworkQuestCard.vue'

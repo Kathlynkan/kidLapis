@@ -1,4 +1,3 @@
-// Shared helpers for E2E tests. Import with:  import { loginAs } from './helpers'
 import { expect } from '@playwright/test'
 
 export const ACCOUNTS = {

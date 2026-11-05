@@ -1,4 +1,3 @@
-// Users of every role: volunteer, coordinator, parent, child.   Owner: Kai Sen
 import mongoose from 'mongoose'
 import { newId, jsonOptions, nowIso } from './helpers.js'
 

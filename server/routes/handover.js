@@ -1,20 +1,3 @@
-// =============================================================
-// /handover  - AI handover summary (EXTERNAL API)   Owner: Yuqi
-// -------------------------------------------------------------
-// The Vue page calls OUR server, and our server calls Gemini.
-// This keeps the API key secret (never put API keys in Vue code!).
-//
-// Vue (axios) --POST /handover/:childId--> Express --axios--> Gemini API
-//
-// 2 types of summary, picked by the role of the logged-in user:
-//   'handover' - for VOLUNTEERS: note for the next session, from the last 5 sessions (default)
-//   'weekly'   - for PARENTS: Monday to Friday, learning + social.
-//                Fri-Sun shows this week, Mon-Thu shows last week.
-//                If that week has no sessions, it shows the latest week that has some.
-//                The parent can step back through the last 8 weeks that have sessions
-//                (POST body { week: '2026-10-19' }). Each week is saved once, so going back is free.
-//                Different volunteers write brief or detailed notes, so the AI combines them into one balanced picture of the week.
-// =============================================================
 import { Router } from 'express'
 import axios from 'axios'
 import { Child, Session, Handover } from '../models/index.js'
@@ -165,7 +148,7 @@ export function weekTitleFor(week, today = new Date()) {
   return `${weeksBack} weeks ago`
 }
 
-// -------- Backup summary for VOLUNTEERS -------- 
+// Backup summary for VOLUNTEERS
 export function buildFallbackHandover(sessions) {
   // child has no sessions yet
   if (sessions.length === 0) {
@@ -201,7 +184,7 @@ export function buildFallbackHandover(sessions) {
   }
 }
 
-// -------- Backup summary for PARENTS -------- 
+// Backup summary for PARENTS
 export function buildWeeklyFallback(sessions, name = 'Your child') {
   if (sessions.length === 0) {
     return { headline: 'No sessions were recorded that week.', source: 'fallback' }

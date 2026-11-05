@@ -1,9 +1,3 @@
-<!-- Which weekdays a child has a volunteer, e.g. next to a child's name.   Owner: Yu Xuan
-  <WeekdayDots :schedule="child.schedule" />
-  Green = an accepted volunteer that day, red = nobody, dashed amber = a request is waiting
-  for the volunteer to accept (it doesn't count until they do). Also shows "2/5" and a
-  full sentence for screen readers, so it never relies on colour alone.
--->
 <script setup>
 import { computed } from 'vue'
 import { isConfirmed, isPending } from '@/utils/slots'

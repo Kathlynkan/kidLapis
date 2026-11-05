@@ -1,19 +1,6 @@
-<!-- =============================================================
-  Coordinator dashboard                               Owner: Yu Xuan
-  -------------------------------------------------------------
-  KPI cards from GET /dashboard/summary + centre-wide topic chart.
-    [x] today's sessions + expandable weekly schedule (WeekScheduleCard)
-    [x] "Volunteer assignment" list: every child, with which weekdays (Mon-Fri) have a volunteer
-        - No volunteer (0 of 5 weekdays), Some days (1-4), Every weekday (5 of 5)
-        - filter by status, click a row -> matchmaking for that child
-        - only ACCEPTED sessions count; requests waiting for a volunteer are mentioned, not counted
-    [x] weekday coverage next to each child's name (WeekdayDots: green = volunteer that day)
-    [x] "Flag for follow-up" toggle per child -> PUT /dashboard/follow-up/:childId
-    [x] recent activity feed (latest sessions across the centre)
-    [x] reloads quietly when a volunteer accepts/declines a session (schedule-changed, Kai Sen)
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import { useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
@@ -61,10 +48,6 @@ async function loadDashboard() {
   volunteers.value = v.data
 }
 
-// A volunteer accepted/declined a session (live, via the NavBar): reload quietly (Kai Sen)
-function onScheduleChanged() {
-  loadDashboard().catch(() => {}) // keep showing the old numbers if this fails
-}
 
 onMounted(async () => {
   try {
@@ -74,9 +57,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
+
+// A volunteer accepted/declined a session (live, via the NavBar): reload quietly (Kai Sen)
+useScheduleChanged(loadDashboard, { isLoading: loading })
 
 const nameById = (list) => Object.fromEntries(list.map((x) => [x.id, x.name]))
 const childNames = computed(() => nameById(children.value))
@@ -84,7 +68,7 @@ const volunteerNames = computed(() => nameById(volunteers.value))
 // the whole volunteer (with the photo) for each id, for the round picture in Recent Sessions
 const volunteerById = computed(() => Object.fromEntries(volunteers.value.map((v) => [v.id, v])))
 
-// ---------- Volunteer assignment ----------
+// Volunteer assignment
 
 // One row per child: which weekdays are covered, a status, and a short sentence.
 // Fewest covered days first, so children who need a volunteer are at the top.
@@ -165,7 +149,7 @@ async function toggleFollowUp(child) {
   }
 }
 
-// ---------- Recent activity ----------
+// Recent activity
 
 const recentSessions = computed(() =>
   [...sessions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6),

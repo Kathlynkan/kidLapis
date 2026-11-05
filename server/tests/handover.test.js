@@ -1,6 +1,4 @@
-/*
-Unit Tests for the handover helper functions (server/routes/handover.js)   Owner: Yuqi
-*/
+// Owner: Yuqi
 
 import { describe, it, expect } from 'vitest'
 import { checkMood } from '../routes/handover.js'

@@ -1,6 +1,3 @@
-// Coordinator "Needs attention" rules.
-// Every function here is PURE: data in, alerts out. No database, no Express,
-// no "new Date()" inside the rules. That makes each rule easy to unit test.
 import { toJpg } from '../models/helpers.js' // old photo paths that say .webp are sent as .jpg
 
 export const NO_SESSION_DAYS = 7 // alert if the last session was MORE than this many days ago

@@ -1,23 +1,13 @@
-<!-- =============================================================
-  Weekly schedule (timetable)                         Owner: Yu Xuan
-  Route: /coordinator/schedule
-  -------------------------------------------------------------
-  Rows = volunteers, columns = days. Shaded cells = volunteer not free.
-  The grid itself is components/WeekGrid.vue, shared with the dashboard, so both look the same.
-  "+ Add" -> pick child + start time -> PUT /matchmaking/:childId/assign
-  "x" on a session -> removes just that day (unassign with day)
-  The server blocks double-bookings (409) and days the volunteer isn't free.
-  A new session is a REQUEST: it shows as "Pending" until the volunteer accepts it
-  (Kai Sen, routes/requests.js). Declined requests are not shown.
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { firstName } from '@/utils/format'
 
 // Start times every 30 minutes from 09:00 to 19:30.
 const TIMES = []
@@ -57,22 +47,15 @@ onMounted(async () => {
     loading.value = false
   }
   window.addEventListener('keydown', onKeydown)
-  window.addEventListener('schedule-changed', onScheduleChanged)
 })
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('schedule-changed', onScheduleChanged)
-})
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
-function onScheduleChanged() {
-  loadData().catch(() => {})
-}
+useScheduleChanged(loadData, { isLoading: loading })
 
 function onKeydown(e) {
   if (e.key === 'Escape' && adding.value && !saving.value) closeAdd()
 }
 
-const firstName = (name) => name.split(' ')[0]
 
 // Accepted weekly sessions, and requests still waiting for the volunteer.
 const countSlots = (test) => children.value.reduce((n, c) => n + (c.schedule || []).filter(test).length, 0)
@@ -93,7 +76,7 @@ const unscheduled = computed(() => {
   return list
 })
 
-// ---------- Add a session ----------
+// Add a session
 
 // Children to offer: unassigned first, then best skill match for this volunteer.
 // Children already booked (or requested) with this volunteer on this day are left out;
@@ -161,7 +144,7 @@ async function submitAdd() {
   }
 }
 
-// ---------- Remove a session ----------
+// Remove a session
 
 // Removes one day (or cancels a pending request for it).
 async function removeSlot(volunteer, day, slot) {

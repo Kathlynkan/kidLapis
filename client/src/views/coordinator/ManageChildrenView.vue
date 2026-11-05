@@ -1,15 +1,6 @@
-<!-- =============================================================
-  Manage children (CRUD)                              Owner: Kai Sen
-  -------------------------------------------------------------
-  Done: a card for every child on the sandy board
-        "Add child" / "Edit" modal -> POST /children, PUT /children/:id
-        "Delete" with a warning    -> DELETE /children/:id
-        Search box (name, level, school, needs) and a level filter
-        Each card shows the volunteers, the parent (or the code to give them) and the warnings
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-
+import { ref, computed, onMounted } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import api, { errorMessage } from '@/services/api'
 import { LEVELS, SKILL_OPTIONS } from '@/utils/constants'
 import { firstName, subjectStyle } from '@/utils/format'
@@ -18,7 +9,7 @@ import ChildInitial from '@/components/ChildInitial.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 
-// ---------- The children ----------
+// The children
 const children = ref([])
 const parents = ref([]) // parent accounts, for the "Parent" dropdown in the form
 const volunteers = ref([]) // volunteer accounts, to show the names on each card
@@ -27,17 +18,6 @@ const loading = ref(true)
 const error = ref('')
 const successMessage = ref('')
 
-async function reloadSilently() {
-  if (loading.value) return
-  try {
-    const [childRes, alertRes] = await Promise.all([
-      api.get('/children'),
-      api.get('/dashboard/alerts'),
-    ])
-    children.value = childRes.data
-    alerts.value = alertRes.data
-  } catch {}
-}
 
 onMounted(async () => {
   try {
@@ -56,10 +36,14 @@ onMounted(async () => {
     error.value = errorMessage(err)
     loading.value = false // stop the spinner (error)
   }
-  window.addEventListener('schedule-changed', reloadSilently)
 })
 
-onUnmounted(() => window.removeEventListener('schedule-changed', reloadSilently))
+// A volunteer accepted/declined a request: reload the cards quietly (volunteers and warnings change)
+useScheduleChanged(async () => {
+  const [childRes, alertRes] = await Promise.all([api.get('/children'), api.get('/dashboard/alerts')])
+  children.value = childRes.data
+  alerts.value = alertRes.data
+}, { isLoading: loading })
 
 // Keep the cards in A-Z order, like the server's list
 const sortByName = (list) => list.sort((a, b) => a.name.localeCompare(b.name))
@@ -90,7 +74,7 @@ const warningsOf = (child) => {
   return [...types].map((type) => ({ type, ...WARNING_TAGS[type] }))
 }
 
-// ---------- Search and level ----------
+// Search and level
 const search = ref('')
 const levelFilter = ref('') // '' = all levels
 
@@ -117,7 +101,7 @@ function clearFilters() {
   levelFilter.value = ''
 }
 
-// ---------- "Add child" / "Edit child" modal (one form for both) ----------
+// "Add child" / "Edit child" modal (one form for both)
 const emptyForm = () => ({
   name: '',
   level: '',
@@ -194,7 +178,7 @@ async function saveChild() {
   }
 }
 
-// ---------- "Delete child" confirmation ----------
+// "Delete child" confirmation
 const childToDelete = ref(null) // the child the coordinator clicked Delete on (null = box closed)
 const deleting = ref(false)
 const deleteError = ref('')

@@ -1,18 +1,3 @@
-// =============================================================
-// /requests  - session requests for volunteers        Owner: Kai Sen
-// -------------------------------------------------------------
-// When the coordinator assigns a volunteer in Matchmaking, the new schedule slot is
-// 'pending' (models/Child.js). The volunteer sees it in their NavBar bell and
-// accepts or declines it here.
-//   accept  -> the slot becomes 'accepted' and the volunteer joins child.volunteerIds,
-//              so the child now appears on their page and counts as assigned.
-//              The slot also gets a startDate: the next time that weekday comes round,
-//              so the child never appears on a day that has already passed.
-//   decline -> the slot becomes 'declined', so the coordinator sees the child needs someone again
-//   A CHANGE to a session the volunteer had already accepted
-//     accept  -> the new day/time is used from now on
-//     decline -> nothing is lost: the session goes back to the old day/time (prevDay, prevTime)
-// =============================================================
 import { Router } from 'express'
 import { Child } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'

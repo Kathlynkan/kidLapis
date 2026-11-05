@@ -1,4 +1,3 @@
-// Homework "quests".   Owners: Ning Xuan (assign), Jachin (submit / verify / points)
 import mongoose from 'mongoose'
 import { newId, jsonOptions } from './helpers.js'
 

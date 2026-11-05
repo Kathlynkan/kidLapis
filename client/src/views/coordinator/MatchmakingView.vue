@@ -1,26 +1,13 @@
-<!-- =============================================================
-  Skills-based matchmaking                            Owner: Yu Xuan
-  Route: matchmaking (optional :childId opens that child)
-  -------------------------------------------------------------
-  All children are listed as toggle buttons (unassigned first) with a search bar.
-  Open a child -> volunteers ranked by score (GET /matchmaking/:childId)
-  -> pick a day + time -> Assign (PUT /matchmaking/:childId/assign).
-  An assigned volunteer can be given more days ("Add day"). Each booked day can be
-  edited in place (pencil: change day/time) or removed (x), or all at once ("Unassign all").
-  Time dropdowns grey out times that would double-book the volunteer or the child.
-  The server re-checks everything: days the volunteer isn't free, and double-bookings.
-  A new day is a REQUEST: it stays "waiting" until the volunteer accepts it from their
-  bell (Kai Sen, routes/requests.js). Until then the child still counts as unassigned.
-============================================================= -->
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useScheduleChanged } from '@/composables/useScheduleChanged'
 import { useRoute, useRouter } from 'vue-router'
 import api, { errorMessage } from '@/services/api'
 import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture
-import { subjectStyle } from '@/utils/format'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
+import { firstName, subjectStyle } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,9 +41,8 @@ const editing = ref(null)
 
 const keyOf = (childId, volunteerId) => `${childId}|${volunteerId}`
 const isAssigned = (c) => (c.volunteerIds || []).length > 0
-const firstName = (name) => name.split(' ')[0]
 
-// ---------- Waiting for a volunteer to accept ----------
+// Waiting for a volunteer to accept
 const volunteerNames = ref({}) // { volunteerId: 'Aisha Rahman' }, for "Waiting for Aisha"
 
 // First names of the volunteers who still have to accept a day with this child
@@ -67,7 +53,7 @@ function waitingFor(c) {
 
 const isPendingDay = (s, day) => (s.pendingDays || []).includes(day)
 
-// ---------- Child list + search ----------
+// Child list + search
 
 // Children with no volunteer first, then alphabetical.
 const sortedChildren = computed(() =>
@@ -100,14 +86,9 @@ async function loadChildren() {
 
 // A volunteer accepted/declined a request (live, via the NavBar): "waiting" changes to the
 // answer without a refresh. The open child's suggestions reload too. (Kai Sen)
-function onScheduleChanged() {
-  loadChildren().catch(() => {})
-  if (openId.value) loadSuggestions(openId.value)
-}
-onUnmounted(() => window.removeEventListener('schedule-changed', onScheduleChanged))
+useScheduleChanged(() => Promise.all([loadChildren(), openId.value && loadSuggestions(openId.value)]))
 
 onMounted(async () => {
-  window.addEventListener('schedule-changed', onScheduleChanged)
   try {
     await loadChildren()
   } catch (err) {
@@ -131,7 +112,7 @@ function toggle(child) {
   if (openId.value) loadSuggestions(openId.value)
 }
 
-// ---------- Suggestions ----------
+// Suggestions
 
 async function loadSuggestions(childId) {
   loadingId.value = childId
@@ -149,7 +130,7 @@ async function loadSuggestions(childId) {
 // Days this volunteer is free but not yet booked with this child.
 const openDays = (s) => s.availability.filter((d) => !s.scheduledDays.includes(d))
 
-// ---------- Busy times (greyed out in the time dropdowns) ----------
+// Busy times (greyed out in the time dropdowns)
 // The server makes the final decision; this just warns the coordinator before they click.
 const SESSION_MINUTES = 60 // same rule as server/utils/schedule.js
 const toMinutes = (time) => {
@@ -193,7 +174,7 @@ function onAddDayChange(child, s) {
   if (!isFreeTime(child, s, dayChoice.value[key], timeChoice.value[key])) delete timeChoice.value[key]
 }
 
-// ---------- Assign / add day / remove ----------
+// Assign / add day / remove
 
 // Returns true if the change was saved, so callers can close an editor only on success.
 async function changeAssignment(child, s, body) {
@@ -231,7 +212,7 @@ function unassign(child, s) {
   changeAssignment(child, s, { action: 'unassign' })
 }
 
-// ---------- Editing a booked day in place ----------
+// Editing a booked day in place
 
 function startEdit(child, s, slot) {
   editing.value = {

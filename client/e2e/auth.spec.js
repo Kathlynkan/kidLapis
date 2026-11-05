@@ -1,5 +1,4 @@
-// Core journey: logging in sends each role to the right home page.   Owner: Kai Sen
-// Run all E2E tests:  pnpm test:e2e   (starts the API + Vue servers for you)
+// Owner: Kai Sen
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 

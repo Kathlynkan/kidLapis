@@ -1,7 +1,3 @@
-// A saved AI handover, so we don't call Gemini every time a page opens.   Owner: Yuqi
-// One saved summary per child, per audience ('volunteer' or 'parent'),
-// per type ('handover' = next-session note, 'weekly' = Mon-Fri),
-// and for weekly, per week (so a parent can look back at older weeks).
 import mongoose from 'mongoose'
 import { newId, jsonOptions } from './helpers.js'
  

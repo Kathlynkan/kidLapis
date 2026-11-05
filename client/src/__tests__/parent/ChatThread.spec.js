@@ -1,13 +1,4 @@
-/*
-Component Test for ChatThread.vue (the chat bubbles and the box to type a message)   Owner: Kat
-
-    User behavior
-        ↓
-    Expected outcome
-        ↓
-    Test implementation
-
-*/
+// Owner: Kat
 
 import { mount } from '@vue/test-utils'
 import { describe, it, expect } from 'vitest'

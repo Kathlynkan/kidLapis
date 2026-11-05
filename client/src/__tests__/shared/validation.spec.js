@@ -1,5 +1,4 @@
-// Unit test for the child code check.   Owner: Kai Sen
-// Run:  pnpm test:unit
+// Owner: Kai Sen
 import { describe, it, expect } from 'vitest'
 import { isValidChildCode } from '@/utils/validation'
 

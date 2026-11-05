@@ -1,4 +1,3 @@
-// Shared bits for every Mongoose model.
 import crypto from 'node:crypto'
 
 // Short readable ids like "s_3f9a1c2b" instead of Mongo's default ObjectId.

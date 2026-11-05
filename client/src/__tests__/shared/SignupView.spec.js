@@ -1,15 +1,4 @@
-/*
-Component Test for SignupView.vue (the sign up page)   Owner: Kai Sen
-
-    User behavior
-        ↓
-    Expected outcome
-        ↓
-    Test implementation
-
-The page uses the router (useRoute, RouterLink) and the auth store (Pinia),
-so it is mounted with a small test router and a Pinia store, or it cannot load.
-*/
+// Owner: Kai Sen
 
 import { mount } from '@vue/test-utils'
 import { describe, it, expect } from 'vitest'

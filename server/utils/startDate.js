@@ -1,9 +1,8 @@
-// The first date a weekly session happens, from today.   
-// Used when a volunteer accepts a request (routes/requests.js), so a new child
-// only appears in the volunteer's week from that date, never on a day that has passed.
-//   firstDateFor('Mon', '16:00')   accepted on Tue 3 Nov   -> volunteers on '2026-11-09' Monday
-//   firstDateFor('Tue', '16:00')   accepted on Tue 3 Nov at 10:00 -> this tues eg '2026-11-03' (today, it has not started yet)
-//   firstDateFor('Tue', '16:00')   on Tue 3 Nov at 17:00 -> '2026-11-10' (today's has started)
+// The first date a weekly session happens, counted from today.
+// e.g. accepted on Tue 3 Nov:
+//   firstDateFor('Mon', '16:00') -> '2026-11-09' (Monday has passed, so next Monday)
+//   firstDateFor('Tue', '16:00') -> '2026-11-03' at 10am (today, not started yet)
+//                                   '2026-11-10' at 5pm  (today's has started, so next week)
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 // a date as 'YYYY-MM-DD' in our time zone

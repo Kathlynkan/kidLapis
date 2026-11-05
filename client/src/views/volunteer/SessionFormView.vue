@@ -1,9 +1,3 @@
-<!-- =============================================================
-  Record / edit a session                              Owner: Ning Xuan
-  Routes:  /children/:id/sessions/new     (create)
-           /sessions/:sessionId/edit      (edit - same form)
-  -------------------------------------------------------------
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

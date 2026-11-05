@@ -1,6 +1,3 @@
-// =============================================================
-// /users  - volunteer list & profiles     Owners: Yu Xuan (volunteers), Kai Sen
-// =============================================================
 import { Router } from 'express'
 import { User, Child } from '../models/index.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
@@ -32,7 +29,6 @@ router.put('/:id', async (req, res) => {
   const user = await User.findById(req.params.id)
   if (!user) return res.status(404).json({ message: 'User not found' })
 
-  // TODO (Yu Xuan): validate skills against SKILL_OPTIONS on the client
   const { skills, availability } = req.body
   const isListOf = (value, allowed) => Array.isArray(value) && value.every((v) => allowed.includes(v))
 

@@ -1,8 +1,3 @@
-// Matchmaking scores. PURE functions: data in, ranking out, so they're easy to unit test.
-//   +2 per subject the volunteer teaches that the child needs
-//   +1 per shared day
-//   -1 per OTHER child the volunteer already has (workload)
-
 import { isActive, isPending, slotStatus } from './schedule.js'
 
 export const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']

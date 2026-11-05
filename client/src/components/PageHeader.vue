@@ -1,4 +1,3 @@
-<!-- Page title + optional buttons on the right (and an optional picture before the title: the "lead" slot) -->
 <script setup>
 import '@/css/main/components.css' // the look of the small parts
 defineProps({

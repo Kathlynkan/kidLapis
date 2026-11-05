@@ -1,16 +1,3 @@
-// Live bell updates (socket.io) + saved updates          Owner: Kai Sen
-// -------------------------------------------------------------
-// Every logged-in browser joins its own private room "user:<id>" and a room for its
-// role, e.g. "role:coordinator" (server.js).
-//
-// notifyBell(req, userIds)  -> those users' bells reload straight away. It only says
-//   "something changed": the bell then asks the normal API (with all its access checks)
-//   what to show, so no private data travels over this message.
-// notifyCoordinators(req)       -> every coordinator's open Dashboard / Matchmaking / Schedule reloads.
-// addUpdate(req, userIds, { text, icon, link })
-//                           -> saves a one-off update (models/Notification.js) for each
-//   user and rings their bell. Used for events that leave nothing else behind, like
-//   "Aisha accepted Sofia" or "You no longer see Sofia on Mon".
 import { Notification, User } from '../models/index.js'
 
 export function notifyBell(req, userIds) {

@@ -1,8 +1,3 @@
-<!-- =============================================================
-  Messages: parent <-> coordinator, one conversation per child.   Owner: Kat
-  Route: /messages/:childId?   (used by parents and coordinators)
-  Its styles are in the style block at the bottom of this file
-============================================================= -->
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -25,7 +20,7 @@ const subtitle = computed(() => {
   return 'Chat with parents about their child.'
 })
 
-// ---------- the things this page remembers ----------
+// the things this page remembers
 const children = ref([]) // the children this user can chat about
 const messages = ref([]) // the messages of the child we are showing
 const unread = ref({}) // how many unread messages each child has, like { c_1: 2 }
@@ -33,7 +28,7 @@ const loading = ref(true) // true while the page is first loading
 const sending = ref(false) // true while a message is on its way to the server
 const error = ref('') // the error sentence, empty if there is no error
 
-// ---------- live messages (socket.io) ----------
+// live messages (socket.io)
 // the live connection, and the "room" of the child we are showing (the server only sends us that child's messages)
 let socket = null
 let currentRoom = null
@@ -53,7 +48,7 @@ function addMessage(message) {
   }
 }
 
-// ---------- talking to the server ----------
+// talking to the server
 async function loadUnread() {
   try {
     const response = await api.get('/messages/unread')
@@ -178,14 +173,14 @@ onUnmounted(() => {
      #CFE0DE            thin borders
    Look: no dark outlines, soft corners and round pills, like the parent page. */
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 /* the sentence under the title (PageHeader.vue is shared, so only the colour is set here) */
 .messagespage .lapis-page-header .page-subtitle {
   color: #5E6C80;
 }
 
-/* ---------- the child buttons ---------- */
+/* the child buttons */
 
 .messagespage .child-buttons {
   margin-bottom: 12px;
@@ -203,7 +198,7 @@ onUnmounted(() => {
   text-align: center;
 }
 
-/* ---------- the chat ---------- */
+/* the chat */
 
 /* the messages grow and scroll, the typing box stays at the bottom */
 .messagespage .chat {
@@ -288,7 +283,7 @@ onUnmounted(() => {
   font-size: 11px;
 }
 
-/* ---------- the typing box ---------- */
+/* the typing box */
 
 .messagespage .chat-input-row {
   display: flex;
@@ -331,7 +326,7 @@ onUnmounted(() => {
   color: #5E6C80;
 }
 
-/* ===== The same page for a coordinator: the messages page and the chat in the coordinator's colours.
+/* The same page for a coordinator: the messages page and the chat in the coordinator's colours.
    The page is shared with the parent, so these rules only apply under .role-coordinator and win over messagespage.css.
    Colours (the same as coordinatorpage.css):
      #3D3454 deep plum        text
@@ -345,7 +340,7 @@ onUnmounted(() => {
      #E3DBF0                  thin borders
    Look: the same as the other coordinator pages: a sandy board, white cards, round pills, a very light shadow. */
 
-/* ---------- the whole page ---------- */
+/* the whole page */
 
 .role-coordinator .messagespage {
   color: #3D3454;
@@ -359,7 +354,7 @@ onUnmounted(() => {
   color: #7D7690;
 }
 
-/* ---------- the child buttons: white chips, lavender when chosen (like the filters on the other coordinator pages) ---------- */
+/* the child buttons: white chips, lavender when chosen (like the filters on the other coordinator pages) */
 
 body .role-coordinator .messagespage .child-button {
   background: #FFFFFF;
@@ -375,7 +370,7 @@ body .role-coordinator .messagespage .unread-badge {
   background: #FBE7A1;
 }
 
-/* ---------- the chat ---------- */
+/* the chat */
 
 .role-coordinator .messagespage .chat {
   box-shadow: 0 1px 6px rgba(61, 52, 84, 0.1);
@@ -404,7 +399,7 @@ body .role-coordinator .messagespage .date-pill {
   color: #3D3454;
 }
 
-/* ---------- the typing box ---------- */
+/* the typing box */
 
 .role-coordinator .messagespage .chat-input {
   border-color: #E3DBF0;

@@ -1,8 +1,4 @@
-// E2E tests for the "seen by parent" rule   Owner: Kat
-//
-// once the parent has opened her page, the sessions count as read and the volunteer isnt allowed to change them anymore
-// opening the page marks the sessions as read in the database. these run twice, on the desktop browser and the iphone size,
-// and it doesnt matter if they are already marked from the first run
+// Owner: Kat
 import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 

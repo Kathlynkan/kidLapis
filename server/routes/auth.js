@@ -1,9 +1,3 @@
-// =============================================================
-// /auth  - Sign up, log in, log out        Owner: Kai Sen
-// -------------------------------------------------------------
-// This file is COMPLETE and doubles as the reference pattern for
-// everyone else's routes:  validate -> Model.create / find -> res.json
-// =============================================================
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { User, Child } from '../models/index.js'
