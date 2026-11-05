@@ -6,14 +6,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import StateMessage from '@/components/StateMessage.vue'
 import WeekGrid from '@/components/WeekGrid.vue'
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
-import { isActive, isConfirmed, isPending } from '@/utils/slots'
+import { isActive, isConfirmed, isPending, timeOptions } from '@/utils/slots'
 import { firstName } from '@/utils/format'
 
-// Start times every 30 minutes from 09:00 to 19:30.
-const TIMES = []
-for (let h = 9; h <= 19; h++) {
-  for (const m of ['00', '30']) TIMES.push(`${String(h).padStart(2, '0')}:${m}`)
-}
 
 const volunteers = ref([])
 const children = ref([])
@@ -117,6 +112,28 @@ function optionLabel(o) {
   if (o.matches.length) label += ` · matches ${o.matches.join(', ')}`
   return label
 }
+
+// The start times for the dialog: times that would double-book the volunteer or the chosen
+// child are greyed out with the reason (the same rule as Matchmaking, from utils/slots.js).
+const addTimeOptions = computed(() => {
+  if (!adding.value) return []
+  const child = children.value.find((c) => c.id === form.value.childId)
+  return timeOptions(children.value, {
+    childId: form.value.childId,
+    childName: child?.name || '',
+    volunteerId: adding.value.volunteer.id,
+    volunteerName: adding.value.volunteer.name,
+    day: adding.value.day,
+  })
+})
+
+// Choosing a different child can make the chosen time clash: clear it so a free one is picked.
+watch(
+  () => form.value.childId,
+  () => {
+    if (addTimeOptions.value.find((o) => o.time === form.value.time)?.disabled) form.value.time = ''
+  },
+)
 
 function openAdd(volunteer, day) {
   adding.value = { volunteer, day }
@@ -253,7 +270,7 @@ async function removeSlot(volunteer, day, slot) {
               <label for="add-time" class="form-label small fw-semibold">Start time (1-hour session)</label>
               <select id="add-time" v-model="form.time" class="form-select" required data-test="add-time">
                 <option value="" disabled>Choose a time</option>
-                <option v-for="t in TIMES" :key="t" :value="t">{{ t }}</option>
+                <option v-for="o in addTimeOptions" :key="o.time" :value="o.time" :disabled="o.disabled">{{ o.label }}</option>
               </select>
 
               <div v-if="formError" class="alert alert-danger small py-2 mt-3 mb-0" data-test="add-error">

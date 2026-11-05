@@ -25,16 +25,33 @@ test.describe('Coordinator: weekly schedule', () => {
     await expect(cell.locator('[data-test="pending-tag"]')).toHaveCount(0)
   })
 
-  test('a time that would double-book a volunteer is refused with the reason', async ({ page }) => {
+  test('times that would double-book a volunteer are greyed out, and the server refuses them', async ({
+    page,
+    request,
+  }) => {
     await danielTuesday(page).locator('[data-test="add-slot"]').click()
     const form = page.locator('[data-test="add-slot-form"]')
     await form.locator('[data-test="add-child"]').selectOption('c_6') // Sofia
-    await form.locator('[data-test="add-time"]').selectOption('16:30') // Ethan is at 16:00
-    await form.locator('[data-test="add-submit"]').click()
 
-    // The server checks the clash rule, so nothing is saved and the dialog explains why
-    await expect(form.locator('[data-test="add-error"]')).toContainText('already has Ethan Wong on Tue at 16:00')
-    await expect(danielTuesday(page).locator('[data-test="schedule-slot"]', { hasText: 'Sofia' })).toHaveCount(0)
+    // Daniel has Ethan at 16:00 and Ryan at 17:00, and sessions last an hour
+    const time = (t) => form.locator(`[data-test="add-time"] option[value="${t}"]`)
+    await expect(time('16:30')).toBeDisabled()
+    await expect(time('16:30')).toContainText('Daniel has Ethan at 16:00')
+    await expect(time('17:30')).toContainText('Daniel has Ryan at 17:00')
+    await expect(time('18:00')).toBeEnabled() // free: Ryan ends at 18:00
+
+    // Even if someone gets past the page, the server checks the clash rule itself and saves nothing
+    const API = 'http://localhost:8000'
+    const login = await request.post(`${API}/auth/login`, {
+      data: { email: 'coordinator@kidslapis.sg', password: 'password123' },
+    })
+    const { token } = await login.json()
+    const res = await request.put(`${API}/matchmaking/c_6/assign`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { action: 'assign', volunteerId: 'u_vol2', day: 'Tue', time: '16:30' }, // Daniel
+    })
+    expect(res.status()).toBe(409) // 409 Conflict
+    expect((await res.json()).message).toContain('already has Ethan Wong on Tue at 16:00')
   })
 
   test('sending a request shows it as Pending until it is cancelled', async ({ page, isMobile }) => {

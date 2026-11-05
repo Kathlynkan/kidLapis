@@ -8,15 +8,10 @@ import StateMessage from '@/components/StateMessage.vue'
 import ChildInitial from '@/components/ChildInitial.vue' // the round picture
 import '@/css/coordinator/coordinatorpage.css' // the styles of the coordinator pages
 import { firstName, subjectStyle } from '@/utils/format'
+import { timeOptions as sessionTimeOptions } from '@/utils/slots'
 
 const route = useRoute()
 const router = useRouter()
-
-// Start times every 30 minutes from 09:00 to 19:30 (same as the Schedule page).
-const TIMES = []
-for (let h = 9; h <= 19; h++) {
-  for (const m of ['00', '30']) TIMES.push(`${String(h).padStart(2, '0')}:${m}`)
-}
 
 const children = ref([])
 const loading = ref(true)
@@ -131,39 +126,16 @@ async function loadSuggestions(childId) {
 const openDays = (s) => s.availability.filter((d) => !s.scheduledDays.includes(d))
 
 // Busy times (greyed out in the time dropdowns)
-// The server makes the final decision; this just warns the coordinator before they click.
-const SESSION_MINUTES = 60 // same rule as server/utils/schedule.js
-const toMinutes = (time) => {
-  const [h, m] = time.split(':').map(Number)
-  return h * 60 + m
-}
-
-// Every booked time on this day that would clash for this volunteer or this child.
-function busyTimes(child, s, day) {
-  const busy = []
-  for (const other of children.value) {
-    for (const slot of other.schedule || []) {
-      if (slot.status === 'declined') continue // a declined request doesn't hold the time
-      if (slot.day !== day || !slot.time) continue
-      if (other.id === child.id && slot.volunteerId === s.volunteerId) continue // this pair's own day
-      if (slot.volunteerId === s.volunteerId) {
-        busy.push({ time: slot.time, reason: `${firstName(s.name)} has ${firstName(other.name)}` })
-      } else if (other.id === child.id) {
-        busy.push({ time: slot.time, reason: `${firstName(child.name)} has another session` })
-      }
-    }
-  }
-  return busy
-}
-
-// All start times, with clashing ones disabled and labelled with the reason.
-function timeOptions(child, s, day) {
-  const busy = day ? busyTimes(child, s, day) : []
-  return TIMES.map((t) => {
-    const clash = busy.find((b) => Math.abs(toMinutes(b.time) - toMinutes(t)) < SESSION_MINUTES)
-    return { time: t, disabled: Boolean(clash), label: clash ? `${t} · ${clash.reason} at ${clash.time}` : t }
+// The rule lives in utils/slots.js and is shared with the Schedule page, so both pages grey out
+// the same times. The server makes the final decision; this just warns the coordinator first.
+const timeOptions = (child, s, day) =>
+  sessionTimeOptions(children.value, {
+    childId: child.id,
+    childName: child.name,
+    volunteerId: s.volunteerId,
+    volunteerName: s.name,
+    day,
   })
-}
 
 const isFreeTime = (child, s, day, time) =>
   Boolean(time) && !timeOptions(child, s, day).find((o) => o.time === time)?.disabled
