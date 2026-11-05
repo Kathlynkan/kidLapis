@@ -286,11 +286,13 @@ onMounted(async () => {
   }
   document.addEventListener('visibilitychange', onVisible)
   pollTimer = setInterval(() => { if (!document.hidden) refreshData() }, 30_000)
+  window.addEventListener('bell-refresh', refreshData)
 })
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisible)
   clearInterval(pollTimer)
+  window.removeEventListener('bell-refresh', refreshData)
 })
 </script>
 
